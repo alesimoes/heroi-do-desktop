@@ -137,3 +137,6 @@ limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão 
 
 ## Fadinha
 - Contagem de 50 monstros começa ao obter a roupa de rei (só no automático; salva no registro/localStorage). Ao zerar: fadinha permanente. Cada monstro que nasce tem 20% de chance de ser marcado; a fada o alcança (190 S/s), gira 0,7 s em volta da cabeça dele e o derrota. Ignora dragão e a onda final.
+
+## Menu de pausa e outros aplicativos
+- O menu (Espaço) fica na mesma camada do herói (no fundo, abaixo dos aplicativos), por cima do herói e dos inimigos. Aplicativos abertos cobrem o menu; com Win+D (área de trabalho) ele sobe junto com o herói.

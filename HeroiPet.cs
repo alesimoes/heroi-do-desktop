@@ -1384,13 +1384,14 @@ namespace HeroiPet
             public MenuForm(PetForm owner, float scale)
             {
                 p = owner; sc = Math.Max(1f, scale);
-                FormBorderStyle = FormBorderStyle.None; ShowInTaskbar = false; StartPosition = FormStartPosition.Manual; TopMost = true;
+                FormBorderStyle = FormBorderStyle.None; ShowInTaskbar = false; StartPosition = FormStartPosition.Manual; TopMost = false;
                 SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
                 Rectangle wa = Screen.PrimaryScreen.WorkingArea;
                 int w = Math.Min((int)(1040 * sc), wa.Width - 20), h = Math.Min((int)(620 * sc), wa.Height - 20);
                 Bounds = new Rectangle(wa.X + (wa.Width - w) / 2, wa.Y + (wa.Height - h) / 2, w, h);
                 BackColor = Color.FromArgb(18, 22, 30);
-                Shown += delegate { Activate(); };
+                Shown += delegate { Activate(); p.PushLayers(); };
+                Activated += delegate { p.PushLayers(); };      // clicar nele o traria para a frente dos aplicativos: volta para o fundo na hora
                 eatTimer = new System.Windows.Forms.Timer(); eatTimer.Interval = 33;
                 eatTimer.Tick += delegate { if (p.MenuEating) { p.MenuTick(0.033f); Invalidate(); } };
                 eatTimer.Start();
@@ -1678,19 +1679,25 @@ namespace HeroiPet
         // ============================ LOGICA ============================
         [DllImport("user32.dll")] static extern bool SetWindowPos(IntPtr h, IntPtr after, int x, int y, int cx, int cy, uint flags);
         int zTick;
+        // Camadas das janelas do jogo: tudo fica no fundo (abaixo dos aplicativos), com o menu de pausa por cima do heroi e dos inimigos.
+        // Com "Mostrar area de trabalho" (Win+D) a area de trabalho sobe e cobriria o heroi: nesse caso ele (e o menu) sobem junto, para ficar por cima dela.
+        // Ordem no fundo (de cima para baixo): menu > heroi > sombras > protecao de cliques. O ultimo a ser mandado para o fundo fica mais embaixo.
+        public void PushLayers()
+        {
+            if (!IsHandleCreated) return;
+            const uint F = 0x0001 | 0x0002 | 0x0010 | 0x0200;      // NOMOVE | NOSIZE | NOACTIVATE | NOOWNERZORDER
+            bool front = DesktopShown();
+            bool menuOn = MenuOpen && menuForm.IsHandleCreated;
+            if (menuOn && !front) SetWindowPos(menuForm.Handle, new IntPtr(1), 0, 0, 0, 0, F);
+            SetWindowPos(Handle, front ? new IntPtr(-1) : new IntPtr(1), 0, 0, 0, 0, F);      // HWND_TOPMOST (so com a area de trabalho na frente) ou HWND_BOTTOM
+            if (shadowLayer == null) { try { shadowLayer = new ShadowLayer(Bounds); shadowLayer.Show(); } catch { shadowLayer = null; } }
+            if (shadowLayer != null && shadowLayer.IsHandleCreated) SetWindowPos(shadowLayer.Handle, Handle, 0, 0, 0, 0, F);   // logo abaixo do heroi
+            if (shield != null) { if (front) shield.PushTop(); else shield.PushBottom(); }
+            if (menuOn && front) SetWindowPos(menuForm.Handle, new IntPtr(-1), 0, 0, 0, 0, F);      // por cima do heroi, so enquanto a area de trabalho esta na frente
+        }
         void Tick()
         {
-            if ((zTick++ % 6) == 0 && IsHandleCreated)
-                {
-                // Normal: fica no fundo (abaixo dos aplicativos). Com "Mostrar area de trabalho" (Win+D) a area de trabalho sobe e cobriria o heroi:
-                // nesse caso ele sobe junto, para ficar por cima dela.
-                bool front = DesktopShown();
-                SetWindowPos(Handle, front ? new IntPtr(-1) : new IntPtr(1), 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010 | 0x0200);      // HWND_TOPMOST (so com a area de trabalho na frente) ou HWND_BOTTOM
-                if (shadowLayer == null) { try { shadowLayer = new ShadowLayer(Bounds); shadowLayer.Show(); } catch { shadowLayer = null; } }
-                if (shadowLayer != null && shadowLayer.IsHandleCreated) SetWindowPos(shadowLayer.Handle, Handle, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010 | 0x0200);   // logo abaixo do heroi
-                if (shield != null) { if (front) shield.PushTop(); else shield.PushBottom(); }
-                if (MenuOpen && menuForm.IsHandleCreated) SetWindowPos(menuForm.Handle, new IntPtr(-1), 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010 | 0x0200);      // o inventario fica por cima de tudo (inclusive do heroi e dos inimigos, que podem estar "no topo" com a area de trabalho em foco)
-            }
+            if ((zTick++ % 6) == 0) PushLayers();
             if (deathForm != null && !deathForm.IsDisposed && deathForm.Ready && IsDown(0x0D)) deathForm.Retry();      // Enter = Tentar de novo (se a janela estiver escondida atras de um aplicativo)
             if (shield != null) shield.PassThrough(IsDown(0x11));        // Ctrl apertado: cliques passam para a area de trabalho
             double now = clock.Elapsed.TotalSeconds;

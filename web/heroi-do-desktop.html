@@ -666,7 +666,7 @@ function countChestKill() { if (chestState !== 0 || evoStage < 4) return;      /
 const chestX = () => W * 0.62, chestY = () => H * 0.34;
 function chestStart() { if (chestState === 1 && chestOpenT <= 0 && !chestGo && bossPhase === 0) { chestGo = true; if (calmState !== 0) endCalm(false); say('Vou abrir!'); } }
 function chestTap() { if (chestState === 1 && Math.hypot(mx - chestX(), my - (chestY() - 8 * S)) < 16 * S) chestStart(); }
-/* ---------- FADINHA (ajudante) ----------
+/* ---------- FADINHA (ajudante; 50 monstros apos a roupa de rei) ----------
    Depois da roupa de rei, mais 50 monstros derrotados (modo automatico) dao uma fadinha. Ela voa perto da cabeca do heroi e derrota 20% dos monstros
    que aparecem: voa ate o monstro, gira rapido em volta da cabeca dele (um pouco acima) e ele cai. Vale nos dois modos. */
 const FAIRY_NEEDED = 50;
@@ -1461,7 +1461,7 @@ function drawHero() {
   shadow(hero.x, hero.y, 12);
   const fr = hero.walking ? Math.floor(hero.walkT * 9) % 2 : 0, bob = (hero.walking && fr === 1) ? S : 0;
   spr(fr ? SP.heroB : SP.heroA, hero.x, hero.y - bob, right);
-  if (previewBare) { rect('#fad0a5', Math.trunc(hero.x - 7 * S) + 3 * S, Math.trunc(hero.y - bob - 16 * S) + 12 * S, S, S); return; }      // aba Roupas: sem armas nem escudo; o braco do outro lado (esquerda da tela) e igual ao da direita: a mao na mesma altura
+  if (previewBare) { const sp0 = fr ? SP.heroB : SP.heroA; rect('#fad0a5', Math.round(hero.x - sp0.w / 2) + 3 * S, Math.round(hero.y - bob) - 4 * S, S, S); return; }      // aba Roupas: sem armas nem escudo; o braco do outro lado (esquerda da tela) e igual ao da direita: a mao na mesma altura (relativa aos pes: a coroa muda a altura do desenho)
   const sx = hero.x - f * 3 * S - 3 * S, sy = hero.y - bob - 11 * S; drawShieldBody(sx, sy);
   if (cookState === 6) { const p = (cookT % 1.2) / 1.2; if (Math.floor(cookT / 1.2) <= 4) drawBakeApple(3, hero.x + f * 5 * S, hero.y - bob - 9 * S, 2.3 - 1.7 * p); }
   else if (playEatT > 0) { const sc2 = 2.3 - 1.7 * Math.min(1, playEatT / 0.9); if (eatRaw) { const a = SP.apple, w = a.w * sc2 * 0.8, h = a.h * sc2 * 0.8; ctx.drawImage(a.r, Math.round(hero.x + f * 5 * S - w / 2), Math.round(hero.y - bob - 9 * S - h / 2), Math.round(w), Math.round(h)); } else drawBakeApple(3, hero.x + f * 5 * S, hero.y - bob - 9 * S, sc2); }
