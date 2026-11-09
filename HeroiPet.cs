@@ -4040,17 +4040,19 @@ namespace HeroiPet
             int fr = walking ? ((int)(walkT * 9)) % 2 : 0;
             float bob = (walking && fr == 1) ? S : 0;
             Spr(g, heroWalk[fr], hx, hy - bob, right);
-            if (previewBare)      // sem armas: o braco da frente fica solto ao lado do corpo
+            if (previewBare)      // sem armas: os dois bracos iguais soltos ao lado do corpo (o da frente e o de tras)
             {
-                float ax = hx + hface * 4 * S, ay = hy - bob - 8 * S;
+                float ay = hy - bob - 9 * S;
                 using (SolidBrush kb = new SolidBrush(Color.FromArgb(28, 22, 36)))
                 using (SolidBrush tb = new SolidBrush(TunicColor()))
                 using (SolidBrush sb = new SolidBrush(Color.FromArgb(250, 208, 165)))
-                {
-                    g.FillRectangle(kb, ax - 2 * S, ay, 4 * S, 8 * S);
-                    g.FillRectangle(tb, ax - S, ay + S, 2 * S, 3 * S);
-                    g.FillRectangle(sb, ax - S, ay + 4 * S, 2 * S, 3 * S);
-                }
+                    for (int side = -1; side <= 1; side += 2)
+                    {
+                        float ax = hx + side * 4 * S;
+                        g.FillRectangle(kb, ax - 2 * S, ay, 4 * S, 7 * S);
+                        g.FillRectangle(tb, ax - S, ay + S, 2 * S, 3 * S);
+                        g.FillRectangle(sb, ax - S, ay + 4 * S, 2 * S, 2 * S);
+                    }
                 return;
             }
 
