@@ -4042,16 +4042,15 @@ namespace HeroiPet
             Spr(g, heroWalk[fr], hx, hy - bob, right);
             if (previewBare)      // sem armas: os dois bracos iguais soltos ao lado do corpo (o da frente e o de tras)
             {
-                float ay = hy - bob - 9 * S;
-                using (SolidBrush kb = new SolidBrush(Color.FromArgb(28, 22, 36)))
-                using (SolidBrush tb = new SolidBrush(TunicColor()))
+                float ay = hy - bob - 7 * S;
+                Color tc = TunicColor(), dk = Color.FromArgb(tc.R * 3 / 4, tc.G * 3 / 4, tc.B * 3 / 4);      // manga um pouco mais escura que a roupa
+                using (SolidBrush tb = new SolidBrush(dk))
                 using (SolidBrush sb = new SolidBrush(Color.FromArgb(250, 208, 165)))
                     for (int side = -1; side <= 1; side += 2)
                     {
                         float ax = hx + side * 4 * S;
-                        g.FillRectangle(kb, ax - 2 * S, ay, 4 * S, 7 * S);
-                        g.FillRectangle(tb, ax - S, ay + S, 2 * S, 3 * S);
-                        g.FillRectangle(sb, ax - S, ay + 4 * S, 2 * S, 2 * S);
+                        g.FillRectangle(tb, ax - S, ay, 2 * S, 3 * S);
+                        g.FillRectangle(sb, ax - S, ay + 3 * S, 2 * S, 2 * S);
                     }
                 return;
             }
