@@ -591,7 +591,8 @@ namespace HeroiPet
     {
         public int Type;          // 0 octorok, 1 morcego, 2 slime
         public float X, Y, VX, VY, KX, KY, T, Timer, Flash;
-        public int HP, MaxHP, Face = 1, Mode; public bool Wave;      // Wave: faz parte da onda final antes do dragao
+        public int HP, MaxHP, Face = 1, Mode; public bool Wave, Fairy;      // Fairy: marcado para a fadinha derrotar (20% dos monstros)
+      //      // Wave: faz parte da onda final antes do dragao
         public float TX, TY, RT; public bool Moving; public float Scale = 1f, SmokeT, GrowT, SparkT, ShockT = 8f;      // dragao: destino, tempo para trocar de destino, esta andando
     }
     class Rock { public float X, Y, VX, VY, Life; public bool Fire, Homing, Arrow; }      // Arrow: flecha dos bokoblins a cavalo
@@ -1048,7 +1049,7 @@ namespace HeroiPet
 
             baseS = Math.Max(3, (int)Math.Round(Screen.PrimaryScreen.Bounds.Height / 360.0));
             EvoInit();
-            ChestInit();
+            ChestInit(); FairyInit();
             LoadEquip();
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--bau") >= 0) { chestState = 1; kingGear = false; }      // teste rapido: o bau ja aparece
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--evolucao") >= 0) { evoKills = EvoThreshold[0] - 1; evoStage = 0; evoNext = 1; }      // teste rapido: o proximo monstro da a 1a evolucao
@@ -1667,7 +1668,7 @@ namespace HeroiPet
         {
             tray.Visible = false;
             SaveRecord();
-            SaveKills(); SaveChest();
+            SaveKills(); SaveChest(); SaveFairy();
             if (evoForm != null) { try { evoForm.Close(); } catch { } evoForm = null; }
             CloseMenu();
             if (shadowLayer != null) { shadowLayer.Close(); shadowLayer = null; }
@@ -1776,6 +1777,7 @@ namespace HeroiPet
             UpdatePower(dt);
             UpdateEvo(dt);
             UpdateChest(dt);
+            UpdateFairy(dt);
             UpdateHero(dt);
             if (playMode) CheckRupeeLevel();
             UpdateBoss(dt);
@@ -2039,6 +2041,104 @@ namespace HeroiPet
             if (chestKills % 10 == 0) SaveChest();
             if (chestKills >= ChestKillsNeeded) { chestState = 1; SaveChest(); Say("Um baú apareceu!"); }
         }
+        // ================= FADINHA (ajudante) =================
+        // Depois de conseguir a roupa de rei, mais 50 monstros derrotados (modo automatico) dao uma fadinha. Ela voa perto da cabeca do heroi e derrota 20% dos
+        // monstros que aparecem: voa ate o monstro, gira rapido em volta da cabeca dele (um pouco acima) e ele cai. Vale nos dois modos.
+        const int FairyKillsNeeded = 50;
+        int fairyKills, fairyState, fairyPh;      // fairyState: 0 contando | 1 tem a fadinha;  fairyPh: 0 segue o heroi | 1 voa ate o alvo | 2 gira em volta
+        float fx, fy, fairyT, fairyOrbit, fairyTrail; Enemy fairyTarget;
+        void FairyInit()
+        {
+            fairyKills = 0; fairyState = 0;
+            if (Environment.GetEnvironmentVariable("HEROI_TESTE") == null)
+                try { using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"Software\HeroiDoDesktop")) { if (k != null) { object a = k.GetValue("MonstrosFada"), b = k.GetValue("Fada"); if (a != null) fairyKills = Math.Max(0, Convert.ToInt32(a)); if (b != null) fairyState = Math.Max(0, Math.Min(1, Convert.ToInt32(b))); } } } catch { }
+            if (fairyState == 0 && !kingGear) fairyKills = 0;
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "--fada") >= 0) { kingGear = true; fairyState = 1; }      // teste rapido: ja com a fadinha
+            fx = W / 2f; fy = H / 2f;
+        }
+        void SaveFairy()
+        {
+            if (Environment.GetEnvironmentVariable("HEROI_TESTE") != null) return;
+            try { using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"Software\HeroiDoDesktop")) { k.SetValue("MonstrosFada", fairyKills); k.SetValue("Fada", fairyState); } } catch { }
+        }
+        void CountFairyKill()
+        {
+            if (fairyState != 0 || !kingGear) return;      // a contagem so comeca depois da roupa de rei
+            fairyKills++;
+            if (fairyKills % 10 == 0) SaveFairy();
+            if (fairyKills >= FairyKillsNeeded)
+            {
+                fairyState = 1; SaveFairy(); fx = hx; fy = hy - 26 * S; Say("Uma fadinha!");
+                for (int k = 0; k < 10; k++) puffs.Add(new Puff { Kind = 1, X = fx + ((float)rnd.NextDouble() - 0.5f) * 24 * S, Y = fy + ((float)rnd.NextDouble() - 0.5f) * 16 * S });
+            }
+        }
+        void UpdateFairy(float dt)
+        {
+            if (fairyState != 1) return;
+            fairyT += dt;
+            if (fairyTarget != null && !enemies.Contains(fairyTarget)) { fairyTarget = null; fairyPh = 0; }
+            if (bossPhase != 0 || dead) { fairyTarget = null; fairyPh = 0; }
+            if (fairyTarget == null && bossPhase == 0 && !dead)
+            {
+                float bd = float.MaxValue;
+                foreach (Enemy e in enemies)
+                {
+                    if (!e.Fairy || e.Wave || e.Type == 3) continue;
+                    float d = (e.X - fx) * (e.X - fx) + (e.Y - fy) * (e.Y - fy);
+                    if (d < bd) { bd = d; fairyTarget = e; }
+                }
+                if (fairyTarget != null) { fairyPh = 1; fairyOrbit = 0; }
+            }
+            float oldX = fx, oldY = fy;
+            if (fairyTarget == null)
+            {
+                float homeX = hx + hface * 5 * S + (float)Math.Sin(fairyT * 2.2) * 7 * S, homeY = hy - 26 * S + (float)Math.Sin(fairyT * 3.1) * 2 * S;      // perto da cabeca do heroi
+                float k = Math.Min(1f, 6f * dt); fx += (homeX - fx) * k; fy += (homeY - fy) * k;
+            }
+            else
+            {
+                Enemy tg = fairyTarget; float headY = tg.Y - (tg.Type == 1 ? 15 : 17) * S;      // um pouco acima da cabeca do monstro
+                if (fairyPh == 1)
+                {
+                    float dx = tg.X - fx, dy = headY - fy, d = (float)Math.Sqrt(dx * dx + dy * dy);
+                    if (d < 8 * S) { fairyPh = 2; fairyOrbit = 0; }
+                    else { float st = Math.Min(d, 190 * S * dt); fx += dx / d * st; fy += dy / d * st; }
+                }
+                else
+                {
+                    fairyOrbit += dt; float a = fairyOrbit * 18f;      // volta rapida em torno da cabeca
+                    fx = tg.X + (float)Math.Cos(a) * 8 * S; fy = headY + (float)Math.Sin(a) * 4 * S;
+                    if (fairyOrbit >= 0.7f)
+                    {
+                        for (int k = 0; k < 6; k++) puffs.Add(new Puff { Kind = 1, X = tg.X + ((float)rnd.NextDouble() - 0.5f) * 12 * S, Y = headY + (float)rnd.NextDouble() * 10 * S });
+                        Enemy t2 = tg; fairyTarget = null; fairyPh = 0; DamageEnemy(t2, 9999);
+                    }
+                }
+            }
+            fx = Math.Max(3 * S, Math.Min(W - 3 * S, fx)); fy = Math.Max(3 * S, Math.Min(H - 3 * S, fy));
+            fairyTrail -= dt;
+            if (fairyTrail <= 0 && (Math.Abs(fx - oldX) + Math.Abs(fy - oldY)) > 1.5f * S) { fairyTrail = 0.09f; puffs.Add(new Puff { Kind = 1, X = fx, Y = fy + 2 * S }); }
+        }
+        void DrawFairy(Graphics g)
+        {
+            if (fairyState != 1) return;
+            int wf = ((int)(time * 16)) % 2;      // asas batendo
+            using (SolidBrush glow = new SolidBrush(Color.FromArgb(255, 245, 160)))
+            using (SolidBrush wing = new SolidBrush(Color.FromArgb(190, 225, 255)))
+            using (SolidBrush wing2 = new SolidBrush(Color.FromArgb(235, 245, 255)))
+            using (SolidBrush core = new SolidBrush(Color.White))
+            {
+                float u = S;
+                g.FillRectangle(glow, fx - 2 * u, fy - 2 * u, 4 * u, 4 * u);
+                g.FillRectangle(glow, fx - 3 * u, fy - u, 6 * u, 2 * u);
+                g.FillRectangle(glow, fx - u, fy - 3 * u, 2 * u, 6 * u);
+                g.FillRectangle(core, fx - u, fy - u, 2 * u, 2 * u);
+                float wy = wf == 0 ? -3 * u : -1 * u;
+                g.FillRectangle(wing, fx - 6 * u, fy + wy - u, 3 * u, 2 * u); g.FillRectangle(wing2, fx - 5 * u, fy + wy, 2 * u, u);
+                g.FillRectangle(wing, fx + 3 * u, fy + wy - u, 3 * u, 2 * u); g.FillRectangle(wing2, fx + 3 * u, fy + wy, 2 * u, u);
+            }
+        }
+
         void UpdateChest(float dt)
         {
             if (dead || bossPhase != 0) chestGo = false;      // o bau vale nos dois modos; fica parado durante a luta com o dragao
@@ -2882,7 +2982,7 @@ namespace HeroiPet
         {
             if (RupeeStep() < 6 || dead || waveSpawned >= WaveSeq.Length) return;
             waveT -= dt;
-            if (waveT <= 0 && WaveAlive() < 3) { Enemy e = Spawn(WaveSeq[waveSpawned]); e.Wave = true; waveSpawned++; waveT = 4f + (float)rnd.NextDouble() * 3f; }
+            if (waveT <= 0 && WaveAlive() < 3) { Enemy e = Spawn(WaveSeq[waveSpawned]); e.Wave = true; e.Fairy = false; waveSpawned++; waveT = 4f + (float)rnd.NextDouble() * 3f; }
         }
 
         void UpdateBoss(float dt)
@@ -3259,6 +3359,7 @@ namespace HeroiPet
             e.HP = type == 1 ? 1 : ((type == 4 || type == 5) ? 3 : 2);
             e.Timer = 0.8f + (float)rnd.NextDouble();
             puffs.Add(new Puff { Kind = 2, X = e.X, Y = e.Y });
+            if (fairyState == 1 && type != 3 && rnd.NextDouble() < 0.20) e.Fairy = true;      // a fadinha derrota 20% dos monstros que aparecem
             enemies.Add(e);
             return e;
         }
@@ -3589,6 +3690,7 @@ namespace HeroiPet
                 enemies.Remove(e); killCount++;
                 if (e.Type == 3) { BossDefeated(e); return; }
                 if (!playMode) CountKill();                                     // evolucao: conta todo monstro derrotado no automatico
+                if (!playMode) CountFairyKill();      // depois da roupa de rei: mais 50 monstros dao a fadinha
                 if (!playMode && (e.Type == 0 || e.Type == 4)) CountChestKill();      // bau do rei: so octoroks (vermelhos) e bokoblins contam (morcegos e gelatinas nao)
                 if (e.Type == 2 && !playMode && powerT <= 0 && !lootHold)      // gelatinas derrotadas: ao chegar a 20 o contador zera e o poder e lancado
                 {
@@ -4023,6 +4125,7 @@ namespace HeroiPet
                 Spr(g, appleSpr, ax, ay + appleSpr.H / 2f, true);
             }
 
+            DrawFairy(g);
             DrawCookApples(g);
             DrawSmokes(g);
             foreach (Puff p in puffs) DrawPuff(g, p);
@@ -4139,18 +4242,10 @@ namespace HeroiPet
             int fr = walking ? ((int)(walkT * 9)) % 2 : 0;
             float bob = (walking && fr == 1) ? S : 0;
             Spr(g, heroWalk[fr], hx, hy - bob, right);
-            if (previewBare)      // sem armas: os dois bracos iguais soltos ao lado do corpo (o da frente e o de tras)
+            if (previewBare)      // aba Roupas: sem armas nem escudo; o braco do outro lado (esquerda da tela) e igual ao da direita: a mao na mesma altura
             {
-                float ay = hy - bob - 7 * S;
-                Color dk = TunicColor();      // manga da cor da camisa
-                using (SolidBrush tb = new SolidBrush(dk))
-                using (SolidBrush sb = new SolidBrush(Color.FromArgb(250, 208, 165)))
-                    for (int side = -1; side <= 1; side += 2)
-                    {
-                        float ax = hx + side * 4 * S;
-                        g.FillRectangle(tb, ax - 0.75f * S, ay, 1.5f * S, 1.5f * S);
-                        g.FillRectangle(sb, ax - 0.75f * S, ay + 1.5f * S, 1.5f * S, 1.5f * S);
-                    }
+                using (SolidBrush skin = new SolidBrush(Color.FromArgb(250, 208, 165)))
+                    g.FillRectangle(skin, (int)(hx - 7 * S) + 3 * S, (int)(hy - bob - 16 * S) + 12 * S, S, S);
                 return;
             }
 

@@ -134,3 +134,6 @@ limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão 
 
 ## Atalhos de teste de nível
 - Desktop: menu da bandeja > **Atalho: ir para o nível 6 / 7**, ou `HeroiPet.exe --nivel6` / `--nivel7` (liga o modo jogo direto no nível, com rupias, corações e vida cheia). Web: botões no menu ou `?nivel=6`. O NV 7 é onde aparece a onda dos bokoblins a cavalo.
+
+## Fadinha
+- Contagem de 50 monstros começa ao obter a roupa de rei (só no automático; salva no registro/localStorage). Ao zerar: fadinha permanente. Cada monstro que nasce tem 20% de chance de ser marcado; a fada o alcança (190 S/s), gira 0,7 s em volta da cabeça dele e o derrota. Ignora dragão e a onda final.

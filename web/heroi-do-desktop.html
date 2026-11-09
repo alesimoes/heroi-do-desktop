@@ -666,7 +666,52 @@ function countChestKill() { if (chestState !== 0 || evoStage < 4) return;      /
 const chestX = () => W * 0.62, chestY = () => H * 0.34;
 function chestStart() { if (chestState === 1 && chestOpenT <= 0 && !chestGo && bossPhase === 0) { chestGo = true; if (calmState !== 0) endCalm(false); say('Vou abrir!'); } }
 function chestTap() { if (chestState === 1 && Math.hypot(mx - chestX(), my - (chestY() - 8 * S)) < 16 * S) chestStart(); }
-function updateChest(dt) {
+/* ---------- FADINHA (ajudante) ----------
+   Depois da roupa de rei, mais 50 monstros derrotados (modo automatico) dao uma fadinha. Ela voa perto da cabeca do heroi e derrota 20% dos monstros
+   que aparecem: voa ate o monstro, gira rapido em volta da cabeca dele (um pouco acima) e ele cai. Vale nos dois modos. */
+const FAIRY_NEEDED = 50;
+let fairyKills = 0, fairyState = 0; const fairy = { x: 0, y: 0, t: 0, orbit: 0, trail: 0, ph: 0, target: null };      // fairyState: 0 contando | 1 tem a fadinha;  ph: 0 segue | 1 voa ate o alvo | 2 gira em volta
+try { fairyKills = Math.max(0, parseInt(localStorage.getItem('heroi_monstros_fada') || '0', 10) || 0); fairyState = Math.max(0, Math.min(1, parseInt(localStorage.getItem('heroi_fada') || '0', 10) || 0)); } catch (_) {}
+if (fairyState === 0 && !kingGear) fairyKills = 0;
+if (/[?&]fada\b/.test(location.search)) { kingGear = true; fairyState = 1; }      // teste rapido: ja com a fadinha
+function saveFairy() { try { localStorage.setItem('heroi_monstros_fada', String(fairyKills)); localStorage.setItem('heroi_fada', String(fairyState)); } catch (_) {} }
+function countFairyKill() {
+  if (fairyState !== 0 || !kingGear) return;      // a contagem so comeca depois da roupa de rei
+  fairyKills++; if (fairyKills % 10 === 0) saveFairy();
+  if (fairyKills >= FAIRY_NEEDED) { fairyState = 1; saveFairy(); fairy.x = hero.x; fairy.y = hero.y - 26 * S; say('Uma fadinha!'); for (let k = 0; k < 10; k++) puffs.push({ kind: 1, x: fairy.x + (rnd() - 0.5) * 24 * S, y: fairy.y + (rnd() - 0.5) * 16 * S, t: 0 }); }
+}
+function updateFairy(dt) {
+  if (fairyState !== 1) return;
+  const F = fairy; F.t += dt;
+  if (F.target && enemies.indexOf(F.target) < 0) { F.target = null; F.ph = 0; }
+  if (bossPhase !== 0 || hero.dead) { F.target = null; F.ph = 0; }
+  if (!F.target && bossPhase === 0 && !hero.dead) {
+    let bd = 1e18; for (const e of enemies) { if (!e.fairy || e.wave || e.type === 3) continue; const d = (e.x - F.x) ** 2 + (e.y - F.y) ** 2; if (d < bd) { bd = d; F.target = e; } }
+    if (F.target) { F.ph = 1; F.orbit = 0; }
+  }
+  const ox = F.x, oy = F.y;
+  if (!F.target) {
+    const homeX = hero.x + hero.face * 5 * S + Math.sin(F.t * 2.2) * 7 * S, homeY = hero.y - 26 * S + Math.sin(F.t * 3.1) * 2 * S, k = Math.min(1, 6 * dt);      // perto da cabeca do heroi
+    F.x += (homeX - F.x) * k; F.y += (homeY - F.y) * k;
+  } else {
+    const tg = F.target, headY = tg.y - (tg.type === 1 ? 15 : 17) * S;      // um pouco acima da cabeca do monstro
+    if (F.ph === 1) {
+      const dx = tg.x - F.x, dy = headY - F.y, d = Math.hypot(dx, dy);
+      if (d < 8 * S) { F.ph = 2; F.orbit = 0; } else { const st = Math.min(d, 190 * S * dt); F.x += dx / d * st; F.y += dy / d * st; }
+    } else {
+      F.orbit += dt; const a = F.orbit * 18; F.x = tg.x + Math.cos(a) * 8 * S; F.y = headY + Math.sin(a) * 4 * S;      // volta rapida em torno da cabeca
+      if (F.orbit >= 0.7) { for (let k = 0; k < 6; k++) puffs.push({ kind: 1, x: tg.x + (rnd() - 0.5) * 12 * S, y: headY + rnd() * 10 * S, t: 0 }); F.target = null; F.ph = 0; damageEnemy(tg, 9999); }
+    }
+  }
+  F.x = Math.max(3 * S, Math.min(W - 3 * S, F.x)); F.y = Math.max(3 * S, Math.min(H - 3 * S, F.y));
+  F.trail -= dt; if (F.trail <= 0 && Math.abs(F.x - ox) + Math.abs(F.y - oy) > 1.5 * S) { F.trail = 0.09; puffs.push({ kind: 1, x: F.x, y: F.y + 2 * S, t: 0 }); }
+}
+function drawFairy() {
+  if (fairyState !== 1) return;
+  const x = fairy.x, y = fairy.y, u = S, wy = Math.floor(time * 16) % 2 === 0 ? -3 * u : -u;
+  rect('#fff5a0', x - 2 * u, y - 2 * u, 4 * u, 4 * u); rect('#fff5a0', x - 3 * u, y - u, 6 * u, 2 * u); rect('#fff5a0', x - u, y - 3 * u, 2 * u, 6 * u); rect('#fff', x - u, y - u, 2 * u, 2 * u);
+  rect('#bee1ff', x - 6 * u, y + wy - u, 3 * u, 2 * u); rect('#ebf5ff', x - 5 * u, y + wy, 2 * u, u); rect('#bee1ff', x + 3 * u, y + wy - u, 3 * u, 2 * u); rect('#ebf5ff', x + 3 * u, y + wy, 2 * u, u);
+}function updateChest(dt) {
   if (hero.dead || bossPhase !== 0) chestGo = false;      // o bau vale nos dois modos; fica parado durante a luta com o dragao
   if (chestState === 1 && chestOpenT <= 0 && bossPhase === 0) { const k4 = keys.has('Digit4') || keys.has('Numpad4'); if (k4 && !prev4) chestStart(); prev4 = k4; }
   if (chestOpenT > 0) { chestOpenT += dt; if (chestOpenT >= 1.4) { chestOpenT = 0; chestState = 2; chestGo = false; saveChest(); evoQueue.push(5); } }      // o tesouro aparece grande (como as evolucoes)
@@ -805,7 +850,8 @@ function spawn(type) {
   if (edge === 0) { x = m; y = m * 3 + rnd() * (H - m * 6); } else if (edge === 1) { x = W - m; y = m * 3 + rnd() * (H - m * 6); }
   else if (edge === 2) { x = m * 3 + rnd() * (W - m * 6); y = 16 * S; } else { x = m * 3 + rnd() * (W - m * 6); y = H - m; }
   const e = { type, x, y, vx: 0, vy: 0, kx: 0, ky: 0, t: 0, timer: 0.8 + rnd(), flash: 0, hp: type === 1 ? 1 : ((type === 4 || type === 5) ? 3 : 2), maxHp: 0, face: 1, mode: 0, tx: 0, ty: 0, rt: 0, moving: false };
-  e.maxHp = e.hp; puffs.push({ kind: 2, x, y, t: 0 }); enemies.push(e); return e;
+  e.maxHp = e.hp; puffs.push({ kind: 2, x, y, t: 0 }); if (fairyState === 1 && type !== 3 && rnd() < 0.20) e.fairy = true;      // a fadinha derrota 20% dos monsters que aparecem
+  enemies.push(e); return e;
 }
 function nearestMelee() { let b = null, bd = 1e18; for (const e of enemies) { if (e.type === 1) continue; const d = (e.x - hero.x) ** 2 + (e.y - hero.y) ** 2; if (d < bd) { bd = d; b = e; } } return b; }
 function nearestItem() { let b = null, bd = 1e18; for (const it of items) { const d = (it.x - hero.x) ** 2 + (it.y - hero.y) ** 2; if (d < bd) { bd = d; b = it; } } return b; }
@@ -845,6 +891,7 @@ function damageEnemy(e, dmg) {
     enemies.splice(enemies.indexOf(e), 1); killCount++;
     if (e.type === 3) { bossDefeated(e); return; }
     if (!playMode) countKill();      // evolucao: conta todo monstro derrotado no automatico
+    if (!playMode) countFairyKill();      // depois da roupa de rei: mais 50 monstros dao a fadinha
     if (!playMode && (e.type === 0 || e.type === 4)) countChestKill();      // bau do rei: so octoroks (vermelhos) e bokoblins contam (morcegos e gelatinas nao)
     if (e.type === 2 && !playMode && powerT <= 0 && !lootHold) { slimeKills++; if (slimeKills >= SLIMES_FOR_POWER) { slimeKills = 0; powerPending = true; } }      // ao chegar a 20 o contador zera e o poder e lancado
     if (playMode && bossPhase === 0 && rupeeStep() >= 6) killsAtMax++;
@@ -1277,7 +1324,7 @@ const WAVE_SEQ = [5, 2, 5, 5, 2, 5, 5]; let waveSpawned = 0, waveT = 2;
 const waveAlive = () => enemies.filter((e) => e.wave).length, waveDone = () => waveSpawned >= WAVE_SEQ.length && waveAlive() === 0;
 function updateWave(dt) {
   if (rupeeStep() < 6 || hero.dead || waveSpawned >= WAVE_SEQ.length) return;
-  waveT -= dt; if (waveT <= 0 && waveAlive() < 3) { const e = spawn(WAVE_SEQ[waveSpawned]); e.wave = true; waveSpawned++; waveT = 4 + rnd() * 3; }
+  waveT -= dt; if (waveT <= 0 && waveAlive() < 3) { const e = spawn(WAVE_SEQ[waveSpawned]); e.wave = true; e.fairy = false; waveSpawned++; waveT = 4 + rnd() * 3; }
 }
 function updateBoss(dt) {
   if (!playMode) return;
@@ -1333,7 +1380,7 @@ function step(dt) {
   spawnTimer -= dt;
   if (spawnTimer <= 0) { spawnTimer = (3 + rnd() * 4) / spawnRateMul(); if (enemies.length < enemyCap() && !hero.dead && calmState === 0 && cookState === 0 && bossPhase === 0) spawn(spawnType()); }
   updatePower(dt);
-  updateEvo(dt); updateChest(dt);
+  updateEvo(dt); updateChest(dt); updateFairy(dt);
   updateHero(dt);
   if (playMode) checkRupeeLevel();
   updateBoss(dt);
@@ -1414,7 +1461,7 @@ function drawHero() {
   shadow(hero.x, hero.y, 12);
   const fr = hero.walking ? Math.floor(hero.walkT * 9) % 2 : 0, bob = (hero.walking && fr === 1) ? S : 0;
   spr(fr ? SP.heroB : SP.heroA, hero.x, hero.y - bob, right);
-  if (previewBare) { const ay = hero.y - bob - 7 * S; for (const sd of [-1, 1]) { const ax = hero.x + sd * 4 * S; /* bracos menores */ rect(tunicColor(), ax - 0.75 * S, ay, 1.5 * S, 1.5 * S); rect('#fad0a5', ax - 0.75 * S, ay + 1.5 * S, 1.5 * S, 1.5 * S); } return; }
+  if (previewBare) { rect('#fad0a5', Math.trunc(hero.x - 7 * S) + 3 * S, Math.trunc(hero.y - bob - 16 * S) + 12 * S, S, S); return; }      // aba Roupas: sem armas nem escudo; o braco do outro lado (esquerda da tela) e igual ao da direita: a mao na mesma altura
   const sx = hero.x - f * 3 * S - 3 * S, sy = hero.y - bob - 11 * S; drawShieldBody(sx, sy);
   if (cookState === 6) { const p = (cookT % 1.2) / 1.2; if (Math.floor(cookT / 1.2) <= 4) drawBakeApple(3, hero.x + f * 5 * S, hero.y - bob - 9 * S, 2.3 - 1.7 * p); }
   else if (playEatT > 0) { const sc2 = 2.3 - 1.7 * Math.min(1, playEatT / 0.9); if (eatRaw) { const a = SP.apple, w = a.w * sc2 * 0.8, h = a.h * sc2 * 0.8; ctx.drawImage(a.r, Math.round(hero.x + f * 5 * S - w / 2), Math.round(hero.y - bob - 9 * S - h / 2), Math.round(w), Math.round(h)); } else drawBakeApple(3, hero.x + f * 5 * S, hero.y - bob - 9 * S, sc2); }
@@ -1512,6 +1559,7 @@ function render() {
   const ents = [...propEnts(), ...enemies.map((e) => ({ y: e.y, f: () => drawEnemy(e) })), ...trees.map((t) => ({ y: t.y, f: () => drawTree(t) })), { y: hero.y, f: drawHero }];
   if (cookState !== 0 || bossPhase === 1) ents.push({ y: fireY, f: drawFire });
   ents.sort((a, b) => a.y - b.y).forEach((o) => o.f());
+  drawFairy();
   for (const r of rocks) { if (r.fire) { const fs = SP.fire[Math.floor(time * 12) % 2]; const k = r.homing ? 1.4 + (r.life > 2 ? 0.18 * Math.sin(r.life * 34) : 0) : 1, w = fs.w * k, h = fs.h * k; ctx.drawImage(fs.r, Math.round(r.x - w / 2), Math.round(r.y - h / 2), Math.round(w), Math.round(h)); } else if (r.arrow) drawArrow(r.x, r.y, r.vx, r.vy); else spr(SP.rock, r.x, r.y + 2 * S, true); }
   for (const a of arrows) { if (a.power) drawPowerArrow(a); else drawArrow(a.x, a.y, a.vx, a.vy); }
   for (const fa of flyApples) { const u = Math.min(1, fa.t / 0.6), tx = hero.x + hero.face * 6 * S, ty = hero.y - 20 * S; spr(SP.apple, fa.x0 + (tx - fa.x0) * u, fa.y0 + (ty - fa.y0) * u - Math.sin(u * Math.PI) * 6 * S + SP.apple.h / 2, true); }
@@ -1692,6 +1740,7 @@ function boot() {
 window.__jogo = { hero, enemies, rocks, arrows, items, trees, step, render, setPlayMode, spawn, get S() { return S; }, get W() { return W; }, get H() { return H; },
   get st() { return { playMode, calmState, cookState, bossPhase, killsAtMax, deathWait, fireK, onFire: onFire.slice(), bakeTs: bakeTs.slice(), phase, boss }; },
   set(o) { if ('mx' in o) mx = o.mx; if ('my' in o) my = o.my; if ('mouse' in o) mouseDown = o.mouse; if ('k' in o) Object.assign(touchKeys, o.k); if ('killsAtMax' in o) killsAtMax = o.killsAtMax; if ('nextCalm' in o) nextCalm = o.nextCalm; if ('forceLong' in o) forceLong = o.forceLong; },
+  fairyTest: { give() { kingGear = true; fairyState = 1; }, setKills(n) { kingGear = true; fairyState = 0; fairyKills = n; }, get info() { return { fairyState, fairyKills, ph: fairy.ph, x: fairy.x, y: fairy.y }; } },
   inv: { open() { openInv(); }, tab(n) { invTab = n; renderInv(); }, eat: invEat, get msg() { return invMsg; } },
   doRetry, fireInteract, damageEnemy, startFinalPhase, startPower, get power() { return { powerT, record, nextPower }; }, setRupees(n) { hero.rupees = n; }, setSlimes(n) { slimeKills = n; }, countKill, get evoInfo() { return { evoKills, evoStage, evoNext, waiting: evoWaiting(), stage: evo && evo.stage }; }, forcePower() { powerPending = true; }, get chestInfo() { return { chestKills, chestState, kingGear, chestGo, chestOpenT }; }, setChestKills(n) { chestKills = n; }, get shocks() { return shocks; }, testBoss() { fireX = W / 2; fireY = H / 2; bossPhase = 4; spawnDragon(); return boss; }, get bossInfo() { return { phase: bossPhase, bossT, rewardSpawned, msgT, endStarted, reward: items.filter((i) => i.reward).reduce((s, i) => s + rupeeValue(i.kind), 0), nItems: items.filter((i) => i.reward).length }; } };
 })();
