@@ -594,11 +594,13 @@ function drawEvoItem(stage, cx, cy, u) {
 const CHEST_NEEDED = 5000;
 let chestKills = 0, chestState = 0, kingGear = false, chestGo = false, prev4 = false, chestOpenT = 0;      // chestState: 0 contando | 1 bau no cenario | 2 ja aberto
 try { chestKills = Math.max(0, parseInt(localStorage.getItem('heroi_monstros_bau') || '0', 10) || 0); chestState = Math.max(0, Math.min(2, parseInt(localStorage.getItem('heroi_bau') || '0', 10) || 0)); } catch (_) {}
+if (chestState === 0 && evoStage < 4) chestKills = 0;      // contagem so vale depois do conjunto das evolucoes
 if (chestState === 0 && chestKills >= CHEST_NEEDED) chestState = 1;
 kingGear = chestState === 2;
 if (/[?&]bau\b/.test(location.search)) { chestState = 1; kingGear = false; }      // teste rapido: o bau ja aparece
 function saveChest() { try { localStorage.setItem('heroi_monstros_bau', String(chestKills)); localStorage.setItem('heroi_bau', String(chestState)); } catch (_) {} }
-function countChestKill() { if (chestState !== 0) return; chestKills++; if (chestKills % 10 === 0) saveChest(); if (chestKills >= CHEST_NEEDED) { chestState = 1; saveChest(); say('Um baú apareceu!'); } }
+function countChestKill() { if (chestState !== 0 || evoStage < 4) return;      // a contagem do bau so comeca depois do conjunto das evolucoes (arco, gorro, blusa, espada e escudo)
+  chestKills++; if (chestKills % 10 === 0) saveChest(); if (chestKills >= CHEST_NEEDED) { chestState = 1; saveChest(); say('Um baú apareceu!'); } }
 const chestX = () => W * 0.62, chestY = () => H * 0.34;
 function chestStart() { if (chestState === 1 && chestOpenT <= 0 && !chestGo && bossPhase === 0) { chestGo = true; if (calmState !== 0) endCalm(false); say('Vou abrir!'); } }
 function chestTap() { if (chestState === 1 && Math.hypot(mx - chestX(), my - (chestY() - 8 * S)) < 16 * S) chestStart(); }

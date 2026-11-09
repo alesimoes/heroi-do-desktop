@@ -79,15 +79,15 @@ namespace HeroiPet
         };
 
         // separa o verde do gorro (linhas 0-8) do verde da roupa (linhas 9+) para poder recolorir cada um na evolucao
-        public static bool KingGear;     // tesouro do bau: coroa de ouro, roupa de rei, calca marrom e sapatos roxos
+        public static bool Crown, Robe;     // equipado: coroa de ouro / roupa de rei (com calca marrom e sapatos roxos)
         public static string[] HeroRecolor(string[] rows)
         {
             List<string> r = new List<string>();
-            if (KingGear) { r.Add("....C.CC.C...."); r.Add("....CCCCCC...."); r.Add("....CRCCRC...."); }      // coroa sobre o gorro
+            if (Crown) { r.Add("....C.CC.C...."); r.Add("....CCCCCC...."); r.Add("....CRCCRC...."); }      // coroa sobre o gorro
             for (int i = 0; i < rows.Length; i++)
             {
                 string s = rows[i].Replace('G', i < 9 ? 'H' : 'Q');
-                if (KingGear)
+                if (Robe)
                 {
                     if (i == 9) s = s.Replace('Q', 'F');          // gola de pele
                     else if (i == 13) s = s.Replace('B', 'C');    // cinto dourado
@@ -1039,6 +1039,7 @@ namespace HeroiPet
             baseS = Math.Max(3, (int)Math.Round(Screen.PrimaryScreen.Bounds.Height / 360.0));
             EvoInit();
             ChestInit();
+            LoadEquip();
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--bau") >= 0) { chestState = 1; kingGear = false; }      // teste rapido: o bau ja aparece
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--evolucao") >= 0) { evoKills = EvoThreshold[0] - 1; evoStage = 0; evoNext = 1; }      // teste rapido: o proximo monstro da a 1a evolucao
             sizeMode = LoadSize();
@@ -1113,13 +1114,67 @@ namespace HeroiPet
             hx = Math.Max(6 * S, Math.Min(W - 6 * S, hx)); hy = Math.Max(17 * S, Math.Min(H - 1 * S, hy));
         }
 
+        // ================= EQUIPAMENTO (menu de pausa: Espaco) =================
+        // indices: arco 0 madeira/1 metal | espada 0 comum/1 Espada Mestre | escudo 0 azul/1 vermelho/2 do rei | gorro 0 verde/1 roxo/2 coroa | roupa 0 verde/1 blusa azul/2 roupa de rei
+        int eqBow, eqSword, eqShield, eqHat, eqTunic;
+        bool OwnBow(int i) { return i == 0 || (i == 1 && evoStage >= 1); }
+        bool OwnSword(int i) { return i == 0 || (i == 1 && evoStage >= 4); }
+        bool OwnShield(int i) { return i == 0 || (i == 1 && evoStage >= 4) || (i == 2 && kingGear); }
+        bool OwnHat(int i) { return i == 0 || (i == 1 && evoStage >= 2) || (i == 2 && kingGear); }
+        bool OwnTunic(int i) { return i == 0 || (i == 1 && evoStage >= 3) || (i == 2 && kingGear); }
+        void BestEquip()
+        {
+            eqBow = evoStage >= 1 ? 1 : 0; eqSword = evoStage >= 4 ? 1 : 0;
+            eqShield = kingGear ? 2 : (evoStage >= 4 ? 1 : 0); eqHat = kingGear ? 2 : (evoStage >= 2 ? 1 : 0); eqTunic = kingGear ? 2 : (evoStage >= 3 ? 1 : 0);
+        }
+        void LoadEquip()
+        {
+            BestEquip();
+            if (Environment.GetEnvironmentVariable("HEROI_TESTE") != null) return;
+            try
+            {
+                using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"Software\HeroiDoDesktop"))
+                {
+                    object v = k == null ? null : k.GetValue("Equip");
+                    if (v != null)
+                    {
+                        string[] p = v.ToString().Split(',');
+                        if (p.Length == 5) { eqBow = int.Parse(p[0]); eqSword = int.Parse(p[1]); eqShield = int.Parse(p[2]); eqHat = int.Parse(p[3]); eqTunic = int.Parse(p[4]); }
+                    }
+                }
+            }
+            catch { BestEquip(); }
+            ValidateEquip();
+        }
+        void SaveEquip()
+        {
+            if (Environment.GetEnvironmentVariable("HEROI_TESTE") != null) return;
+            try { using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"Software\HeroiDoDesktop")) k.SetValue("Equip", eqBow + "," + eqSword + "," + eqShield + "," + eqHat + "," + eqTunic); } catch { }
+        }
+        void ValidateEquip()      // nunca fica com algo que o heroi nao tem
+        {
+            if (!OwnBow(eqBow)) eqBow = 0; if (!OwnSword(eqSword)) eqSword = 0; if (!OwnShield(eqShield)) eqShield = 0; if (!OwnHat(eqHat)) eqHat = 0; if (!OwnTunic(eqTunic)) eqTunic = 0;
+        }
+        void AutoEquip(int stage)      // ao ganhar um item, ele e equipado
+        {
+            if (stage == 1) eqBow = 1; else if (stage == 2) eqHat = 1; else if (stage == 3) eqTunic = 1; else if (stage == 4) { eqSword = 1; eqShield = 1; } else if (stage == 5) { eqHat = 2; eqTunic = 2; eqShield = 2; }
+            ValidateEquip(); SaveEquip();
+        }
+        public void EquipItem(int cat, int id)      // cat: 0 arco, 1 espada, 2 escudo, 3 gorro, 4 roupa
+        {
+            if (cat == 0 && OwnBow(id)) eqBow = id; else if (cat == 1 && OwnSword(id)) eqSword = id; else if (cat == 2 && OwnShield(id)) eqShield = id;
+            else if (cat == 3 && OwnHat(id)) eqHat = id; else if (cat == 4 && OwnTunic(id)) eqTunic = id; else return;
+            SaveEquip(); BuildSprites();
+        }
+
         void BuildSprites()
         {
-            Art.KingGear = kingGear;
+            ValidateEquip();
+            Art.Crown = eqHat == 2; Art.Robe = eqTunic == 2;
             Dictionary<char, Color> hov = new Dictionary<char, Color>();
-            if (evoStage >= 2) hov['H'] = Color.FromArgb(150, 80, 205);       // evolucao 2: gorro roxo
-            if (evoStage >= 3) hov['Q'] = Color.FromArgb(70, 125, 235);       // evolucao 3: blusa azul
-            if (kingGear) { hov['Q'] = Color.FromArgb(190, 35, 60); hov['J'] = Color.FromArgb(150, 100, 55); hov['Z'] = Color.FromArgb(130, 60, 190); }      // bau: manto vermelho, calca marrom, sapatos roxos
+            if (eqHat == 1) hov['H'] = Color.FromArgb(150, 80, 205);       // gorro roxo
+            if (eqTunic == 1) hov['Q'] = Color.FromArgb(70, 125, 235);       // blusa azul
+            if (eqTunic == 2) { hov['Q'] = Color.FromArgb(190, 35, 60); hov['J'] = Color.FromArgb(150, 100, 55); hov['Z'] = Color.FromArgb(130, 60, 190); }      // bau: manto vermelho, calca marrom, sapatos roxos
             heroWalk[0] = Art.Make(Art.HeroRecolor(Art.HeroA), S, hov);
             heroWalk[1] = Art.Make(Art.HeroRecolor(Art.HeroB), S, hov);
             Bitmap d = (Bitmap)heroWalk[0].R.Clone();
@@ -1326,7 +1381,7 @@ namespace HeroiPet
                     Enemy en = enemies[k];
                     float dx = en.X - a.X, dy = (en.Y - (en.Type == 1 ? 9 * S : (en.Type == 3 ? 12 * S * DK * en.Scale : 4 * S))) - a.Y;
                     float hitR = en.Type == 3 ? 14 * S * DK * en.Scale : 7 * S;
-                    if (dx * dx + dy * dy < hitR * hitR) { DamageEnemy(en, (en.Type == 3 ? 50 : 1) * ((!a.Power && evoStage >= 1) ? 2 : 1)); gone = true; }      // arco prateado (evolucao 1): o dobro de dano (flecha de poder nao muda)
+                    if (dx * dx + dy * dy < hitR * hitR) { DamageEnemy(en, (en.Type == 3 ? 50 : 1) * ((!a.Power && eqBow == 1) ? 2 : 1)); gone = true; }      // arco prateado (evolucao 1): o dobro de dano (flecha de poder nao muda)
                 }
                 if (gone) arrows.RemoveAt(i);
             }
@@ -1390,11 +1445,11 @@ namespace HeroiPet
         Font evoFont;
         const float EvoFly = 1.5f;
 
-        Color ShieldColor() { return evoStage >= 4 ? Color.FromArgb(205, 50, 50) : Color.FromArgb(55, 95, 205); }
-        Color BladeColor() { return evoStage >= 4 ? Color.FromArgb(205, 232, 255) : Color.FromArgb(225, 235, 245); }
-        Color GuardColor() { return evoStage >= 4 ? Color.FromArgb(60, 95, 205) : Color.FromArgb(215, 160, 40); }
-        Color GripColor() { return evoStage >= 4 ? Color.FromArgb(80, 55, 150) : Color.FromArgb(135, 85, 45); }
-        Color TunicColor() { return kingGear ? Color.FromArgb(190, 35, 60) : (evoStage >= 3 ? Color.FromArgb(70, 125, 235) : Color.FromArgb(58, 165, 62)); }
+        Color ShieldColor() { return eqShield == 1 ? Color.FromArgb(205, 50, 50) : Color.FromArgb(55, 95, 205); }
+        Color BladeColor() { return eqSword == 1 ? Color.FromArgb(205, 232, 255) : Color.FromArgb(225, 235, 245); }
+        Color GuardColor() { return eqSword == 1 ? Color.FromArgb(60, 95, 205) : Color.FromArgb(215, 160, 40); }
+        Color GripColor() { return eqSword == 1 ? Color.FromArgb(80, 55, 150) : Color.FromArgb(135, 85, 45); }
+        Color TunicColor() { return eqTunic == 2 ? Color.FromArgb(190, 35, 60) : (eqTunic == 1 ? Color.FromArgb(70, 125, 235) : Color.FromArgb(58, 165, 62)); }
 
         int LoadKills()
         {
@@ -1442,6 +1497,7 @@ namespace HeroiPet
             if (evo.T >= EvoFly)
             {
                 if (evo.Stage == 5) { kingGear = true; SaveChest(); } else evoStage = Math.Max(evoStage, evo.Stage);
+                AutoEquip(evo.Stage);      // o item novo ja vem equipado (pode trocar no menu: Espaco)
                 BuildSprites();
                 for (int k = 0; k < 10; k++) puffs.Add(new Puff { Kind = k % 2, X = hx + ((float)rnd.NextDouble() - 0.5f) * 20 * S, Y = hy - (float)rnd.NextDouble() * 18 * S });
                 Say("Evoluí!");
@@ -1596,6 +1652,7 @@ namespace HeroiPet
             chestKills = 0; chestState = 0;
             if (Environment.GetEnvironmentVariable("HEROI_TESTE") == null)
                 try { using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"Software\HeroiDoDesktop")) { if (k != null) { object a = k.GetValue("MonstrosBau"), b = k.GetValue("Bau"); if (a != null) chestKills = Math.Max(0, Convert.ToInt32(a)); if (b != null) chestState = Math.Max(0, Math.Min(2, Convert.ToInt32(b))); } } } catch { }
+            if (chestState == 0 && evoStage < 4) chestKills = 0;      // contagem so vale depois do conjunto das evolucoes
             if (chestState == 0 && chestKills >= ChestKillsNeeded) chestState = 1;
             kingGear = chestState == 2;
         }
@@ -1606,7 +1663,7 @@ namespace HeroiPet
         }
         void CountChestKill()
         {
-            if (chestState != 0) return;
+            if (chestState != 0 || evoStage < 4) return;      // a contagem do bau so comeca depois do conjunto das evolucoes (arco, gorro, blusa, espada e escudo) estar completo
             chestKills++;
             if (chestKills % 10 == 0) SaveChest();
             if (chestKills >= ChestKillsNeeded) { chestState = 1; SaveChest(); Say("Um baú apareceu!"); }
@@ -1696,7 +1753,7 @@ namespace HeroiPet
         // escudo do heroi: normal (retangular) ou, com o tesouro do bau, circular roxo escuro com um quadrado azul (um pouco menor, cobre menos o personagem)
         void DrawShieldBody(Graphics g, float sx, float sy)
         {
-            if (kingGear)
+            if (eqShield == 2)
             {
                 float cx = sx + 3 * S, cy = sy + 4 * S, ro = 3.6f * S, ri = 2.8f * S;
                 using (SolidBrush kb = new SolidBrush(Color.FromArgb(28, 22, 36)))
@@ -3055,7 +3112,7 @@ namespace HeroiPet
             {
                 Enemy e = enemies[i];
                 float dx = e.X - cx, dy = e.Y - hy;
-                { float rad = e.Type == 3 ? R + 14 * S * DK * e.Scale : R; if (dx * dx + dy * dy < rad * rad) DamageEnemy(e, (e.Type == 3 ? 150 : 1) * (evoStage >= 4 ? 2 : 1)); }      // espada azulada (evolucao 4): o dobro de dano
+                { float rad = e.Type == 3 ? R + 14 * S * DK * e.Scale : R; if (dx * dx + dy * dy < rad * rad) DamageEnemy(e, (e.Type == 3 ? 150 : 1) * (eqSword == 1 ? 2 : 1)); }      // espada azulada (evolucao 4): o dobro de dano
             }
             for (int i = rocks.Count - 1; i >= 0; i--)
             {
@@ -3556,7 +3613,7 @@ namespace HeroiPet
                 float u = (i - 4) / 4f, bend = 3 * S * (1 - u * u);
                 pts[i] = new PointF(cx + px * u * 7 * S + dx * bend, cy + py * u * 7 * S + dy * bend);
             }
-            if (evoStage >= 1)      // arco de metal (evolucao 1): prata com contorno escuro
+            if (eqBow == 1)      // arco de metal (evolucao 1): prata com contorno escuro
             {
                 using (Pen bo = new Pen(Color.FromArgb(28, 22, 36), S + 3)) g.DrawLines(bo, pts);
                 using (Pen bm = new Pen(Color.FromArgb(185, 192, 205), S + 1)) g.DrawLines(bm, pts);

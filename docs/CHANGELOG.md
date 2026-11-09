@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 09/11/2026 — Contagem do baú só depois do conjunto das evoluções
+- Os 5000 monstros do baú só começam a contar **depois que as 4 evoluções foram adquiridas** (antes disso a contagem fica em zero).
+
 ## 09/11/2026 — Baú e roupas nos dois modos
 - O baú, uma vez que aparece, fica disponível no **modo jogável e no automático** (aperte 4). Os anúncios de evolução/tesouro e a aparência do herói valem nos dois modos.
 

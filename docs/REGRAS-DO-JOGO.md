@@ -75,6 +75,8 @@ Teste rápido: `HeroiPet.exe --evolucao` (desktop) ou `?evolucao` na URL (web) �
 - **A contagem é feita no modo automático**, mas depois que o baú aparece ele **fica disponível nos dois modos** (automático e jogável); o painel de comandos do modo jogo
   ganha a linha "4: abrir o baú". O baú fica escondido durante a luta com o dragão. As roupas das evoluções e do baú **mudam a aparência do herói nos dois modos**,
   e o anúncio do item grande (com o botão USAR ITEM) também aparece nos dois.
+- **A contagem só começa depois que o conjunto das evoluções estiver completo** (as 4 evoluções: arco, gorro, blusa, Espada Mestre e escudo vermelho, ou seja, depois dos 3000 monstros das evoluções).
+  Monstros derrotados antes disso **não contam** para o baú (a contagem começa do zero quando a evolução 4 é adquirida).
 - Depois de **5000 monstros vermelhos (octoroks) e bokoblins** derrotados no modo automático, aparece um **baú** no cenário (62% da largura, 34% da altura).
   **Morcegos e gelatinas NÃO contam.** (Interpretação do pedido: "monstros vermelhos e bokoblins" contam; "morcegos e bokoblins não contam" foi entendido como morcegos e gelatinas.)
 - Em cima do baú aparece **"APERTE 4 PARA ABRIR"** (na web em celular: "TOQUE NO BAÚ PARA ABRIR"). Ao apertar **4**, o herói **vai até o baú** e o abre.
