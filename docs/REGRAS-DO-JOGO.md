@@ -76,7 +76,8 @@ Teste rápido: `HeroiPet.exe --evolucao` (desktop) ou `?evolucao` na URL (web) �
   **Morcegos e gelatinas NÃO contam.** (Interpretação do pedido: "monstros vermelhos e bokoblins" contam; "morcegos e bokoblins não contam" foi entendido como morcegos e gelatinas.)
 - Em cima do baú aparece **"APERTE 4 PARA ABRIR"** (na web em celular: "TOQUE NO BAÚ PARA ABRIR"). Ao apertar **4**, o herói **vai até o baú** e o abre.
 - O tesouro aparece grande no meio da tela (como as evoluções, com o botão **USAR ITEM** e o jogo pausado) e o herói passa a usar: **coroa de ouro**, **roupa de rei**
-  (manto vermelho com gola de pele branca e cinto dourado), **calça marrom** e **sapatos roxos**. A roupa de rei substitui a blusa azul.
+  (manto vermelho com gola de pele branca e cinto dourado), **calça marrom**, **sapatos roxos** e um **escudo circular roxo escuro com um quadrado azul no meio**
+  (um pouco menor que o escudo normal, para tampar menos o personagem; substitui o escudo azul/vermelho). A roupa de rei substitui a blusa azul.
 - O progresso (contagem, baú aparecendo, tesouro já ganho) é salvo: registro `MonstrosBau` e `Bau` (desktop); `heroi_monstros_bau` e `heroi_bau` (web).
 - Teste rápido: `HeroiPet.exe --bau` (desktop) ou `?bau` na URL (web) mostram o baú na hora.
 

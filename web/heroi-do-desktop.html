@@ -547,7 +547,7 @@ function drawEvo() {
   if (evo.wait || evo.t < 0.35) {
     const ty = cy + 17 * bigU / 1.6;
     text(evo.stage === 5 ? 'TESOURO DO REI!' : EVO_TITLE[evo.stage - 1] + '!', W / 2, ty, '#ffdc5a', 4.2 * S, 'center');
-    text(evo.stage === 5 ? 'COROA, ROUPA DE REI, CALÇA MARROM E SAPATOS ROXOS' : EVO_NEED[evo.stage - 1] + ' MONSTROS DERROTADOS', W / 2, ty + 7 * S, '#fff', 3.4 * S, 'center');
+    text(evo.stage === 5 ? 'COROA, ROUPA DE REI, CALÇA, SAPATOS ROXOS E ESCUDO' : EVO_NEED[evo.stage - 1] + ' MONSTROS DERROTADOS', W / 2, ty + 7 * S, '#fff', 3.4 * S, 'center');
   }
 }
 function drawEvoItem(stage, cx, cy, u) {
@@ -575,7 +575,7 @@ function drawEvoItem(stage, cx, cy, u) {
     poly([[cx - 4 * u, cy - 10 * u], [cx + 4 * u, cy - 10 * u], [cx + 12 * u, cy - 5 * u], [cx + 9 * u, cy + 0.5 * u], [cx + 6 * u, cy - 2 * u], [cx + 6 * u, cy + 10 * u], [cx - 6 * u, cy + 10 * u], [cx - 6 * u, cy - 2 * u], [cx - 9 * u, cy + 0.5 * u], [cx - 12 * u, cy - 5 * u]], b1);
     R(cx - 6 * u, cy + 8 * u, 12 * u, 2 * u, b2); ell(cx - 3 * u, cy - 11.5 * u, 6 * u, 4 * u, dark); ell(cx - 2.2 * u, cy - 11 * u, 4.4 * u, 3 * u, b2);
   } else if (stage === 5) {  // tesouro do bau: coroa, manto de rei, calca e sapatos
-    const uu = u * 0.8; drawCrownItem(cx - 31 * uu, cy - uu, uu); drawRobeItem(cx - 9 * uu, cy, uu); drawPantsItem(cx + 15 * uu, cy, uu); drawShoesItem(cx + 35 * uu, cy + 2 * uu, uu);
+    const uu = Math.min(u * 0.8, W / 125); drawCrownItem(cx - 46 * uu, cy - uu, uu); drawRobeItem(cx - 22 * uu, cy, uu); drawPantsItem(cx - uu, cy, uu); drawShoesItem(cx + 21 * uu, cy + 2 * uu, uu); drawShieldItem(cx + 44 * uu, cy, uu);
   } else {                   // espada mestre + escudo vermelho
     const sx = cx - 8 * u;
     poly([[sx - 2 * u, cy + 3 * u], [sx - 2 * u, cy - 15 * u], [sx, cy - 19 * u], [sx + 2 * u, cy - 15 * u], [sx + 2 * u, cy + 3 * u]], '#cde8ff');
@@ -654,6 +654,10 @@ function drawRobeItem(cx, cy, u) {
 function drawPantsItem(cx, cy, u) {
   ctx.beginPath(); [[-7, -9], [7, -9], [8, 11], [1, 11], [0, -2], [-1, 11], [-8, 11]].forEach((p, i) => i ? ctx.lineTo(cx + p[0] * u, cy + p[1] * u) : ctx.moveTo(cx + p[0] * u, cy + p[1] * u));
   ctx.closePath(); ctx.fillStyle = '#966437'; ctx.fill(); ctx.lineWidth = Math.max(1, u * 0.7); ctx.strokeStyle = '#1c1624'; ctx.lineJoin = 'round'; ctx.stroke(); rect('#6e4623', cx - 7 * u, cy - 9 * u, 14 * u, 2.5 * u);
+}
+function drawShieldItem(cx, cy, u) {
+  const circ = (r, c) => { ctx.beginPath(); ctx.arc(cx, cy, r, 0, TAU); ctx.fillStyle = c; ctx.fill(); };
+  circ(8.5 * u, '#1c1624'); circ(7.5 * u, '#6e3ca0'); circ(6.4 * u, '#461e6e'); rect('#1c1624', cx - 3.8 * u, cy - 3.8 * u, 7.6 * u, 7.6 * u); rect('#467deb', cx - 3 * u, cy - 3 * u, 6 * u, 6 * u);
 }
 function drawShoesItem(cx, cy, u) {
   for (const off of [-6, 6]) { const bx = cx + off * u; ctx.beginPath(); [[-4, -8], [2, -8], [2, 0], [6, 2], [6, 6], [-4, 6]].forEach((p, i) => i ? ctx.lineTo(bx + p[0] * u, cy + p[1] * u) : ctx.moveTo(bx + p[0] * u, cy + p[1] * u)); ctx.closePath(); ctx.fillStyle = '#823cbe'; ctx.fill(); ctx.lineWidth = Math.max(1, u * 0.7); ctx.strokeStyle = '#1c1624'; ctx.lineJoin = 'round'; ctx.stroke(); rect('#5a288c', bx - 4 * u, cy + 4 * u, 10 * u, 2 * u); }
@@ -1263,7 +1267,12 @@ function drawSword(handX, handY, aDeg, f) {
   ctx.strokeStyle = evoStage >= 4 ? '#3c5fcd' : '#d7a028'; ctx.lineWidth = 2 * S; ctx.beginPath(); ctx.moveTo(handX + px * 3 * S, handY + py * 3 * S); ctx.lineTo(handX - px * 3 * S, handY - py * 3 * S); ctx.stroke();
   ctx.strokeStyle = evoStage >= 4 ? '#503796' : '#87552d'; ctx.lineWidth = S + 1; ctx.beginPath(); ctx.moveTo(handX, handY); ctx.lineTo(handX - dx * 3 * S, handY - dy * 3 * S); ctx.stroke();
 }
-function drawShieldBody(sx, sy) { rect('#1c1624', sx - S, sy - S, 8 * S, 10 * S); rect(evoStage >= 4 ? '#cd3232' : '#375fcd', sx, sy, 6 * S, 8 * S); rect('#f5cd46', sx + 2 * S, sy + 2 * S, 2 * S, 3 * S); }
+function drawShieldBody(sx, sy) {
+  if (kingGear) {      // tesouro do bau: escudo circular roxo escuro com quadrado azul, um pouco menor (cobre menos o personagem)
+    const cx = sx + 3 * S, cy = sy + 4 * S, circ = (r, c) => { ctx.beginPath(); ctx.arc(cx, cy, r, 0, TAU); ctx.fillStyle = c; ctx.fill(); };
+    circ(3.6 * S, '#1c1624'); circ(2.8 * S, '#461e6e'); rect('#1c1624', cx - 1.7 * S, cy - 1.7 * S, 3.4 * S, 3.4 * S); rect('#467deb', cx - 1.3 * S, cy - 1.3 * S, 2.6 * S, 2.6 * S); return;
+  }
+  rect('#1c1624', sx - S, sy - S, 8 * S, 10 * S); rect(evoStage >= 4 ? '#cd3232' : '#375fcd', sx, sy, 6 * S, 8 * S); rect('#f5cd46', sx + 2 * S, sy + 2 * S, 2 * S, 3 * S); }
 function drawBow(f, bob) {
   const cx = hero.x + f * 7 * S, cy = hero.y - bob - 8 * S, dx = hero.aimX, dy = hero.aimY, px = -dy, py = dx, pull = Math.min(1, hero.bowT / 0.4);
   const strokeBow = (col, lw) => { ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.beginPath(); for (let i = 0; i < 9; i++) { const u = (i - 4) / 4, bend = 3 * S * (1 - u * u), x = cx + px * u * 7 * S + dx * bend, y = cy + py * u * 7 * S + dy * bend; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke(); };

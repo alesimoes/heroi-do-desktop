@@ -1479,7 +1479,7 @@ namespace HeroiPet
             if (evo.Wait || t < 0.35f)      // textos so enquanto o item esta grande
             {
                 if (evoFont == null) evoFont = new Font("Consolas", S * 9, FontStyle.Bold, GraphicsUnit.Pixel);
-                string l1 = evo.Stage == 5 ? "TESOURO DO REI!" : EvoTitle[evo.Stage - 1] + "!", l2 = evo.Stage == 5 ? "COROA, ROUPA DE REI, CALÇA MARROM E SAPATOS ROXOS" : EvoNeeded[evo.Stage - 1] + " MONSTROS DERROTADOS";
+                string l1 = evo.Stage == 5 ? "TESOURO DO REI!" : EvoTitle[evo.Stage - 1] + "!", l2 = evo.Stage == 5 ? "COROA, ROUPA DE REI, CALÇA, SAPATOS ROXOS E ESCUDO" : EvoNeeded[evo.Stage - 1] + " MONSTROS DERROTADOS";
                 SizeF s1 = g.MeasureString(l1, evoFont), s2 = g.MeasureString(l2, evoFont);
                 float ty2 = cy + 17 * bigU / 1.6f;
                 DrawTextF(g, l1, evoFont, W / 2f - s1.Width / 2, ty2, Color.FromArgb(255, 220, 90));
@@ -1542,11 +1542,12 @@ namespace HeroiPet
                 }
                 else if (stage == 5)      // tesouro do bau: coroa, manto de rei, calca e sapatos
                 {
-                    float uu = u * 0.8f;
-                    DrawCrownItem(g, cx - 31 * uu, cy - 1 * uu, uu);
-                    DrawRobeItem(g, cx - 9 * uu, cy, uu);
-                    DrawPantsItem(g, cx + 15 * uu, cy, uu);
-                    DrawShoesItem(g, cx + 35 * uu, cy + 2 * uu, uu);
+                    float uu = Math.Min(u * 0.8f, W / 125f);
+                    DrawCrownItem(g, cx - 46 * uu, cy - 1 * uu, uu);
+                    DrawRobeItem(g, cx - 22 * uu, cy, uu);
+                    DrawPantsItem(g, cx - 1 * uu, cy, uu);
+                    DrawShoesItem(g, cx + 21 * uu, cy + 2 * uu, uu);
+                    DrawShieldItem(g, cx + 44 * uu, cy, uu);
                 }
                 else                      // espada mestre + escudo vermelho
                 {
@@ -1693,6 +1694,48 @@ namespace HeroiPet
         }
 
         // itens do tesouro (usados no anuncio grande)
+        // escudo do heroi: normal (retangular) ou, com o tesouro do bau, circular roxo escuro com um quadrado azul (um pouco menor, cobre menos o personagem)
+        void DrawShieldBody(Graphics g, float sx, float sy)
+        {
+            if (kingGear)
+            {
+                float cx = sx + 3 * S, cy = sy + 4 * S, ro = 3.6f * S, ri = 2.8f * S;
+                using (SolidBrush kb = new SolidBrush(Color.FromArgb(28, 22, 36)))
+                using (SolidBrush pu = new SolidBrush(Color.FromArgb(70, 30, 110)))
+                using (SolidBrush bl = new SolidBrush(Color.FromArgb(70, 125, 235)))
+                {
+                    g.FillEllipse(kb, cx - ro, cy - ro, 2 * ro, 2 * ro);
+                    g.FillEllipse(pu, cx - ri, cy - ri, 2 * ri, 2 * ri);
+                    g.FillRectangle(kb, cx - 1.7f * S, cy - 1.7f * S, 3.4f * S, 3.4f * S);
+                    g.FillRectangle(bl, cx - 1.3f * S, cy - 1.3f * S, 2.6f * S, 2.6f * S);
+                }
+                return;
+            }
+            using (SolidBrush kb = new SolidBrush(Color.FromArgb(28, 22, 36)))
+            using (SolidBrush bb = new SolidBrush(ShieldColor()))
+            using (SolidBrush yb = new SolidBrush(Color.FromArgb(245, 205, 70)))
+            {
+                g.FillRectangle(kb, sx - S, sy - S, 8 * S, 10 * S);
+                g.FillRectangle(bb, sx, sy, 6 * S, 8 * S);
+                g.FillRectangle(yb, sx + 2 * S, sy + 2 * S, 2 * S, 3 * S);
+            }
+        }
+
+        void DrawShieldItem(Graphics g, float cx, float cy, float u)
+        {
+            Color dark = Color.FromArgb(28, 22, 36);
+            using (SolidBrush kb = new SolidBrush(dark))
+            using (SolidBrush pu = new SolidBrush(Color.FromArgb(70, 30, 110)))
+            using (SolidBrush rim = new SolidBrush(Color.FromArgb(110, 60, 160)))
+            using (SolidBrush bl = new SolidBrush(Color.FromArgb(70, 125, 235)))
+            {
+                g.FillEllipse(kb, cx - 8.5f * u, cy - 8.5f * u, 17 * u, 17 * u);
+                g.FillEllipse(rim, cx - 7.5f * u, cy - 7.5f * u, 15 * u, 15 * u);
+                g.FillEllipse(pu, cx - 6.4f * u, cy - 6.4f * u, 12.8f * u, 12.8f * u);
+                g.FillRectangle(kb, cx - 3.8f * u, cy - 3.8f * u, 7.6f * u, 7.6f * u);
+                g.FillRectangle(bl, cx - 3 * u, cy - 3 * u, 6 * u, 6 * u);
+            }
+        }
         void DrawCrownItem(Graphics g, float cx, float cy, float u)
         {
             Color dark = Color.FromArgb(28, 22, 36);
@@ -3568,14 +3611,8 @@ namespace HeroiPet
             // escudo
             float f = hface;
             float sx = hx - f * 3 * S - 3 * S, sy = hy - bob - 11 * S;
-            using (SolidBrush kb = new SolidBrush(Color.FromArgb(28, 22, 36)))
-            using (SolidBrush bb = new SolidBrush(ShieldColor()))
-            using (SolidBrush yb = new SolidBrush(Color.FromArgb(245, 205, 70)))
-            {
-                g.FillRectangle(kb, sx - S, sy - S, 8 * S, 10 * S);
-                g.FillRectangle(bb, sx, sy, 6 * S, 8 * S);
-                g.FillRectangle(yb, sx + 2 * S, sy + 2 * S, 2 * S, 3 * S);
-            }
+            DrawShieldBody(g, sx, sy);
+
 
             if (cookState == 6) DrawEatApple(g, f, bob); else if (playEatT > 0) DrawPlayEat(g, f, bob);
             if (calmState == 2 || cookState != 0 || playPickT > 0 || playEatT > 0) { DrawReach(g, f, bob); return; }   // espada guardada
@@ -3651,14 +3688,8 @@ namespace HeroiPet
 
             // escudo: do peito para o chao, ao lado
             float sx = hx - 7 * S + (-5 * S) * q, sy = hy - 12 * S + 6 * S * q;
-            using (SolidBrush kb = new SolidBrush(Color.FromArgb(28, 22, 36)))
-            using (SolidBrush bb = new SolidBrush(ShieldColor()))
-            using (SolidBrush yb = new SolidBrush(Color.FromArgb(245, 205, 70)))
-            {
-                g.FillRectangle(kb, sx - S, sy - S, 8 * S, 10 * S);
-                g.FillRectangle(bb, sx, sy, 6 * S, 8 * S);
-                g.FillRectangle(yb, sx + 2 * S, sy + 2 * S, 2 * S, 3 * S);
-            }
+            DrawShieldBody(g, sx, sy);
+
 
             if (!waving)
             {

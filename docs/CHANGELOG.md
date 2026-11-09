@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 09/11/2026 — Escudo roxo no baú
+- O tesouro do baú agora inclui um **escudo circular roxo escuro com um quadrado azul**, um pouco menor que o atual.
+
 ## 09/11/2026 — Baú do Rei
 - Depois de **5000 octoroks e bokoblins** (morcegos e gelatinas não contam) aparece um **baú** no modo automático: "aperte 4 para abrir". Dá **coroa de ouro, roupa de rei, calça marrom e sapatos roxos**.
 
