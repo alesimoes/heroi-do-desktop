@@ -1,5 +1,12 @@
 # Changelog (resumo)
 
+## 09/11/2026 — Comer maçã pelo inventário e fome do automático
+- No menu (Espaço) > **Comida**, clicar na maçã faz o herói **comer na tela ampliada**; **maçã crua recupera meio coração** (assada na fogueira continua recuperando mais). Não gasta a maçã se os corações já estão cheios.
+- **Modo automático:** com **só 1 coração** (ou menos) e **nenhum monstro num raio de 4 tamanhos do Link**, ele vai até uma árvore, colhe e **come uma maçã** (+0,5). Se um monstro chega perto no caminho, ele desiste e luta.
+
+## 09/11/2026 — Menu de pausa com equipamento
+- **Espaço** abre um menu (estilo Zelda) com as abas **Armas / Roupas / Comida** e o **herói ampliado** ao lado; ao escolher armas ou roupas com o mouse o herói muda na hora. Desktop e web. O equipamento escolhido vale no jogo (aparência e dano) e fica salvo.
+
 ## 09/11/2026 — Contagem do baú só depois do conjunto das evoluções
 - Os 5000 monstros do baú só começam a contar **depois que as 4 evoluções foram adquiridas** (antes disso a contagem fica em zero).
 

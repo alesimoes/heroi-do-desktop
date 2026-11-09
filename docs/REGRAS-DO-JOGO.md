@@ -95,6 +95,16 @@ Teste rápido: `HeroiPet.exe --evolucao` (desktop) ou `?evolucao` na URL (web) �
   A partir de +40% (100, 125, 150) cada degrau dá **+1 coração máximo** (até 8).
 - **Morte:** tela "VOCÊ MORREU" + "Tentar de novo"; volta com 10 rupias a menos (mínimo 0); nível/corações recalculados.
 
+## Menu de pausa / equipamento (Espaço)
+**Espaço** abre e fecha o menu (nos modos automático e jogo; no desktop vale com a área de trabalho em foco; **Esc** também fecha) e **pausa o jogo**.
+No desktop é uma janela própria com o mouse; na web, uma tela sobre o jogo. Ao lado das 3 abas (**Armas**, **Roupas**, **Comida**, fechadas até serem clicadas)
+fica o **herói ampliado** mostrando o que está equipado; ao clicar em um item o herói muda na hora.
+- **Armas:** arcos (madeira / metal), espadas (comum / Espada Mestre) e escudos (azul / vermelho / do rei) que você já tem.
+- **Roupas:** gorros (verde / roxo / coroa de ouro) e roupas (túnica verde / blusa azul / roupa de rei, que inclui calça e sapatos).
+- **Comida:** só maçãs (quantidade).
+- Só aparece o que o herói **já ganhou**. Ao ganhar um item (evolução ou baú) ele já vem equipado. A escolha fica salva (registro `Equip` / `localStorage heroi_equip`).
+- Os efeitos dependem do que está **equipado**: arco de metal e Espada Mestre dão o dobro de dano; as cores/escudos seguem as roupas escolhidas.
+
 ## Período de teste do dragão
 Para testar a luta sem jogar tudo antes: desktop → menu da bandeja **"Teste: ir para a luta do dragão"** (ou `HeroiPet.exe --dragao`);
 web → botão **"Teste: ir para a luta do dragão"** no menu (ou `?dragao` na URL). Liga o modo jogo no nível máximo (150 rupias, 8 corações cheios),
@@ -114,3 +124,7 @@ limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão 
 5. **Morte do dragão:** ele **volta ao normal** (roxo, tamanho normal) e pisca por 1,3 s; depois **explode** e solta **1000 rupias** em valores
    diferentes (2×**300 dourada**, 4×50, 5×20, 8×10, 3×5, 5×1 = 1000), que se espalham e **não somem**. Cerca de 2 s depois da explosão aparece
    **"ESPERE POR MAIS ATUALIZAÇÕES"** por 4,5 s e então os **créditos** (que rolam com o jogo ainda ativo para pegar as rupias) → volta ao modo automático.
+
+## Comer maçã (inventário e fome do automático)
+- Inventário > Comida: clicar na maçã faz o herói comer (animação na tela ampliada). Maçã **crua** = **+0,5 coração**; assada na fogueira = mais. Com corações cheios a maçã não é gasta.
+- Automático: com **hp ≤ 1** e nenhum monstro dentro de **4 × 16 × S px** (4 tamanhos do Link), vai à árvore mais próxima com maçã, colhe e come uma (+0,5). Monstro chegando no raio cancela.

@@ -1,4 +1,6 @@
 <title>Herói do Desktop</title>
+<!-- menu de pausa/equipamento (Espaço) -->
+
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,7 +31,27 @@ button.primary:hover { filter: brightness(1.08); }
 #menu { position: absolute; left: max(12px, env(safe-area-inset-left, 0px)); top: calc(max(12px, env(safe-area-inset-top, 0px)) + 46px); z-index: 5; width: min(300px, calc(100% - 24px)); background: var(--panel); border: 2px solid var(--line); border-radius: 8px; padding: 10px; display: grid; gap: 6px; }
 #menu h3 { margin: 4px 2px 2px; font: 9px/1.4 var(--display); color: var(--gold); letter-spacing: .05em; }
 #menu .sep { height: 1px; background: var(--line); margin: 4px 0; }
-#evoBtn { position: fixed; z-index: 7; transform: translateX(-50%); padding: 12px 28px; font: 700 18px var(--display); letter-spacing: .04em; background: #f5cd46; color: #281c0a; border: 3px solid #1c1624; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 0 #1c1624; }
+#inv { position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; background: rgba(8, 10, 18, .72); padding: 12px; }
+#inv .invbox { position: relative; display: grid; grid-template-columns: 330px 1fr; gap: 18px; width: min(1000px, 100%); max-height: calc(100vh - 24px); overflow: auto; background: #12161e; border: 3px solid #f7be46; border-radius: 10px; padding: 18px; box-sizing: border-box; }
+#inv #invClose { position: absolute; right: 12px; top: 12px; width: 44px; height: 44px; border-radius: 8px; background: #783240; color: #fff; border: 0; font-size: 18px; cursor: pointer; z-index: 2; }
+#inv .invtitle { color: #f7be46; font: 700 22px var(--display); margin-bottom: 8px; }
+#inv #invPrev { width: 100%; height: auto; border-radius: 10px; border: 1.5px solid #50596f; background: linear-gradient(#2e384e, #161c28); image-rendering: pixelated; display: block; }
+#inv #invEq { list-style: none; margin: 10px 0 0; padding: 0; font-size: 14px; color: #fff; display: grid; gap: 3px; }
+#inv .invtabs { display: flex; gap: 10px; margin-right: 56px; }
+#inv .invtabs button { flex: 1; padding: 13px 8px; border-radius: 10px; border: 2px solid #f7be46; background: #222836; color: #fff; font: 700 17px var(--body); cursor: pointer; }
+#inv .invtabs button:hover { background: #3a4256; }
+#inv .invtabs button[aria-selected="true"] { background: #f7be46; color: #000; }
+#inv #invBody { margin-top: 14px; min-height: 240px; }
+#inv #invBody .hint { color: #c8c8d0; line-height: 1.7; margin-top: 14px; }
+#inv .sec { color: #f7be46; font: 700 16px var(--body); margin: 8px 0 6px; }
+#inv .row { display: flex; gap: 10px; flex-wrap: wrap; }
+#inv .card { width: 112px; height: 124px; border-radius: 10px; border: 1.5px solid #50596f; background: #222836; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 4px; font: 700 12px var(--body); text-align: center; }
+#inv .card:hover { background: #3a4256; }
+#inv .card[aria-pressed="true"] { border: 3px solid #f7be46; }
+#inv .card[aria-pressed="true"] span { color: #f7be46; }
+#inv .card canvas { width: 72px; height: 72px; image-rendering: pixelated; }
+#inv #invInfo { margin-top: 10px; min-height: 22px; color: #fff; font-size: 14px; }
+@media (max-width: 720px) { #inv .invbox { grid-template-columns: 1fr; } #inv #invPrev { max-width: 240px; margin: 0 auto; } }#evoBtn { position: fixed; z-index: 7; transform: translateX(-50%); padding: 12px 28px; font: 700 18px var(--display); letter-spacing: .04em; background: #f5cd46; color: #281c0a; border: 3px solid #1c1624; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 0 #1c1624; }
 #evoBtn:hover { background: #ffe07a; }
 #evoBtn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 #menu .lbl { font-size: 12px; opacity: .8; }
@@ -77,8 +99,8 @@ html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout
 #touch .bw .bowo { fill: none; stroke: #1c1624; stroke-width: 5.4; } #touch .bw .bowm { fill: none; stroke: #87552d; stroke-width: 3.2; } #touch .bw .str { fill: none; stroke: #ebebeb; stroke-width: 1; } #touch .bw .shaft { fill: none; stroke: #c9a46a; stroke-width: 1.8; } #touch .bw .head { fill: #e1ebf5; stroke: #1c1624; stroke-width: 1; } #touch .bw .fl { fill: none; stroke: #ebebeb; stroke-width: 1.4; }
 #touch .ap .fruit { fill: #d73737; stroke: #1c1624; stroke-width: 1.4; } #touch .ap .stem { fill: none; stroke: #87552d; stroke-width: 1.8; } #touch .ap .leaf { fill: #3aa53e; stroke: #1c1624; stroke-width: 1; } #touch .ap .shine { fill: none; stroke: #ffb4a8; stroke-width: 1.6; }
 /* itens evoluidos: o icone acompanha o equipamento do heroi */
-#touch[data-evo="1"] .bw .bowm, #touch[data-evo="2"] .bw .bowm, #touch[data-evo="3"] .bw .bowm, #touch[data-evo="4"] .bw .bowm { stroke: #b9c0cd; }
-#touch[data-evo="4"] .sw .blade { fill: #cde8ff; } #touch[data-evo="4"] .sw .guard, #touch[data-evo="4"] .sw .pom { fill: #3c5fcd; } #touch[data-evo="4"] .sw .grip { fill: #503796; }
+#touch[data-bow="1"] .bw .bowm { stroke: #b9c0cd; }
+#touch[data-sword="1"] .sw .blade { fill: #cde8ff; } #touch[data-sword="1"] .sw .guard, #touch[data-sword="1"] .sw .pom { fill: #3c5fcd; } #touch[data-sword="1"] .sw .grip { fill: #503796; }
 #touch button.on { background: var(--gold); }
 #touch button[data-k="1"] { right: 0; bottom: 0; width: 86px; height: 86px; }
 #touch button[data-k="2"] { right: 98px; bottom: 6px; width: 70px; height: 70px; }
@@ -113,6 +135,7 @@ html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout
     <button id="mApples">Dar 5 maçãs (lanche)</button>
     <button id="mDragon">Teste: ir para a luta do dragão</button>
     <button id="mPause" aria-pressed="false">Pausar</button>
+    <button id="mInv">Inventário (Espaço)</button>
     <button id="mFull" aria-pressed="false">Tela cheia</button>
     <div class="sep"></div>
     <div class="lbl">Tamanho do herói e do cenário</div>
@@ -121,7 +144,17 @@ html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout
     <button id="mAbout">Sobre</button>
   </div>
   <div id="toast" role="status" aria-live="polite"><b id="toastT"></b><span id="toastS"></span></div>
-  <button id="evoBtn" hidden>USAR ITEM</button>
+  <div id="inv" hidden>
+    <div class="invbox" role="dialog" aria-label="Inventário">
+      <button id="invClose" aria-label="Fechar o menu">✕</button>
+      <div class="invprev"><div class="invtitle">HERÓI</div><canvas id="invPrev" width="300" height="320"></canvas><ul id="invEq"></ul></div>
+      <div class="invright">
+        <div class="invtabs"><button data-tab="0">Armas</button><button data-tab="1">Roupas</button><button data-tab="2">Comida</button></div>
+        <div id="invBody"></div>
+        <div id="invInfo"></div>
+      </div>
+    </div>
+  </div>  <button id="evoBtn" hidden>USAR ITEM</button>
   <div id="dpad" aria-hidden="true"><i>▲</i><i>▼</i><i>◀</i><i>▶</i><b></b></div>
   <div id="touch" aria-hidden="true">
     <button data-k="1" aria-label="Espada"><svg class="ic sw" viewBox="0 0 32 32" aria-hidden="true"><g transform="rotate(45 16 16)"><path class="blade" d="M16 1.5 L19.2 6 V21 H12.8 V6 Z"/><rect class="guard" x="8.5" y="21" width="15" height="3.4" rx="1"/><rect class="grip" x="14.4" y="24.4" width="3.2" height="5"/><circle class="pom" cx="16" cy="30.2" r="1.8"/></g></svg></button><button data-k="2" aria-label="Arco"><svg class="ic bw" viewBox="0 0 32 32" aria-hidden="true"><path class="bowo" d="M11 3 Q27 16 11 29"/><path class="bowm" d="M11 3 Q27 16 11 29"/><path class="str" d="M11 3 V29"/><path class="shaft" d="M3.5 16 H21"/><path class="head" d="M21 12.8 L27 16 L21 19.2 Z"/><path class="fl" d="M3.5 16 L1.5 13 M3.5 16 L1.5 19"/></svg></button><button data-k="3" aria-label="Colher maçã"><svg class="ic ap" viewBox="0 0 32 32" aria-hidden="true"><path class="fruit" d="M16 9 C9 5 3.5 11 5.5 19 C7.5 26 12.5 29.5 16 27.5 C19.5 29.5 24.5 26 26.5 19 C28.5 11 23 5 16 9 Z"/><path class="stem" d="M16 9 Q16 5 18.5 2.5"/><path class="leaf" d="M17.5 6.5 Q22.5 2.5 26 5.5 Q22 9.5 17.5 6.5 Z"/><path class="shine" d="M9 14 Q9.5 11.5 12 10.5"/></svg></button>
@@ -186,7 +219,7 @@ html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout
 (() => {
 'use strict';
 const $ = (id) => document.getElementById(id);
-const cv = $('c'), ctx = cv.getContext('2d');
+const cv = $('c'); let ctx = cv.getContext('2d');      // 'ctx' pode ser trocado temporariamente (menu: heroi ampliado e icones) por withCtx()
 const rnd = Math.random;
 const TAU = Math.PI * 2;
 
@@ -340,14 +373,15 @@ if (touchMode) {
 function buildSprites() {
   const ov = (c, col, extra) => Object.assign({ [c]: col }, extra || {});
   const dS = Math.round(S * 1.7); DK = dS / S;
-  const hov = {}; if (evoStage >= 2) hov.H = '#9650cd'; if (evoStage >= 3) hov.Q = '#467deb';      // evolucao 2: gorro roxo; 3: blusa azul
-  if (kingGear) { hov.Q = '#be233c'; hov.J = '#966437'; hov.Z = '#823cbe'; }      // bau: manto vermelho, calca marrom, sapatos roxos
+  const hov = {}; if (eqHat === 1) hov.H = '#9650cd'; if (eqTunic === 1) hov.Q = '#467deb';      // equipado: gorro roxo / blusa azul
+  if (eqTunic === 2) { hov.Q = '#be233c'; hov.J = '#966437'; hov.Z = '#823cbe'; }      // bau: manto vermelho, calca marrom, sapatos roxos
   SP = {
     heroA: makeSprite(heroRows(ROWS.heroA), S, hov), heroB: makeSprite(heroRows(ROWS.heroB), S, hov), front: makeSprite(heroRows(ROWS.front), S, hov), wave: makeSprite(heroRows(ROWS.wave), S, hov),
     octo: [makeSprite(ROWS.octoA, S), makeSprite(ROWS.octoB, S)], bat: [makeSprite(ROWS.batUp, S), makeSprite(ROWS.batDown, S)],
     slime: [makeSprite(ROWS.slimeTall, S), makeSprite(ROWS.slimeFlat, S)],
     boko: [makeSprite(ROWS.bokoA, S), makeSprite(ROWS.bokoB, S), makeSprite(ROWS.bokoC, S)],
     capItem: makeSprite(ROWS.capItem, S, { H: '#9650cd', h: '#cd96f0', g: '#60328c' }), shirtItem: makeSprite(ROWS.shirtItem, S, { Q: '#467deb', h: '#87b4ff', g: '#2d55be' }),
+    capGreen: makeSprite(ROWS.capItem, S, { H: '#3aa53e', h: '#82d278', g: '#1e6e2d' }), shirtGreen: makeSprite(ROWS.shirtItem, S, { Q: '#3aa53e', h: '#82d278', g: '#1e6e2d' }), robeItem: makeSprite(ROWS.shirtItem, S, { Q: '#be233c', h: '#eb6478', g: '#821428' }),
     heroPow: [tintBlue(makeSprite(ROWS.heroA, S)), tintBlue(makeSprite(ROWS.heroB, S))],
     heart: makeSprite(ROWS.heart, S), heartE: makeSprite(ROWS.heart, S, { R: '#46465a', W: '#69697a' }), heartH: (() => { const e = makeSprite(ROWS.heart, S, { R: '#46465a', W: '#69697a' }), f = makeSprite(ROWS.heart, S), mk = (a, b) => { const c = document.createElement('canvas'); c.width = a.width; c.height = a.height; const g = c.getContext('2d'); g.drawImage(a, 0, 0); g.drawImage(b, 0, 0, b.width / 2, b.height, 0, 0, b.width / 2, b.height); return c; }; return { r: mk(e.r, f.r), l: mk(e.l, f.l), w: e.w, h: e.h }; })(),
     rupee: [makeSprite(ROWS.rupee, S), makeSprite(ROWS.rupee, S, { G: '#467deb' }), makeSprite(ROWS.rupee, S, { G: '#e63c3c' }), makeSprite(ROWS.rupee, S, { G: '#f0c83c' }), makeSprite(ROWS.rupee, S, { G: '#9650cd' }), makeSprite(ROWS.rupee, S * 2, { G: '#ffcd28' })],      // [5] = 300 (recompensa do dragao): dourada e grande
@@ -505,12 +539,11 @@ while (evoStage < 4 && evoKills >= EVO_THR[evoStage]) evoStage++;
 evoNext = evoStage + 1;
 if (/[?&]evolucao\b/.test(location.search)) { evoKills = EVO_THR[0] - 1; evoStage = 0; evoNext = 1; }      // teste rapido: o proximo monstro da a 1a evolucao
 const heroRows = (rows) => {
-  const out = rows.map((r, i) => { let s = r.replace(/G/g, i < 9 ? 'H' : 'Q'); if (kingGear) { if (i === 9) s = s.replace(/Q/g, 'F'); else if (i === 13) s = s.replace(/B/g, 'C'); else if (i === 14) s = s.replace(/W/g, 'J'); else if (i === 15) s = s.replace(/B/g, 'Z'); } return s; });
-  return kingGear ? ['....C.CC.C....', '....CCCCCC....', '....CRCCRC....', ...out] : out;      // coroa sobre o gorro
+  const out = rows.map((r, i) => { let s = r.replace(/G/g, i < 9 ? (eqHat === 2 ? 'Y' : 'H') : 'Q'); if (eqTunic === 2) { if (i === 9) s = s.replace(/Q/g, 'F'); else if (i === 13) s = s.replace(/B/g, 'C'); else if (i === 14) s = s.replace(/W/g, 'J'); else if (i === 15) s = s.replace(/B/g, 'Z'); } return s; });
+  return eqHat === 2 ? ['....C.CC.C....', '....CCCCCC....', '....CRCCRC....', ...out] : out;      // coroa sobre o gorro
 };
-const tunicColor = () => (kingGear ? '#be233c' : (evoStage >= 3 ? '#467deb' : '#3aa53e'));
-function syncTouchIcons() { const t = document.getElementById('touch'); if (t) t.dataset.evo = String(evoStage); }
-syncTouchIcons();
+const tunicColor = () => (eqTunic === 2 ? '#be233c' : (eqTunic === 1 ? '#467deb' : '#3aa53e'));
+function syncTouchIcons() { const t = document.getElementById('touch'); if (t) { t.dataset.bow = String(eqBow); t.dataset.sword = String(eqSword); } }
 function saveKills() { try { localStorage.setItem('heroi_monstros', String(evoKills)); } catch (_) {} }
 function countKill() {
   evoKills++; if (evoKills % 5 === 0) saveKills();
@@ -526,7 +559,8 @@ function updateEvo(dt) {
   if (evo.wait) return;
   evo.t += dt;
   if (evo.t >= EVO_FLY) {
-    if (evo.stage === 5) { kingGear = true; saveChest(); } else { evoStage = Math.max(evoStage, evo.stage); syncTouchIcons(); }
+    if (evo.stage === 5) { kingGear = true; saveChest(); } else { evoStage = Math.max(evoStage, evo.stage); }
+    autoEquip(evo.stage); syncTouchIcons();      // o item novo ja vem equipado (troque no menu: Espaco)
     buildSprites(); buildProps();      // buildSprites recria o SP inteiro: os sprites do cenario precisam ser refeitos
     for (let k = 0; k < 10; k++) puffs.push({ kind: k % 2, x: hero.x + (rnd() - 0.5) * 20 * S, y: hero.y - rnd() * 18 * S, t: 0 });
     say('Evoluí!'); evo = null;
@@ -598,6 +632,26 @@ if (chestState === 0 && evoStage < 4) chestKills = 0;      // contagem so vale d
 if (chestState === 0 && chestKills >= CHEST_NEEDED) chestState = 1;
 kingGear = chestState === 2;
 if (/[?&]bau\b/.test(location.search)) { chestState = 1; kingGear = false; }      // teste rapido: o bau ja aparece
+/* ---------- EQUIPAMENTO (menu de pausa: Espaco) ---------- */
+// arco 0 madeira/1 metal | espada 0 comum/1 Espada Mestre | escudo 0 azul/1 vermelho/2 do rei | gorro 0 verde/1 roxo/2 coroa | roupa 0 verde/1 blusa azul/2 roupa de rei
+let eqBow = 0, eqSword = 0, eqShield = 0, eqHat = 0, eqTunic = 0;
+function ownBow(i) { return i === 0 || (i === 1 && evoStage >= 1); }
+function ownSword(i) { return i === 0 || (i === 1 && evoStage >= 4); }
+function ownShield(i) { return i === 0 || (i === 1 && evoStage >= 4) || (i === 2 && kingGear); }
+function ownHat(i) { return i === 0 || (i === 1 && evoStage >= 2) || (i === 2 && kingGear); }
+function ownTunic(i) { return i === 0 || (i === 1 && evoStage >= 3) || (i === 2 && kingGear); }
+function owns(cat, id) { return [ownBow, ownSword, ownShield, ownHat, ownTunic][cat](id); }
+function getEq(cat) { return [eqBow, eqSword, eqShield, eqHat, eqTunic][cat]; }
+function bestEquip() { eqBow = evoStage >= 1 ? 1 : 0; eqSword = evoStage >= 4 ? 1 : 0; eqShield = kingGear ? 2 : (evoStage >= 4 ? 1 : 0); eqHat = kingGear ? 2 : (evoStage >= 2 ? 1 : 0); eqTunic = kingGear ? 2 : (evoStage >= 3 ? 1 : 0); }
+function validateEquip() { if (!ownBow(eqBow)) eqBow = 0; if (!ownSword(eqSword)) eqSword = 0; if (!ownShield(eqShield)) eqShield = 0; if (!ownHat(eqHat)) eqHat = 0; if (!ownTunic(eqTunic)) eqTunic = 0; }
+function saveEquip() { try { localStorage.setItem('heroi_equip', [eqBow, eqSword, eqShield, eqHat, eqTunic].join(',')); } catch (_) {} }
+function loadEquip() {
+  bestEquip();
+  try { const v = localStorage.getItem('heroi_equip'); if (v) { const p = v.split(',').map(Number); if (p.length === 5 && p.every(Number.isFinite)) [eqBow, eqSword, eqShield, eqHat, eqTunic] = p; } } catch (_) {}
+  validateEquip();
+}
+function autoEquip(stage) { if (stage === 1) eqBow = 1; else if (stage === 2) eqHat = 1; else if (stage === 3) eqTunic = 1; else if (stage === 4) { eqSword = 1; eqShield = 1; } else if (stage === 5) { eqHat = 2; eqTunic = 2; eqShield = 2; } validateEquip(); saveEquip(); }
+loadEquip(); syncTouchIcons();
 function saveChest() { try { localStorage.setItem('heroi_monstros_bau', String(chestKills)); localStorage.setItem('heroi_bau', String(chestState)); } catch (_) {} }
 function countChestKill() { if (chestState !== 0 || evoStage < 4) return;      // a contagem do bau so comeca depois do conjunto das evolucoes (arco, gorro, blusa, espada e escudo)
   chestKills++; if (chestKills % 10 === 0) saveChest(); if (chestKills >= CHEST_NEEDED) { chestState = 1; saveChest(); say('Um baú apareceu!'); } }
@@ -769,7 +823,7 @@ function hurtHero(fx, fy, dmg = 1, ignoreInv = false) {
 }
 function doSwing() {
   const cx = hero.x + hero.face * 8 * S, R = 18 * S;
-  for (let i = enemies.length - 1; i >= 0; i--) { const e = enemies[i]; const dx = e.x - cx, dy = e.y - hero.y; const rad = e.type === 3 ? R + 14 * S * DK * (e.scale || 1) : R; if (dx * dx + dy * dy < rad * rad) damageEnemy(e, (e.type === 3 ? 150 : 1) * (evoStage >= 4 ? 2 : 1)); }      // espada azulada (evolucao 4): o dobro de dano
+  for (let i = enemies.length - 1; i >= 0; i--) { const e = enemies[i]; const dx = e.x - cx, dy = e.y - hero.y; const rad = e.type === 3 ? R + 14 * S * DK * (e.scale || 1) : R; if (dx * dx + dy * dy < rad * rad) damageEnemy(e, (e.type === 3 ? 150 : 1) * (eqSword === 1 ? 2 : 1)); }      // espada azulada (evolucao 4): o dobro de dano
   for (let i = rocks.length - 1; i >= 0; i--) { const r = rocks[i]; const dx = r.x - cx, dy = r.y - (hero.y - 6 * S); if (dx * dx + dy * dy < R * R) { puffs.push({ kind: 1, x: r.x, y: r.y, t: 0 }); rocks.splice(i, 1); } }
 }
 function damageEnemy(e, dmg) {
@@ -926,7 +980,7 @@ function updateArrows(dt) {
     let gone = a.x < -30 || a.y < -30 || a.x > W + 30 || a.y > H + 30;
     for (let k = enemies.length - 1; k >= 0 && !gone; k--) {
       const en = enemies[k], dx = en.x - a.x, dy = (en.y - (en.type === 1 ? 9 * S : (en.type === 3 ? 12 * S * DK * (en.scale || 1) : 4 * S))) - a.y, hitR = en.type === 3 ? 14 * S * DK * (en.scale || 1) : 7 * S;
-      if (dx * dx + dy * dy < hitR * hitR) { damageEnemy(en, (en.type === 3 ? 50 : 1) * ((!a.power && evoStage >= 1) ? 2 : 1)); gone = true; }      // arco prateado (evolucao 1): o dobro de dano (flecha de poder nao muda)
+      if (dx * dx + dy * dy < hitR * hitR) { damageEnemy(en, (en.type === 3 ? 50 : 1) * ((!a.power && eqBow === 1) ? 2 : 1)); gone = true; }      // arco prateado (evolucao 1): o dobro de dano (flecha de poder nao muda)
     }
     if (gone) arrows.splice(i, 1);
   }
@@ -975,12 +1029,37 @@ function retreat(dt) {
   moveHero(hero.x + rx * 100, hero.y + ry * 100, 64 * S, dt);
 }
 const itemSafe = (it) => enemies.every((e) => (e.x - it.x) ** 2 + (e.y - it.y) ** 2 >= (24 * S) ** 2);
+const enemyWithin = (r) => enemies.some((e) => NEAR(e.x, e.y, hero.x, hero.y) < r);
+function autoEatAbort() { autoEatPh = 0; autoEatTree = null; playPickT = 0; playEatT = 0; eatRaw = false; }
+function autoEatApple(dt) {      // so 1 coracao e nenhum monstro num raio de 4 Links: vai a uma arvore e come uma maca (meio coracao)
+  const R = 4 * 16 * S;
+  if (autoEatPh === 0) {
+    if (hero.hp > 1 || hero.hp <= 0 || hero.dead || enemyWithin(R)) return false;
+    const t = nearestTreeWithApples(); if (!t) return false; autoEatTree = t; autoEatPh = 1; say('Preciso comer...');
+  }
+  if (autoEatPh < 3 && enemyWithin(R)) { autoEatAbort(); return false; }
+  if (autoEatPh === 1) {
+    if (!autoEatTree || firstApple(autoEatTree) < 0) { autoEatTree = nearestTreeWithApples(); if (!autoEatTree) { autoEatAbort(); return false; } }
+    if (NEAR(autoEatTree.x, autoEatTree.y, hero.x, hero.y) > 12 * S) { moveHero(autoEatTree.x, autoEatTree.y, 56 * S, dt); return true; }
+    hero.face = autoEatTree.x >= hero.x ? 1 : -1; playTree = autoEatTree; playPickT = 0.001; pickedFlag = false; pickT = 0; autoEatPh = 2; return true;
+  }
+  if (autoEatPh === 2) {
+    playPickT += dt; pickT = playPickT;
+    if (!pickedFlag && playPickT >= 0.4) { const idx = firstApple(autoEatTree); if (idx < 0) { autoEatAbort(); return false; } autoEatTree.has[idx] = false; autoEatTree.regrow[idx] = 60 + rnd() * 40; pickedFlag = true; }
+    if (playPickT >= 0.8) { playPickT = 0; playEatT = 0.001; eatRaw = true; autoEatPh = 3; }
+    return true;
+  }
+  playEatT += dt;
+  if (playEatT >= 0.9) { playEatT = 0; eatRaw = false; hero.hp = Math.min(hero.maxHp, hero.hp + 0.5); say('Nham!'); autoEatPh = 0; autoEatTree = null; }
+  return true;
+}
 function autoControl(dt) {
   hero.bowCool -= dt;
   let near = null, nd = 1e18, crowd = 0;
   for (const e of enemies) { const d = NEAR(e.x, e.y, hero.x, hero.y); if (d < nd) { nd = d; near = e; } if (d < 30 * S) crowd++; }
   const lowHp = hero.hp <= 2, safe = (lowHp ? TUNE.low : TUNE.safe) * S;
-  if (tryDodge(dt)) { hero.bowT = 0; return; }
+  if (tryDodge(dt)) { if (autoEatPh === 2) autoEatAbort(); hero.bowT = 0; return; }
+  if (autoEatApple(dt)) { hero.bowT = 0; return; }
   if (near && near.type !== 1 && nd < 110 * S) {
     const it0 = nearestItem(); if (it0 && nd >= TUNE.item * S) { moveHero(it0.x, it0.y, 56 * S, dt); hero.bowT = 0; return; }
     if (Math.abs(near.x - hero.x) > 2) hero.face = near.x >= hero.x ? 1 : -1;
@@ -1262,22 +1341,22 @@ function drawBakeApple(idx, cx, cy, sc) { const sp = SP.bake[idx]; const w = sp.
 
 function drawSword(handX, handY, aDeg, f) {
   const a = aDeg * Math.PI / 180, dx = f * Math.cos(a), dy = Math.sin(a), px = -dy, py = dx, len = 14 * S, w = 1.2 * S;
-  ctx.fillStyle = evoStage >= 4 ? '#cde8ff' : '#e1ebf5'; ctx.strokeStyle = '#1c1624'; ctx.lineWidth = 1;
+  ctx.fillStyle = eqSword === 1 ? '#cde8ff' : '#e1ebf5'; ctx.strokeStyle = '#1c1624'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(handX + px * w, handY + py * w); ctx.lineTo(handX - px * w, handY - py * w); ctx.lineTo(handX + dx * len - px * w, handY + dy * len - py * w);
   ctx.lineTo(handX + dx * (len + 3 * S), handY + dy * (len + 3 * S)); ctx.lineTo(handX + dx * len + px * w, handY + dy * len + py * w); ctx.closePath(); ctx.fill(); ctx.stroke();
-  ctx.strokeStyle = evoStage >= 4 ? '#3c5fcd' : '#d7a028'; ctx.lineWidth = 2 * S; ctx.beginPath(); ctx.moveTo(handX + px * 3 * S, handY + py * 3 * S); ctx.lineTo(handX - px * 3 * S, handY - py * 3 * S); ctx.stroke();
-  ctx.strokeStyle = evoStage >= 4 ? '#503796' : '#87552d'; ctx.lineWidth = S + 1; ctx.beginPath(); ctx.moveTo(handX, handY); ctx.lineTo(handX - dx * 3 * S, handY - dy * 3 * S); ctx.stroke();
+  ctx.strokeStyle = eqSword === 1 ? '#3c5fcd' : '#d7a028'; ctx.lineWidth = 2 * S; ctx.beginPath(); ctx.moveTo(handX + px * 3 * S, handY + py * 3 * S); ctx.lineTo(handX - px * 3 * S, handY - py * 3 * S); ctx.stroke();
+  ctx.strokeStyle = eqSword === 1 ? '#503796' : '#87552d'; ctx.lineWidth = S + 1; ctx.beginPath(); ctx.moveTo(handX, handY); ctx.lineTo(handX - dx * 3 * S, handY - dy * 3 * S); ctx.stroke();
 }
 function drawShieldBody(sx, sy) {
-  if (kingGear) {      // tesouro do bau: escudo circular roxo escuro com quadrado azul, um pouco menor (cobre menos o personagem)
+  if (eqShield === 2) {      // tesouro do bau: escudo circular roxo escuro com quadrado azul, um pouco menor (cobre menos o personagem)
     const cx = sx + 3 * S, cy = sy + 4 * S, circ = (r, c) => { ctx.beginPath(); ctx.arc(cx, cy, r, 0, TAU); ctx.fillStyle = c; ctx.fill(); };
     circ(3.6 * S, '#1c1624'); circ(2.8 * S, '#461e6e'); rect('#1c1624', cx - 1.7 * S, cy - 1.7 * S, 3.4 * S, 3.4 * S); rect('#467deb', cx - 1.3 * S, cy - 1.3 * S, 2.6 * S, 2.6 * S); return;
   }
-  rect('#1c1624', sx - S, sy - S, 8 * S, 10 * S); rect(evoStage >= 4 ? '#cd3232' : '#375fcd', sx, sy, 6 * S, 8 * S); rect('#f5cd46', sx + 2 * S, sy + 2 * S, 2 * S, 3 * S); }
+  rect('#1c1624', sx - S, sy - S, 8 * S, 10 * S); rect(eqShield === 1 ? '#cd3232' : '#375fcd', sx, sy, 6 * S, 8 * S); rect('#f5cd46', sx + 2 * S, sy + 2 * S, 2 * S, 3 * S); }
 function drawBow(f, bob) {
   const cx = hero.x + f * 7 * S, cy = hero.y - bob - 8 * S, dx = hero.aimX, dy = hero.aimY, px = -dy, py = dx, pull = Math.min(1, hero.bowT / 0.4);
   const strokeBow = (col, lw) => { ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.beginPath(); for (let i = 0; i < 9; i++) { const u = (i - 4) / 4, bend = 3 * S * (1 - u * u), x = cx + px * u * 7 * S + dx * bend, y = cy + py * u * 7 * S + dy * bend; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke(); };
-  if (evoStage >= 1) { strokeBow('#1c1624', S + 3); strokeBow('#b9c0cd', S + 1); strokeBow('#f0f5ff', 1); } else strokeBow('#87552d', S + 1);      // evolucao 1: arco de metal
+  if (eqBow === 1) { strokeBow('#1c1624', S + 3); strokeBow('#b9c0cd', S + 1); strokeBow('#f0f5ff', 1); } else strokeBow('#87552d', S + 1);      // evolucao 1: arco de metal
   const nx = cx - dx * pull * 5 * S, ny = cy - dy * pull * 5 * S; ctx.strokeStyle = '#ebebeb'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx + px * 7 * S, cy + py * 7 * S); ctx.lineTo(nx, ny); ctx.lineTo(cx - px * 7 * S, cy - py * 7 * S); ctx.stroke();
   if (pull > 0.05) drawArrow(nx + dx * 10 * S, ny + dy * 10 * S, dx, dy);
 }
@@ -1300,7 +1379,7 @@ function drawHero() {
   spr(fr ? SP.heroB : SP.heroA, hero.x, hero.y - bob, right);
   const sx = hero.x - f * 3 * S - 3 * S, sy = hero.y - bob - 11 * S; drawShieldBody(sx, sy);
   if (cookState === 6) { const p = (cookT % 1.2) / 1.2; if (Math.floor(cookT / 1.2) <= 4) drawBakeApple(3, hero.x + f * 5 * S, hero.y - bob - 9 * S, 2.3 - 1.7 * p); }
-  else if (playEatT > 0) drawBakeApple(3, hero.x + f * 5 * S, hero.y - bob - 9 * S, 2.3 - 1.7 * Math.min(1, playEatT / 0.9));
+  else if (playEatT > 0) { const sc2 = 2.3 - 1.7 * Math.min(1, playEatT / 0.9); if (eatRaw) { const a = SP.apple, w = a.w * sc2 * 0.8, h = a.h * sc2 * 0.8; ctx.drawImage(a.r, Math.round(hero.x + f * 5 * S - w / 2), Math.round(hero.y - bob - 9 * S - h / 2), Math.round(w), Math.round(h)); } else drawBakeApple(3, hero.x + f * 5 * S, hero.y - bob - 9 * S, sc2); }
   if (calmState === 2 || cookState !== 0 || playPickT > 0 || playEatT > 0) {
     if ((calmState === 2 && phase === 1) || playPickT > 0) { const reach = Math.sin(Math.min(1, pickT / 1) * Math.PI / 2); const x = hero.x + f * 4 * S, y0 = hero.y - bob - 10 * S; drawArm(x, y0, y0 - (5 + 5 * reach) * S); }
     return;
@@ -1441,19 +1520,98 @@ document.addEventListener('fullscreenchange', () => { $('mFull').setAttribute('a
 $('mFull').addEventListener('click', () => { toggleFullscreen(); closeMenu(); });
 $('goPlay').addEventListener('click', () => { $('intro').hidden = true; goFullscreen(); setPlayMode(true); });
 $('goAuto').addEventListener('click', () => { $('intro').hidden = true; goFullscreen(); });
-addEventListener('keydown', (e) => { if (e.code === 'Escape') closeMenu(); });
+/* ---------- MENU DE PAUSA (Espaco; clicar na maca = comer): abas Armas / Roupas / Comida e o heroi ampliado ---------- */
+let invOn = false, invTab = -1, invBow = false, invEatT = 0, invMsg = '', eatRaw = false, autoEatPh = 0, autoEatTree = null;      // invBow: o heroi do exemplo segura o arco (clicou num arco) ou espada e escudo (clicou neles)
+const INV_NAMES = [['Arco de madeira', 'Arco de metal'], ['Espada comum', 'Espada Mestre'], ['Escudo azul', 'Escudo vermelho', 'Escudo do rei'], ['Gorro verde', 'Gorro roxo', 'Coroa de ouro'], ['Túnica verde', 'Blusa azul', 'Roupa de rei']];
+const INV_DESC = [['O arco de sempre.', 'Flechas com o dobro de dano.'], ['A espada de sempre.', 'Dobro de dano.'], ['Escudo comum.', 'Escudo vermelho do herói.', 'Escudo circular do tesouro do rei.'], ['O gorro de sempre.', 'Gorro roxo da evolução.', 'Coroa de ouro do tesouro do rei.'], ['A túnica de sempre.', 'Blusa azul da evolução.', 'Manto vermelho, calça marrom e sapatos roxos.']];
+const withCtx = (c, fn) => { const old = ctx; ctx = c; try { fn(); } finally { ctx = old; } };
+function iconShape(g, pts, fill, u) { g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.closePath(); g.fillStyle = fill; g.fill(); g.lineWidth = Math.max(1, u * 0.7); g.strokeStyle = '#1c1624'; g.lineJoin = 'round'; g.stroke(); }
+function drawIcon(cat, id, cx, cy, u) {      // desenha o icone no 'ctx' atual
+  const dark = '#1c1624', ell = (x, y, w, h, c) => { ctx.beginPath(); ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, TAU); ctx.fillStyle = c; ctx.fill(); };
+  if (cat === 0) {
+    if (id === 1) { drawEvoItem(1, cx, cy, u * 0.85); return; }
+    const pts = []; for (let i = 0; i < 13; i++) { const t = (i - 6) / 6; pts.push([cx + (5 * t * t - 2.5) * u * 0.85, cy + t * 12 * u * 0.85]); }
+    const line = (w, c) => { ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.lineWidth = w; ctx.strokeStyle = c; ctx.lineCap = 'round'; ctx.stroke(); };
+    line(u * 3.2, dark); line(u * 1.8, '#87552d'); ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); ctx.lineTo(pts[12][0], pts[12][1]); ctx.lineWidth = Math.max(1, u * 0.4); ctx.strokeStyle = '#ebebeb'; ctx.stroke();
+  } else if (cat === 1) {
+    const m = id === 1; ctx.save(); ctx.translate(cx, cy); ctx.rotate(Math.PI / 4);
+    iconShape(ctx, [[-2 * u, 3 * u], [-2 * u, -11 * u], [0, -15 * u], [2 * u, -11 * u], [2 * u, 3 * u]], m ? '#cde8ff' : '#e1ebf5', u); rect('#fff', -0.4 * u, -12 * u, 0.8 * u, 14 * u);
+    iconShape(ctx, [[-6 * u, 3 * u], [6 * u, 3 * u], [7 * u, 6 * u], [-7 * u, 6 * u]], m ? '#3c5fcd' : '#d7a028', u);
+    rect(m ? '#503796' : '#87552d', -1.5 * u, 6 * u, 3 * u, 7 * u); ell(-2 * u, 12.5 * u, 4 * u, 3.5 * u, m ? '#3c5fcd' : '#d7a028'); ctx.restore();
+  } else if (cat === 2) {
+    if (id === 2) { drawShieldItem(cx, cy, u * 0.9); return; }
+    const k = u * 2.2, x = cx - 3 * k, y = cy - 4 * k;      // mesmo formato do escudo do jogo: retangulo 6x8, borda escura, quadradinho amarelo 2x3
+    rect('#1c1624', x - k, y - k, 8 * k, 10 * k); rect(id === 1 ? '#cd3232' : '#375fcd', x, y, 6 * k, 8 * k); rect('#f5cd46', x + 2 * k, y + 2 * k, 2 * k, 3 * k);
+  } else if (cat === 3) {
+    if (id === 2) { drawCrownItem(cx, cy, u * 0.9); return; }
+    if (id === 1) { drawEvoItem(2, cx, cy, u * 0.85); return; }
+    itemSpr(SP.capGreen, cx, cy, u * 0.85);
+  } else {
+    if (id === 2) { itemSpr(SP.robeItem, cx, cy, u * 0.85); return; }
+    if (id === 1) { drawEvoItem(3, cx, cy, u * 0.85); return; }
+    itemSpr(SP.shirtGreen, cx, cy, u * 0.85);
+  }
+}
+function itemSpr(sp, cx, cy, u) { const k = u / S * 1.7, w = sp.w * k, h = sp.h * k; ctx.drawImage(sp.r, Math.round(cx - w / 2), Math.round(cy - h / 2), Math.round(w), Math.round(h)); }
+function iconCanvas(cat, id) { const c = document.createElement('canvas'); c.width = c.height = 72; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; withCtx(g, () => drawIcon(cat, id, 36, 34, 2.1)); return c; }
+function appleIcon() { const c = document.createElement('canvas'); c.width = c.height = 72; const g = c.getContext('2d'); withCtx(g, () => { const u = 2.1, cx = 36, cy = 38; ctx.fillStyle = '#1c1624'; ctx.beginPath(); ctx.ellipse(cx, cy + u, 11 * u, 10.5 * u, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#d73737'; ctx.beginPath(); ctx.ellipse(cx, cy + u, 10 * u, 9.5 * u, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#ffb4aa'; ctx.fillRect(cx - 6 * u, cy - 4 * u, 4 * u, 2.5 * u); rect('#1c1624', cx - 0.8 * u, cy - 13 * u, 1.6 * u, 5 * u); ctx.fillStyle = '#3aa53e'; ctx.beginPath(); ctx.ellipse(cx + 4.5 * u, cy - 11 * u, 3.5 * u, 2 * u, 0, 0, TAU); ctx.fill(); }); return c; }
+function drawHeroPreview() {      // heroi equipado, ampliado (muda na hora ao trocar roupa/arma)
+  const pc = $('invPrev'), g = pc.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, pc.width, pc.height); g.imageSmoothingEnabled = false;
+  const sv = { ax: hero.aimX, ay: hero.aimY, bt: hero.bowT, x: hero.x, y: hero.y, f: hero.face, w: hero.walking, a: hero.attacking, b: hero.bowing, d: hero.dead, i: hero.inv, p: powerT, c: calmState, k: cookState, pp: playPickT, pe: playEatT, er: eatRaw };
+  try {
+    hero.x = 0; hero.y = 0; hero.face = 1; hero.walking = false; hero.attacking = false; hero.bowing = invBow; hero.aimX = 1; hero.aimY = 0; hero.bowT = 0.4; hero.dead = false; hero.inv = 0; powerT = 0; calmState = 0; cookState = 0; playPickT = 0; playEatT = invEatT; eatRaw = invEatT > 0;
+    const k = Math.max(1, (pc.height * 0.62) / (30 * S)); g.setTransform(k, 0, 0, k, pc.width / 2, pc.height * 0.72); withCtx(g, () => drawHero());
+  } finally { hero.aimX = sv.ax; hero.aimY = sv.ay; hero.bowT = sv.bt; hero.x = sv.x; hero.y = sv.y; hero.face = sv.f; hero.walking = sv.w; hero.attacking = sv.a; hero.bowing = sv.b; hero.dead = sv.d; hero.inv = sv.i; powerT = sv.p; calmState = sv.c; cookState = sv.k; playPickT = sv.pp; playEatT = sv.pe; eatRaw = sv.er; g.setTransform(1, 0, 0, 1, 0, 0); }
+}
+function renderInv() {
+  drawHeroPreview();
+  const cats = ['Arco', 'Espada', 'Escudo', 'Gorro', 'Roupa']; $('invEq').innerHTML = cats.map((c, i) => '<li>' + c + ': ' + INV_NAMES[i][getEq(i)] + '</li>').join('');
+  document.querySelectorAll('#inv .invtabs button').forEach((b) => b.setAttribute('aria-selected', String(+b.dataset.tab === invTab)));
+  const body = $('invBody'); body.innerHTML = ''; const info = $('invInfo'); info.textContent = '';
+  const section = (title, cat) => {
+    const h = document.createElement('div'); h.className = 'sec'; h.textContent = title; body.appendChild(h); const row = document.createElement('div'); row.className = 'row'; body.appendChild(row);
+    INV_NAMES[cat].forEach((name, id) => {
+      if (!owns(cat, id)) return;
+      const b = document.createElement('button'); b.className = 'card'; const eq = getEq(cat) === id; b.setAttribute('aria-pressed', String(eq));
+      b.appendChild(iconCanvas(cat, id)); const s = document.createElement('span'); s.textContent = eq ? 'EQUIPADO' : name; b.appendChild(s);
+      b.addEventListener('click', () => { if (cat === 0) invBow = true; else if (cat === 1 || cat === 2) invBow = false; equipItem(cat, id); }); const show = () => { info.textContent = name + ' — ' + INV_DESC[cat][id]; }; b.addEventListener('mouseenter', show); b.addEventListener('focus', show);
+      row.appendChild(b);
+    });
+  };
+  if (invTab < 0) { const p = document.createElement('div'); p.className = 'hint'; p.innerHTML = 'Escolha uma aba: Armas, Roupas ou Comida.<br>Clique no que quiser usar; o herói muda ao lado.<br>Espaço ou Esc fecham o menu.'; body.appendChild(p); }
+  else if (invTab === 0) { section('ARCOS', 0); section('ESPADAS', 1); section('ESCUDOS', 2); }
+  else if (invTab === 1) { section('GORROS', 3); section('ROUPAS', 4); }
+  else { const h = document.createElement('div'); h.className = 'sec'; h.textContent = 'COMIDA'; body.appendChild(h); const b = document.createElement('button'); b.className = 'card'; b.appendChild(appleIcon()); const s = document.createElement('span'); s.textContent = 'Maçãs x ' + hero.apples; b.appendChild(s); b.addEventListener('click', invEat); body.appendChild(b); const p = document.createElement('div'); p.className = 'hint'; p.innerHTML = 'Clique na maçã para o herói comer: maçã crua recupera meio coração.<br>Com 5 ou mais ele faz lanche na fogueira (assadas recuperam mais).'; body.appendChild(p); const hh = document.createElement('div'); hh.className = 'hint'; hh.style.color = '#f7be46'; hh.textContent = 'Corações: ' + (Math.round(hero.hp * 10) / 10) + ' / ' + hero.maxHp; body.appendChild(hh); if (invMsg) { const m = document.createElement('div'); m.className = 'hint'; m.style.color = '#ff6a4a'; m.textContent = invMsg; body.appendChild(m); } }
+}
+function invEat() {
+  if (invEatT > 0) return; invMsg = '';
+  if (hero.apples <= 0) invMsg = 'Sem maçãs'; else if (hero.hp >= hero.maxHp) invMsg = 'Corações cheios';
+  if (invMsg) { renderInv(); return; }
+  invEatT = 0.001; invBow = false; let last = performance.now();
+  const iv = setInterval(() => { const now = performance.now(), dt = Math.min(0.1, (now - last) / 1000); last = now; invEatT += dt; if (invEatT >= 0.9 || !invOn) { clearInterval(iv); invEatT = 0; if (invOn && hero.apples > 0) { hero.apples--; hero.hp = Math.min(hero.maxHp, hero.hp + 0.5); } renderInv(); return; } drawHeroPreview(); }, 33);
+}
+function equipItem(cat, id) {
+  if (!owns(cat, id)) return; if (cat === 0) eqBow = id; else if (cat === 1) eqSword = id; else if (cat === 2) eqShield = id; else if (cat === 3) eqHat = id; else eqTunic = id;
+  saveEquip(); buildSprites(); buildProps(); syncTouchIcons(); renderInv();
+}
+function openInv() { if (invOn || evoWaiting() || deathWait || !$('intro').hidden || !$('death').hidden || !$('credits').hidden || !$('about').hidden) return; invOn = true; closeMenu(); $('inv').hidden = false; renderInv(); }
+function closeInv() { invOn = false; invMsg = ''; $('inv').hidden = true; }
+document.querySelectorAll('#inv .invtabs button').forEach((b) => b.addEventListener('click', () => { invTab = invTab === +b.dataset.tab ? -1 : +b.dataset.tab; invMsg = ''; renderInv(); }));
+$('invClose').addEventListener('click', closeInv);
+$('inv').addEventListener('click', (e) => { if (e.target === $('inv')) closeInv(); });
+$('mInv').addEventListener('click', () => { openInv(); });addEventListener('keydown', (e) => { if (e.code === 'Escape') { closeMenu(); if (invOn) closeInv(); } });
 // Espaco pausa e continua o jogo (so no modo jogo, e nao quando uma tela de aviso esta aberta)
 function setPaused(p) { paused = p; $('mPause').setAttribute('aria-pressed', String(p)); $('mPause').textContent = p ? 'Continuar' : 'Pausar'; }
 addEventListener('keydown', (e) => {
-  if (e.code !== 'Space' || e.repeat || !playMode) return;
+  if (e.code !== 'Space' || e.repeat) return;      // Espaco abre/fecha o menu (armas, roupas, comida), nos dois modos
   if (!$('intro').hidden || !$('death').hidden || !$('credits').hidden || !$('about').hidden) return;
-  e.preventDefault(); setPaused(!paused);
+  e.preventDefault(); if (invOn) closeInv(); else openInv();
 });
 
 let last = performance.now(), acc = 0;
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
-  if (!paused && !document.hidden && !evoWaiting()) step(dt);      // com o item grande na tela o jogo pausa ate apertar USAR ITEM
+  if (!paused && !document.hidden && !evoWaiting() && !invOn) step(dt);      // com o item grande na tela o jogo pausa ate apertar USAR ITEM
   render(); requestAnimationFrame(frame);
 }
 function boot() {
@@ -1467,6 +1625,7 @@ function boot() {
 window.__jogo = { hero, enemies, rocks, arrows, items, trees, step, render, setPlayMode, spawn, get S() { return S; }, get W() { return W; }, get H() { return H; },
   get st() { return { playMode, calmState, cookState, bossPhase, killsAtMax, deathWait, fireK, onFire: onFire.slice(), bakeTs: bakeTs.slice(), phase, boss }; },
   set(o) { if ('mx' in o) mx = o.mx; if ('my' in o) my = o.my; if ('mouse' in o) mouseDown = o.mouse; if ('k' in o) Object.assign(touchKeys, o.k); if ('killsAtMax' in o) killsAtMax = o.killsAtMax; if ('nextCalm' in o) nextCalm = o.nextCalm; if ('forceLong' in o) forceLong = o.forceLong; },
+  inv: { open() { openInv(); }, tab(n) { invTab = n; renderInv(); }, eat: invEat, get msg() { return invMsg; } },
   doRetry, fireInteract, damageEnemy, startFinalPhase, startPower, get power() { return { powerT, record, nextPower }; }, setRupees(n) { hero.rupees = n; }, setSlimes(n) { slimeKills = n; }, countKill, get evoInfo() { return { evoKills, evoStage, evoNext, waiting: evoWaiting(), stage: evo && evo.stage }; }, forcePower() { powerPending = true; }, get chestInfo() { return { chestKills, chestState, kingGear, chestGo, chestOpenT }; }, setChestKills(n) { chestKills = n; }, get shocks() { return shocks; }, testBoss() { fireX = W / 2; fireY = H / 2; bossPhase = 4; spawnDragon(); return boss; }, get bossInfo() { return { phase: bossPhase, bossT, rewardSpawned, msgT, endStarted, reward: items.filter((i) => i.reward).reduce((s, i) => s + rupeeValue(i.kind), 0), nItems: items.filter((i) => i.reward).length }; } };
 })();
 </script>

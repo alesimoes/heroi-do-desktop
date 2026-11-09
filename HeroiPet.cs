@@ -86,7 +86,7 @@ namespace HeroiPet
             if (Crown) { r.Add("....C.CC.C...."); r.Add("....CCCCCC...."); r.Add("....CRCCRC...."); }      // coroa sobre o gorro
             for (int i = 0; i < rows.Length; i++)
             {
-                string s = rows[i].Replace('G', i < 9 ? 'H' : 'Q');
+                string s = rows[i].Replace('G', i < 9 ? (Crown ? 'Y' : 'H') : 'Q');      // com a coroa: sem gorro (cabelo aparece) e a coroa fica sobre a cabeca
                 if (Robe)
                 {
                     if (i == 9) s = s.Replace('Q', 'F');          // gola de pele
@@ -980,7 +980,7 @@ namespace HeroiPet
         const int WS_EX_TRANSPARENT = 0x20, WS_EX_TOOLWINDOW = 0x80, WS_EX_NOACTIVATE = 0x08000000;
         static readonly Color Key = Color.FromArgb(255, 0, 255);
 
-        int S;
+        public int S;
         Random rnd = new Random();
         System.Windows.Forms.Timer timer;
         Stopwatch clock = Stopwatch.StartNew();
@@ -1167,6 +1167,317 @@ namespace HeroiPet
             SaveEquip(); BuildSprites();
         }
 
+        // ================= MENU DE PAUSA (Espaco): abas Armas / Roupas / Comida e o heroi ampliado =================
+        MenuForm menuForm;
+        bool MenuOpen { get { return menuForm != null && !menuForm.IsDisposed; } }
+        bool previewMode;
+        void OpenMenu()
+        {
+            if (MenuOpen || EvoWaiting || deathWait) return;
+            try { menuForm = new MenuForm(this, S / 3f); menuForm.Show(); }
+            catch { menuForm = null; }
+        }
+        void CloseMenu() { if (MenuOpen) { try { menuForm.Close(); } catch { } } menuForm = null; }
+        public bool Owns(int cat, int id)
+        {
+            switch (cat) { case 0: return OwnBow(id); case 1: return OwnSword(id); case 2: return OwnShield(id); case 3: return OwnHat(id); default: return OwnTunic(id); }
+        }
+        public int Equipped(int cat)
+        {
+            switch (cat) { case 0: return eqBow; case 1: return eqSword; case 2: return eqShield; case 3: return eqHat; default: return eqTunic; }
+        }
+        public int AppleCount { get { return apples; } }
+        public float HeartsNow { get { return hp; } }
+        public int HeartsMax { get { return MaxHP; } }
+
+        // comer uma maca crua pelo inventario: mostra o heroi comendo na tela ampliada e recupera meio coracao
+        float menuEatT;
+        public bool MenuEating { get { return menuEatT > 0; } }
+        public string MenuEat()
+        {
+            if (menuEatT > 0) return null;
+            if (apples <= 0) return "Sem maçãs";
+            if (hp >= MaxHP) return "Corações cheios";
+            menuEatT = 0.001f; return null;
+        }
+        public void MenuTick(float dt)
+        {
+            if (menuEatT <= 0) return;
+            menuEatT += dt;
+            if (menuEatT >= 0.9f) { menuEatT = 0; if (apples > 0) { apples--; hp = Math.Min(MaxHP, hp + 0.5f); } }
+        }
+        bool eatRaw;          // a maca na boca e crua (inventario / fome do automatico): meio coracao
+
+        // desenha o heroi equipado, ampliado, dentro do menu (para ver como ele fica ao trocar de roupa/arma)
+        public void DrawHeroPreview(Graphics g, float cx, float groundY, float k, bool bow)
+        {
+            float sax = aimX, say = aimY, sbt = bowT;
+            float shx = hx, shy = hy, sp = powerT, si = inv, spk = playPickT, sed = playEatT; bool ser = eatRaw; int shf = hface, sc = calmState, sck = cookState; bool sw = walking, sa = attacking, sb = bowing, sd = dead;
+            previewMode = true;
+            try
+            {
+                hx = 0; hy = 0; hface = 1; walking = false; attacking = false; bowing = bow; aimX = 1; aimY = 0; bowT = 0.4f; dead = false; powerT = 0; inv = 0; playPickT = 0; playEatT = menuEatT; eatRaw = menuEatT > 0; calmState = 0; cookState = 0;
+                GraphicsState st = g.Save();
+                g.TranslateTransform(cx, groundY); g.ScaleTransform(k, k);
+                g.InterpolationMode = InterpolationMode.NearestNeighbor; g.PixelOffsetMode = PixelOffsetMode.Half; g.SmoothingMode = SmoothingMode.None;
+                DrawHero(g);
+                g.Restore(st);
+            }
+            finally { aimX = sax; aimY = say; bowT = sbt; hx = shx; hy = shy; hface = shf; walking = sw; attacking = sa; bowing = sb; dead = sd; powerT = sp; inv = si; playPickT = spk; playEatT = sed; eatRaw = ser; calmState = sc; cookState = sck; previewMode = false; }
+        }
+
+        // icones dos itens (formas desenhadas por codigo)
+        public void DrawIcon(Graphics g, int cat, int id, float cx, float cy, float u)
+        {
+            Color dark = Color.FromArgb(28, 22, 36);
+            if (cat == 0)
+            {
+                if (id == 1) { DrawEvoItem(g, 1, cx, cy, u * 0.85f); return; }
+                PointF[] pts = new PointF[13];
+                for (int i = 0; i < 13; i++) { float tt = (i - 6) / 6f; pts[i] = new PointF(cx + (5f * tt * tt - 2.5f) * u * 0.85f, cy + tt * 12 * u * 0.85f); }
+                using (Pen o = new Pen(dark, u * 3.2f)) { o.StartCap = LineCap.Round; o.EndCap = LineCap.Round; g.DrawLines(o, pts); }
+                using (Pen m = new Pen(Color.FromArgb(135, 85, 45), u * 1.8f)) { m.StartCap = LineCap.Round; m.EndCap = LineCap.Round; g.DrawLines(m, pts); }
+                using (Pen s = new Pen(Color.FromArgb(235, 235, 235), Math.Max(1f, u * 0.4f))) g.DrawLine(s, pts[0], pts[12]);
+            }
+            else if (cat == 1) IconSword(g, cx, cy, u, id == 1);
+            else if (cat == 2) IconShield(g, cx, cy, u, id);
+            else if (cat == 3)
+            {
+                if (id == 0) DrawItemSpr(g, menuSpr[0], cx, cy, u * 0.85f);
+                else if (id == 1) DrawEvoItem(g, 2, cx, cy, u * 0.85f);
+                else DrawCrownItem(g, cx, cy, u * 0.9f);
+            }
+            else
+            {
+                if (id == 0) DrawItemSpr(g, menuSpr[1], cx, cy, u * 0.85f);
+                else if (id == 1) DrawEvoItem(g, 3, cx, cy, u * 0.85f);
+                else DrawItemSpr(g, menuSpr[2], cx, cy, u * 0.85f);
+            }
+        }
+        void DrawItemSpr(Graphics g, Sprite sp, float cx, float cy, float u)
+        {
+            if (sp == null) return;
+            float k = u / S * 1.7f, w = sp.W * k, h = sp.H * k; g.DrawImage(sp.R, cx - w / 2f, cy - h / 2f, w, h);
+        }
+        void IconSword(Graphics g, float cx, float cy, float u, bool master)
+        {
+            Color dark = Color.FromArgb(28, 22, 36);
+            Color blade = master ? Color.FromArgb(205, 232, 255) : Color.FromArgb(225, 235, 245), guard = master ? Color.FromArgb(60, 95, 205) : Color.FromArgb(215, 160, 40), grip = master ? Color.FromArgb(80, 55, 150) : Color.FromArgb(135, 85, 45);
+            GraphicsState st = g.Save(); g.TranslateTransform(cx, cy); g.RotateTransform(45f);
+            using (Pen ol = new Pen(dark, Math.Max(1f, u * 0.7f)))
+            using (SolidBrush bl = new SolidBrush(blade)) using (SolidBrush gu = new SolidBrush(guard)) using (SolidBrush gp = new SolidBrush(grip)) using (SolidBrush wh = new SolidBrush(Color.White))
+            {
+                PointF[] b = { new PointF(-2 * u, 3 * u), new PointF(-2 * u, -11 * u), new PointF(0, -15 * u), new PointF(2 * u, -11 * u), new PointF(2 * u, 3 * u) };
+                g.FillPolygon(bl, b); g.DrawPolygon(ol, b);
+                g.FillRectangle(wh, -0.4f * u, -12 * u, 0.8f * u, 14 * u);
+                PointF[] gd = { new PointF(-6 * u, 3 * u), new PointF(6 * u, 3 * u), new PointF(7 * u, 6 * u), new PointF(-7 * u, 6 * u) };
+                g.FillPolygon(gu, gd); g.DrawPolygon(ol, gd);
+                g.FillRectangle(gp, -1.5f * u, 6 * u, 3 * u, 7 * u); g.DrawRectangle(ol, -1.5f * u, 6 * u, 3 * u, 7 * u);
+                g.FillEllipse(gu, -2 * u, 12.5f * u, 4 * u, 3.5f * u);
+            }
+            g.Restore(st);
+        }
+        void IconShield(Graphics g, float cx, float cy, float u, int type)
+        {
+            if (type == 2) { DrawShieldItem(g, cx, cy, u * 0.9f); return; }
+            Color dark = Color.FromArgb(28, 22, 36), col = type == 1 ? Color.FromArgb(205, 50, 50) : Color.FromArgb(55, 95, 205);
+            using (SolidBrush kb = new SolidBrush(dark)) using (SolidBrush b = new SolidBrush(col)) using (SolidBrush ye = new SolidBrush(Color.FromArgb(245, 205, 70)))
+            {      // mesmo formato do escudo do jogo: retangulo 6x8 com borda escura e quadradinho amarelo 2x3
+                float k = u * 2.2f, x = cx - 3 * k, y = cy - 4 * k;
+                g.FillRectangle(kb, x - k, y - k, 8 * k, 10 * k); g.FillRectangle(b, x, y, 6 * k, 8 * k); g.FillRectangle(ye, x + 2 * k, y + 2 * k, 2 * k, 3 * k);
+            }
+        }
+        void IconCap(Graphics g, float cx, float cy, float u, Color c1, Color c2)
+        {
+            Color dark = Color.FromArgb(28, 22, 36);
+            using (Pen ol = new Pen(dark, Math.Max(1f, u * 0.7f))) using (SolidBrush dk = new SolidBrush(dark)) using (SolidBrush p1 = new SolidBrush(c1)) using (SolidBrush p2 = new SolidBrush(c2))
+            {
+                PointF[] tail = { new PointF(cx + 4 * u, cy - 9 * u), new PointF(cx + 13 * u, cy + 3 * u), new PointF(cx + 11 * u, cy + 9 * u), new PointF(cx + 3 * u, cy + 1 * u) };
+                g.FillEllipse(dk, cx - 10 * u, cy - 11 * u, 20 * u, 17 * u); g.FillEllipse(p1, cx - 9 * u, cy - 10 * u, 18 * u, 15 * u);
+                g.FillPolygon(p2, tail); g.DrawPolygon(ol, tail);
+                g.FillRectangle(dk, cx - 11 * u, cy + 2 * u, 22 * u, 5 * u); g.FillRectangle(p2, cx - 10 * u, cy + 3 * u, 20 * u, 3 * u);
+            }
+        }
+        void IconShirt(Graphics g, float cx, float cy, float u, Color c1, Color c2)
+        {
+            Color dark = Color.FromArgb(28, 22, 36);
+            using (Pen ol = new Pen(dark, Math.Max(1f, u * 0.7f))) using (SolidBrush dk = new SolidBrush(dark)) using (SolidBrush b1 = new SolidBrush(c1)) using (SolidBrush b2 = new SolidBrush(c2))
+            {
+                PointF[] shirt = {
+                    new PointF(cx - 4 * u, cy - 10 * u), new PointF(cx + 4 * u, cy - 10 * u), new PointF(cx + 12 * u, cy - 5 * u), new PointF(cx + 9 * u, cy + 0.5f * u),
+                    new PointF(cx + 6 * u, cy - 2 * u), new PointF(cx + 6 * u, cy + 10 * u), new PointF(cx - 6 * u, cy + 10 * u), new PointF(cx - 6 * u, cy - 2 * u),
+                    new PointF(cx - 9 * u, cy + 0.5f * u), new PointF(cx - 12 * u, cy - 5 * u) };
+                g.FillPolygon(b1, shirt); g.DrawPolygon(ol, shirt);
+                g.FillRectangle(b2, cx - 6 * u, cy + 8 * u, 12 * u, 2 * u);
+                g.FillEllipse(dk, cx - 3 * u, cy - 11.5f * u, 6 * u, 4 * u); g.FillEllipse(b2, cx - 2.2f * u, cy - 11f * u, 4.4f * u, 3 * u);
+            }
+        }
+        public void IconApple(Graphics g, float cx, float cy, float u)
+        {
+            Color dark = Color.FromArgb(28, 22, 36);
+            using (SolidBrush dk = new SolidBrush(dark)) using (SolidBrush r = new SolidBrush(Color.FromArgb(215, 55, 55))) using (SolidBrush gr = new SolidBrush(Color.FromArgb(58, 165, 62))) using (SolidBrush sh = new SolidBrush(Color.FromArgb(255, 180, 170)))
+            {
+                g.FillEllipse(dk, cx - 11 * u, cy - 9 * u, 22 * u, 21 * u); g.FillEllipse(r, cx - 10 * u, cy - 8 * u, 20 * u, 19 * u);
+                g.FillEllipse(sh, cx - 6 * u, cy - 5 * u, 4 * u, 3 * u);
+                g.FillRectangle(dk, cx - 0.8f * u, cy - 13 * u, 1.6f * u, 5 * u);
+                g.FillEllipse(gr, cx + u, cy - 13 * u, 7 * u, 4 * u);
+            }
+        }
+
+        class MenuForm : Form
+        {
+            struct Hit { public Rectangle R; public int Kind, A, B; }      // Kind 0 aba | 1 item | 2 fechar
+            static readonly string[][] Names = {
+                new string[] { "Arco de madeira", "Arco de metal" }, new string[] { "Espada comum", "Espada Mestre" }, new string[] { "Escudo azul", "Escudo vermelho", "Escudo do rei" },
+                new string[] { "Gorro verde", "Gorro roxo", "Coroa de ouro" }, new string[] { "Túnica verde", "Blusa azul", "Roupa de rei" } };
+            static readonly string[][] Descs = {
+                new string[] { "O arco de sempre.", "Flechas com o dobro de dano." }, new string[] { "A espada de sempre.", "Dobro de dano." }, new string[] { "Escudo comum.", "Escudo vermelho do herói.", "Escudo circular do tesouro do rei." },
+                new string[] { "O gorro de sempre.", "Gorro roxo da evolução.", "Coroa de ouro do tesouro do rei." }, new string[] { "A túnica de sempre.", "Blusa azul da evolução.", "Manto vermelho, calça marrom e sapatos roxos." } };
+            static readonly string[] TabNames = { "Armas", "Roupas", "Comida" };
+            PetForm p; float sc; int tab = -1, hover = -1; bool showBow;      // showBow: o heroi do exemplo segura o arco (ao clicar num arco) ou espada e escudo (ao clicar neles)
+            List<Hit> hits = new List<Hit>(); string msg;
+            System.Windows.Forms.Timer eatTimer;
+
+            protected override CreateParams CreateParams { get { CreateParams cp = base.CreateParams; cp.ExStyle |= 0x80; return cp; } }      // TOOLWINDOW; fica por cima (e ativa) para receber os cliques
+
+            public MenuForm(PetForm owner, float scale)
+            {
+                p = owner; sc = Math.Max(1f, scale);
+                FormBorderStyle = FormBorderStyle.None; ShowInTaskbar = false; StartPosition = FormStartPosition.Manual; TopMost = true;
+                SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+                Rectangle wa = Screen.PrimaryScreen.WorkingArea;
+                int w = Math.Min((int)(1040 * sc), wa.Width - 20), h = Math.Min((int)(620 * sc), wa.Height - 20);
+                Bounds = new Rectangle(wa.X + (wa.Width - w) / 2, wa.Y + (wa.Height - h) / 2, w, h);
+                BackColor = Color.FromArgb(18, 22, 30);
+                Shown += delegate { Activate(); };
+                eatTimer = new System.Windows.Forms.Timer(); eatTimer.Interval = 33;
+                eatTimer.Tick += delegate { if (p.MenuEating) { p.MenuTick(0.033f); Invalidate(); } };
+                eatTimer.Start();
+                FormClosed += delegate { eatTimer.Stop(); eatTimer.Dispose(); };
+            }
+
+            protected override void OnMouseMove(MouseEventArgs e)
+            {
+                int hv = -1;
+                for (int i = 0; i < hits.Count; i++) if (hits[i].R.Contains(e.Location)) hv = i;
+                if (hv != hover) { hover = hv; Cursor = hv >= 0 ? Cursors.Hand : Cursors.Default; Invalidate(); }
+                base.OnMouseMove(e);
+            }
+            protected override void OnMouseLeave(EventArgs e) { hover = -1; Invalidate(); base.OnMouseLeave(e); }
+            protected override void OnMouseClick(MouseEventArgs e)
+            {
+                if (e.Button == MouseButtons.Left)
+                    for (int i = 0; i < hits.Count; i++)
+                        if (hits[i].R.Contains(e.Location))
+                        {
+                            Hit h = hits[i];
+                            if (h.Kind == 0) { tab = (tab == h.A) ? -1 : h.A; msg = null; }
+                            else if (h.Kind == 1) { p.EquipItem(h.A, h.B); if (h.A == 0) showBow = true; else if (h.A == 1 || h.A == 2) showBow = false; }
+                            else if (h.Kind == 2) { p.CloseMenu(); return; }
+                            else if (h.Kind == 3) { msg = p.MenuEat(); showBow = false; }
+                            Invalidate(); break;
+                        }
+                base.OnMouseClick(e);
+            }
+
+            void Round(Graphics g, Rectangle r, int rad, Brush fill, Pen pen)
+            {
+                GraphicsPath gp = new GraphicsPath(); int d = rad * 2;
+                gp.AddArc(r.X, r.Y, d, d, 180, 90); gp.AddArc(r.Right - d, r.Y, d, d, 270, 90); gp.AddArc(r.Right - d, r.Bottom - d, d, d, 0, 90); gp.AddArc(r.X, r.Bottom - d, d, d, 90, 90); gp.CloseAllFigures();
+                if (fill != null) g.FillPath(fill, gp); if (pen != null) g.DrawPath(pen, gp); gp.Dispose();
+            }
+
+            void Section(Graphics g, string title, int cat, ref int y, Rectangle area, Font hf, Font nf)
+            {
+                g.DrawString(title, hf, Brushes.Gold, area.X, y); y += (int)(26 * sc);
+                int cs = (int)(112 * sc), gap = (int)(12 * sc), x = area.X;
+                int n = Names[cat].Length;
+                for (int id = 0; id < n; id++)
+                {
+                    if (!p.Owns(cat, id)) continue;
+                    Rectangle r = new Rectangle(x, y, cs, cs);
+                    bool eq = p.Equipped(cat) == id; int idx = hits.Count; bool hv = hover == idx;
+                    hits.Add(new Hit { R = r, Kind = 1, A = cat, B = id });
+                    using (SolidBrush bg = new SolidBrush(hv ? Color.FromArgb(58, 66, 86) : Color.FromArgb(34, 40, 54)))
+                    using (Pen pen = new Pen(eq ? Color.FromArgb(247, 190, 70) : Color.FromArgb(80, 90, 112), eq ? 3 * sc : 1.5f * sc))
+                        Round(g, r, (int)(10 * sc), bg, pen);
+                    p.DrawIcon(g, cat, id, r.X + cs / 2f, r.Y + cs * 0.42f, cs / 34f);
+                    StringFormat c = new StringFormat(); c.Alignment = StringAlignment.Center;
+                    g.DrawString(eq ? "EQUIPADO" : Names[cat][id], nf, eq ? Brushes.Gold : Brushes.White, new RectangleF(r.X, r.Bottom - 22 * sc, cs, 22 * sc), c);
+                    x += cs + gap;
+                }
+                y += cs + (int)(14 * sc);
+            }
+
+            protected override void OnPaint(PaintEventArgs e)
+            {
+                Graphics g = e.Graphics; hits.Clear();
+                g.SmoothingMode = SmoothingMode.AntiAlias; g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+                float W = Width, H = Height; int pad = (int)(20 * sc);
+                using (Pen border = new Pen(Color.FromArgb(247, 190, 70), 3 * sc)) g.DrawRectangle(border, 1, 1, W - 3, H - 3);
+                using (Font tf = new Font("Segoe UI", 24 * sc, FontStyle.Bold, GraphicsUnit.Pixel))
+                using (Font hf = new Font("Segoe UI", 17 * sc, FontStyle.Bold, GraphicsUnit.Pixel))
+                using (Font nf = new Font("Segoe UI", 13 * sc, FontStyle.Bold, GraphicsUnit.Pixel))
+                using (Font sf = new Font("Segoe UI", 15 * sc, FontStyle.Regular, GraphicsUnit.Pixel))
+                {
+                    g.DrawString("HERÓI", tf, Brushes.Gold, pad, 22 * sc);
+                    // heroi ampliado (mostra o que esta equipado)
+                    Rectangle pv = new Rectangle(pad, (int)(80 * sc), (int)(360 * sc), (int)(H - 80 * sc - pad));
+                    using (LinearGradientBrush lg = new LinearGradientBrush(pv, Color.FromArgb(46, 56, 78), Color.FromArgb(22, 28, 40), 90f))
+                    using (Pen pp = new Pen(Color.FromArgb(80, 90, 112), 1.5f * sc)) Round(g, pv, (int)(12 * sc), lg, pp);
+                    float k = Math.Max(2f, (float)Math.Floor((pv.Height - 150 * sc) / (30f * p.S)));
+                    p.DrawHeroPreview(g, pv.X + pv.Width / 2f, pv.Y + pv.Height * 0.62f, k, showBow);
+                    g.SmoothingMode = SmoothingMode.AntiAlias; g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+                    float ty = pv.Bottom - 118 * sc;
+                    string[] cats = { "Arco", "Espada", "Escudo", "Gorro", "Roupa" };
+                    for (int i = 0; i < 5; i++) { g.DrawString(cats[i] + ": " + Names[i][p.Equipped(i)], sf, Brushes.White, pv.X + 16 * sc, ty); ty += 21 * sc; }
+                    // abas (fechadas ate serem escolhidas)
+                    int x0 = (int)(420 * sc), th = (int)(50 * sc), gapT = (int)(10 * sc), tw = (int)((W - x0 - pad - 60 * sc - 2 * gapT) / 3);
+                    for (int i = 0; i < 3; i++)
+                    {
+                        Rectangle r = new Rectangle(x0 + i * (tw + gapT), pad, tw, th); int idx = hits.Count; bool hv = hover == idx; bool sel = tab == i;
+                        hits.Add(new Hit { R = r, Kind = 0, A = i });
+                        using (SolidBrush bg = new SolidBrush(sel ? Color.FromArgb(247, 190, 70) : (hv ? Color.FromArgb(58, 66, 86) : Color.FromArgb(34, 40, 54))))
+                        using (Pen pen = new Pen(Color.FromArgb(247, 190, 70), 2 * sc)) Round(g, r, (int)(10 * sc), bg, pen);
+                        StringFormat c = new StringFormat(); c.Alignment = StringAlignment.Center; c.LineAlignment = StringAlignment.Center;
+                        g.DrawString(TabNames[i], hf, sel ? Brushes.Black : Brushes.White, r, c);
+                    }
+                    Rectangle cl = new Rectangle((int)(W - pad - 44 * sc), pad, (int)(44 * sc), th); int ci = hits.Count; hits.Add(new Hit { R = cl, Kind = 2 });
+                    using (SolidBrush bg = new SolidBrush(hover == ci ? Color.FromArgb(200, 60, 70) : Color.FromArgb(120, 40, 50))) Round(g, cl, (int)(10 * sc), bg, null);
+                    StringFormat cc = new StringFormat(); cc.Alignment = StringAlignment.Center; cc.LineAlignment = StringAlignment.Center;
+                    g.DrawString("X", hf, Brushes.White, cl, cc);
+                    // conteudo da aba escolhida
+                    Rectangle area = new Rectangle(x0, (int)(90 * sc), (int)(W - x0 - pad), (int)(H - 90 * sc - pad));
+                    if (tab < 0)
+                        g.DrawString("Escolha uma aba: Armas, Roupas ou Comida.\nClique no que quiser usar; o herói muda ao lado.\nEspaço ou Esc fecham o menu.", sf, Brushes.LightGray, area.X, area.Y + 20 * sc);
+                    else
+                    {
+                        int y = area.Y;
+                        if (tab == 0) { Section(g, "ARCOS", 0, ref y, area, hf, nf); Section(g, "ESPADAS", 1, ref y, area, hf, nf); Section(g, "ESCUDOS", 2, ref y, area, hf, nf); }
+                        else if (tab == 1) { Section(g, "GORROS", 3, ref y, area, hf, nf); Section(g, "ROUPAS", 4, ref y, area, hf, nf); }
+                        else
+                        {
+                            g.DrawString("COMIDA", hf, Brushes.Gold, area.X, y); y += (int)(26 * sc);
+                            int cs = (int)(112 * sc); Rectangle r = new Rectangle(area.X, y, cs, cs);
+                            int ai = hits.Count; hits.Add(new Hit { R = r, Kind = 3 });
+                            using (SolidBrush bg = new SolidBrush(hover == ai ? Color.FromArgb(58, 66, 86) : Color.FromArgb(34, 40, 54))) using (Pen pen = new Pen(Color.FromArgb(80, 90, 112), 1.5f * sc)) Round(g, r, (int)(10 * sc), bg, pen);
+                            p.IconApple(g, r.X + cs / 2f, r.Y + cs * 0.42f, cs / 34f);
+                            StringFormat c = new StringFormat(); c.Alignment = StringAlignment.Center;
+                            g.DrawString("Maçãs x " + p.AppleCount, nf, Brushes.White, new RectangleF(r.X, r.Bottom - 22 * sc, cs, 22 * sc), c);
+                            g.DrawString("Clique na maçã para o herói comer: maçã crua recupera meio coração.\nCom 5 ou mais ele faz lanche na fogueira (assadas recuperam mais).", sf, Brushes.LightGray, area.X, r.Bottom + 16 * sc);
+                            g.DrawString("Corações: " + p.HeartsNow.ToString("0.#") + " / " + p.HeartsMax, sf, Brushes.Gold, area.X, r.Bottom + 68 * sc);
+                            if (!string.IsNullOrEmpty(msg)) g.DrawString(msg, sf, Brushes.OrangeRed, area.X, r.Bottom + 94 * sc);
+                        }
+                    }
+                    // descricao do item sob o mouse
+                    if (hover >= 0 && hover < hits.Count && hits[hover].Kind == 1)
+                    {
+                        Hit h = hits[hover];
+                        g.DrawString(Names[h.A][h.B] + " — " + Descs[h.A][h.B], sf, Brushes.White, area.X, H - pad - 26 * sc);
+                    }
+                }
+            }
+        }
         void BuildSprites()
         {
             ValidateEquip();
@@ -1203,6 +1514,10 @@ namespace HeroiPet
             Dictionary<char, Color> capOv = Art.Ov('H', Color.FromArgb(150, 80, 205)); capOv['h'] = Color.FromArgb(205, 150, 240); capOv['g'] = Color.FromArgb(96, 50, 140);
             Dictionary<char, Color> shOv = Art.Ov('Q', Color.FromArgb(70, 125, 235)); shOv['h'] = Color.FromArgb(135, 180, 255); shOv['g'] = Color.FromArgb(45, 85, 190);
             evoItemSpr[0] = Art.Make(Art.CapItem, S, capOv); evoItemSpr[1] = Art.Make(Art.ShirtItem, S, shOv);
+            Dictionary<char, Color> gcOv = Art.Ov('H', Color.FromArgb(58, 165, 62)); gcOv['h'] = Color.FromArgb(130, 210, 120); gcOv['g'] = Color.FromArgb(30, 110, 45);
+            Dictionary<char, Color> gsOv = Art.Ov('Q', Color.FromArgb(58, 165, 62)); gsOv['h'] = Color.FromArgb(130, 210, 120); gsOv['g'] = Color.FromArgb(30, 110, 45);
+            Dictionary<char, Color> rbOv = Art.Ov('Q', Color.FromArgb(190, 35, 60)); rbOv['h'] = Color.FromArgb(235, 100, 120); rbOv['g'] = Color.FromArgb(130, 20, 40);
+            menuSpr[0] = Art.Make(Art.CapItem, S, gcOv); menuSpr[1] = Art.Make(Art.ShirtItem, S, gsOv); menuSpr[2] = Art.Make(Art.ShirtItem, S, rbOv);
             heroFrontWave = Art.Make(Art.HeroRecolor(Art.HeroFrontWave), S, hov);
             octo[0] = Art.Make(Art.OctoA, S, null); octo[1] = Art.Make(Art.OctoB, S, null);
             bat[0] = Art.Make(Art.BatUp, S, null); bat[1] = Art.Make(Art.BatDown, S, null);
@@ -1268,6 +1583,7 @@ namespace HeroiPet
             }
             menu.Items.Add(sizeMenu);
             menu.Items.Add(new ToolStripSeparator());
+            menu.Items.Add("Inventário (Espaço)", null, delegate { OpenMenu(); });
             menu.Items.Add("Sobre", null, delegate
             {
                 MessageBox.Show("Herói do Desktop\nVersão 1.0.0\n\nUm herói pixel-art que vive na sua área de trabalho: luta, colhe maçãs, assa o próprio lanche e enfrenta um dragão.\n\nIdeia: Alexandre\nCriação: Bia Krepel\nProgramação: Claude", "Sobre", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -1302,6 +1618,7 @@ namespace HeroiPet
             SaveRecord();
             SaveKills(); SaveChest();
             if (evoForm != null) { try { evoForm.Close(); } catch { } evoForm = null; }
+            CloseMenu();
             if (shadowLayer != null) { shadowLayer.Close(); shadowLayer = null; }
             base.OnFormClosing(e);
         }
@@ -1326,8 +1643,8 @@ namespace HeroiPet
             double now = clock.Elapsed.TotalSeconds;
             float dt = (float)Math.Min(0.05, now - lastT);
             lastT = now;
-            if (playMode) CheckSpacePause();
-            if (!paused && !EvoWaiting) Step(dt);          // com o item grande na tela o jogo fica pausado ate apertar "USAR ITEM"
+            CheckSpacePause();
+            if (!paused && !EvoWaiting && !MenuOpen) Step(dt);      // com o menu aberto o jogo fica pausado          // com o item grande na tela o jogo fica pausado ate apertar "USAR ITEM"
             Invalidate();
         }
 
@@ -1441,6 +1758,7 @@ namespace HeroiPet
         int evoNext;                         // proximo estagio a anunciar (1 a 4; 5 = acabou)
         Queue<int> evoQueue = new Queue<int>();
         EvoAnim evo;
+        Sprite[] menuSpr = new Sprite[3];      // gorro verde, blusa verde e roupa de rei em pixel art (para o menu)
         Sprite[] evoItemSpr = new Sprite[2];      // gorro e blusa em pixel art (iguais ao corpo)
         Font evoFont;
         const float EvoFly = 1.5f;
@@ -1512,6 +1830,7 @@ namespace HeroiPet
         {
             if (evo != null) { evo.Wait = false; evo.T = 0; }
             if (evoForm != null) { try { evoForm.Close(); } catch { } evoForm = null; }
+            CloseMenu();
         }
 
         // o item aparece grande no meio da tela com o numero de monstros, diminui e voa ate o heroi
@@ -2655,7 +2974,52 @@ namespace HeroiPet
 
         void DrawPlayEat(Graphics g, float f, float bob)
         {
-            DrawBakeApple(g, 3, hx + f * 5 * S, hy - bob - 9 * S, 2.3f - 1.7f * Math.Min(1f, playEatT / 0.9f));
+            float sc2 = 2.3f - 1.7f * Math.Min(1f, playEatT / 0.9f);
+            if (eatRaw)      // maca crua (verde/vermelha)
+            {
+                int w = (int)(appleSpr.W * sc2 * 0.8f), h = (int)(appleSpr.H * sc2 * 0.8f);
+                g.DrawImage(appleSpr.R, (int)(hx + f * 5 * S - w / 2f), (int)(hy - bob - 9 * S - h / 2f), w, h);
+            }
+            else DrawBakeApple(g, 3, hx + f * 5 * S, hy - bob - 9 * S, sc2);
+        }
+
+        // ---- modo automatico: com so 1 coracao e sem monstros num raio de 4 Links, vai a uma arvore e come uma maca ----
+        int autoEatPh; Tree autoEatTree;
+        void AutoEatAbortIfBusy() { if (autoEatPh == 2) AutoEatAbort(); }
+        bool EnemyWithin(float r) { foreach (Enemy e in enemies) if (ED(e) < r) return true; return false; }
+        void AutoEatAbort() { autoEatPh = 0; autoEatTree = null; playPickT = 0; playEatT = 0; eatRaw = false; }
+        bool AutoEatApple(float dt)
+        {
+            float R = 4 * 16 * S;        // 4 tamanhos do Link
+            if (autoEatPh == 0)
+            {
+                if (hp > 1 || hp <= 0 || dead || EnemyWithin(R)) return false;
+                Tree t = NearestTreeWithApples(); if (t == null) return false;
+                autoEatTree = t; autoEatPh = 1; Say("Preciso comer...");
+            }
+            if (autoEatPh < 3 && EnemyWithin(R)) { AutoEatAbort(); return false; }
+            if (autoEatPh == 1)
+            {
+                if (autoEatTree == null || FirstApple(autoEatTree) < 0) { autoEatTree = NearestTreeWithApples(); if (autoEatTree == null) { AutoEatAbort(); return false; } }
+                float d = (float)Math.Sqrt((autoEatTree.X - hx) * (autoEatTree.X - hx) + (autoEatTree.Y - hy) * (autoEatTree.Y - hy));
+                if (d > 12 * S) { MoveHero(autoEatTree.X, autoEatTree.Y, 56 * S, dt); return true; }
+                hface = autoEatTree.X >= hx ? 1 : -1; playTree = autoEatTree; playPickT = 0.001f; pickedFlag = false; pickT = 0; autoEatPh = 2; return true;
+            }
+            if (autoEatPh == 2)
+            {
+                playPickT += dt; pickT = playPickT;
+                if (!pickedFlag && playPickT >= 0.4f)
+                {
+                    int idx = FirstApple(autoEatTree);
+                    if (idx < 0) { AutoEatAbort(); return false; }
+                    autoEatTree.Has[idx] = false; autoEatTree.Regrow[idx] = 60f + (float)rnd.NextDouble() * 40f; pickedFlag = true;
+                }
+                if (playPickT >= 0.8f) { playPickT = 0; playEatT = 0.001f; eatRaw = true; autoEatPh = 3; }
+                return true;
+            }
+            playEatT += dt;                // autoEatPh == 3: comendo
+            if (playEatT >= 0.9f) { playEatT = 0; eatRaw = false; hp = Math.Min(MaxHP, hp + 0.5f); Say("Nham!"); autoEatPh = 0; autoEatTree = null; }
+            return true;
         }
 
                 // ================= MORTE NO MODO JOGO =================
@@ -2707,14 +3071,19 @@ namespace HeroiPet
             if (FgHook != null) return FgHook();
             return shield != null && !shield.IsDisposed && GetForegroundWindow() == shield.Handle;
         }
+        // Espaco abre/fecha o MENU DE PAUSA (armas, roupas, comida). Vale com a area de trabalho em foco (no modo jogo, com a janela de protecao)
+        bool SpaceAllowed()
+        {
+            if (FgHook != null) return FgHook();
+            if (playMode) return ShieldFocused();
+            System.Text.StringBuilder sb = new System.Text.StringBuilder(64); GetClassName(GetForegroundWindow(), sb, 64);
+            string cn = sb.ToString(); return cn == "Progman" || cn == "WorkerW" || cn == "Shell_TrayWnd" || cn == "Shell_SecondaryTrayWnd" || cn == "" || cn == "NotifyIconOverflowWindow";
+        }
         void CheckSpacePause()
         {
             bool d = IsDown(0x20);
-            if (d && !prevSpace && ShieldFocused())
-            {
-                paused = !paused;
-                if (pauseItem != null) pauseItem.Text = paused ? "Continuar" : "Pausar";
-            }
+            if (d && !prevSpace) { if (MenuOpen) CloseMenu(); else if (SpaceAllowed()) OpenMenu(); }
+            if (MenuOpen && IsDown(0x1B)) CloseMenu();      // Esc tambem fecha
             prevSpace = d;
         }
         Font pauseFont;
@@ -2908,7 +3277,8 @@ namespace HeroiPet
             bool lowHp = hp <= 2;
             float safe = (lowHp ? TuneLow : TuneSafe) * S;
 
-            if (TryDodge(dt)) { bowT = 0; return; }
+            if (TryDodge(dt)) { AutoEatAbortIfBusy(); bowT = 0; return; }
+            if (AutoEatApple(dt)) { bowT = 0; return; }
 
             // octoroks e slimes: luta de espada (aproxima e golpeia), mas so se nao houver item para pegar primeiro
             if (near != null && near.Type != 1 && nd < 110 * S)
@@ -3466,6 +3836,7 @@ namespace HeroiPet
         ShadowLayer shadowLayer;
         void Shadow(Graphics g, float x, float y, float wTiles)
         {
+            if (previewMode) return;
             // as sombras vao para a camada com transparencia real (ShadowLayer), desenhada depois
             shadowList.Add(new float[] { x - wTiles * S / 2f, y - S, wTiles * S, 3 * S });
         }
