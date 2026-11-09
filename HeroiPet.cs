@@ -1486,9 +1486,13 @@ namespace HeroiPet
                             p.IconApple(g, r.X + cs / 2f, r.Y + cs * 0.42f, cs / 34f);
                             StringFormat c = new StringFormat(); c.Alignment = StringAlignment.Center;
                             g.DrawString("Maçãs x " + p.AppleCount, nf, Brushes.White, new RectangleF(r.X, r.Bottom - 22 * sc, cs, 22 * sc), c);
-                            g.DrawString("Clique na maçã para o herói comer: maçã crua recupera meio coração.\nCom 5 ou mais ele faz lanche na fogueira (assadas recuperam mais).", sf, Brushes.LightGray, area.X, r.Bottom + 16 * sc);
-                            g.DrawString("Corações: " + p.HeartsNow.ToString("0.#") + " / " + p.HeartsMax, sf, Brushes.Gold, area.X, r.Bottom + 68 * sc);
-                            if (!string.IsNullOrEmpty(msg)) g.DrawString(msg, sf, Brushes.OrangeRed, area.X, r.Bottom + 94 * sc);
+                            Rectangle eb = new Rectangle(area.X, r.Bottom + 8 * sc > 0 ? (int)(r.Bottom + 8 * sc) : r.Bottom, cs, (int)(32 * sc));      // opcao "Comer maçã" logo abaixo do icone
+                            int ei = hits.Count; hits.Add(new Hit { R = eb, Kind = 3 });
+                            using (SolidBrush bg2 = new SolidBrush(hover == ei ? Color.FromArgb(255, 210, 100) : Color.FromArgb(247, 190, 70))) using (Pen pen2 = new Pen(Color.FromArgb(28, 22, 36), 1.5f * sc)) Round(g, eb, (int)(8 * sc), bg2, pen2);
+                            using (SolidBrush dk2 = new SolidBrush(Color.FromArgb(28, 22, 36))) g.DrawString("Comer maçã", nf, dk2, new RectangleF(eb.X, eb.Y + 5 * sc, eb.Width, eb.Height), c);
+                            g.DrawString("Maçã crua recupera meio coração.\nCom 5 ou mais ele faz lanche na fogueira (assadas recuperam mais).", sf, Brushes.LightGray, area.X, eb.Bottom + 12 * sc);
+                            g.DrawString("Corações: " + p.HeartsNow.ToString("0.#") + " / " + p.HeartsMax, sf, Brushes.Gold, area.X, eb.Bottom + 64 * sc);
+                            if (!string.IsNullOrEmpty(msg)) g.DrawString(msg, sf, Brushes.OrangeRed, area.X, eb.Bottom + 90 * sc);
                         }
                     }
                     // descricao do item sob o mouse
@@ -4385,7 +4389,7 @@ namespace HeroiPet
             int f = e.Face > 0 ? 1 : -1;
             bool run = e.Mode == 0 || e.VX != 0 || e.VY != 0;
             // galope: as patas INCLINAM (giram no quadril): as da frente para frente, as de tras para tras, e voltam
-            float ang = run ? 24f * (1f - (float)Math.Cos(e.T * 9.0)) / 2f : 0f;
+            float ang = run ? 24f * (1f - (float)Math.Cos(e.T * 13.0)) / 2f : 0f;
             Color K = Color.FromArgb(28, 22, 36), body = Color.FromArgb(165, 105, 58), dark = Color.FromArgb(105, 62, 32);
             // cavaleiro primeiro: as pernas dele ficam escondidas atras do corpo do cavalo
             Spr(g, boko[0], e.X, e.Y - 6 * S, f > 0);
