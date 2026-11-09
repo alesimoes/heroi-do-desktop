@@ -41,6 +41,9 @@ Arte própria inspirada no gênero (não usa sprites/imagens da Nintendo). O usu
 - **Instalador bloqueado em outro PC:** escolhido o caminho da **assinatura gratuita SignPath** para projeto de **código aberto no GitHub**
   (licença MIT, repositório público). O usuário prefere publicar o código a pagar certificado.
 - Web abre em **tela cheia** ao clicar em Jogar / Deixar rodando.
+- **Não pagar nada** pela assinatura do instalador (exclui certificado comercial e Certum). Caminhos aceitos: SignPath (grátis, código aberto) e
+  Microsoft Store (conta gratuita). Repositório **público no GitHub** (`alesimoes/heroi-do-desktop`, MIT). Ver `PROBLEMA-CERTIFICADO.md`.
+- Botões de toque da web com **ícones das armas** (espada, arco, maçã) em vez de texto; acompanham as evoluções.
 
 ## Lições técnicas
 - Janela transparente com `TransparencyKey` é **clique-através** nos pixels magenta; por isso o modo jogo lê entrada

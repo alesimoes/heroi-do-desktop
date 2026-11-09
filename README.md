@@ -37,6 +37,7 @@ Mais detalhes (testes, publicação da web) em [`docs/COMO-CONSTRUIR-E-PUBLICAR.
 | Arquivo | Assunto |
 |---|---|
 | [`docs/STATUS.md`](docs/STATUS.md) | **estado atual do projeto** e pendências |
+| [`docs/PROBLEMA-CERTIFICADO.md`](docs/PROBLEMA-CERTIFICADO.md) | por que o Windows bloqueia o instalador e como resolver de graça |
 | [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) | como o código é organizado |
 | [`docs/REGRAS-DO-JOGO.md`](docs/REGRAS-DO-JOGO.md) | todas as regras e números |
 | [`docs/COMO-CONSTRUIR-E-PUBLICAR.md`](docs/COMO-CONSTRUIR-E-PUBLICAR.md) | build, testes e publicação |

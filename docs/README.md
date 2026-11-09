@@ -23,6 +23,8 @@ Hollow Knight) e a web em 16 bits (parecida demais com um jogo conhecido). Fica 
 ## Mapa de documentos
 
 - `STATUS.md`: **ponto em que o projeto está** (entregas, pendências, como verificar). Comece por aqui.
+- `PROBLEMA-CERTIFICADO.md`: por que o instalador é bloqueado, opções gratuitas avaliadas e o que falta.
+- `ASSINATURA-SIGNPATH.md`: passo a passo e texto do pedido de assinatura gratuita.
 - `COMO-INSTALAR.txt`: instalação e o que fazer quando o Windows bloqueia o instalador.
 - `ARQUITETURA.md`: como o código do desktop e da web é organizado.
 - `REGRAS-DO-JOGO.md`: todas as regras e números do jogo (IA, pausas, lanche, modo jogo, chefão).

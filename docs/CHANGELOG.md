@@ -1,5 +1,11 @@
 # Changelog (resumo)
 
+## 08/11/2026 (fim da noite) — GitHub, ícones e certificado
+- Repositório **público** no GitHub (MIT) com build automático; preparação da assinatura gratuita (SignPath): política, workflows, guia e texto do pedido.
+- Web: botões de toque com **ícones** (espada, arco, maçã) que acompanham as evoluções; antes eram textos que se sobrepunham.
+- Documentado o problema do certificado (`PROBLEMA-CERTIFICADO.md`): instalador sem assinatura é bloqueado em outros PCs; restrição "não pagar nada".
+- Documentação atualizada e consolidada (`STATUS.md`).
+
 ## 08/11/2026 (noite 4) — evolução, poder por gelatinas, tela cheia, publicação
 - **Evolução** do herói por monstros derrotados (1000 / +500 / +500 / +1000): arco de metal, gorro roxo, blusa azul, Espada Mestre + escudo vermelho. O item aparece grande, o jogo pausa até **USAR ITEM**, o item diminui e voa até o herói.
 - **Poder** agora é lançado com **20 gelatinas** (não mais pelo recorde); herói com cores normais; 18x monstros; 5x mais projéteis; colhe 3 maçãs; itens somem em 15 s.

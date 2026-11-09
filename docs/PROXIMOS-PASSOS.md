@@ -3,9 +3,9 @@
 Estado atual em [`STATUS.md`](STATUS.md).
 
 ## Em andamento / decisões em aberto
-1. **Publicar no GitHub (repositório aberto) e assinar o instalador.** Arquivos prontos; falta Git + GitHub CLI, login, criar o
-   repositório e enviar. Depois pedir aprovação no SignPath Foundation (`CODE_SIGNING_POLICY.md`); só então o fluxo de build pode
-   enviar os binários para assinatura. Alternativa paga: certificado de assinatura para pessoa física (~US$150–300/ano).
+1. **Certificado / instalador bloqueado (prioridade).** O usuário **não vai pagar nada**. Repositório já está público
+   (https://github.com/alesimoes/heroi-do-desktop). Próximo: os autores pedirem aprovação no **SignPath** (`ASSINATURA-SIGNPATH.md`) e,
+   em paralelo, avaliar a **Microsoft Store** (conta gratuita; instalar o Windows SDK e empacotar em MSIX). Resumo completo em `PROBLEMA-CERTIFICADO.md`.
 2. **Correções da revisão em paralelo** (ver `STATUS.md`, item 2): lanche só no automático no desktop, tela inicial e rotação na
    web/celular, tela cheia no Android, direcional, macieiras sob os botões, jogo pausado atrás de telas na web, botão "Tentar de novo"
    após Win+D, pausa longa da web.
