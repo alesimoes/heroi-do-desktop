@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 09/11/2026 — Onda de choque do dragão
+- Nos **últimos 15% de vida**, a cada 8 s o dragão lança uma **onda de choque**: a área pisca 3 vezes, a onda irradia ao redor dele e, se encostar no herói, tira **2 corações**.
+
 ## 09/11/2026 — Dano: bolas de fogo e meio coração
 - **Cada bola de fogo do dragão tira 1 coração** (antes algumas não davam dano: o escudo bloqueava as de frente e a invulnerabilidade engolia as seguintes).
 - **Encostar em um monstro tira meio coração**; corações com metades no HUD.

@@ -93,6 +93,9 @@ limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão 
    a cada 1,5–3 s. Flecha 50, espada 150. **Com metade da vida (fúria)**: fica **vermelho** e **cresce lentamente por 3 s até 1,2×** (10% + mais 10%; hitboxes acompanham), **brilhando e soltando faíscas durante o crescimento**; anda
    **um pouco mais rápido** (18/s, ainda bem mais lento que o herói, 56/s), **solta fumaça do nariz de vez em quando** (a cada 2,5–5,5 s),
    bolas de fogo **20% mais frequentes**, 3 bolas em leque. **Com 10%**: bolas **teleguiadas** (52/s, curvam 1,8 rad/s) que **explodem em 3 s** (raio 16).
+   **Onda de choque (últimos 15% de vida):** a cada **8 s** o dragão lança uma onda. A área (elipse de raio 80 em unidades de tela, 0,7 de altura) **pisca 3 vezes**
+   (1,5 s) avisando, e então a onda **irradia a partir do dragão** por 1,3 s. **Se o anel encostar no herói, ele perde 2 corações** (uma vez por onda, ignora a invulnerabilidade).
+   Dá para escapar saindo da área durante o aviso. Se o herói morre e tenta de novo, as ondas reiniciam.
 5. **Morte do dragão:** ele **volta ao normal** (roxo, tamanho normal) e pisca por 1,3 s; depois **explode** e solta **1000 rupias** em valores
    diferentes (2×**300 dourada**, 4×50, 5×20, 8×10, 3×5, 5×1 = 1000), que se espalham e **não somem**. Cerca de 2 s depois da explosão aparece
    **"ESPERE POR MAIS ATUALIZAÇÕES"** por 4,5 s e então os **créditos** (que rolam com o jogo ainda ativo para pegar as rupias) → volta ao modo automático.
