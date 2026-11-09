@@ -136,7 +136,8 @@ html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout
     <button id="mNap">Soneca agora</button>
     <button id="mHarvest">Colher maçãs e dormir (2 min)</button>
     <button id="mApples">Dar 5 maçãs (lanche)</button>
-    <button id="mDragon">Teste: ir para a luta do dragão</button>
+    <button id="mLv6">Atalho: ir para o nível 6</button>
+    <button id="mLv7">Atalho: ir para o nível 7 (cavaleiros)</button>
     <button id="mPause" aria-pressed="false">Pausar</button>
     <button id="mInv">Inventário (Espaço)</button>
     <button id="mFull" aria-pressed="false">Tela cheia</button>
@@ -1412,7 +1413,7 @@ function drawHero() {
   shadow(hero.x, hero.y, 12);
   const fr = hero.walking ? Math.floor(hero.walkT * 9) % 2 : 0, bob = (hero.walking && fr === 1) ? S : 0;
   spr(fr ? SP.heroB : SP.heroA, hero.x, hero.y - bob, right);
-  if (previewBare) { const ay = hero.y - bob - 7 * S; for (const sd of [-1, 1]) { const ax = hero.x + sd * 4 * S; rect(tunicColor(), ax - 0.75 * S, ay, 1.5 * S, 1.5 * S); rect('#fad0a5', ax - 0.75 * S, ay + 1.5 * S, 1.5 * S, 1.5 * S); } return; }
+  if (previewBare) { const ay = hero.y - bob - 7 * S; for (const sd of [-1, 1]) { const ax = hero.x + sd * 4 * S; /* bracos menores */ rect(tunicColor(), ax - 0.75 * S, ay, 1.5 * S, 1.5 * S); rect('#fad0a5', ax - 0.75 * S, ay + 1.5 * S, 1.5 * S, 1.5 * S); } return; }
   const sx = hero.x - f * 3 * S - 3 * S, sy = hero.y - bob - 11 * S; drawShieldBody(sx, sy);
   if (cookState === 6) { const p = (cookT % 1.2) / 1.2; if (Math.floor(cookT / 1.2) <= 4) drawBakeApple(3, hero.x + f * 5 * S, hero.y - bob - 9 * S, 2.3 - 1.7 * p); }
   else if (playEatT > 0) { const sc2 = 2.3 - 1.7 * Math.min(1, playEatT / 0.9); if (eatRaw) { const a = SP.apple, w = a.w * sc2 * 0.8, h = a.h * sc2 * 0.8; ctx.drawImage(a.r, Math.round(hero.x + f * 5 * S - w / 2), Math.round(hero.y - bob - 9 * S - h / 2), Math.round(w), Math.round(h)); } else drawBakeApple(3, hero.x + f * 5 * S, hero.y - bob - 9 * S, sc2); }
@@ -1535,15 +1536,21 @@ $('mNap').addEventListener('click', () => { if (!playMode && calmState === 0) ne
 $('mHarvest').addEventListener('click', () => { if (!playMode && calmState === 0) { forceLong = true; nextCalm = 0; } closeMenu(); });
 $('mApples').addEventListener('click', () => { hero.apples = Math.max(hero.apples, 5); closeMenu(); });
 // PERIODO DE TESTE: coloca o jogador logo antes da luta com o dragao (modo jogo, nivel maximo, vida cheia, fogueira ja explodindo)
-function startDragonTest() {
-  if (!playMode) setPlayMode(true); else resetBoss();
+function startLevelTest(nv) {      // ATALHO: modo jogo direto no nivel nv (NV 1..7)
+  nv = Math.max(1, Math.min(7, nv)); if (!playMode) setPlayMode(true); else resetBoss();
   enemies.length = 0; rocks.length = 0; arrows.length = 0; items.length = 0; puffs.length = 0;
-  hero.rupees = 125; lastStep = rupeeStep(); setMaxHp(8);      // 125 rupias = nivel 6 (NV 6) hero.hp = hero.maxHp; hero.dead = false; deathWait = false; closeDeath(); hero.inv = 2; hero.apples = 0; powerT = 0; hero.face = 1;
+  hero.rupees = (nv - 1) * 25; lastStep = rupeeStep(); setMaxHp(5 + Math.max(0, Math.min(3, lastStep - 3))); hero.hp = hero.maxHp; hero.dead = false; deathWait = false; closeDeath(); hero.inv = 2; hero.apples = 0; powerT = 0; hero.x = W / 2; hero.y = H / 2; spawnTimer = 1.5; say('Nível ' + nv);
+}
+function startDragonTest() {
+  if (!playMode) setPlayMode(true); else resetBoss();      // teste: nivel maximo (NV 7)
+  enemies.length = 0; rocks.length = 0; arrows.length = 0; items.length = 0; puffs.length = 0;
+  hero.rupees = 150; lastStep = rupeeStep(); setMaxHp(8); hero.hp = hero.maxHp; hero.dead = false; deathWait = false; closeDeath(); hero.inv = 2; hero.apples = 0; powerT = 0; hero.face = 1;
   fireX = W / 2; fireY = H / 2; hero.x = W * 0.15; hero.y = H * 0.6;
   bossPhase = 3; bossT = 0; bossSpawned = false; fireExplode(); say('Hora da luta!');      // o dragao nasce em ~1 s, saindo da fumaca da fogueira
 }
-$('mDragon').addEventListener('click', () => { startDragonTest(); closeMenu(); });
-if (/[?&]dragao\b/.test(location.search)) setTimeout(() => { $('intro').hidden = true; startDragonTest(); }, 400);
+$('mLv6').addEventListener('click', () => { $('intro').hidden = true; startLevelTest(6); closeMenu(); });
+$('mLv7').addEventListener('click', () => { $('intro').hidden = true; startLevelTest(7); closeMenu(); });
+if (/[?&]nivel=(\d)/.test(location.search)) setTimeout(() => { $('intro').hidden = true; startLevelTest(+RegExp.$1); }, 400);
 $('mPause').addEventListener('click', () => { setPaused(!paused); closeMenu(); });
 $('evoBtn').addEventListener('click', useEvoItem);
 function setSizeMode(m) {

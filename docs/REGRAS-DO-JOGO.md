@@ -106,8 +106,7 @@ fica o **herói ampliado** mostrando o que está equipado; ao clicar em um item 
 - Os efeitos dependem do que está **equipado**: arco de metal e Espada Mestre dão o dobro de dano; as cores/escudos seguem as roupas escolhidas.
 
 ## Período de teste do dragão
-Para testar a luta sem jogar tudo antes: desktop → menu da bandeja **"Teste: ir para a luta do dragão"** (ou `HeroiPet.exe --dragao`);
-web → botão **"Teste: ir para a luta do dragão"** no menu (ou `?dragao` na URL). Liga o modo jogo no nível máximo (150 rupias, 8 corações cheios),
+**Atalho removido** (a pedido): não há mais o item de menu "Teste: ir para a luta do dragão", nem `--dragao` (desktop) nem `?dragao` (web). Como era (histórico): liga o modo jogo no nível máximo (150 rupias, 8 corações cheios),
 limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão nasce em ~1 s. Pode ser repetido quantas vezes quiser.
 
 ## Chefão (Dragão) — só no modo jogo
@@ -132,3 +131,6 @@ limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão 
 ## Onda final (cavaleiros bokoblin)
 - Modo jogo, nível máximo (NV 7): sequência de 7 inimigos (cavaleiro, gelatina, cavaleiro, cavaleiro, gelatina, cavaleiro, cavaleiro), 1 a cada 4-7 s, máximo 3 vivos. O dragão começa quando os 7 morreram e já houve 5 mortes no nível.
 - Cavaleiro: 3 de vida, velocidade 95% da do herói (53 S/s), aproxima até ~62-76 S e orbita em elipse atirando a cada 1,7-3 s. Flecha: 90 S/s, mira no herói com erro sorteado (±14 S/distância => ~50% erram); trajetória fixa.
+
+## Atalhos de teste de nível
+- Desktop: menu da bandeja > **Atalho: ir para o nível 6 / 7**, ou `HeroiPet.exe --nivel6` / `--nivel7` (liga o modo jogo direto no nível, com rupias, corações e vida cheia). Web: botões no menu ou `?nivel=6`. O NV 7 é onde aparece a onda dos bokoblins a cavalo.

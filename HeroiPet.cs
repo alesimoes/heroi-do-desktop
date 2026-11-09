@@ -1073,7 +1073,7 @@ namespace HeroiPet
 
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--lanche") >= 0) apples = 5;
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--jogar") >= 0) SetPlayMode(true);
-            if (Array.IndexOf(Environment.GetCommandLineArgs(), "--dragao") >= 0) StartDragonTest();
+            foreach (string ar in Environment.GetCommandLineArgs()) if (ar.StartsWith("--nivel") && ar.Length == 8 && char.IsDigit(ar[7])) StartLevelTest(ar[7] - '0');      // --nivel6, --nivel7...
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--chefao") >= 0) StartBossTest();   // teste rapido do lanche
             timer = new System.Windows.Forms.Timer();
             timer.Interval = 30;
@@ -1612,7 +1612,8 @@ namespace HeroiPet
             menu.Items.Add("Dar 5 maçãs (lanche)", null, delegate { apples = Math.Max(apples, 5); });
             menu.Items.Add("Soneca agora", null, delegate { if (calmState == 0) nextCalm = 0; });
             menu.Items.Add("Colher macas e dormir (2 min)", null, delegate { if (calmState == 0) { forceLong = true; nextCalm = 0; } });
-            menu.Items.Add("Teste: ir para a luta do dragão", null, delegate { StartDragonTest(); });
+            menu.Items.Add("Atalho: ir para o nível 6", null, delegate { StartLevelTest(6); });
+            menu.Items.Add("Atalho: ir para o nível 7 (cavaleiros)", null, delegate { StartLevelTest(7); });
             ToolStripMenuItem pause = new ToolStripMenuItem("Pausar"); pauseItem = pause;
             pause.Click += delegate { paused = !paused; pause.Text = paused ? "Continuar" : "Pausar"; };
             menu.Items.Add(pause);
@@ -2715,13 +2716,24 @@ namespace HeroiPet
         {
             if (!playMode) SetPlayMode(true); else ResetBoss();
             enemies.Clear(); rocks.Clear(); arrows.Clear(); items.Clear(); puffs.Clear();
-            rupees = 125; lastStep = RupeeStep(); SetMaxHp(8); hp = MaxHP; dead = false; deathWait = false; inv = 2f;      // 125 rupias = nivel 6 (NV 6)
+            rupees = 150; lastStep = RupeeStep(); SetMaxHp(8); hp = MaxHP; dead = false; deathWait = false; inv = 2f;
             apples = 0; powerT = 0; evo = null; hface = 1;
             fireX = W / 2; fireY = H / 2;
             hx = W * 0.15f; hy = H * 0.6f;
             bossPhase = 3; bossT = 0; bossSpawned = false;           // o dragao nasce em ~1 s, saindo da fumaça da fogueira
             FireExplode();
             Say("Hora da luta!");
+        }
+
+        // ATALHO DE TESTE: liga o modo jogo direto no nivel n (NV 1..7): rupias, coracoes extras e vida cheia; sem monstros, a contagem comeca do zero
+        void StartLevelTest(int nv)
+        {
+            nv = Math.Max(1, Math.Min(7, nv));
+            if (!playMode) SetPlayMode(true); else ResetBoss();
+            enemies.Clear(); rocks.Clear(); arrows.Clear(); items.Clear(); puffs.Clear();
+            rupees = (nv - 1) * 25; lastStep = RupeeStep(); SetMaxHp(5 + Math.Max(0, Math.Min(3, lastStep - 3))); hp = MaxHP; dead = false; deathWait = false; inv = 2f;
+            apples = 0; powerT = 0; evo = null; hx = W / 2; hy = H / 2; spawnTimer = 1.5f;
+            Say("Nível " + nv);
         }
 
         void StartBossTest()
