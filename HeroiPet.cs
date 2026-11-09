@@ -51,7 +51,7 @@ namespace HeroiPet
             {'g', Color.FromArgb(30, 110, 45)},
             {'Y', Color.FromArgb(240, 200, 80)},
             {'S', Color.FromArgb(250, 208, 165)},
-            {'V', Color.FromArgb(120, 62, 28)},
+            {'V', Color.FromArgb(222, 158, 20)},
             {'B', Color.FromArgb(135, 85, 45)},
             {'W', Color.FromArgb(245, 245, 245)},
             {'R', Color.FromArgb(215, 55, 55)},
