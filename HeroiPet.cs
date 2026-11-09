@@ -1013,6 +1013,7 @@ namespace HeroiPet
 
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--lanche") >= 0) apples = 5;
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--jogar") >= 0) SetPlayMode(true);
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "--dragao") >= 0) StartDragonTest();
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--chefao") >= 0) StartBossTest();   // teste rapido do lanche
             timer = new System.Windows.Forms.Timer();
             timer.Interval = 30;
@@ -1134,6 +1135,7 @@ namespace HeroiPet
             menu.Items.Add("Dar 5 maçãs (lanche)", null, delegate { apples = Math.Max(apples, 5); });
             menu.Items.Add("Soneca agora", null, delegate { if (calmState == 0) nextCalm = 0; });
             menu.Items.Add("Colher macas e dormir (2 min)", null, delegate { if (calmState == 0) { forceLong = true; nextCalm = 0; } });
+            menu.Items.Add("Teste: ir para a luta do dragão", null, delegate { StartDragonTest(); });
             ToolStripMenuItem pause = new ToolStripMenuItem("Pausar"); pauseItem = pause;
             pause.Click += delegate { paused = !paused; pause.Text = paused ? "Continuar" : "Pausar"; };
             menu.Items.Add(pause);
@@ -1985,6 +1987,20 @@ namespace HeroiPet
         bool DragonAlive() { return boss != null && enemies.Contains(boss); }
 
         // Atalho de teste: liga o modo jogo no nivel maximo e pula direto para o aviso de colher macas (vida baixa para testar a cura)
+        // PERIODO DE TESTE: coloca o jogador logo antes da luta com o dragao (modo jogo, nivel maximo, vida cheia, fogueira ja explodindo)
+        void StartDragonTest()
+        {
+            if (!playMode) SetPlayMode(true); else ResetBoss();
+            enemies.Clear(); rocks.Clear(); arrows.Clear(); items.Clear(); puffs.Clear();
+            rupees = 150; lastStep = RupeeStep(); SetMaxHp(8); hp = MaxHP; dead = false; deathWait = false; inv = 2f;
+            apples = 0; powerT = 0; evo = null; hface = 1;
+            fireX = W / 2; fireY = H / 2;
+            hx = W * 0.15f; hy = H * 0.6f;
+            bossPhase = 3; bossT = 0; bossSpawned = false;           // o dragao nasce em ~1 s, saindo da fumaça da fogueira
+            FireExplode();
+            Say("Hora da luta!");
+        }
+
         void StartBossTest()
         {
             rupees = 150;

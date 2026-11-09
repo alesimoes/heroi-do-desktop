@@ -78,6 +78,11 @@ Teste rápido: `HeroiPet.exe --evolucao` (desktop) ou `?evolucao` na URL (web) �
   A partir de +40% (100, 125, 150) cada degrau dá **+1 coração máximo** (até 8).
 - **Morte:** tela "VOCÊ MORREU" + "Tentar de novo"; volta com 10 rupias a menos (mínimo 0); nível/corações recalculados.
 
+## Período de teste do dragão
+Para testar a luta sem jogar tudo antes: desktop → menu da bandeja **"Teste: ir para a luta do dragão"** (ou `HeroiPet.exe --dragao`);
+web → botão **"Teste: ir para a luta do dragão"** no menu (ou `?dragao` na URL). Liga o modo jogo no nível máximo (150 rupias, 8 corações cheios),
+limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão nasce em ~1 s. Pode ser repetido quantas vezes quiser.
+
 ## Chefão (Dragão) — só no modo jogo
 1. No nível máximo (150 rupias) e **5 mortes** depois: os monstros que sobraram explodem, aviso grande aparece.
 2. Fogueira no meio. O jogador colhe, põe maçãs (3+2) e come **assadas** (10 s) com a tecla 3; cada uma cura **2**.

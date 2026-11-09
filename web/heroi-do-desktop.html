@@ -111,6 +111,7 @@ html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout
     <button id="mNap">Soneca agora</button>
     <button id="mHarvest">Colher maçãs e dormir (2 min)</button>
     <button id="mApples">Dar 5 maçãs (lanche)</button>
+    <button id="mDragon">Teste: ir para a luta do dragão</button>
     <button id="mPause" aria-pressed="false">Pausar</button>
     <button id="mFull" aria-pressed="false">Tela cheia</button>
     <div class="sep"></div>
@@ -1280,6 +1281,16 @@ $('mHeal').addEventListener('click', () => { hero.hp = hero.maxHp; closeMenu(); 
 $('mNap').addEventListener('click', () => { if (!playMode && calmState === 0) nextCalm = 0; closeMenu(); });
 $('mHarvest').addEventListener('click', () => { if (!playMode && calmState === 0) { forceLong = true; nextCalm = 0; } closeMenu(); });
 $('mApples').addEventListener('click', () => { hero.apples = Math.max(hero.apples, 5); closeMenu(); });
+// PERIODO DE TESTE: coloca o jogador logo antes da luta com o dragao (modo jogo, nivel maximo, vida cheia, fogueira ja explodindo)
+function startDragonTest() {
+  if (!playMode) setPlayMode(true); else resetBoss();
+  enemies.length = 0; rocks.length = 0; arrows.length = 0; items.length = 0; puffs.length = 0;
+  hero.rupees = 150; lastStep = rupeeStep(); setMaxHp(8); hero.hp = hero.maxHp; hero.dead = false; deathWait = false; closeDeath(); hero.inv = 2; hero.apples = 0; powerT = 0; hero.face = 1;
+  fireX = W / 2; fireY = H / 2; hero.x = W * 0.15; hero.y = H * 0.6;
+  bossPhase = 3; bossT = 0; bossSpawned = false; fireExplode(); say('Hora da luta!');      // o dragao nasce em ~1 s, saindo da fumaca da fogueira
+}
+$('mDragon').addEventListener('click', () => { startDragonTest(); closeMenu(); });
+if (/[?&]dragao\b/.test(location.search)) setTimeout(() => { $('intro').hidden = true; startDragonTest(); }, 400);
 $('mPause').addEventListener('click', () => { setPaused(!paused); closeMenu(); });
 $('evoBtn').addEventListener('click', useEvoItem);
 function setSizeMode(m) {
