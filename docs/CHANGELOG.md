@@ -3,6 +3,7 @@
 ## 08/11/2026 (fim da noite) — GitHub, ícones e certificado
 - Repositório **público** no GitHub (MIT) com build automático; preparação da assinatura gratuita (SignPath): política, workflows, guia e texto do pedido.
 - Web: botões de toque com **ícones** (espada, arco, maçã) que acompanham as evoluções; antes eram textos que se sobrepunham.
+- **Decisão final:** não assinar o instalador; material do SignPath arquivado em `docs/assinatura-arquivada/`.
 - Documentado o problema do certificado (`PROBLEMA-CERTIFICADO.md`): instalador sem assinatura é bloqueado em outros PCs; restrição "não pagar nada".
 - Documentação atualizada e consolidada (`STATUS.md`).
 

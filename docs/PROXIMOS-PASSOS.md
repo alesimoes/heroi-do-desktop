@@ -3,9 +3,9 @@
 Estado atual em [`STATUS.md`](STATUS.md).
 
 ## Em andamento / decisões em aberto
-1. **Certificado / instalador bloqueado (prioridade).** O usuário **não vai pagar nada**. Repositório já está público
-   (https://github.com/alesimoes/heroi-do-desktop). Próximo: os autores pedirem aprovação no **SignPath** (`ASSINATURA-SIGNPATH.md`) e,
-   em paralelo, avaliar a **Microsoft Store** (conta gratuita; instalar o Windows SDK e empacotar em MSIX). Resumo completo em `PROBLEMA-CERTIFICADO.md`.
+1. ~~Certificado / assinatura do instalador~~ — **decidido: não será feito** (ver `PROBLEMA-CERTIFICADO.md`). O repositório já está público
+   (https://github.com/alesimoes/heroi-do-desktop). Se mudar de ideia: SignPath e Microsoft Store são os caminhos gratuitos (material em `assinatura-arquivada/`).
+   Opcional útil: criar uma **Release** no GitHub com o instalador e o `COMO-INSTALAR.txt`.
 2. **Correções da revisão em paralelo** (ver `STATUS.md`, item 2): lanche só no automático no desktop, tela inicial e rotação na
    web/celular, tela cheia no Android, direcional, macieiras sob os botões, jogo pausado atrás de telas na web, botão "Tentar de novo"
    após Win+D, pausa longa da web.

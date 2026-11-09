@@ -15,6 +15,12 @@ Os `.exe` (jogo e instalador) **não têm assinatura digital** (Authenticode). P
 
 Não é vírus: o código é aberto e o programa não usa rede (ver `CODE_SIGNING_POLICY.md`).
 
+## DECISÃO FINAL (08/11/2026): **não vamos assinar o instalador**
+O usuário decidiu **encerrar este assunto**: sem certificado e sem pedir assinatura gratuita. O instalador continua **sem assinatura**; quem for bloqueado usa o
+guia [`COMO-INSTALAR.txt`](COMO-INSTALAR.txt) ou joga a **versão web**. Os arquivos preparados para o SignPath foram **arquivados** em
+[`assinatura-arquivada/`](assinatura-arquivada) (não estão ativos: o workflow virou `.txt` e o repositório não afirma ter assinatura).
+Se um dia mudar de ideia, o material está pronto (o SignPath e a Microsoft Store continuam sendo os caminhos gratuitos).
+
 ## Restrição do usuário
 **Não pagar nada.** Isso exclui certificados comerciais (cerca de US$150–300/ano) e a opção mais barata encontrada (Certum open source, ~€49/ano).
 
@@ -37,7 +43,7 @@ Não é vírus: o código é aberto e o programa não usa rede (ver `CODE_SIGNIN
 - Build automático (`.github/workflows/build.yml`, **testado e passando**) e fluxo de assinatura (`.github/workflows/assinar.yml`, **não testado**; só roda depois de configurado).
 - Passo a passo e texto do pedido: [`ASSINATURA-SIGNPATH.md`](ASSINATURA-SIGNPATH.md); configuração de artefato em `signpath-artifact-configuration.xml`.
 
-## O que falta (ordem sugerida)
+## O que faltaria (ARQUIVADO: não será feito)
 1. **Autores:** ativar 2FA no GitHub; pedir a aprovação em signpath.org usando o texto de `ASSINATURA-SIGNPATH.md`; ativar 2FA no SignPath.
 2. Quando aprovado: criar as variáveis `SIGNPATH_ORGANIZATION_ID`, `SIGNPATH_PROJECT_SLUG`, `SIGNPATH_POLICY_SLUG` e o segredo `SIGNPATH_API_TOKEN`
    no GitHub (o token é colocado pelos autores, não por ferramentas); preencher as contas em `CODE_SIGNING_POLICY.md`; rodar o fluxo **Assinar**;

@@ -26,9 +26,8 @@ Todos os desenhos são pixel art **próprios**, gerados por código (tabelas de 
 - **Versão web (recomendada, sem instalar nada):** https://heroi-games-2026.web.app
 - **Programa do Windows:** instalador na página de [Releases](https://github.com/alesimoes/heroi-do-desktop/releases) (ou compile você mesmo, abaixo).
 
-**Assinatura:** o instalador ainda **não é assinado**, então o Windows pode avisar que o aplicativo não é reconhecido
-(veja [`docs/COMO-INSTALAR.txt`](docs/COMO-INSTALAR.txt)). O pedido de assinatura gratuita à **SignPath Foundation** está sendo preparado;
-quando for aprovado, os instaladores serão assinados e esta página dirá: *Free code signing provided by SignPath.io, certificate by SignPath Foundation*.
+**Assinatura:** o instalador **não é assinado digitalmente** (certificados custam dinheiro e esta é uma obra gratuita), então o Windows pode avisar que o
+aplicativo não é reconhecido. Veja [`docs/COMO-INSTALAR.txt`](docs/COMO-INSTALAR.txt) para o que fazer — ou jogue a **versão web**, que não precisa de instalação.
 
 ## Como compilar (Windows)
 
@@ -57,8 +56,7 @@ Mais detalhes (testes, publicação da web) em [`docs/COMO-CONSTRUIR-E-PUBLICAR.
 
 ## Assinatura do instalador
 
-Veja [`CODE_SIGNING_POLICY.md`](CODE_SIGNING_POLICY.md). Enquanto o instalador não estiver assinado, o Windows pode mostrar um
-aviso de "aplicativo não reconhecido" — o guia [`docs/COMO-INSTALAR.txt`](docs/COMO-INSTALAR.txt) explica o que fazer.
+Não há assinatura digital (decisão do projeto: não pagar por certificado). O histórico das opções avaliadas está em [`docs/PROBLEMA-CERTIFICADO.md`](docs/PROBLEMA-CERTIFICADO.md); os arquivos preparados para o SignPath ficam arquivados em [`docs/assinatura-arquivada`](docs/assinatura-arquivada).
 
 ## Licença
 

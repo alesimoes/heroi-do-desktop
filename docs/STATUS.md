@@ -33,10 +33,10 @@ Ponto em que o projeto está, para retomar de onde parou. **Comece por aqui.**
 
 Detalhes: `REGRAS-DO-JOGO.md` (números) e `ARQUITETURA.md` (código).
 
-## Problema principal em aberto: certificado / instalador bloqueado
-Instalador sem assinatura é bloqueado em outros computadores. **O usuário não vai pagar nada.** Caminhos gratuitos: SignPath (pedido a fazer pelos
-autores) e Microsoft Store (conta gratuita; exige empacotar em MSIX e o Windows SDK, que não está instalado). Enquanto isso: `COMO-INSTALAR.txt` e a
-versão web. **Tudo em `PROBLEMA-CERTIFICADO.md`** e `ASSINATURA-SIGNPATH.md`.
+## Certificado / instalador bloqueado — DECIDIDO: não vamos assinar
+Instalador sem assinatura é bloqueado em alguns computadores. **O usuário decidiu não fazer certificado nem pedir assinatura** (não paga nada).
+Solução adotada: `COMO-INSTALAR.txt` e a **versão web**. Histórico completo em `PROBLEMA-CERTIFICADO.md`; o material do SignPath está arquivado em
+`assinatura-arquivada/`.
 
 ## Outras pendências
 1. **Correções da revisão em paralelo** ainda **não aplicadas**: lanche automático no modo jogo no desktop (deveria ser só automático, como na web), tela
