@@ -744,7 +744,7 @@ namespace HeroiPet
             "#Criação", "Bia Krepel", "",
             "#Programação", "Claude", "",
             "#Herói", "Link, o aventureiro da área de trabalho", "",
-            "#Inimigos", "Octoroks, morcegos e slimes", "",
+            "#Inimigos", "Octoroks, morcegos, slimes e bokoblins", "",
             "#Chefão", "O Dragão da Fogueira", "",
             "#Cenário", "Macieiras, fogueira e a sua área de trabalho", "",
             "", "Obrigado por jogar!" };
