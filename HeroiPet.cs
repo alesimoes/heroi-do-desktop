@@ -1165,10 +1165,23 @@ namespace HeroiPet
         {
             if (!OwnBow(eqBow)) eqBow = 0; if (!OwnSword(eqSword)) eqSword = 0; if (!OwnShield(eqShield)) eqShield = 0; if (!OwnHat(eqHat)) eqHat = 0; if (!OwnTunic(eqTunic)) eqTunic = 0;
         }
+        float newItemUntil = -1f;
+        void DrawNewItemNotice(Graphics g)
+        {
+            if (time >= newItemUntil) return;
+            string t = "NOVO ITEM"; SizeF z = g.MeasureString(t, font);
+            float w = z.Width + 10 * S, h = z.Height + 4 * S, x = W - w - 6 * S, y = 16 * S;
+            using (SolidBrush k = new SolidBrush(Color.FromArgb(28, 22, 36))) using (SolidBrush bg = new SolidBrush(Color.FromArgb(46, 40, 62))) using (SolidBrush gold = new SolidBrush(Color.FromArgb(247, 190, 70)))
+            {
+                g.FillRectangle(k, x - S, y - S, w + 2 * S, h + 2 * S); g.FillRectangle(bg, x, y, w, h); g.FillRectangle(gold, x, y, S, h);
+            }
+            DrawText(g, t, x + 6 * S, y + 2 * S, Color.FromArgb(255, 220, 90));
+        }
         void AutoEquip(int stage)      // ao ganhar um item, ele e equipado
         {
             if (stage == 1) eqBow = 1; else if (stage == 2) eqHat = 1; else if (stage == 3) eqTunic = 1; else if (stage == 4) { eqSword = 1; eqShield = 1; } else if (stage == 5) { eqHat = 2; eqTunic = 2; eqShield = 2; }
             ValidateEquip(); SaveEquip();
+            newItemUntil = time + 3f;      // aviso "NOVO ITEM" no canto direito por 3 s
         }
         public void EquipItem(int cat, int id)      // cat: 0 arco, 1 espada, 2 escudo, 3 gorro, 4 roupa
         {
@@ -4363,30 +4376,27 @@ namespace HeroiPet
         }
         void DrawRider(Graphics g, Enemy e)
         {
-            Shadow(g, e.X, e.Y, 17);
+            Shadow(g, e.X, e.Y, 13);
             int f = e.Face > 0 ? 1 : -1;
-            bool run = e.Mode == 0 || ((e.VX != 0 || e.VY != 0));
-            int ph = run ? ((int)(e.T * 8)) % 2 : 0;
-            Color K = Color.FromArgb(28, 22, 36), body = Color.FromArgb(165, 105, 58), dark = Color.FromArgb(105, 62, 32), mane = Color.FromArgb(70, 42, 24);
-            // patas (alternam ao galopar)
-            float l1 = ph == 0 ? 0 : 1, l2 = ph == 0 ? 1 : 0;
-            HRect(g, K, e.X, e.Y, f, -9, 0, 3, 7 - l1); HRect(g, dark, e.X, e.Y, f, -8, 0, 1, 6 - l1);
-            HRect(g, K, e.X, e.Y, f, -4, 0, 3, 7 - l2); HRect(g, dark, e.X, e.Y, f, -3, 0, 1, 6 - l2);
-            HRect(g, K, e.X, e.Y, f, 3, 0, 3, 7 - l2); HRect(g, dark, e.X, e.Y, f, 4, 0, 1, 6 - l2);
-            HRect(g, K, e.X, e.Y, f, 7, 0, 3, 7 - l1); HRect(g, dark, e.X, e.Y, f, 8, 0, 1, 6 - l1);
-            // corpo, pescoco, cabeca, rabo
-            HRect(g, K, e.X, e.Y, f, -12, 6, 24, 10); HRect(g, body, e.X, e.Y, f, -11, 7, 22, 8);
-            HRect(g, K, e.X, e.Y, f, 8, 10, 7, 11); HRect(g, body, e.X, e.Y, f, 9, 11, 5, 9);
-            HRect(g, K, e.X, e.Y, f, 11, 17, 8, 6); HRect(g, body, e.X, e.Y, f, 12, 18, 6, 4); HRect(g, K, e.X, e.Y, f, 15, 20, 1, 1);
-            HRect(g, mane, e.X, e.Y, f, 7, 12, 2, 9); HRect(g, mane, e.X, e.Y, f, -15, 8, 4, 7);
-            // cela
-            HRect(g, Color.FromArgb(150, 40, 45), e.X, e.Y, f, -4, 14, 9, 2);
-            // cavaleiro (bokoblin) sentado no cavalo
-            Spr(g, boko[0], e.X - f * 1 * S, e.Y - 9 * S, f > 0);
+            bool run = e.Mode == 0 || e.VX != 0 || e.VY != 0;
+            // galope: as patas da frente vao um pouco para frente e as de tras um pouco para tras, depois voltam
+            float sw = run ? (float)Math.Round(2.0 * (1.0 - Math.Cos(e.T * 9.0)) / 2.0) : 0f;
+            Color K = Color.FromArgb(28, 22, 36), body = Color.FromArgb(165, 105, 58), dark = Color.FromArgb(105, 62, 32);
+            // cavaleiro primeiro: as pernas dele ficam escondidas atras do corpo do cavalo
+            Spr(g, boko[0], e.X, e.Y - 6 * S, f > 0);
+            // patas: 2 de tras e 2 da frente
+            HRect(g, K, e.X, e.Y, f, -7 - sw, 0, 3, 5); HRect(g, dark, e.X, e.Y, f, -6 - sw, 0, 1, 4);
+            HRect(g, K, e.X, e.Y, f, 4 + sw, 0, 3, 5); HRect(g, dark, e.X, e.Y, f, 5 + sw, 0, 1, 4);
+            // corpo, pescoco, cabeca e rabo
+            HRect(g, K, e.X, e.Y, f, -8, 3, 16, 8); HRect(g, body, e.X, e.Y, f, -7, 4, 14, 6);
+            HRect(g, K, e.X, e.Y, f, 5, 8, 5, 6); HRect(g, body, e.X, e.Y, f, 6, 9, 3, 4);
+            HRect(g, K, e.X, e.Y, f, 8, 10, 6, 4); HRect(g, body, e.X, e.Y, f, 9, 11, 4, 2);
+            HRect(g, dark, e.X, e.Y, f, -11, 6, 3, 3);
             // arco na frente do cavaleiro
-            HRect(g, K, e.X, e.Y, f, 8, 19, 2, 9); HRect(g, Color.FromArgb(135, 85, 45), e.X, e.Y, f, 8, 20, 1, 7); HRect(g, Color.White, e.X, e.Y, f, 7, 20, 1, 7);
+            HRect(g, Color.FromArgb(135, 85, 45), e.X, e.Y, f, 8, 17, 1, 1); HRect(g, Color.FromArgb(135, 85, 45), e.X, e.Y, f, 9, 15, 1, 2);
+            HRect(g, Color.FromArgb(135, 85, 45), e.X, e.Y, f, 10, 12, 1, 3); HRect(g, Color.FromArgb(135, 85, 45), e.X, e.Y, f, 9, 10, 1, 2); HRect(g, Color.FromArgb(135, 85, 45), e.X, e.Y, f, 8, 9, 1, 1);
+            HRect(g, Color.White, e.X, e.Y, f, 8, 10, 1, 7);
         }
-
         void DrawPuff(Graphics g, Puff p)
         {
             float t = p.T / 0.45f;
@@ -4424,6 +4434,7 @@ namespace HeroiPet
                 DrawText(g, gs, W - gz.Width - 6 * S, 4 * S, powerT > 0 ? Color.FromArgb(120, 230, 255) : Color.FromArgb(150, 200, 255));
             }
             if (playMode) DrawControlsHelp(g);
+            DrawNewItemNotice(g);
             if (paused) DrawPauseBanner(g);
         }
     }
