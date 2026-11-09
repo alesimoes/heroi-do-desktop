@@ -18,7 +18,7 @@ Unidades: distâncias em "unidades de sprite" (múltiplos de `S`). Tempos em seg
 | Slime | 2 | Pula em ciclos (55/s por 0,45 s) |
 | Bokoblin (rosado, chifres, porrete) | 3 | Persegue (26/s); a menos de 16 levanta o porrete (0,55 s) e bate (acerta se o herói estiver a menos de 20); descansa 0,8 s e repete. Contato também machuca |
 - Sorteio no modo jogo: octorok 25%, morcego 30%, slime 30%, **bokoblin 15%**. No automático: 15% bokoblin, o resto 1/3 cada.
-- Quando o herói morre e tenta de novo, o **dragão recupera toda a vida** (2500) e as bolas de fogo somem.
+- Quando o herói morre e tenta de novo, o **dragão recupera toda a vida** (5000) e as bolas de fogo somem.
 - Aparecem nas bordas a cada 3–7 s (dividido pelo multiplicador de rupias no modo jogo), máx. 4 (automático).
 - Contato machuca (raio 9). Herói perde 1 coração e fica invulnerável 1,2 s.
 - No **modo jogo** o sorteio é: octorok 30%, morcego 35%, slime 35% (octoroks 10% menos frequentes).
@@ -82,7 +82,10 @@ Teste rápido: `HeroiPet.exe --evolucao` (desktop) ou `?evolucao` na URL (web) �
 1. No nível máximo (150 rupias) e **5 mortes** depois: os monstros que sobraram explodem, aviso grande aparece.
 2. Fogueira no meio. O jogador colhe, põe maçãs (3+2) e come **assadas** (10 s) com a tecla 3; cada uma cura **2**.
 3. Com vida cheia (depois de comer ao menos uma): herói se afasta, a fogueira explode, fumaça, **Dragão** nasce.
-4. Dragão: **2500 de vida**, ~1,7× maior, **anda** em volta do herói (14/s, não pisa nele), cospe bola de fogo mirada
-   a cada 1,5–3 s. Flecha 50, espada 150. **Abaixo de 50%**: 3 bolas em leque e 30% mais rápido. **Com 10%**: bolas
-   **teleguiadas** (52/s, curvam 1,8 rad/s) que **explodem em 3 s** (raio 16).
-5. Morte do dragão: **FIM DE JOGO** + créditos → volta ao modo automático.
+4. Dragão: **5000 de vida** (o dobro), ~1,7× maior, **anda** em volta do herói (14/s, não pisa nele), cospe bola de fogo mirada
+   a cada 1,5–3 s. Flecha 50, espada 150. **Com metade da vida (fúria)**: fica **vermelho**, **+10% de tamanho** (hitboxes acompanham), anda
+   **um pouco mais rápido** (18/s, ainda bem mais lento que o herói, 56/s), **solta fumaça do nariz de vez em quando** (a cada 2,5–5,5 s),
+   bolas de fogo **20% mais frequentes**, 3 bolas em leque. **Com 10%**: bolas **teleguiadas** (52/s, curvam 1,8 rad/s) que **explodem em 3 s** (raio 16).
+5. **Morte do dragão:** ele **volta ao normal** (roxo, tamanho normal) e pisca por 1,3 s; depois **explode** e solta **1000 rupias** em valores
+   diferentes (2×**300 dourada**, 4×50, 5×20, 8×10, 3×5, 5×1 = 1000), que se espalham e **não somem**. Cerca de 2 s depois da explosão aparece
+   **"ESPERE POR MAIS ATUALIZAÇÕES"** por 4,5 s e então os **créditos** (que rolam com o jogo ainda ativo para pegar as rupias) → volta ao modo automático.

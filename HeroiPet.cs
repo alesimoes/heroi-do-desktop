@@ -548,7 +548,7 @@ namespace HeroiPet
         public int Type;          // 0 octorok, 1 morcego, 2 slime
         public float X, Y, VX, VY, KX, KY, T, Timer, Flash;
         public int HP, MaxHP, Face = 1, Mode;
-        public float TX, TY, RT; public bool Moving;      // dragao: destino, tempo para trocar de destino, esta andando
+        public float TX, TY, RT; public bool Moving; public float Scale = 1f, SmokeT;      // dragao: destino, tempo para trocar de destino, esta andando
     }
     class Rock { public float X, Y, VX, VY, Life; public bool Fire, Homing; }
     class Arrow { public float X, Y, VX, VY; public bool Power; }
@@ -556,8 +556,8 @@ namespace HeroiPet
     class FlyApple { public float X0, Y0, T; }
     class CookApple { public float X0, Y0, X1, Y1, T, Dur; public int Idx, Dir; }
     class Fire { }
-    class Smoke { public float X, Y, T, Sz; }
-    class Item { public int Kind; public float X, Y, T; }   // 0 coracao, 1 verde, 2 azul, 3 vermelha
+    class Smoke { public float X, Y, T, Sz; public float Life = 3.2f, Grow = 5f; }
+    class Item { public int Kind; public float X, Y, T; public bool Reward; public float VX, VY; }   // 0 coracao, 1 verde, 2 azul, 3 vermelha
     class Puff { public int Kind; public float X, Y, T; }  // 0 morte, 1 faisca, 2 spawn
 
         // Aviso que aparece por cima de qualquer aplicativo, sem roubar o foco nem bloquear cliques
@@ -947,7 +947,7 @@ namespace HeroiPet
         Sprite heroDead;
         Sprite[] octo = new Sprite[2], bat = new Sprite[2], slime = new Sprite[2], boko = new Sprite[3];
         Sprite heartFull, heartEmpty, rockSpr;
-        Sprite[] rupeeSpr = new Sprite[5];
+        Sprite[] rupeeSpr = new Sprite[6];
         Font font;
 
         List<Enemy> enemies = new List<Enemy>();
@@ -1085,6 +1085,8 @@ namespace HeroiPet
             appleHud = Art.Make(Art.AppleBig, S, null);
             int ds = (int)Math.Round(S * 1.7); DK = ds / (float)S;          // dragao ~1,7x maior
             dragonSpr[0] = Art.Make(Art.DragonRows(false), ds, null); dragonSpr[1] = Art.Make(Art.DragonRows(true), ds, null);
+            Dictionary<char, Color> redOv = Art.Ov('P', Color.FromArgb(210, 45, 50)); redOv['p'] = Color.FromArgb(135, 25, 38); redOv['Y'] = Color.FromArgb(245, 170, 70);      // abaixo de 50% da vida o dragao fica vermelho
+            dragonSprRed[0] = Art.Make(Art.DragonRows(false), ds, redOv); dragonSprRed[1] = Art.Make(Art.DragonRows(true), ds, redOv);
             fireSpr[0] = Art.Make(Art.FireballRows(0), S + 1, null); fireSpr[1] = Art.Make(Art.FireballRows(1), S + 1, null);
             Color[] bk = { Color.FromArgb(215, 55, 55), Color.FromArgb(205, 92, 48), Color.FromArgb(176, 86, 42), Color.FromArgb(142, 74, 36) };
             for (int i = 0; i < 4; i++) { Dictionary<char, Color> ob = Art.Ov('R', bk[i]); ob['G'] = i == 0 ? Color.FromArgb(58, 165, 62) : Color.FromArgb(104, 110, 40); appleBake[i] = Art.Make(Art.AppleSm, S, ob); }
@@ -1104,6 +1106,7 @@ namespace HeroiPet
             rupeeSpr[2] = Art.Make(Art.Rupee, S, Art.Ov('G', Color.FromArgb(230, 60, 60)));
             rupeeSpr[3] = Art.Make(Art.Rupee, S, Art.Ov('G', Color.FromArgb(240, 200, 60)));      // 10
             rupeeSpr[4] = Art.Make(Art.Rupee, S, Art.Ov('G', Color.FromArgb(150, 80, 205)));      // 50
+            rupeeSpr[5] = Art.Make(Art.Rupee, S * 2, Art.Ov('G', Color.FromArgb(255, 205, 40)));      // 300 (recompensa do dragao): dourada e grande
         }
 
         void BuildTray()
@@ -1259,8 +1262,8 @@ namespace HeroiPet
                 for (int k = enemies.Count - 1; k >= 0 && !gone; k--)
                 {
                     Enemy en = enemies[k];
-                    float dx = en.X - a.X, dy = (en.Y - (en.Type == 1 ? 9 * S : (en.Type == 3 ? 12 * S * DK : 4 * S))) - a.Y;
-                    float hitR = en.Type == 3 ? 14 * S * DK : 7 * S;
+                    float dx = en.X - a.X, dy = (en.Y - (en.Type == 1 ? 9 * S : (en.Type == 3 ? 12 * S * DK * en.Scale : 4 * S))) - a.Y;
+                    float hitR = en.Type == 3 ? 14 * S * DK * en.Scale : 7 * S;
                     if (dx * dx + dy * dy < hitR * hitR) { DamageEnemy(en, en.Type == 3 ? 50 : 1); gone = true; }
                 }
                 if (gone) arrows.RemoveAt(i);
@@ -1791,7 +1794,7 @@ namespace HeroiPet
         }
 
         // valores: 1 verde, 5 azul, 20 vermelha, 10 amarela, 50 roxa. No modo jogo so caem as de 5 a 50, para nao demorar.
-        static int RupeeValue(int kind) { switch (kind) { case 1: return 1; case 2: return 5; case 3: return 20; case 4: return 10; default: return 50; } }
+        static int RupeeValue(int kind) { switch (kind) { case 1: return 1; case 2: return 5; case 3: return 20; case 4: return 10; case 6: return 300; default: return 50; } }
         int RupeeKind(int r)
         {
             if (!playMode)
@@ -1969,13 +1972,14 @@ namespace HeroiPet
         // o jogador colhe macas (tecla 3), poe na fogueira e come (tecla 3) ate encher a vida. Ai a fogueira explode e sai o dragao.
         int bossPhase, killsAtMax;      // 0 normal | 1 fogueira de cura | 2 heroi se afasta | 3 explosao e fumaca | 4 luta | 5 vitoria
         float bossT, playEatT, leaveX, leaveY, bossDeadX, bossDeadY;
+        int bossDeadFace = 1; bool rewardSpawned; float msgT;      // fim do dragao: fantasma normal, explosao com 1000 rupias, mensagem
         bool atePhase1, endStarted, bossSpawned;
         float[] bakeTs = new float[5];
         bool[] reserved = new bool[5];
         Enemy boss;
         List<Smoke> smokes = new List<Smoke>();
         EndShow endShow;
-        Sprite[] dragonSpr = new Sprite[2], fireSpr = new Sprite[2];
+        Sprite[] dragonSpr = new Sprite[2], dragonSprRed = new Sprite[2], fireSpr = new Sprite[2];
         float DK = 1.7f;                  // fator de tamanho do dragao em relacao ao tamanho normal
 
         bool DragonAlive() { return boss != null && enemies.Contains(boss); }
@@ -1995,7 +1999,7 @@ namespace HeroiPet
         {
             bossPhase = 0; killsAtMax = 0; bossT = 0; atePhase1 = false; playEatT = 0; endStarted = false; bossSpawned = false;
             if (boss != null) { enemies.Remove(boss); boss = null; }
-            smokes.Clear();
+            smokes.Clear(); rewardSpawned = false; msgT = 0; items.RemoveAll(delegate (Item it) { return it.Reward; });
             rocks.RemoveAll(delegate (Rock r) { return r.Fire; });
             for (int i = 0; i < 5; i++) { reserved[i] = false; bakeTs[i] = 0; }
             if (cookState == 0) { fireK = 0; for (int i = 0; i < 5; i++) onFire[i] = false; }
@@ -2041,7 +2045,7 @@ namespace HeroiPet
             bossSpawned = true;
             boss = new Enemy();
             boss.Type = 3; boss.X = fireX; boss.Y = fireY + 8 * S;
-            boss.HP = boss.MaxHP = 2500;
+            boss.HP = boss.MaxHP = 5000;
             boss.Timer = 1.5f; boss.Face = hx >= fireX ? 1 : -1;
             enemies.Add(boss);
             for (int k = 0; k < 6; k++) puffs.Add(new Puff { Kind = 2, X = fireX + ((float)rnd.NextDouble() - 0.5f) * 16 * S, Y = fireY - (float)rnd.NextDouble() * 10 * S });
@@ -2049,11 +2053,56 @@ namespace HeroiPet
 
         void BossDefeated(Enemy e)
         {
-            bossPhase = 5; bossT = 0; endStarted = false;
-            bossDeadX = e.X; bossDeadY = e.Y;
+            bossPhase = 5; bossT = 0; endStarted = false; rewardSpawned = false; msgT = 0;
+            bossDeadX = e.X; bossDeadY = e.Y; bossDeadFace = e.Face;
             rocks.Clear();
             for (int k = 0; k < 8; k++)
                 puffs.Add(new Puff { Kind = k % 2, X = e.X + ((float)rnd.NextDouble() - 0.5f) * 30 * S, Y = e.Y - (float)rnd.NextDouble() * 24 * S });
+        }
+
+        // explosao do dragao: 1000 rupias em valores diferentes (2x300 + 4x50 + 5x20 + 8x10 + 3x5 + 5x1 = 1000)
+        void SpawnDragonReward()
+        {
+            int[] kinds = { 6, 6, 5, 5, 5, 5, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 2, 2, 2, 1, 1, 1, 1, 1 };
+            for (int i = 0; i < kinds.Length; i++)
+            {
+                double a = rnd.NextDouble() * Math.PI * 2; float sp = (35 + (float)rnd.NextDouble() * 70) * S;
+                items.Add(new Item { Kind = kinds[i], X = bossDeadX, Y = bossDeadY - 8 * S, Reward = true, VX = (float)Math.Cos(a) * sp, VY = (float)Math.Sin(a) * sp * 0.7f });
+            }
+            for (int k = 0; k < 22; k++)
+                puffs.Add(new Puff { Kind = k % 2, X = bossDeadX + ((float)rnd.NextDouble() - 0.5f) * 40 * S, Y = bossDeadY - (float)rnd.NextDouble() * 30 * S });
+            for (int k = 0; k < 14; k++)
+                smokes.Add(new Smoke { X = bossDeadX + ((float)rnd.NextDouble() - 0.5f) * 36 * S, Y = bossDeadY - (float)rnd.NextDouble() * 12 * S, T = -(float)rnd.NextDouble() * 0.4f, Sz = 4 + (float)rnd.NextDouble() * 4, Life = 2.6f, Grow = 7f });
+            Say("1000 rupias!");
+        }
+
+        // o dragao derrotado volta ao normal (roxo, tamanho normal) e pisca antes de explodir
+        void DrawDragonGhost(Graphics g)
+        {
+            if (bossPhase != 5 || rewardSpawned) return;
+            if (((int)(bossT * 12)) % 2 == 0) return;
+            Sprite sp = dragonSpr[0];
+            Shadow(g, bossDeadX, bossDeadY, 34 * DK);
+            g.DrawImage(bossDeadFace > 0 ? sp.R : sp.L, (int)(bossDeadX - sp.W / 2f), (int)(bossDeadY - sp.H), sp.W, sp.H);
+        }
+
+        Font msgFont;
+        void DrawBossMsg(Graphics g)
+        {
+            if (msgT <= 0) return;
+            if (msgFont == null) msgFont = new Font("Consolas", S * 8, FontStyle.Bold, GraphicsUnit.Pixel);
+            string a = "ESPERE POR MAIS ATUALIZAÇÕES";
+            SizeF sz = g.MeasureString(a, msgFont);
+            float pad = 6 * S, x = W / 2f - sz.Width / 2, y = H / 2f - sz.Height / 2;
+            using (SolidBrush k = new SolidBrush(Color.FromArgb(28, 22, 36)))
+            using (SolidBrush bg = new SolidBrush(Color.FromArgb(46, 40, 62)))
+            using (SolidBrush gold = new SolidBrush(Color.FromArgb(247, 190, 70)))
+            {
+                g.FillRectangle(k, x - pad - S, y - pad - S, sz.Width + 2 * pad + 2 * S, sz.Height + 2 * pad + 2 * S);
+                g.FillRectangle(bg, x - pad, y - pad, sz.Width + 2 * pad, sz.Height + 2 * pad);
+                g.FillRectangle(gold, x - pad, y - pad, sz.Width + 2 * pad, S);
+            }
+            DrawTextF(g, a, msgFont, x, y, Color.FromArgb(255, 220, 90));
         }
 
         void BossLeave(float dt)                // o heroi se afasta da fogueira sozinho
@@ -2076,7 +2125,7 @@ namespace HeroiPet
             if (bossPhase == 0) { if (killsAtMax >= 5) StartFinalPhase(); return; }
             bossT += dt;
             for (int i = 0; i < 5; i++) if (onFire[i]) bakeTs[i] += dt;
-            for (int i = smokes.Count - 1; i >= 0; i--) { smokes[i].T += dt; if (smokes[i].T > 3.2f) smokes.RemoveAt(i); }
+            for (int i = smokes.Count - 1; i >= 0; i--) { smokes[i].T += dt; if (smokes[i].T > smokes[i].Life) smokes.RemoveAt(i); }
 
             if (bossPhase == 1)
             {
@@ -2098,12 +2147,20 @@ namespace HeroiPet
             }
             else if (bossPhase == 5)
             {
-                if (((int)(bossT * 8)) != ((int)((bossT - dt) * 8)) && bossT < 2.2f)
-                    puffs.Add(new Puff { Kind = rnd.Next(2), X = bossDeadX + ((float)rnd.NextDouble() - 0.5f) * 30 * S, Y = bossDeadY - (float)rnd.NextDouble() * 24 * S });
-                if (bossT >= 2.4f && !endStarted)
+                // 0-1,3 s: o dragao volta ao normal (sem vermelho, tamanho normal) e pisca; depois EXPLODE e solta 1000 rupias
+                if (bossT >= 1.3f && !rewardSpawned) { rewardSpawned = true; SpawnDragonReward(); }
+                if (rewardSpawned && bossT < 3.3f && ((int)(bossT * 10)) != ((int)((bossT - dt) * 10)))
+                    puffs.Add(new Puff { Kind = rnd.Next(2), X = bossDeadX + ((float)rnd.NextDouble() - 0.5f) * 44 * S, Y = bossDeadY - (float)rnd.NextDouble() * 34 * S });
+                // depois de vencer o dragao: "Espere por mais atualizacoes" e entao os creditos
+                if (bossT >= 3.6f && msgT <= 0 && !endStarted) msgT = 0.001f;
+                if (msgT > 0 && !endStarted)
                 {
-                    endStarted = true;
-                    try { endShow = new EndShow(S / 3f); endShow.Show(); } catch { endShow = null; }
+                    msgT += dt;
+                    if (msgT >= 4.5f)
+                    {
+                        endStarted = true; msgT = 0;
+                        try { endShow = new EndShow(S / 3f); endShow.Show(); } catch { endShow = null; }
+                    }
                 }
                 if (endStarted && (endShow == null || endShow.IsDisposed || endShow.Done))
                     SetPlayMode(false);                 // acabou: volta ao modo automatico
@@ -2143,8 +2200,8 @@ namespace HeroiPet
             foreach (Smoke s in smokes)
             {
                 if (s.T < 0) continue;
-                float k = s.T / 3.2f;
-                float sz = S * (s.Sz + k * 5);
+                float k = s.T / s.Life;
+                float sz = S * (s.Sz + k * s.Grow);
                 int shade = (int)(210 - 90 * k);
                 using (SolidBrush b = new SolidBrush(Color.FromArgb(shade, shade, shade + 10)))
                     g.FillRectangle(b, s.X - sz / 2, s.Y - s.T * 11 * S - sz / 2, sz, sz);
@@ -2153,9 +2210,9 @@ namespace HeroiPet
 
         void DrawDragon(Graphics g, Enemy e)
         {
-            Shadow(g, e.X, e.Y, 34 * DK);
-            float k = e.T < 1.5f ? 0.15f + 0.85f * (e.T / 1.5f) : 1f;
-            Sprite sp = dragonSpr[e.Mode == 1 ? 1 : 0];
+            Shadow(g, e.X, e.Y, 34 * DK * e.Scale);
+            float k = (e.T < 1.5f ? 0.15f + 0.85f * (e.T / 1.5f) : 1f) * e.Scale;
+            Sprite sp = (e.HP * 2 <= e.MaxHP ? dragonSprRed : dragonSpr)[e.Mode == 1 ? 1 : 0];
             int w = (int)(sp.W * k), h = (int)(sp.H * k);
             float bob = e.Moving ? Math.Abs((float)Math.Sin(e.T * 7)) * 2 * S : 0;      // pula um pouco ao andar
             g.DrawImage(e.Face > 0 ? sp.R : sp.L, (int)(e.X - w / 2f), (int)(e.Y - h - bob), w, h);
@@ -2675,7 +2732,7 @@ namespace HeroiPet
             {
                 Enemy e = enemies[i];
                 float dx = e.X - cx, dy = e.Y - hy;
-                { float rad = e.Type == 3 ? R + 14 * S * DK : R; if (dx * dx + dy * dy < rad * rad) DamageEnemy(e, e.Type == 3 ? 150 : 1); }
+                { float rad = e.Type == 3 ? R + 14 * S * DK * e.Scale : R; if (dx * dx + dy * dy < rad * rad) DamageEnemy(e, e.Type == 3 ? 150 : 1); }
             }
             for (int i = rocks.Count - 1; i >= 0; i--)
             {
@@ -2756,7 +2813,9 @@ namespace HeroiPet
                         e.RT -= dt; e.Moving = false;
                         if (e.Mode == 0)
                         {
-                            float halfW = 24 * DK * S + 4 * S, topH = 40 * DK * S + 6 * S;
+                            bool furia = e.HP * 2 <= e.MaxHP;                          // metade da vida: vermelho, +10% maior, mais rapido, solta fumaca, mais fogo
+                            e.Scale = furia ? 1.1f : 1f;
+                            float halfW = 24 * DK * e.Scale * S + 4 * S, topH = 40 * DK * e.Scale * S + 6 * S;
                             if (e.RT <= 0 || ((e.TX - e.X) * (e.TX - e.X) + (e.TY - e.Y) * (e.TY - e.Y)) < (3 * S) * (3 * S))
                             {
                                 // novo destino: um ponto em volta do heroi, a uns 70-110 de distancia
@@ -2767,16 +2826,27 @@ namespace HeroiPet
                             }
                             float mdx = e.TX - e.X, mdy = e.TY - e.Y, md = (float)Math.Sqrt(mdx * mdx + mdy * mdy);
                             float hdx = hx - e.X, hdy = hy - e.Y;
-                            bool tooClose = hdx * hdx + hdy * hdy < (22 * S * DK) * (22 * S * DK);      // nao anda por cima do heroi
+                            bool tooClose = hdx * hdx + hdy * hdy < (22 * S * DK * e.Scale) * (22 * S * DK * e.Scale);      // nao anda por cima do heroi
                             if (tooClose && md > 1 && (mdx * hdx + mdy * hdy) > 0) e.RT = 0;      // perto demais: nao anda para o heroi, escolhe outro destino
-                            else if (md > 1) { e.X += mdx / md * 14 * S * dt; e.Y += mdy / md * 14 * S * dt; e.Moving = true; }
+                            else if (md > 1) { float vel = (furia ? 18f : 14f) * S; e.X += mdx / md * vel * dt; e.Y += mdy / md * vel * dt; e.Moving = true; }      // furia: um pouco mais rapido, ainda bem mais lento que o heroi (56)
+                            if (furia)
+                            {
+                                e.SmokeT -= dt;
+                                if (e.SmokeT <= 0)      // de vez em quando sai fumaca do nariz
+                                {
+                                    e.SmokeT = 2.5f + (float)rnd.NextDouble() * 3f;
+                                    Sprite dsp = dragonSprRed[0]; float sgn = e.Face > 0 ? 1f : -1f;
+                                    float nx = e.X + sgn * ((43f / 48f) - 0.5f) * dsp.W * e.Scale, ny = e.Y - dsp.H * e.Scale + (13f / 40f) * dsp.H * e.Scale;
+                                    for (int sk = 0; sk < 4; sk++) smokes.Add(new Smoke { X = nx + ((float)rnd.NextDouble() - 0.5f) * 2 * S, Y = ny, T = -sk * 0.18f, Sz = 1.6f + (float)rnd.NextDouble() * 1.4f, Life = 1.7f, Grow = 3f });
+                                }
+                            }
                         }
                         if (e.Mode == 0) { if (e.Timer <= 0) { e.Mode = 1; e.Timer = 0.6f; } }
                         else if (e.Timer <= 0)
                         {
                             bool homing = e.HP * 10 <= e.MaxHP;                       // 10% da vida: bolas teleguiadas que explodem em 3 s
                             bool rage = e.HP * 2 <= e.MaxHP;                         // abaixo de 50% da vida: furia (3 bolas em leque, mais rapido)
-                            float mx = e.X + e.Face * 17 * S * DK, my = e.Y - 15 * S * DK;
+                            float mx = e.X + e.Face * 17 * S * DK * e.Scale, my = e.Y - 15 * S * DK * e.Scale;
                             float a0 = (float)Math.Atan2((hy - 6 * S) - my, hx - mx);
                             int nb = rage ? 3 : 1;
                             for (int bi = 0; bi < nb; bi++)
@@ -2787,7 +2857,7 @@ namespace HeroiPet
                                 r.VX = (float)Math.Cos(ang) * spd; r.VY = (float)Math.Sin(ang) * spd;
                                 rocks.Add(r);
                             }
-                            e.Mode = 0; e.Timer = (1.5f + (float)rnd.NextDouble() * 1.5f) * (rage ? 0.7f : 1f);
+                            e.Mode = 0; e.Timer = (1.5f + (float)rnd.NextDouble() * 1.5f) * (rage ? 1f / 1.2f : 1f);      // furia: bolas de fogo 20% mais frequentes
                         }
                     }
                 }
@@ -2874,7 +2944,7 @@ namespace HeroiPet
                 if (!dead && inv <= 0)
                 {
                     float cx = hx - e.X, cy = hy - e.Y;
-                    { float rc = e.Type == 3 ? (e.T > 1.5f ? 15 * S * DK : 0) : 9 * S; if (cx * cx + cy * cy < rc * rc) HurtHero(e.X, e.Y); }
+                    { float rc = e.Type == 3 ? (e.T > 1.5f ? 15 * S * DK * e.Scale : 0) : 9 * S; if (cx * cx + cy * cy < rc * rc) HurtHero(e.X, e.Y); }
                 }
             }
         }
@@ -2925,7 +2995,13 @@ namespace HeroiPet
             for (int i = items.Count - 1; i >= 0; i--)
             {
                 Item it = items[i];
-                it.T += dt;                                 // os itens somem normalmente (15 s), inclusive depois do poder
+                if (it.Reward)      // recompensa do dragao: espalha para fora e nao some ate ser pega
+                {
+                    it.X = Math.Max(4 * S, Math.Min(W - 4 * S, it.X + it.VX * dt)); it.Y = Math.Max(14 * S, Math.Min(H - 2 * S, it.Y + it.VY * dt));
+                    float dm = Math.Min(1f, 3f * dt); it.VX -= it.VX * dm; it.VY -= it.VY * dm;
+                    it.T = 0;
+                }
+                else it.T += dt;                                 // os itens somem normalmente (15 s), inclusive depois do poder
                 if (it.T > 15f) { items.RemoveAt(i); continue; }
                 if (dead) continue;
                 float dx = it.X - hx, dy = it.Y - hy;
@@ -2988,6 +3064,7 @@ namespace HeroiPet
                 Spr(g, sp, it.X, it.Y - 2 * S - bob, true);
             }
 
+            DrawDragonGhost(g);
             // entidades ordenadas por Y (heroi incluso)
             List<object> ents = new List<object>();
             foreach (Enemy en in enemies) ents.Add(en);
@@ -3034,6 +3111,7 @@ namespace HeroiPet
             foreach (Puff p in puffs) DrawPuff(g, p);
 
             DrawHud(g);
+            DrawBossMsg(g);
             DrawEvo(g);
 
             if (speechT > 0 && !dead)

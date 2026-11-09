@@ -11,3 +11,6 @@ tela*.png
 zoom*.png
 *.tmp
 Thumbs.db
+
+# pacotes gerados
+dist/

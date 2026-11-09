@@ -1,5 +1,9 @@
 # Changelog (resumo)
 
+## 09/11/2026 — Dragão reforçado
+- Dragão com **5000 de vida**. Na metade: **vermelho**, +10% maior, um pouco mais rápido, **fumaça do nariz**, bolas de fogo 20% mais frequentes.
+- Ao morrer: volta ao normal, **explode e solta 1000 rupias** (inclui a **rupia dourada de 300**), aparece **"ESPERE POR MAIS ATUALIZAÇÕES"** e então os créditos.
+
 ## 08/11/2026 (fim da noite) — GitHub, ícones e certificado
 - Repositório **público** no GitHub (MIT) com build automático; preparação da assinatura gratuita (SignPath): política, workflows, guia e texto do pedido.
 - Web: botões de toque com **ícones** (espada, arco, maçã) que acompanham as evoluções; antes eram textos que se sobrepunham.
