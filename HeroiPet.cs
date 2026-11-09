@@ -68,6 +68,10 @@ namespace HeroiPet
             {'D', Color.FromArgb(45, 34, 48)},
             {'O', Color.FromArgb(250, 150, 40)},
             {'p', Color.FromArgb(96, 50, 140)},
+            {'C', Color.FromArgb(255, 205, 40)},       // dourado (coroa, cinto do rei)
+            {'F', Color.FromArgb(245, 245, 250)},      // pele branca do manto do rei
+            {'J', Color.FromArgb(245, 245, 245)},      // pernas (branco; vira calca marrom com o bau)
+            {'Z', Color.FromArgb(135, 85, 45)},        // sapatos (marrom; viram roxos com o bau)
             {'H', Color.FromArgb(58, 165, 62)},       // gorro do heroi (verde; vira roxo na evolucao 2)
             {'Q', Color.FromArgb(58, 165, 62)},       // roupa do heroi (verde; vira azul na evolucao 3)
             {'k', Color.FromArgb(226, 106, 92)},
@@ -75,11 +79,24 @@ namespace HeroiPet
         };
 
         // separa o verde do gorro (linhas 0-8) do verde da roupa (linhas 9+) para poder recolorir cada um na evolucao
+        public static bool KingGear;     // tesouro do bau: coroa de ouro, roupa de rei, calca marrom e sapatos roxos
         public static string[] HeroRecolor(string[] rows)
         {
-            string[] r = new string[rows.Length];
-            for (int i = 0; i < rows.Length; i++) r[i] = rows[i].Replace('G', i < 9 ? 'H' : 'Q');
-            return r;
+            List<string> r = new List<string>();
+            if (KingGear) { r.Add("....C.CC.C...."); r.Add("....CCCCCC...."); r.Add("....CRCCRC...."); }      // coroa sobre o gorro
+            for (int i = 0; i < rows.Length; i++)
+            {
+                string s = rows[i].Replace('G', i < 9 ? 'H' : 'Q');
+                if (KingGear)
+                {
+                    if (i == 9) s = s.Replace('Q', 'F');          // gola de pele
+                    else if (i == 13) s = s.Replace('B', 'C');    // cinto dourado
+                    else if (i == 14) s = s.Replace('W', 'J');    // calca
+                    else if (i == 15) s = s.Replace('B', 'Z');    // sapatos
+                }
+                r.Add(s);
+            }
+            return r.ToArray();
         }
 
         public static Dictionary<char, Color> Ov(char c, Color col)
@@ -581,7 +598,7 @@ namespace HeroiPet
     class FlyApple { public float X0, Y0, T; }
     class CookApple { public float X0, Y0, X1, Y1, T, Dur; public int Idx, Dir; }
     class Fire { }
-    class Shock { public float X, Y, T; public bool Hit; }      // onda de choque do dragao
+    class Shock { public float X, Y, T, R, R0; public bool Hit; }      // onda de choque do dragao
     class Smoke { public float X, Y, T, Sz; public float Life = 3.2f, Grow = 5f; }
     class Item { public int Kind; public float X, Y, T; public bool Reward; public float VX, VY; }   // 0 coracao, 1 verde, 2 azul, 3 vermelha
     class Puff { public int Kind; public float X, Y, T; }  // 0 morte, 1 faisca, 2 spawn
@@ -1021,6 +1038,8 @@ namespace HeroiPet
 
             baseS = Math.Max(3, (int)Math.Round(Screen.PrimaryScreen.Bounds.Height / 360.0));
             EvoInit();
+            ChestInit();
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "--bau") >= 0) { chestState = 1; kingGear = false; }      // teste rapido: o bau ja aparece
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--evolucao") >= 0) { evoKills = EvoThreshold[0] - 1; evoStage = 0; evoNext = 1; }      // teste rapido: o proximo monstro da a 1a evolucao
             sizeMode = LoadSize();
             S = SizeToS(sizeMode);
@@ -1096,9 +1115,11 @@ namespace HeroiPet
 
         void BuildSprites()
         {
+            Art.KingGear = kingGear;
             Dictionary<char, Color> hov = new Dictionary<char, Color>();
             if (evoStage >= 2) hov['H'] = Color.FromArgb(150, 80, 205);       // evolucao 2: gorro roxo
             if (evoStage >= 3) hov['Q'] = Color.FromArgb(70, 125, 235);       // evolucao 3: blusa azul
+            if (kingGear) { hov['Q'] = Color.FromArgb(190, 35, 60); hov['J'] = Color.FromArgb(150, 100, 55); hov['Z'] = Color.FromArgb(130, 60, 190); }      // bau: manto vermelho, calca marrom, sapatos roxos
             heroWalk[0] = Art.Make(Art.HeroRecolor(Art.HeroA), S, hov);
             heroWalk[1] = Art.Make(Art.HeroRecolor(Art.HeroB), S, hov);
             Bitmap d = (Bitmap)heroWalk[0].R.Clone();
@@ -1224,7 +1245,7 @@ namespace HeroiPet
         {
             tray.Visible = false;
             SaveRecord();
-            SaveKills();
+            SaveKills(); SaveChest();
             if (evoForm != null) { try { evoForm.Close(); } catch { } evoForm = null; }
             if (shadowLayer != null) { shadowLayer.Close(); shadowLayer = null; }
             base.OnFormClosing(e);
@@ -1330,6 +1351,7 @@ namespace HeroiPet
             }
             UpdatePower(dt);
             UpdateEvo(dt);
+            UpdateChest(dt);
             UpdateHero(dt);
             if (playMode) CheckRupeeLevel();
             UpdateBoss(dt);
@@ -1372,7 +1394,7 @@ namespace HeroiPet
         Color BladeColor() { return evoStage >= 4 ? Color.FromArgb(205, 232, 255) : Color.FromArgb(225, 235, 245); }
         Color GuardColor() { return evoStage >= 4 ? Color.FromArgb(60, 95, 205) : Color.FromArgb(215, 160, 40); }
         Color GripColor() { return evoStage >= 4 ? Color.FromArgb(80, 55, 150) : Color.FromArgb(135, 85, 45); }
-        Color TunicColor() { return evoStage >= 3 ? Color.FromArgb(70, 125, 235) : Color.FromArgb(58, 165, 62); }
+        Color TunicColor() { return kingGear ? Color.FromArgb(190, 35, 60) : (evoStage >= 3 ? Color.FromArgb(70, 125, 235) : Color.FromArgb(58, 165, 62)); }
 
         int LoadKills()
         {
@@ -1419,7 +1441,7 @@ namespace HeroiPet
             evo.T += dt;
             if (evo.T >= EvoFly)
             {
-                evoStage = Math.Max(evoStage, evo.Stage);
+                if (evo.Stage == 5) { kingGear = true; SaveChest(); } else evoStage = Math.Max(evoStage, evo.Stage);
                 BuildSprites();
                 for (int k = 0; k < 10; k++) puffs.Add(new Puff { Kind = k % 2, X = hx + ((float)rnd.NextDouble() - 0.5f) * 20 * S, Y = hy - (float)rnd.NextDouble() * 18 * S });
                 Say("Evoluí!");
@@ -1457,7 +1479,7 @@ namespace HeroiPet
             if (evo.Wait || t < 0.35f)      // textos so enquanto o item esta grande
             {
                 if (evoFont == null) evoFont = new Font("Consolas", S * 9, FontStyle.Bold, GraphicsUnit.Pixel);
-                string l1 = EvoTitle[evo.Stage - 1] + "!", l2 = EvoNeeded[evo.Stage - 1] + " MONSTROS DERROTADOS";
+                string l1 = evo.Stage == 5 ? "TESOURO DO REI!" : EvoTitle[evo.Stage - 1] + "!", l2 = evo.Stage == 5 ? "COROA, ROUPA DE REI, CALÇA MARROM E SAPATOS ROXOS" : EvoNeeded[evo.Stage - 1] + " MONSTROS DERROTADOS";
                 SizeF s1 = g.MeasureString(l1, evoFont), s2 = g.MeasureString(l2, evoFont);
                 float ty2 = cy + 17 * bigU / 1.6f;
                 DrawTextF(g, l1, evoFont, W / 2f - s1.Width / 2, ty2, Color.FromArgb(255, 220, 90));
@@ -1518,6 +1540,14 @@ namespace HeroiPet
                         g.FillEllipse(b2, cx - 2.2f * u, cy - 11f * u, 4.4f * u, 3 * u);
                     }
                 }
+                else if (stage == 5)      // tesouro do bau: coroa, manto de rei, calca e sapatos
+                {
+                    float uu = u * 0.8f;
+                    DrawCrownItem(g, cx - 31 * uu, cy - 1 * uu, uu);
+                    DrawRobeItem(g, cx - 9 * uu, cy, uu);
+                    DrawPantsItem(g, cx + 15 * uu, cy, uu);
+                    DrawShoesItem(g, cx + 35 * uu, cy + 2 * uu, uu);
+                }
                 else                      // espada mestre + escudo vermelho
                 {
                     float sx = cx - 8 * u;
@@ -1550,6 +1580,185 @@ namespace HeroiPet
             }
         }
 
+        // ================= BAU DO REI (so no modo automatico) =================
+        // Depois de 5000 monstros vermelhos (octoroks) e bokoblins derrotados (morcegos e gelatinas NAO contam) aparece um bau no cenario.
+        // Ao apertar 4, o heroi vai ate ele e abre: ganha coroa de ouro, roupa de rei, calca marrom e sapatos roxos.
+        const int ChestKillsNeeded = 5000;
+        int chestKills, chestState;          // chestState: 0 contando | 1 bau no cenario | 2 ja aberto
+        bool kingGear, chestGo, prev4;
+        float chestOpenT;
+        float ChestX { get { return W * 0.62f; } }
+        float ChestY { get { return H * 0.34f; } }
+
+        void ChestInit()
+        {
+            chestKills = 0; chestState = 0;
+            if (Environment.GetEnvironmentVariable("HEROI_TESTE") == null)
+                try { using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"Software\HeroiDoDesktop")) { if (k != null) { object a = k.GetValue("MonstrosBau"), b = k.GetValue("Bau"); if (a != null) chestKills = Math.Max(0, Convert.ToInt32(a)); if (b != null) chestState = Math.Max(0, Math.Min(2, Convert.ToInt32(b))); } } } catch { }
+            if (chestState == 0 && chestKills >= ChestKillsNeeded) chestState = 1;
+            kingGear = chestState == 2;
+        }
+        void SaveChest()
+        {
+            if (Environment.GetEnvironmentVariable("HEROI_TESTE") != null) return;
+            try { using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"Software\HeroiDoDesktop")) { k.SetValue("MonstrosBau", chestKills); k.SetValue("Bau", chestState); } } catch { }
+        }
+        void CountChestKill()
+        {
+            if (chestState != 0) return;
+            chestKills++;
+            if (chestKills % 10 == 0) SaveChest();
+            if (chestKills >= ChestKillsNeeded) { chestState = 1; SaveChest(); Say("Um baú apareceu!"); }
+        }
+        void UpdateChest(float dt)
+        {
+            if (playMode) { chestGo = false; return; }
+            if (dead) chestGo = false;
+            if (chestState == 1 && chestOpenT <= 0)
+            {
+                bool k4 = IsDown(0x34) || IsDown(0x64);      // tecla 4 (fileira de cima ou teclado numerico)
+                if (k4 && !prev4 && !chestGo) { chestGo = true; if (calmState != 0) EndCalm(false); Say("Vou abrir!"); }
+                prev4 = k4;
+            }
+            if (chestOpenT > 0)
+            {
+                chestOpenT += dt;
+                if (chestOpenT >= 1.4f) { chestOpenT = 0; chestState = 2; chestGo = false; SaveChest(); evoQueue.Enqueue(5); }      // o tesouro aparece grande (como as evolucoes)
+            }
+        }
+        void UpdateChestHero(float dt)
+        {
+            float tx = ChestX, ty = ChestY + 10 * S;
+            if (chestOpenT <= 0)
+            {
+                MoveHero(tx, ty, 56 * S, dt);
+                if (walking) walkT += dt;
+                float d2 = (tx - hx) * (tx - hx) + (ty - hy) * (ty - hy);
+                if (d2 < (3 * S) * (3 * S)) { chestOpenT = 0.001f; hface = ChestX >= hx ? 1 : -1; }
+            }
+            hx = Math.Max(6 * S, Math.Min(W - 6 * S, hx)); hy = Math.Max(17 * S, Math.Min(H - 1 * S, hy));
+        }
+
+        void DrawChest(Graphics g)
+        {
+            if (playMode || chestState != 1) return;
+            float x = ChestX, y = ChestY;
+            float open = chestOpenT > 0 ? Math.Min(1f, chestOpenT / 0.5f) : 0f;
+            Shadow(g, x, y, 22);
+            using (SolidBrush k = new SolidBrush(Color.FromArgb(28, 22, 36)))
+            using (SolidBrush wood = new SolidBrush(Color.FromArgb(150, 95, 45)))
+            using (SolidBrush wood2 = new SolidBrush(Color.FromArgb(115, 70, 32)))
+            using (SolidBrush gold = new SolidBrush(Color.FromArgb(255, 205, 40)))
+            using (SolidBrush gold2 = new SolidBrush(Color.FromArgb(200, 140, 20)))
+            {
+                g.FillRectangle(k, x - 10 * S, y - 10 * S, 20 * S, 11 * S);                 // corpo
+                g.FillRectangle(wood, x - 9 * S, y - 9 * S, 18 * S, 9 * S);
+                g.FillRectangle(wood2, x - 9 * S, y - 4 * S, 18 * S, S);
+                g.FillRectangle(gold, x - 7 * S, y - 9 * S, 2 * S, 9 * S); g.FillRectangle(gold, x + 5 * S, y - 9 * S, 2 * S, 9 * S);
+                if (open <= 0)
+                {
+                    g.FillRectangle(k, x - 10 * S, y - 17 * S, 20 * S, 8 * S);             // tampa fechada
+                    g.FillRectangle(wood, x - 9 * S, y - 16 * S, 18 * S, 6 * S);
+                    g.FillRectangle(gold, x - 7 * S, y - 16 * S, 2 * S, 6 * S); g.FillRectangle(gold, x + 5 * S, y - 16 * S, 2 * S, 6 * S);
+                    g.FillRectangle(k, x - 2 * S, y - 12 * S, 4 * S, 5 * S); g.FillRectangle(gold, x - S, y - 11 * S, 2 * S, 3 * S);
+                }
+                else
+                {
+                    float lift = open * 9 * S;
+                    g.FillRectangle(k, x - 10 * S, y - 17 * S - lift, 20 * S, 3 * S); g.FillRectangle(wood, x - 9 * S, y - 16 * S - lift, 18 * S, 2 * S);   // tampa levantada
+                    g.FillRectangle(gold2, x - 8 * S, y - 10 * S, 16 * S, 2 * S);
+                    for (int i = 0; i < 12; i++)
+                    {
+                        double a = time * 3 + i; float h = ((i * 7) % 5) * 3 * S + (float)((time * 40 + i * 9) % 20) * S * 0.6f;
+                        g.FillRectangle(gold, x + (float)Math.Cos(a) * 8 * S, y - 12 * S - h * open, 2 * S, 2 * S);
+                    }
+                }
+            }
+        }
+        void DrawChestPrompt(Graphics g)
+        {
+            if (playMode || chestState != 1 || chestOpenT > 0 || chestGo) return;
+            string t = "APERTE 4 PARA ABRIR";
+            SizeF sz = g.MeasureString(t, font);
+            float pad = 2 * S, x = ChestX - sz.Width / 2, y = ChestY - 17 * S - sz.Height - 4 * S - (float)Math.Abs(Math.Sin(time * 3)) * 2 * S;
+            using (SolidBrush k = new SolidBrush(Color.FromArgb(28, 22, 36)))
+            using (SolidBrush bg = new SolidBrush(Color.FromArgb(46, 40, 62)))
+            using (SolidBrush gold = new SolidBrush(Color.FromArgb(247, 190, 70)))
+            {
+                g.FillRectangle(k, x - pad - S, y - pad - S, sz.Width + 2 * pad + 2 * S, sz.Height + 2 * pad + 2 * S);
+                g.FillRectangle(bg, x - pad, y - pad, sz.Width + 2 * pad, sz.Height + 2 * pad);
+                g.FillRectangle(gold, x - pad, y - pad, sz.Width + 2 * pad, S);
+            }
+            DrawText(g, t, x, y, Color.FromArgb(255, 220, 90));
+        }
+
+        // itens do tesouro (usados no anuncio grande)
+        void DrawCrownItem(Graphics g, float cx, float cy, float u)
+        {
+            Color dark = Color.FromArgb(28, 22, 36);
+            using (Pen ol = new Pen(dark, Math.Max(1f, u * 0.7f)))
+            using (SolidBrush go = new SolidBrush(Color.FromArgb(255, 205, 40)))
+            using (SolidBrush go2 = new SolidBrush(Color.FromArgb(215, 150, 20)))
+            using (SolidBrush red = new SolidBrush(Color.FromArgb(215, 40, 60)))
+            using (SolidBrush blu = new SolidBrush(Color.FromArgb(70, 125, 235)))
+            {
+                ol.LineJoin = LineJoin.Round;
+                PointF[] cr = { new PointF(cx - 9 * u, cy + 4 * u), new PointF(cx - 9 * u, cy - 5 * u), new PointF(cx - 4.5f * u, cy - 1 * u), new PointF(cx, cy - 7 * u), new PointF(cx + 4.5f * u, cy - 1 * u), new PointF(cx + 9 * u, cy - 5 * u), new PointF(cx + 9 * u, cy + 4 * u) };
+                g.FillPolygon(go, cr); g.DrawPolygon(ol, cr);
+                g.FillRectangle(go2, cx - 9 * u, cy + 1.5f * u, 18 * u, 2.5f * u);
+                g.FillEllipse(red, cx - 1.5f * u, cy - 2 * u, 3 * u, 3 * u); g.FillEllipse(blu, cx - 6.5f * u, cy - 0.5f * u, 2 * u, 2 * u); g.FillEllipse(blu, cx + 4.5f * u, cy - 0.5f * u, 2 * u, 2 * u);
+                foreach (float px in new float[] { -9f, 0f, 9f }) g.FillEllipse(go, cx + (px - 1) * u, cy + (px == 0 ? -8f : -6f) * u, 2 * u, 2 * u);
+            }
+        }
+        void DrawRobeItem(Graphics g, float cx, float cy, float u)
+        {
+            Color dark = Color.FromArgb(28, 22, 36);
+            using (Pen ol = new Pen(dark, Math.Max(1f, u * 0.7f)))
+            using (SolidBrush rd = new SolidBrush(Color.FromArgb(190, 35, 60)))
+            using (SolidBrush rd2 = new SolidBrush(Color.FromArgb(140, 20, 45)))
+            using (SolidBrush fur = new SolidBrush(Color.FromArgb(245, 245, 250)))
+            using (SolidBrush go = new SolidBrush(Color.FromArgb(255, 205, 40)))
+            using (SolidBrush dk = new SolidBrush(dark))
+            {
+                ol.LineJoin = LineJoin.Round;
+                PointF[] robe = { new PointF(cx - 5 * u, cy - 10 * u), new PointF(cx + 5 * u, cy - 10 * u), new PointF(cx + 12 * u, cy - 5 * u), new PointF(cx + 9 * u, cy + 0.5f * u), new PointF(cx + 7 * u, cy - 2 * u), new PointF(cx + 8 * u, cy + 12 * u), new PointF(cx - 8 * u, cy + 12 * u), new PointF(cx - 7 * u, cy - 2 * u), new PointF(cx - 9 * u, cy + 0.5f * u), new PointF(cx - 12 * u, cy - 5 * u) };
+                g.FillPolygon(rd, robe); g.DrawPolygon(ol, robe);
+                g.FillRectangle(go, cx - 7.5f * u, cy + 3 * u, 15 * u, 2 * u);                 // cinto dourado
+                g.FillRectangle(go, cx - 8 * u, cy + 10 * u, 16 * u, 2 * u);                   // barra dourada
+                g.FillEllipse(dk, cx - 6 * u, cy - 12 * u, 12 * u, 5 * u); g.FillEllipse(fur, cx - 5.2f * u, cy - 11.6f * u, 10.4f * u, 4.2f * u);      // gola de pele
+                for (int i = 0; i < 3; i++) g.FillRectangle(dk, cx + (-3 + i * 3) * u, cy - 10.2f * u, u, u);
+            }
+        }
+        void DrawPantsItem(Graphics g, float cx, float cy, float u)
+        {
+            Color dark = Color.FromArgb(28, 22, 36);
+            using (Pen ol = new Pen(dark, Math.Max(1f, u * 0.7f)))
+            using (SolidBrush br = new SolidBrush(Color.FromArgb(150, 100, 55)))
+            using (SolidBrush br2 = new SolidBrush(Color.FromArgb(110, 70, 35)))
+            {
+                ol.LineJoin = LineJoin.Round;
+                PointF[] p = { new PointF(cx - 7 * u, cy - 9 * u), new PointF(cx + 7 * u, cy - 9 * u), new PointF(cx + 8 * u, cy + 11 * u), new PointF(cx + 1 * u, cy + 11 * u), new PointF(cx, cy - 2 * u), new PointF(cx - 1 * u, cy + 11 * u), new PointF(cx - 8 * u, cy + 11 * u) };
+                g.FillPolygon(br, p); g.DrawPolygon(ol, p);
+                g.FillRectangle(br2, cx - 7 * u, cy - 9 * u, 14 * u, 2.5f * u);
+            }
+        }
+        void DrawShoesItem(Graphics g, float cx, float cy, float u)
+        {
+            Color dark = Color.FromArgb(28, 22, 36);
+            using (Pen ol = new Pen(dark, Math.Max(1f, u * 0.7f)))
+            using (SolidBrush pu = new SolidBrush(Color.FromArgb(130, 60, 190)))
+            using (SolidBrush pu2 = new SolidBrush(Color.FromArgb(90, 40, 140)))
+            {
+                ol.LineJoin = LineJoin.Round;
+                foreach (float off in new float[] { -6f, 6f })
+                {
+                    float bx = cx + off * u;
+                    PointF[] b = { new PointF(bx - 4 * u, cy - 8 * u), new PointF(bx + 2 * u, cy - 8 * u), new PointF(bx + 2 * u, cy), new PointF(bx + 6 * u, cy + 2 * u), new PointF(bx + 6 * u, cy + 6 * u), new PointF(bx - 4 * u, cy + 6 * u) };
+                    g.FillPolygon(pu, b); g.DrawPolygon(ol, b);
+                    g.FillRectangle(pu2, bx - 4 * u, cy + 4 * u, 10 * u, 2 * u);
+                }
+            }
+        }
         // ================= MODO PODER: ao bater o recorde de rupias do automatico =================
         int record;                         // maximo de rupias ja conseguido no modo automatico (salvo no registro)
         int nextPower;                      // rupias necessarias para disparar o proximo poder
@@ -2274,6 +2483,10 @@ namespace HeroiPet
         void DrawDragon(Graphics g, Enemy e)
         {
             Shadow(g, e.X, e.Y, 34 * DK * e.Scale);
+            foreach (Shock sk in shocks)      // aviso da onda de choque: a sombra do dragao pisca 3 vezes (vermelha)
+                if (sk.T < ShockWarn && ((int)(sk.T / 0.25f)) % 2 == 0)
+                    using (SolidBrush rb = new SolidBrush(Color.FromArgb(235, 40, 50)))
+                        g.FillEllipse(rb, e.X - 17 * S * DK * e.Scale, e.Y - 2 * S, 34 * S * DK * e.Scale, 5 * S);
             float k = (e.T < 1.5f ? 0.15f + 0.85f * (e.T / 1.5f) : 1f) * e.Scale;
             bool furiaD = e.HP * 2 <= e.MaxHP;
             bool brilha = furiaD && e.GrowT < 3f && ((int)(time * 8)) % 2 == 0;      // brilha enquanto cresce
@@ -2676,6 +2889,7 @@ namespace HeroiPet
             walking = false;
             bowing = false;
             if (powerT > 0) { UpdatePowerHero(dt); return; }
+            if (chestGo && chestState == 1 && !dead && cookState == 0) { UpdateChestHero(dt); return; }
             if (cookState != 0 && !dead) { UpdateCook(dt); return; }
             if (bossPhase == 2 && !dead) { BossLeave(dt); return; }
             if (bossPhase == 3 && !dead) { hface = fireX >= hx ? 1 : -1; return; }
@@ -2827,6 +3041,7 @@ namespace HeroiPet
                 enemies.Remove(e); killCount++;
                 if (e.Type == 3) { BossDefeated(e); return; }
                 if (!playMode) CountKill();                                     // evolucao: conta todo monstro derrotado no automatico
+                if (!playMode && (e.Type == 0 || e.Type == 4)) CountChestKill();      // bau do rei: so octoroks (vermelhos) e bokoblins contam (morcegos e gelatinas nao)
                 if (e.Type == 2 && !playMode && powerT <= 0 && !lootHold)      // gelatinas derrotadas: ao chegar a 20 o contador zera e o poder e lancado
                 {
                     slimeKills++;
@@ -2880,7 +3095,7 @@ namespace HeroiPet
                         if (e.HP * 100 <= e.MaxHP * 15)      // ultimos 15% de vida: a cada 8 s, onda de choque (tira 2 coracoes)
                         {
                             e.ShockT -= dt;
-                            if (e.ShockT <= 0) { e.ShockT = 8f; shocks.Add(new Shock { X = e.X, Y = e.Y - 2 * S }); }
+                            if (e.ShockT <= 0) { e.ShockT = 8f; shocks.Add(new Shock { X = e.X, Y = e.Y - 2 * S, R = 1.5f * dragonSpr[0].W * e.Scale, R0 = 17 * S * DK * e.Scale }); }      // area: diametro = 3x o tamanho do dragao
                         }
                         else e.ShockT = 8f;
                         if (e.Mode == 0)
@@ -3043,8 +3258,7 @@ namespace HeroiPet
 
         // ---------- onda de choque do dragao ----------
         List<Shock> shocks = new List<Shock>();
-        const float ShockWarn = 1.5f, ShockExpand = 1.3f;       // pisca 3 vezes (1,5 s) e depois irradia por 1,3 s
-        float ShockR { get { return 80 * S; } }
+        const float ShockWarn = 1.5f, ShockExpand = 2.0f;       // a sombra do dragao pisca 3 vezes (1,5 s) e dela sai a onda (2 s)
         void UpdateShocks(float dt)
         {
             for (int i = shocks.Count - 1; i >= 0; i--)
@@ -3052,7 +3266,7 @@ namespace HeroiPet
                 Shock s = shocks[i]; s.T += dt;
                 if (s.T >= ShockWarn && s.T < ShockWarn + ShockExpand && !s.Hit && !dead)
                 {
-                    float r = ShockR * (s.T - ShockWarn) / ShockExpand;
+                    float r = s.R0 + (s.R - s.R0) * (s.T - ShockWarn) / ShockExpand;
                     float dx = hx - s.X, dy = (hy - s.Y) / 0.7f, n = (float)Math.Sqrt(dx * dx + dy * dy);
                     if (Math.Abs(n - r) < 7 * S) { s.Hit = true; HurtHero(s.X, s.Y, 2f, true); }      // encostou na onda: 2 coracoes
                 }
@@ -3063,32 +3277,18 @@ namespace HeroiPet
         {
             foreach (Shock s in shocks)
             {
-                float R = ShockR;
-                if (s.T < ShockWarn)
+                if (s.T < ShockWarn) continue;      // o aviso e a sombra do dragao piscando (ver DrawDragon)
+                float r = s.R0 + (s.R - s.R0) * Math.Min(1f, (s.T - ShockWarn) / ShockExpand);
+                using (Pen o = new Pen(Color.FromArgb(225, 70, 40), 8 * S))
+                using (Pen m = new Pen(Color.FromArgb(255, 170, 60), 5 * S))
+                using (Pen w = new Pen(Color.FromArgb(255, 245, 190), 2 * S))
                 {
-                    if (((int)(s.T / 0.25f)) % 2 != 0) continue;       // pisca tres vezes
-                    using (Pen p1 = new Pen(Color.FromArgb(225, 55, 60), 2 * S))
-                    using (Pen p2 = new Pen(Color.FromArgb(255, 150, 60), S))
-                    {
-                        g.DrawEllipse(p1, s.X - R, s.Y - R * 0.7f, 2 * R, 1.4f * R);
-                        g.DrawEllipse(p2, s.X - R * 0.5f, s.Y - R * 0.35f, R, 0.7f * R);
-                    }
-                }
-                else
-                {
-                    float r = ShockR * Math.Min(1f, (s.T - ShockWarn) / ShockExpand);
-                    using (Pen o = new Pen(Color.FromArgb(225, 70, 40), 8 * S))
-                    using (Pen m = new Pen(Color.FromArgb(255, 170, 60), 5 * S))
-                    using (Pen w = new Pen(Color.FromArgb(255, 245, 190), 2 * S))
-                    {
-                        g.DrawEllipse(o, s.X - r, s.Y - r * 0.7f, 2 * r, 1.4f * r);
-                        g.DrawEllipse(m, s.X - r, s.Y - r * 0.7f, 2 * r, 1.4f * r);
-                        g.DrawEllipse(w, s.X - r, s.Y - r * 0.7f, 2 * r, 1.4f * r);
-                    }
+                    g.DrawEllipse(o, s.X - r, s.Y - r * 0.7f, 2 * r, 1.4f * r);
+                    g.DrawEllipse(m, s.X - r, s.Y - r * 0.7f, 2 * r, 1.4f * r);
+                    g.DrawEllipse(w, s.X - r, s.Y - r * 0.7f, 2 * r, 1.4f * r);
                 }
             }
         }
-
         void UpdateRocks(float dt)
         {
             for (int i = rocks.Count - 1; i >= 0; i--)
@@ -3206,6 +3406,7 @@ namespace HeroiPet
 
             DrawDragonGhost(g);
             DrawShocks(g);
+            DrawChest(g);
             // entidades ordenadas por Y (heroi incluso)
             List<object> ents = new List<object>();
             foreach (Enemy en in enemies) ents.Add(en);
@@ -3251,6 +3452,7 @@ namespace HeroiPet
             DrawSmokes(g);
             foreach (Puff p in puffs) DrawPuff(g, p);
 
+            DrawChestPrompt(g);
             DrawHud(g);
             DrawBossMsg(g);
             DrawEvo(g);

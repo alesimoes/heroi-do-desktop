@@ -71,6 +71,15 @@ Ao conquistar: o item aparece **bem grande no meio da tela** com o número de mo
 o **jogo pausa**. Ao apertar o botão **USAR ITEM** o jogo volta, o item **diminui até o tamanho normal e voa até o herói**, que o veste.
 Teste rápido: `HeroiPet.exe --evolucao` (desktop) ou `?evolucao` na URL (web) — o próximo monstro dá a 1ª evolução.
 
+## Baú do Rei (só no modo automático)
+- Depois de **5000 monstros vermelhos (octoroks) e bokoblins** derrotados no modo automático, aparece um **baú** no cenário (62% da largura, 34% da altura).
+  **Morcegos e gelatinas NÃO contam.** (Interpretação do pedido: "monstros vermelhos e bokoblins" contam; "morcegos e bokoblins não contam" foi entendido como morcegos e gelatinas.)
+- Em cima do baú aparece **"APERTE 4 PARA ABRIR"** (na web em celular: "TOQUE NO BAÚ PARA ABRIR"). Ao apertar **4**, o herói **vai até o baú** e o abre.
+- O tesouro aparece grande no meio da tela (como as evoluções, com o botão **USAR ITEM** e o jogo pausado) e o herói passa a usar: **coroa de ouro**, **roupa de rei**
+  (manto vermelho com gola de pele branca e cinto dourado), **calça marrom** e **sapatos roxos**. A roupa de rei substitui a blusa azul.
+- O progresso (contagem, baú aparecendo, tesouro já ganho) é salvo: registro `MonstrosBau` e `Bau` (desktop); `heroi_monstros_bau` e `heroi_bau` (web).
+- Teste rápido: `HeroiPet.exe --bau` (desktop) ou `?bau` na URL (web) mostram o baú na hora.
+
 ## Modo jogo
 - Entrar pelo menu "Jogar": herói vai ao **meio**, monstros somem, **rupias e maçãs zeram**. Sair (automático): rupias
   zeram e vida máxima volta a 5.

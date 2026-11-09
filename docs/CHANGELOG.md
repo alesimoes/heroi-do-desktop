@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 09/11/2026 — Baú do Rei
+- Depois de **5000 octoroks e bokoblins** (morcegos e gelatinas não contam) aparece um **baú** no modo automático: "aperte 4 para abrir". Dá **coroa de ouro, roupa de rei, calça marrom e sapatos roxos**.
+
 ## 09/11/2026 — Armas evoluídas dão o dobro de dano
 - **Arco prateado** (evolução 1): flechas com o dobro de dano. **Espada azulada / Espada Mestre** (evolução 4): o dobro de dano. Vale também contra o dragão (flecha 100, espada 300).
 
