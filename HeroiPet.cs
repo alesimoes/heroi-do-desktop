@@ -1215,16 +1215,33 @@ namespace HeroiPet
 
         // comer uma maca crua pelo inventario: mostra o heroi comendo na tela ampliada e recupera meio coracao
         float menuEatT;
-        public bool MenuEating { get { return menuEatT > 0; } }
+        float menuPickT;
+        public bool MenuEating { get { return menuEatT > 0 || menuPickT > 0; } }
+        public string MenuPick()      // colher uma maca da arvore mais proxima que tenha: o heroi estica o braco no exemplo e a maca vai para o inventario
+        {
+            if (menuEatT > 0 || menuPickT > 0) return null;
+            if (NearestTreeWithApples() == null) return "Nenhuma árvore tem maçãs agora";
+            menuPickT = 0.001f; return null;
+        }
         public string MenuEat()
         {
-            if (menuEatT > 0) return null;
+            if (menuEatT > 0 || menuPickT > 0) return null;
             if (apples <= 0) return "Sem maçãs";
             if (hp >= MaxHP) return "Corações cheios";
             menuEatT = 0.001f; return null;
         }
         public void MenuTick(float dt)
         {
+            if (menuPickT > 0)
+            {
+                menuPickT += dt;
+                if (menuPickT >= 0.8f)
+                {
+                    menuPickT = 0; Tree t = NearestTreeWithApples();
+                    if (t != null) { int idx = FirstApple(t); if (idx >= 0) { t.Has[idx] = false; t.Regrow[idx] = 60f + (float)rnd.NextDouble() * 40f; apples++; } }
+                }
+                return;
+            }
             if (menuEatT <= 0) return;
             menuEatT += dt;
             if (menuEatT >= 0.9f) { menuEatT = 0; if (apples > 0) { apples--; hp = Math.Min(MaxHP, hp + 0.5f); } }
@@ -1236,19 +1253,19 @@ namespace HeroiPet
         public void DrawHeroPreview(Graphics g, float cx, float groundY, float k, bool bow, bool bare = false)
         {
             previewBare = bare;
-            float sax = aimX, say = aimY, sbt = bowT;
+            float sax = aimX, say = aimY, sbt = bowT, spt = pickT;
             float shx = hx, shy = hy, sp = powerT, si = inv, spk = playPickT, sed = playEatT; bool ser = eatRaw; int shf = hface, sc = calmState, sck = cookState; bool sw = walking, sa = attacking, sb = bowing, sd = dead;
             previewMode = true;
             try
             {
-                hx = 0; hy = 0; hface = 1; walking = false; attacking = false; bowing = bow; aimX = 1; aimY = 0; bowT = 0.4f; dead = false; powerT = 0; inv = 0; playPickT = 0; playEatT = menuEatT; eatRaw = menuEatT > 0; calmState = 0; cookState = 0;
+                hx = 0; hy = 0; hface = 1; walking = false; attacking = false; bowing = bow; aimX = 1; aimY = 0; bowT = 0.4f; dead = false; powerT = 0; inv = 0; playPickT = menuPickT; pickT = menuPickT; playEatT = menuEatT; eatRaw = menuEatT > 0; calmState = 0; cookState = 0;
                 GraphicsState st = g.Save();
                 g.TranslateTransform(cx, groundY); g.ScaleTransform(k, k);
                 g.InterpolationMode = InterpolationMode.NearestNeighbor; g.PixelOffsetMode = PixelOffsetMode.Half; g.SmoothingMode = SmoothingMode.None;
                 DrawHero(g);
                 g.Restore(st);
             }
-            finally { aimX = sax; aimY = say; bowT = sbt; hx = shx; hy = shy; hface = shf; walking = sw; attacking = sa; bowing = sb; dead = sd; powerT = sp; inv = si; playPickT = spk; playEatT = sed; eatRaw = ser; calmState = sc; cookState = sck; previewMode = false; previewBare = false; }
+            finally { pickT = spt; aimX = sax; aimY = say; bowT = sbt; hx = shx; hy = shy; hface = shf; walking = sw; attacking = sa; bowing = sb; dead = sd; powerT = sp; inv = si; playPickT = spk; playEatT = sed; eatRaw = ser; calmState = sc; cookState = sck; previewMode = false; previewBare = false; }
         }
 
         // icones dos itens (formas desenhadas por codigo)
@@ -1397,6 +1414,7 @@ namespace HeroiPet
                             else if (h.Kind == 1) { p.EquipItem(h.A, h.B); if (h.A == 0) showBow = true; else if (h.A == 1 || h.A == 2) showBow = false; }
                             else if (h.Kind == 2) { p.CloseMenu(); return; }
                             else if (h.Kind == 3) { msg = p.MenuEat(); showBow = false; }
+                            else if (h.Kind == 4) { msg = p.MenuPick(); showBow = false; }
                             Invalidate(); break;
                         }
                 base.OnMouseClick(e);
@@ -1490,6 +1508,10 @@ namespace HeroiPet
                             int ei = hits.Count; hits.Add(new Hit { R = eb, Kind = 3 });
                             using (SolidBrush bg2 = new SolidBrush(hover == ei ? Color.FromArgb(255, 210, 100) : Color.FromArgb(247, 190, 70))) using (Pen pen2 = new Pen(Color.FromArgb(28, 22, 36), 1.5f * sc)) Round(g, eb, (int)(8 * sc), bg2, pen2);
                             using (SolidBrush dk2 = new SolidBrush(Color.FromArgb(28, 22, 36))) g.DrawString("Comer maçã", nf, dk2, new RectangleF(eb.X, eb.Y + 5 * sc, eb.Width, eb.Height), c);
+                            Rectangle pb = new Rectangle(eb.Right + (int)(10 * sc), eb.Y, cs, eb.Height);      // opcao "Colher maçã" ao lado
+                            int pi = hits.Count; hits.Add(new Hit { R = pb, Kind = 4 });
+                            using (SolidBrush bg3 = new SolidBrush(hover == pi ? Color.FromArgb(150, 225, 130) : Color.FromArgb(105, 200, 95))) using (Pen pen3 = new Pen(Color.FromArgb(28, 22, 36), 1.5f * sc)) Round(g, pb, (int)(8 * sc), bg3, pen3);
+                            using (SolidBrush dk3 = new SolidBrush(Color.FromArgb(28, 22, 36))) g.DrawString("Colher maçã", nf, dk3, new RectangleF(pb.X, pb.Y + 5 * sc, pb.Width, pb.Height), c);
                             g.DrawString("Maçã crua recupera meio coração.\nCom 5 ou mais ele faz lanche na fogueira (assadas recuperam mais).", sf, Brushes.LightGray, area.X, eb.Bottom + 12 * sc);
                             g.DrawString("Corações: " + p.HeartsNow.ToString("0.#") + " / " + p.HeartsMax, sf, Brushes.Gold, area.X, eb.Bottom + 64 * sc);
                             if (!string.IsNullOrEmpty(msg)) g.DrawString(msg, sf, Brushes.OrangeRed, area.X, eb.Bottom + 90 * sc);
@@ -2693,7 +2715,7 @@ namespace HeroiPet
         {
             if (!playMode) SetPlayMode(true); else ResetBoss();
             enemies.Clear(); rocks.Clear(); arrows.Clear(); items.Clear(); puffs.Clear();
-            rupees = 150; lastStep = RupeeStep(); SetMaxHp(8); hp = MaxHP; dead = false; deathWait = false; inv = 2f;
+            rupees = 125; lastStep = RupeeStep(); SetMaxHp(8); hp = MaxHP; dead = false; deathWait = false; inv = 2f;      // 125 rupias = nivel 6 (NV 6)
             apples = 0; powerT = 0; evo = null; hface = 1;
             fireX = W / 2; fireY = H / 2;
             hx = W * 0.15f; hy = H * 0.6f;
@@ -4112,8 +4134,8 @@ namespace HeroiPet
                     for (int side = -1; side <= 1; side += 2)
                     {
                         float ax = hx + side * 4 * S;
-                        g.FillRectangle(tb, ax - S, ay, 2 * S, 2 * S);
-                        g.FillRectangle(sb, ax - S, ay + 2 * S, 2 * S, 2 * S);
+                        g.FillRectangle(tb, ax - 0.75f * S, ay, 1.5f * S, 1.5f * S);
+                        g.FillRectangle(sb, ax - 0.75f * S, ay + 1.5f * S, 1.5f * S, 1.5f * S);
                     }
                 return;
             }
