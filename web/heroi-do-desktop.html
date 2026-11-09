@@ -69,12 +69,20 @@ button.primary:hover { filter: brightness(1.08); }
 
 /* Botões de toque */
 html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-text-size-adjust: 100%; overscroll-behavior: none; }
-#touch { position: absolute; right: max(18px, env(safe-area-inset-right, 0px)); bottom: max(14px, env(safe-area-inset-bottom, 0px)); z-index: 4; display: none; width: 190px; height: 150px; }
-#touch button { position: absolute; width: 74px; height: 74px; border-radius: 50%; text-align: center; font: 12px var(--display); padding: 0; background: rgba(27, 24, 48, .62); border: 2px solid rgba(255,255,255,.35); user-select: none; -webkit-user-select: none; touch-action: none; }
-#touch button.on { background: var(--gold); color: #231a05; }
-#touch button[data-k="1"] { right: 0; bottom: 38px; width: 86px; height: 86px; }
-#touch button[data-k="2"] { right: 96px; bottom: 0; }
-#touch button[data-k="3"] { right: 70px; bottom: 82px; width: 62px; height: 62px; }
+#touch { position: absolute; right: max(18px, env(safe-area-inset-right, 0px)); bottom: max(14px, env(safe-area-inset-bottom, 0px)); z-index: 4; display: none; width: 200px; height: 160px; }
+#touch button { position: absolute; display: grid; place-items: center; width: 72px; height: 72px; border-radius: 50%; padding: 0; background: rgba(27, 24, 48, .66); border: 2px solid rgba(255,255,255,.4); user-select: none; -webkit-user-select: none; touch-action: none; }
+#touch .ic { width: 66%; height: 66%; pointer-events: none; overflow: visible; }
+#touch .ic * { stroke-linecap: round; stroke-linejoin: round; }
+#touch .sw .blade { fill: #e1ebf5; stroke: #1c1624; stroke-width: 1.2; } #touch .sw .guard { fill: #d7a028; stroke: #1c1624; stroke-width: 1; } #touch .sw .grip { fill: #87552d; stroke: #1c1624; stroke-width: 1; } #touch .sw .pom { fill: #d7a028; stroke: #1c1624; stroke-width: 1; }
+#touch .bw .bowo { fill: none; stroke: #1c1624; stroke-width: 5.4; } #touch .bw .bowm { fill: none; stroke: #87552d; stroke-width: 3.2; } #touch .bw .str { fill: none; stroke: #ebebeb; stroke-width: 1; } #touch .bw .shaft { fill: none; stroke: #c9a46a; stroke-width: 1.8; } #touch .bw .head { fill: #e1ebf5; stroke: #1c1624; stroke-width: 1; } #touch .bw .fl { fill: none; stroke: #ebebeb; stroke-width: 1.4; }
+#touch .ap .fruit { fill: #d73737; stroke: #1c1624; stroke-width: 1.4; } #touch .ap .stem { fill: none; stroke: #87552d; stroke-width: 1.8; } #touch .ap .leaf { fill: #3aa53e; stroke: #1c1624; stroke-width: 1; } #touch .ap .shine { fill: none; stroke: #ffb4a8; stroke-width: 1.6; }
+/* itens evoluidos: o icone acompanha o equipamento do heroi */
+#touch[data-evo="1"] .bw .bowm, #touch[data-evo="2"] .bw .bowm, #touch[data-evo="3"] .bw .bowm, #touch[data-evo="4"] .bw .bowm { stroke: #b9c0cd; }
+#touch[data-evo="4"] .sw .blade { fill: #cde8ff; } #touch[data-evo="4"] .sw .guard, #touch[data-evo="4"] .sw .pom { fill: #3c5fcd; } #touch[data-evo="4"] .sw .grip { fill: #503796; }
+#touch button.on { background: var(--gold); }
+#touch button[data-k="1"] { right: 0; bottom: 0; width: 86px; height: 86px; }
+#touch button[data-k="2"] { right: 98px; bottom: 6px; width: 70px; height: 70px; }
+#touch button[data-k="3"] { right: 38px; bottom: 94px; width: 64px; height: 64px; }
 #dpad { position: absolute; left: max(18px, env(safe-area-inset-left, 0px)); bottom: max(14px, env(safe-area-inset-bottom, 0px)); z-index: 4; display: none; width: 150px; height: 150px; border-radius: 50%; background: rgba(27, 24, 48, .5); border: 2px solid rgba(255,255,255,.3); touch-action: none; }
 #dpad i { position: absolute; font: normal 22px var(--display); color: rgba(255,255,255,.75); pointer-events: none; }
 #dpad i:nth-child(1) { left: 62px; top: 8px; } #dpad i:nth-child(2) { left: 62px; bottom: 8px; } #dpad i:nth-child(3) { left: 10px; top: 60px; } #dpad i:nth-child(4) { right: 10px; top: 60px; }
@@ -115,7 +123,7 @@ html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout
   <button id="evoBtn" hidden>USAR ITEM</button>
   <div id="dpad" aria-hidden="true"><i>▲</i><i>▼</i><i>◀</i><i>▶</i><b></b></div>
   <div id="touch" aria-hidden="true">
-    <button data-k="1">ESPADA</button><button data-k="2">ARCO</button><button data-k="3">COLHER</button>
+    <button data-k="1" aria-label="Espada"><svg class="ic sw" viewBox="0 0 32 32" aria-hidden="true"><g transform="rotate(45 16 16)"><path class="blade" d="M16 1.5 L19.2 6 V21 H12.8 V6 Z"/><rect class="guard" x="8.5" y="21" width="15" height="3.4" rx="1"/><rect class="grip" x="14.4" y="24.4" width="3.2" height="5"/><circle class="pom" cx="16" cy="30.2" r="1.8"/></g></svg></button><button data-k="2" aria-label="Arco"><svg class="ic bw" viewBox="0 0 32 32" aria-hidden="true"><path class="bowo" d="M11 3 Q27 16 11 29"/><path class="bowm" d="M11 3 Q27 16 11 29"/><path class="str" d="M11 3 V29"/><path class="shaft" d="M3.5 16 H21"/><path class="head" d="M21 12.8 L27 16 L21 19.2 Z"/><path class="fl" d="M3.5 16 L1.5 13 M3.5 16 L1.5 19"/></svg></button><button data-k="3" aria-label="Colher maçã"><svg class="ic ap" viewBox="0 0 32 32" aria-hidden="true"><path class="fruit" d="M16 9 C9 5 3.5 11 5.5 19 C7.5 26 12.5 29.5 16 27.5 C19.5 29.5 24.5 26 26.5 19 C28.5 11 23 5 16 9 Z"/><path class="stem" d="M16 9 Q16 5 18.5 2.5"/><path class="leaf" d="M17.5 6.5 Q22.5 2.5 26 5.5 Q22 9.5 17.5 6.5 Z"/><path class="shine" d="M9 14 Q9.5 11.5 12 10.5"/></svg></button>
   </div>
   <div id="rot"><div class="ph">📱</div><b>Deite o telefone</b><span>O jogo funciona com o celular na horizontal:<br>direcional no polegar esquerdo, ações no direito.</span></div>
 
@@ -491,6 +499,8 @@ while (evoStage < 4 && evoKills >= EVO_THR[evoStage]) evoStage++;
 evoNext = evoStage + 1;
 if (/[?&]evolucao\b/.test(location.search)) { evoKills = EVO_THR[0] - 1; evoStage = 0; evoNext = 1; }      // teste rapido: o proximo monstro da a 1a evolucao
 const heroRows = (rows) => rows.map((r, i) => r.replace(/G/g, i < 9 ? 'H' : 'Q'));
+function syncTouchIcons() { const t = document.getElementById('touch'); if (t) t.dataset.evo = String(evoStage); }
+syncTouchIcons();
 function saveKills() { try { localStorage.setItem('heroi_monstros', String(evoKills)); } catch (_) {} }
 function countKill() {
   evoKills++; if (evoKills % 5 === 0) saveKills();
@@ -506,7 +516,7 @@ function updateEvo(dt) {
   if (evo.wait) return;
   evo.t += dt;
   if (evo.t >= EVO_FLY) {
-    evoStage = Math.max(evoStage, evo.stage); buildSprites(); buildProps();      // buildSprites recria o SP inteiro: os sprites do cenario precisam ser refeitos
+    evoStage = Math.max(evoStage, evo.stage); syncTouchIcons(); buildSprites(); buildProps();      // buildSprites recria o SP inteiro: os sprites do cenario precisam ser refeitos
     for (let k = 0; k < 10; k++) puffs.push({ kind: k % 2, x: hero.x + (rnd() - 0.5) * 20 * S, y: hero.y - rnd() * 18 * S, t: 0 });
     say('Evoluí!'); evo = null;
   }

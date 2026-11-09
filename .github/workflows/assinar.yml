@@ -1,0 +1,47 @@
+name: Assinar (SignPath)
+
+# Só funciona depois de o projeto ser aprovado no SignPath Foundation e de as variáveis/segredo abaixo existirem.
+# Passo a passo: docs/ASSINATURA-SIGNPATH.md   (este workflow ainda NÃO foi testado)
+on:
+  workflow_dispatch:
+
+jobs:
+  assinar:
+    runs-on: windows-latest
+    if: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compilar
+        shell: cmd
+        run: |
+          set CSC=%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe
+          if not exist installer\saida mkdir installer\saida
+          "%CSC%" /nologo /target:winexe /optimize+ /out:installer\saida\HeroiPet.exe /win32icon:installer\heroi.ico /r:System.Windows.Forms.dll /r:System.Drawing.dll HeroiPet.cs installer\InfoDoPrograma.cs
+          if errorlevel 1 exit /b 1
+          "%CSC%" /nologo /target:winexe /optimize+ /out:installer\saida\Instalador-HeroiDoDesktop.exe /win32icon:installer\heroi.ico /win32manifest:installer\app.manifest /resource:installer\saida\HeroiPet.exe,HeroiPet.exe /r:System.Windows.Forms.dll /r:System.Drawing.dll installer\Instalador.cs
+          if errorlevel 1 exit /b 1
+
+      - name: Guardar os binários sem assinatura
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: HeroiDoDesktop-sem-assinatura
+          path: installer/saida/*.exe
+
+      - name: Enviar para assinatura no SignPath
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_POLICY_SLUG }}
+          github-artifact-id: ${{ steps.upload.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: assinado
+
+      - name: Guardar o instalador assinado
+        uses: actions/upload-artifact@v4
+        with:
+          name: HeroiDoDesktop-assinado
+          path: assinado/

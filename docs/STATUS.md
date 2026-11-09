@@ -10,7 +10,7 @@ Resumo do ponto em que o projeto está, para retomar de onde parou.
 | Instalador (`Instalador-HeroiDoDesktop.exe`) | Gerado às 22:12, ~124 KB, **sem assinatura digital** (o Windows pode bloquear; ver `COMO-INSTALAR.txt`) |
 | Versão web (`web/heroi-do-desktop.html`) | Publicada em https://heroi-games-2026.web.app (Firebase Hosting) |
 | Documentação | Esta pasta `docs/` + `README.md` na raiz |
-| Repositório GitHub público | **Preparado, ainda não publicado** (ver "Pendências") |
+| Repositório GitHub público | **Publicado:** https://github.com/alesimoes/heroi-do-desktop (MIT). O build automático passa |
 
 ## Funcionalidades (desktop e web, mesmas regras)
 
@@ -29,9 +29,9 @@ Detalhes das regras: `REGRAS-DO-JOGO.md`. Como o código funciona: `ARQUITETURA.
 
 ## Pendências e decisões em aberto
 
-1. **GitHub + assinatura (SignPath).** O repositório está pronto (`LICENSE` MIT, `README.md`, `CODE_SIGNING_POLICY.md`, `.gitignore`,
-   `.github/workflows/build.yml`), mas falta: instalar Git e GitHub CLI, fazer login no GitHub, criar o repositório público
-   `heroi-do-desktop` e enviar. Depois, pedir aprovação em signpath.org (feito pelos autores, com verificação em dois passos).
+1. **Assinatura (SignPath).** Repositório publicado e workflows prontos (`build.yml` testado; `assinar.yml` **não testado**). Falta os **autores**
+   se cadastrarem em signpath.org e pedirem aprovação (identidade e verificação em dois passos; não pode ser feito por ferramenta),
+   depois configurar variáveis/segredo no GitHub. Passo a passo e texto do pedido em `ASSINATURA-SIGNPATH.md`.
 2. **Correções da revisão em paralelo** ainda **não aplicadas** (itens aprovados por outra sessão, sem confirmação neste chat):
    lanche automático no modo jogo no desktop (deveria ser só automático, como na web), tela inicial cortada no celular deitado,
    redimensionar/rotacionar a web trava o herói, tela cheia no Android, direcional desacelera fora do círculo, macieiras sob os

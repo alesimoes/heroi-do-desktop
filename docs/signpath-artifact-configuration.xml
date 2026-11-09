@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Configuração de artefato para o SignPath: assina os dois executáveis dentro do zip enviado pelo GitHub Actions.
+     Confira a sintaxe atual em https://about.signpath.io/documentation/artifact-configuration-syntax (não testado). -->
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <zip-file>
+    <pe-file path="HeroiPet.exe">
+      <authenticode-sign/>
+    </pe-file>
+    <pe-file path="Instalador-HeroiDoDesktop.exe">
+      <authenticode-sign/>
+    </pe-file>
+  </zip-file>
+</artifact-configuration>
