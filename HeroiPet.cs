@@ -548,7 +548,7 @@ namespace HeroiPet
         public int Type;          // 0 octorok, 1 morcego, 2 slime
         public float X, Y, VX, VY, KX, KY, T, Timer, Flash;
         public int HP, MaxHP, Face = 1, Mode;
-        public float TX, TY, RT; public bool Moving; public float Scale = 1f, SmokeT;      // dragao: destino, tempo para trocar de destino, esta andando
+        public float TX, TY, RT; public bool Moving; public float Scale = 1f, SmokeT, GrowT, SparkT;      // dragao: destino, tempo para trocar de destino, esta andando
     }
     class Rock { public float X, Y, VX, VY, Life; public bool Fire, Homing; }
     class Arrow { public float X, Y, VX, VY; public bool Power; }
@@ -1088,6 +1088,8 @@ namespace HeroiPet
             dragonSpr[0] = Art.Make(Art.DragonRows(false), ds, null); dragonSpr[1] = Art.Make(Art.DragonRows(true), ds, null);
             Dictionary<char, Color> redOv = Art.Ov('P', Color.FromArgb(210, 45, 50)); redOv['p'] = Color.FromArgb(135, 25, 38); redOv['Y'] = Color.FromArgb(245, 170, 70);      // abaixo de 50% da vida o dragao fica vermelho
             dragonSprRed[0] = Art.Make(Art.DragonRows(false), ds, redOv); dragonSprRed[1] = Art.Make(Art.DragonRows(true), ds, redOv);
+            Dictionary<char, Color> glowOv = Art.Ov('P', Color.FromArgb(255, 125, 105)); glowOv['p'] = Color.FromArgb(235, 80, 70); glowOv['Y'] = Color.FromArgb(255, 235, 140); glowOv['W'] = Color.FromArgb(255, 255, 230);      // versao 'brilhante' (mais clara)
+            dragonSprGlow[0] = Art.Make(Art.DragonRows(false), ds, glowOv); dragonSprGlow[1] = Art.Make(Art.DragonRows(true), ds, glowOv);
             fireSpr[0] = Art.Make(Art.FireballRows(0), S + 1, null); fireSpr[1] = Art.Make(Art.FireballRows(1), S + 1, null);
             Color[] bk = { Color.FromArgb(215, 55, 55), Color.FromArgb(205, 92, 48), Color.FromArgb(176, 86, 42), Color.FromArgb(142, 74, 36) };
             for (int i = 0; i < 4; i++) { Dictionary<char, Color> ob = Art.Ov('R', bk[i]); ob['G'] = i == 0 ? Color.FromArgb(58, 165, 62) : Color.FromArgb(104, 110, 40); appleBake[i] = Art.Make(Art.AppleSm, S, ob); }
@@ -1981,7 +1983,7 @@ namespace HeroiPet
         Enemy boss;
         List<Smoke> smokes = new List<Smoke>();
         EndShow endShow;
-        Sprite[] dragonSpr = new Sprite[2], dragonSprRed = new Sprite[2], fireSpr = new Sprite[2];
+        Sprite[] dragonSpr = new Sprite[2], dragonSprRed = new Sprite[2], dragonSprGlow = new Sprite[2], fireSpr = new Sprite[2];
         float DK = 1.7f;                  // fator de tamanho do dragao em relacao ao tamanho normal
 
         bool DragonAlive() { return boss != null && enemies.Contains(boss); }
@@ -2228,7 +2230,9 @@ namespace HeroiPet
         {
             Shadow(g, e.X, e.Y, 34 * DK * e.Scale);
             float k = (e.T < 1.5f ? 0.15f + 0.85f * (e.T / 1.5f) : 1f) * e.Scale;
-            Sprite sp = (e.HP * 2 <= e.MaxHP ? dragonSprRed : dragonSpr)[e.Mode == 1 ? 1 : 0];
+            bool furiaD = e.HP * 2 <= e.MaxHP;
+            bool brilha = furiaD && e.GrowT < 3f && ((int)(time * 8)) % 2 == 0;      // brilha enquanto cresce
+            Sprite sp = (brilha ? dragonSprGlow : (furiaD ? dragonSprRed : dragonSpr))[e.Mode == 1 ? 1 : 0];
             int w = (int)(sp.W * k), h = (int)(sp.H * k);
             float bob = e.Moving ? Math.Abs((float)Math.Sin(e.T * 7)) * 2 * S : 0;      // pula um pouco ao andar
             g.DrawImage(e.Face > 0 ? sp.R : sp.L, (int)(e.X - w / 2f), (int)(e.Y - h - bob), w, h);
@@ -2830,7 +2834,18 @@ namespace HeroiPet
                         if (e.Mode == 0)
                         {
                             bool furia = e.HP * 2 <= e.MaxHP;                          // metade da vida: vermelho, +10% maior, mais rapido, solta fumaca, mais fogo
-                            e.Scale = furia ? 1.1f : 1f;
+                            if (furia)      // cresce LENTAMENTE (3 s) ate 1,2x (10% + mais 10%) e brilha durante o crescimento
+                            {
+                                if (e.GrowT < 3f) e.GrowT = Math.Min(3f, e.GrowT + dt);
+                                float gq = e.GrowT / 3f; gq = gq * gq * (3 - 2 * gq);
+                                e.Scale = 1f + 0.2f * gq;
+                                if (e.GrowT < 3f)
+                                {
+                                    e.SparkT -= dt;
+                                    if (e.SparkT <= 0) { e.SparkT = 0.12f; puffs.Add(new Puff { Kind = 1, X = e.X + ((float)rnd.NextDouble() - 0.5f) * 40 * S * e.Scale, Y = e.Y - (float)rnd.NextDouble() * 38 * S * e.Scale }); }
+                                }
+                            }
+                            else { e.Scale = 1f; e.GrowT = 0f; }
                             float halfW = 24 * DK * e.Scale * S + 4 * S, topH = 40 * DK * e.Scale * S + 6 * S;
                             if (e.RT <= 0 || ((e.TX - e.X) * (e.TX - e.X) + (e.TY - e.Y) * (e.TY - e.Y)) < (3 * S) * (3 * S))
                             {

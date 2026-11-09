@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 09/11/2026 — Dragão: crescimento lento e brilho
+- Ao ficar vermelho (metade da vida) o dragão **cresce devagar (3 s) até 1,2×** (mais 10% além dos 10% anteriores) e **brilha** com faíscas durante o crescimento.
+
 ## 09/11/2026 — Dragão reforçado
 - Dragão com **5000 de vida**. Na metade: **vermelho**, +10% maior, um pouco mais rápido, **fumaça do nariz**, bolas de fogo 20% mais frequentes.
 - Ao morrer: volta ao normal, **explode e solta 1000 rupias** (inclui a **rupia dourada de 300**), aparece **"ESPERE POR MAIS ATUALIZAÇÕES"** e então os créditos.

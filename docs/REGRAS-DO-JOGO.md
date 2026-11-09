@@ -88,7 +88,7 @@ limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão 
 2. Fogueira no meio. O jogador colhe, põe maçãs (3+2) e come **assadas** (10 s) com a tecla 3; cada uma cura **2**.
 3. Com vida cheia (depois de comer ao menos uma): herói se afasta, a fogueira explode, fumaça, **Dragão** nasce.
 4. Dragão: **5000 de vida** (o dobro), ~1,7× maior, **anda** em volta do herói (14/s, não pisa nele), cospe bola de fogo mirada
-   a cada 1,5–3 s. Flecha 50, espada 150. **Com metade da vida (fúria)**: fica **vermelho**, **+10% de tamanho** (hitboxes acompanham), anda
+   a cada 1,5–3 s. Flecha 50, espada 150. **Com metade da vida (fúria)**: fica **vermelho** e **cresce lentamente por 3 s até 1,2×** (10% + mais 10%; hitboxes acompanham), **brilhando e soltando faíscas durante o crescimento**; anda
    **um pouco mais rápido** (18/s, ainda bem mais lento que o herói, 56/s), **solta fumaça do nariz de vez em quando** (a cada 2,5–5,5 s),
    bolas de fogo **20% mais frequentes**, 3 bolas em leque. **Com 10%**: bolas **teleguiadas** (52/s, curvam 1,8 rad/s) que **explodem em 3 s** (raio 16).
 5. **Morte do dragão:** ele **volta ao normal** (roxo, tamanho normal) e pisca por 1,3 s; depois **explode** e solta **1000 rupias** em valores

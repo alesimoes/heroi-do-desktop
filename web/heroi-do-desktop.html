@@ -349,7 +349,7 @@ function buildSprites() {
     rupee: [makeSprite(ROWS.rupee, S), makeSprite(ROWS.rupee, S, { G: '#467deb' }), makeSprite(ROWS.rupee, S, { G: '#e63c3c' }), makeSprite(ROWS.rupee, S, { G: '#f0c83c' }), makeSprite(ROWS.rupee, S, { G: '#9650cd' }), makeSprite(ROWS.rupee, S * 2, { G: '#ffcd28' })],      // [5] = 300 (recompensa do dragao): dourada e grande
     rock: makeSprite(ROWS.rock, S), apple: makeSprite(ROWS.apple, S), appleHud: makeSprite(ROWS.appleBig, S),
     bake: ['#d73737', '#cd5c30', '#b0562a', '#8e4a24'].map((c, i) => makeSprite(ROWS.apple, S, { R: c, G: i === 0 ? '#3aa53e' : '#686e28' })),
-    tree: makeSprite(treeRows(), S), dragon: [makeSprite(dragonRows(false), dS), makeSprite(dragonRows(true), dS)], dragonRed: [makeSprite(dragonRows(false), dS, { P: '#d22d32', p: '#871926', Y: '#f5aa46' }), makeSprite(dragonRows(true), dS, { P: '#d22d32', p: '#871926', Y: '#f5aa46' })],
+    tree: makeSprite(treeRows(), S), dragon: [makeSprite(dragonRows(false), dS), makeSprite(dragonRows(true), dS)], dragonRed: [makeSprite(dragonRows(false), dS, { P: '#d22d32', p: '#871926', Y: '#f5aa46' }), makeSprite(dragonRows(true), dS, { P: '#d22d32', p: '#871926', Y: '#f5aa46' })], dragonGlow: [makeSprite(dragonRows(false), dS, { P: '#ff7d69', p: '#eb5046', Y: '#ffeb8c', W: '#fffff0' }), makeSprite(dragonRows(true), dS, { P: '#ff7d69', p: '#eb5046', Y: '#ffeb8c', W: '#fffff0' })],
     fire: [makeSprite(ROWS.fire0, S + 1), makeSprite(ROWS.fire1, S + 1)]
   };
 }
@@ -710,7 +710,11 @@ function updateEnemies(dt) {
       if (e.t > 1.5) {
         e.timer -= dt; e.rt -= dt; e.moving = false;
         if (e.mode === 0) {
-          const furia = e.hp * 2 <= e.maxHp; e.scale = furia ? 1.1 : 1;      // metade da vida: vermelho, +10% maior, mais rapido, solta fumaca, mais fogo
+          const furia = e.hp * 2 <= e.maxHp;
+          if (furia) {      // cresce LENTAMENTE (3 s) ate 1,2x (10% + mais 10%) e brilha durante o crescimento
+            if (e.growT < 3) e.growT = Math.min(3, e.growT + dt); let gq = e.growT / 3; gq = gq * gq * (3 - 2 * gq); e.scale = 1 + 0.2 * gq;
+            if (e.growT < 3) { e.sparkT -= dt; if (e.sparkT <= 0) { e.sparkT = 0.12; puffs.push({ kind: 1, x: e.x + (rnd() - 0.5) * 40 * S * e.scale, y: e.y - rnd() * 38 * S * e.scale, t: 0 }); } }
+          } else { e.scale = 1; e.growT = 0; }      // metade da vida: vermelho, +10% maior, mais rapido, solta fumaca, mais fogo
           const halfW = 24 * DK * e.scale * S + 4 * S, topH = 40 * DK * e.scale * S + 6 * S;
           if (e.rt <= 0 || (e.tx - e.x) ** 2 + (e.ty - e.y) ** 2 < (3 * S) ** 2) {
             const ang = rnd() * TAU, dist = (70 + rnd() * 40) * S;
@@ -1015,7 +1019,7 @@ function fireExplode() {
   fireK = 0; onFire.fill(false); reserved.fill(false); cookApples.length = 0;
 }
 function spawnDragon() {
-  bossSpawned = true; boss = { type: 3, x: fireX, y: fireY + 8 * S, vx: 0, vy: 0, kx: 0, ky: 0, t: 0, timer: 1.5, flash: 0, hp: 5000, maxHp: 5000, face: hero.x >= fireX ? 1 : -1, mode: 0, tx: 0, ty: 0, rt: 0, moving: false, scale: 1, smokeT: 0 };
+  bossSpawned = true; boss = { type: 3, x: fireX, y: fireY + 8 * S, vx: 0, vy: 0, kx: 0, ky: 0, t: 0, timer: 1.5, flash: 0, hp: 5000, maxHp: 5000, face: hero.x >= fireX ? 1 : -1, mode: 0, tx: 0, ty: 0, rt: 0, moving: false, scale: 1, smokeT: 0, growT: 0, sparkT: 0 };
   enemies.push(boss); for (let k = 0; k < 6; k++) puffs.push({ kind: 2, x: fireX + (rnd() - 0.5) * 16 * S, y: fireY - rnd() * 10 * S, t: 0 });
 }
 function bossDefeated(e) {
@@ -1202,7 +1206,7 @@ function drawEnemy(e) {
   if (e.flash > 0 && Math.floor(e.flash * 30) % 2 === 0) return;
   const right = e.face > 0;
   if (e.type === 3) {
-    shadow(e.x, e.y, 34 * DK * (e.scale || 1)); const k = (e.t < 1.5 ? 0.15 + 0.85 * (e.t / 1.5) : 1) * (e.scale || 1), sp = (e.hp * 2 <= e.maxHp ? SP.dragonRed : SP.dragon)[e.mode === 1 ? 1 : 0], w = sp.w * k, h = sp.h * k, bob = e.moving ? Math.abs(Math.sin(e.t * 7)) * 2 * S : 0;
+    shadow(e.x, e.y, 34 * DK * (e.scale || 1)); const k = (e.t < 1.5 ? 0.15 + 0.85 * (e.t / 1.5) : 1) * (e.scale || 1), sp = ((e.hp * 2 <= e.maxHp && e.growT < 3 && Math.floor(time * 8) % 2 === 0) ? SP.dragonGlow : (e.hp * 2 <= e.maxHp ? SP.dragonRed : SP.dragon))[e.mode === 1 ? 1 : 0], w = sp.w * k, h = sp.h * k, bob = e.moving ? Math.abs(Math.sin(e.t * 7)) * 2 * S : 0;
     ctx.drawImage(right ? sp.r : sp.l, Math.round(e.x - w / 2), Math.round(e.y - h - bob), Math.round(w), Math.round(h)); return;
   }
   if (e.type === 0) { shadow(e.x, e.y, 12); const fr = (e.mode === 0 && (e.vx !== 0 || e.vy !== 0)) ? Math.floor(e.t * 6) % 2 : 0; spr(SP.octo[fr], e.x, e.y, right); }
