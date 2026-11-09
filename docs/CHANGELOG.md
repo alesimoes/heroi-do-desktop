@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 09/11/2026 — Cabelo com mais contraste e aba Roupas sem armas
+- Cabelo do herói agora **castanho** (antes amarelo, parecido com o rosto). Na aba **Roupas** do menu o herói aparece **sem espada, arco nem escudo**.
+
 ## 09/11/2026 — Comer maçã pelo inventário e fome do automático
 - No menu (Espaço) > **Comida**, clicar na maçã faz o herói **comer na tela ampliada**; **maçã crua recupera meio coração** (assada na fogueira continua recuperando mais). Não gasta a maçã se os corações já estão cheios.
 - **Modo automático:** com **só 1 coração** (ou menos) e **nenhum monstro num raio de 4 tamanhos do Link**, ele vai até uma árvore, colhe e **come uma maçã** (+0,5). Se um monstro chega perto no caminho, ele desiste e luta.

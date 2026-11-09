@@ -51,6 +51,7 @@ namespace HeroiPet
             {'g', Color.FromArgb(30, 110, 45)},
             {'Y', Color.FromArgb(240, 200, 80)},
             {'S', Color.FromArgb(250, 208, 165)},
+            {'V', Color.FromArgb(120, 62, 28)},
             {'B', Color.FromArgb(135, 85, 45)},
             {'W', Color.FromArgb(245, 245, 245)},
             {'R', Color.FromArgb(215, 55, 55)},
@@ -86,7 +87,8 @@ namespace HeroiPet
             if (Crown) { r.Add("....C.CC.C...."); r.Add("....CCCCCC...."); r.Add("....CRCCRC...."); }      // coroa sobre o gorro
             for (int i = 0; i < rows.Length; i++)
             {
-                string s = rows[i].Replace('G', i < 9 ? (Crown ? 'Y' : 'H') : 'Q');      // com a coroa: sem gorro (cabelo aparece) e a coroa fica sobre a cabeca
+                string s = rows[i].Replace('Y', 'V').Replace('G', i < 9 ? (Crown ? 'V' : 'H') : 'Q');      // cabelo castanho ('V') para contrastar com o rosto; com a coroa: sem gorro (cabelo aparece) e a coroa fica sobre a cabeca
+                if (Crown && (i == 4 || i == 5) && s.StartsWith("KV")) s = ".K" + s.Substring(2);      // sem gorro: tira a pontinha do canto esquerdo da cabeca
                 if (Robe)
                 {
                     if (i == 9) s = s.Replace('Q', 'F');          // gola de pele
@@ -1209,8 +1211,10 @@ namespace HeroiPet
         bool eatRaw;          // a maca na boca e crua (inventario / fome do automatico): meio coracao
 
         // desenha o heroi equipado, ampliado, dentro do menu (para ver como ele fica ao trocar de roupa/arma)
-        public void DrawHeroPreview(Graphics g, float cx, float groundY, float k, bool bow)
+        bool previewBare;      // aba Roupas: o heroi nao segura espada, arco nem escudo
+        public void DrawHeroPreview(Graphics g, float cx, float groundY, float k, bool bow, bool bare = false)
         {
+            previewBare = bare;
             float sax = aimX, say = aimY, sbt = bowT;
             float shx = hx, shy = hy, sp = powerT, si = inv, spk = playPickT, sed = playEatT; bool ser = eatRaw; int shf = hface, sc = calmState, sck = cookState; bool sw = walking, sa = attacking, sb = bowing, sd = dead;
             previewMode = true;
@@ -1223,7 +1227,7 @@ namespace HeroiPet
                 DrawHero(g);
                 g.Restore(st);
             }
-            finally { aimX = sax; aimY = say; bowT = sbt; hx = shx; hy = shy; hface = shf; walking = sw; attacking = sa; bowing = sb; dead = sd; powerT = sp; inv = si; playPickT = spk; playEatT = sed; eatRaw = ser; calmState = sc; cookState = sck; previewMode = false; }
+            finally { aimX = sax; aimY = say; bowT = sbt; hx = shx; hy = shy; hface = shf; walking = sw; attacking = sa; bowing = sb; dead = sd; powerT = sp; inv = si; playPickT = spk; playEatT = sed; eatRaw = ser; calmState = sc; cookState = sck; previewMode = false; previewBare = false; }
         }
 
         // icones dos itens (formas desenhadas por codigo)
@@ -1426,7 +1430,7 @@ namespace HeroiPet
                     using (LinearGradientBrush lg = new LinearGradientBrush(pv, Color.FromArgb(46, 56, 78), Color.FromArgb(22, 28, 40), 90f))
                     using (Pen pp = new Pen(Color.FromArgb(80, 90, 112), 1.5f * sc)) Round(g, pv, (int)(12 * sc), lg, pp);
                     float k = Math.Max(2f, (float)Math.Floor((pv.Height - 150 * sc) / (30f * p.S)));
-                    p.DrawHeroPreview(g, pv.X + pv.Width / 2f, pv.Y + pv.Height * 0.62f, k, showBow);
+                    p.DrawHeroPreview(g, pv.X + pv.Width / 2f, pv.Y + pv.Height * 0.62f, k, showBow, tab == 1);
                     g.SmoothingMode = SmoothingMode.AntiAlias; g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
                     float ty = pv.Bottom - 118 * sc;
                     string[] cats = { "Arco", "Espada", "Escudo", "Gorro", "Roupa" };
@@ -4036,6 +4040,7 @@ namespace HeroiPet
             int fr = walking ? ((int)(walkT * 9)) % 2 : 0;
             float bob = (walking && fr == 1) ? S : 0;
             Spr(g, heroWalk[fr], hx, hy - bob, right);
+            if (previewBare) return;
 
             // escudo
             float f = hface;
@@ -4077,7 +4082,7 @@ namespace HeroiPet
                 new PointF(handX + dx * len + px * w, handY + dy * len + py * w)
             };
             using (SolidBrush bl = new SolidBrush(BladeColor()))
-            using (Pen ol = new Pen(Color.FromArgb(28, 22, 36), 1))
+            using (Pen ol = new Pen(Color.FromArgb(28, 22, 36), Math.Max(1f, S)))      // contorno na mesma espessura do resto do jogo (1 pixel da arte)
             {
                 g.FillPolygon(bl, blade);
                 g.DrawPolygon(ol, blade);
@@ -4133,7 +4138,7 @@ namespace HeroiPet
                     new PointF(handX + dx * (len + 3 * S), handY + dy * (len + 3 * S)),
                     new PointF(handX + dx * len + px * w, handY + dy * len + py * w) };
                 using (SolidBrush bl = new SolidBrush(BladeColor()))
-                using (Pen ol = new Pen(Color.FromArgb(28, 22, 36), 1))
+                using (Pen ol = new Pen(Color.FromArgb(28, 22, 36), Math.Max(1f, S)))
                 using (Pen gd = new Pen(GuardColor(), 2 * S))
                 {
                     g.FillPolygon(bl, blade); g.DrawPolygon(ol, blade);
