@@ -591,10 +591,10 @@ namespace HeroiPet
     {
         public int Type;          // 0 octorok, 1 morcego, 2 slime
         public float X, Y, VX, VY, KX, KY, T, Timer, Flash;
-        public int HP, MaxHP, Face = 1, Mode;
+        public int HP, MaxHP, Face = 1, Mode; public bool Wave;      // Wave: faz parte da onda final antes do dragao
         public float TX, TY, RT; public bool Moving; public float Scale = 1f, SmokeT, GrowT, SparkT, ShockT = 8f;      // dragao: destino, tempo para trocar de destino, esta andando
     }
-    class Rock { public float X, Y, VX, VY, Life; public bool Fire, Homing; }
+    class Rock { public float X, Y, VX, VY, Life; public bool Fire, Homing, Arrow; }      // Arrow: flecha dos bokoblins a cavalo
     class Arrow { public float X, Y, VX, VY; public bool Power; }
     class Tree { public float X, Y; public bool[] Has = new bool[5]; public float[] Regrow = new float[5]; }
     class FlyApple { public float X0, Y0, T; }
@@ -724,7 +724,15 @@ namespace HeroiPet
         {
             if (!IsHandleCreated || gfx == null) return;
             gfx.Clear(Color.Transparent);
-            foreach (float[] r in list) gfx.FillEllipse(brush, r[0], r[1], r[2], r[3]);
+            foreach (float[] r in list)
+            {
+                if (r.Length > 4)      // onda de choque do dragao: anel amarelo transparente
+                {
+                    using (Pen o = new Pen(Color.FromArgb(95, 255, 215, 50), 8 * r[4])) gfx.DrawEllipse(o, r[0], r[1], r[2], r[3]);
+                    using (Pen m = new Pen(Color.FromArgb(110, 255, 240, 130), 3 * r[4])) gfx.DrawEllipse(m, r[0], r[1], r[2], r[3]);
+                }
+                else gfx.FillEllipse(brush, r[0], r[1], r[2], r[3]);
+            }
             SIZE sz = new SIZE(); sz.cx = bw; sz.cy = bh;
             POINT src = new POINT();
             BLENDFUNCTION bf = new BLENDFUNCTION(); bf.Op = 0; bf.Flags = 0; bf.Alpha = 255; bf.Format = 1;      // AC_SRC_OVER, AC_SRC_ALPHA
@@ -1641,6 +1649,7 @@ namespace HeroiPet
                 if (shadowLayer == null) { try { shadowLayer = new ShadowLayer(Bounds); shadowLayer.Show(); } catch { shadowLayer = null; } }
                 if (shadowLayer != null && shadowLayer.IsHandleCreated) SetWindowPos(shadowLayer.Handle, Handle, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010 | 0x0200);   // logo abaixo do heroi
                 if (shield != null) { if (front) shield.PushTop(); else shield.PushBottom(); }
+                if (MenuOpen && menuForm.IsHandleCreated) SetWindowPos(menuForm.Handle, new IntPtr(-1), 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010 | 0x0200);      // o inventario fica por cima de tudo (inclusive do heroi e dos inimigos, que podem estar "no topo" com a area de trabalho em foco)
             }
             if (deathForm != null && !deathForm.IsDisposed && deathForm.Ready && IsDown(0x0D)) deathForm.Retry();      // Enter = Tentar de novo (se a janela estiver escondida atras de um aplicativo)
             if (shield != null) shield.PassThrough(IsDown(0x11));        // Ctrl apertado: cliques passam para a area de trabalho
@@ -1700,8 +1709,8 @@ namespace HeroiPet
                 for (int k = enemies.Count - 1; k >= 0 && !gone; k--)
                 {
                     Enemy en = enemies[k];
-                    float dx = en.X - a.X, dy = (en.Y - (en.Type == 1 ? 9 * S : (en.Type == 3 ? 12 * S * DK * en.Scale : 4 * S))) - a.Y;
-                    float hitR = en.Type == 3 ? 14 * S * DK * en.Scale : 7 * S;
+                    float dx = en.X - a.X, dy = (en.Y - (en.Type == 1 ? 9 * S : (en.Type == 5 ? 9 * S : (en.Type == 3 ? 12 * S * DK * en.Scale : 4 * S)))) - a.Y;
+                    float hitR = en.Type == 3 ? 14 * S * DK * en.Scale : (en.Type == 5 ? 9 * S : 7 * S);
                     if (dx * dx + dy * dy < hitR * hitR) { DamageEnemy(en, (en.Type == 3 ? 50 : 1) * ((!a.Power && eqBow == 1) ? 2 : 1)); gone = true; }      // arco prateado (evolucao 1): o dobro de dano (flecha de poder nao muda)
                 }
                 if (gone) arrows.RemoveAt(i);
@@ -2691,7 +2700,7 @@ namespace HeroiPet
 
         void ResetBoss()
         {
-            bossPhase = 0; killsAtMax = 0; bossT = 0; atePhase1 = false; playEatT = 0; endStarted = false; bossSpawned = false;
+            bossPhase = 0; killsAtMax = 0; bossT = 0; atePhase1 = false; playEatT = 0; endStarted = false; bossSpawned = false; waveSpawned = 0; waveT = 2f;
             if (boss != null) { enemies.Remove(boss); boss = null; }
             shocks.Clear(); smokes.Clear(); rewardSpawned = false; msgT = 0; items.RemoveAll(delegate (Item it) { return it.Reward; });
             rocks.RemoveAll(delegate (Rock r) { return r.Fire; });
@@ -2813,10 +2822,23 @@ namespace HeroiPet
             hy = Math.Max(17 * S, Math.Min(H - 1 * S, hy));
         }
 
+        // ONDA FINAL (ultimo nivel antes do dragao): 2 gelatinas e 5 bokoblins a cavalo com arco, nunca todos juntos (no maximo 3 vivos ao mesmo tempo).
+        // O dragao so aparece depois que os 7 foram derrotados (e das 5 mortes do nivel maximo).
+        static readonly int[] WaveSeq = { 5, 2, 5, 5, 2, 5, 5 };
+        int waveSpawned; float waveT = 2f;
+        int WaveAlive() { int n = 0; foreach (Enemy e in enemies) if (e.Wave) n++; return n; }
+        bool WaveDone() { return waveSpawned >= WaveSeq.Length && WaveAlive() == 0; }
+        void UpdateWave(float dt)
+        {
+            if (RupeeStep() < 6 || dead || waveSpawned >= WaveSeq.Length) return;
+            waveT -= dt;
+            if (waveT <= 0 && WaveAlive() < 3) { Enemy e = Spawn(WaveSeq[waveSpawned]); e.Wave = true; waveSpawned++; waveT = 4f + (float)rnd.NextDouble() * 3f; }
+        }
+
         void UpdateBoss(float dt)
         {
             if (!playMode) return;
-            if (bossPhase == 0) { if (killsAtMax >= 5) StartFinalPhase(); return; }
+            if (bossPhase == 0) { UpdateWave(dt); if (killsAtMax >= 5 && WaveDone()) StartFinalPhase(); return; }
             bossT += dt;
             for (int i = 0; i < 5; i++) if (onFire[i]) bakeTs[i] += dt;
             for (int i = smokes.Count - 1; i >= 0; i--) { smokes[i].T += dt; if (smokes[i].T > smokes[i].Life) smokes.RemoveAt(i); }
@@ -3174,7 +3196,7 @@ namespace HeroiPet
             Say(startled ? "!" : "Hm?");
         }
 
-        void Spawn(int type)
+        Enemy Spawn(int type)
         {
             Enemy e = new Enemy();
             e.Type = type;
@@ -3184,10 +3206,11 @@ namespace HeroiPet
             else if (edge == 1) { e.X = W - m; e.Y = m * 3 + (float)rnd.NextDouble() * (H - m * 6); }
             else if (edge == 2) { e.X = m * 3 + (float)rnd.NextDouble() * (W - m * 6); e.Y = 16 * S; }
             else { e.X = m * 3 + (float)rnd.NextDouble() * (W - m * 6); e.Y = H - m; }
-            e.HP = type == 1 ? 1 : (type == 4 ? 3 : 2);
+            e.HP = type == 1 ? 1 : ((type == 4 || type == 5) ? 3 : 2);
             e.Timer = 0.8f + (float)rnd.NextDouble();
             puffs.Add(new Puff { Kind = 2, X = e.X, Y = e.Y });
             enemies.Add(e);
+            return e;
         }
 
         Enemy NearestBat()
@@ -3640,6 +3663,38 @@ namespace HeroiPet
                     e.Mode = 0; e.VX = ux * sp; e.VY = uy * sp;
                     if (d > 3 * S) { e.X += e.VX * dt; e.Y += e.VY * dt; }
                 }
+                else if (e.Type == 5) // bokoblin a cavalo com arco: se aproxima um pouco e depois rodeia o heroi atirando flechas
+                {
+                    float rv = 0.95f * 56 * S;      // 95% da velocidade do heroi (56)
+                    if (e.Mode == 0)
+                    {
+                        if (e.SparkT <= 0) { e.SparkT = (62 + (float)rnd.NextDouble() * 14) * S; e.TY = rnd.Next(2) == 0 ? 1f : -1f; e.Timer = 0.8f + (float)rnd.NextDouble(); }      // SparkT: raio da volta, TY: sentido, Timer: tempo ate a proxima flecha
+                        if (d > e.SparkT + 6 * S) { e.X += ux * rv * dt; e.Y += uy * rv * dt; }
+                        else { e.Mode = 1; e.TX = (float)Math.Atan2(e.Y - hy, e.X - hx); }      // TX: angulo atual em volta do heroi
+                    }
+                    else
+                    {
+                        e.TX += e.TY * (rv / e.SparkT) * dt;
+                        float tx = hx + (float)Math.Cos(e.TX) * e.SparkT, ty = hy + (float)Math.Sin(e.TX) * e.SparkT * 0.75f;
+                        tx = Math.Max(8 * S, Math.Min(W - 8 * S, tx)); ty = Math.Max(20 * S, Math.Min(H - 2 * S, ty));
+                        float mx2 = tx - e.X, my2 = ty - e.Y, md2 = (float)Math.Sqrt(mx2 * mx2 + my2 * my2);
+                        if (md2 > 1) { float st2 = Math.Min(md2, rv * dt); e.X += mx2 / md2 * st2; e.Y += my2 / md2 * st2; e.VX = mx2 / md2; e.VY = my2 / md2; }
+                        if (d > e.SparkT + 40 * S) e.Mode = 0;      // ficou longe demais: volta a se aproximar
+                        e.Timer -= dt;
+                        if (e.Timer <= 0 && !dead)
+                        {
+                            // mira perto do heroi, mas sem precisao: o erro e sorteado para ~50% das flechas errarem; depois de solta ela nao muda de rumo
+                            float sx2 = e.X + e.Face * 8 * S, sy2 = e.Y - 12 * S;
+                            float aimX = hx - sx2, aimY = (hy - 6 * S) - sy2, al = (float)Math.Sqrt(aimX * aimX + aimY * aimY);
+                            if (al < 1) al = 1;
+                            float err = ((float)rnd.NextDouble() * 2f - 1f) * (14f * S / al);      // acerta se |erro| * distancia < 7 S (raio do heroi): ~50%
+                            float ang2 = (float)Math.Atan2(aimY, aimX) + err;
+                            Rock r = new Rock(); r.Arrow = true; r.X = sx2; r.Y = sy2; r.VX = (float)Math.Cos(ang2) * 90 * S; r.VY = (float)Math.Sin(ang2) * 90 * S;
+                            rocks.Add(r);
+                            e.Timer = 1.7f + (float)rnd.NextDouble() * 1.3f;
+                        }
+                    }
+                }
                 else if (e.Type == 0) // octorok: anda, para, mira e cospe pedra
                 {
                     e.Timer -= dt;
@@ -3754,14 +3809,7 @@ namespace HeroiPet
             {
                 if (s.T < ShockWarn) continue;      // o aviso e a sombra do dragao piscando (ver DrawDragon)
                 float r = s.R0 + (s.R - s.R0) * Math.Min(1f, (s.T - ShockWarn) / ShockExpand);
-                using (Pen o = new Pen(Color.FromArgb(225, 70, 40), 8 * S))
-                using (Pen m = new Pen(Color.FromArgb(255, 170, 60), 5 * S))
-                using (Pen w = new Pen(Color.FromArgb(255, 245, 190), 2 * S))
-                {
-                    g.DrawEllipse(o, s.X - r, s.Y - r * 0.7f, 2 * r, 1.4f * r);
-                    g.DrawEllipse(m, s.X - r, s.Y - r * 0.7f, 2 * r, 1.4f * r);
-                    g.DrawEllipse(w, s.X - r, s.Y - r * 0.7f, 2 * r, 1.4f * r);
-                }
+                shadowList.Add(new float[] { s.X - r, s.Y - r * 0.7f, 2 * r, 1.4f * r, S });      // onda amarela transparente: vai para a camada com transparencia real (a janela do heroi so liga/desliga a cor)
             }
         }
         void UpdateRocks(float dt)
@@ -3907,6 +3955,7 @@ namespace HeroiPet
                         int fw = (int)(fs.W * k), fh = (int)(fs.H * k);
                         g.DrawImage(fs.R, (int)(r.X - fw / 2f), (int)(r.Y - fh / 2f), fw, fh);
                     }
+                    else if (r.Arrow) DrawArrow(g, r.X, r.Y, r.VX, r.VY, 1f);
                     else if (r.Fire) Spr(g, fireSpr[((int)(time * 12)) % 2], r.X, r.Y + fireSpr[0].H / 2f, true);
                     else Spr(g, rockSpr, r.X, r.Y + 2 * S, true);
                 }
@@ -4291,6 +4340,7 @@ namespace HeroiPet
                 float lift = 9 * S + (float)Math.Sin(e.T * 6) * 2 * S;
                 Spr(g, bat[((int)(e.T * 9)) % 2], e.X, e.Y - lift, right);
             }
+            else if (e.Type == 5) DrawRider(g, e);
             else if (e.Type == 4)
             {
                 Shadow(g, e.X, e.Y, 12);
@@ -4303,6 +4353,38 @@ namespace HeroiPet
                 float hop = e.Mode == 1 ? (float)Math.Sin((1 - e.Timer / 0.45f) * Math.PI) * 5 * S : 0;
                 Spr(g, slime[e.Mode == 1 ? 0 : 1], e.X, e.Y - hop, right);
             }
+        }
+
+        // bokoblin montado num cavalo, com arco (desenhado por retangulos; x vai para frente, y para cima, em unidades de S)
+        void HRect(Graphics g, Color c, float ox, float oy, int f, float x, float y, float w, float h)
+        {
+            using (SolidBrush b = new SolidBrush(c))
+                g.FillRectangle(b, f > 0 ? ox + x * S : ox - (x + w) * S, oy - (y + h) * S, w * S, h * S);
+        }
+        void DrawRider(Graphics g, Enemy e)
+        {
+            Shadow(g, e.X, e.Y, 17);
+            int f = e.Face > 0 ? 1 : -1;
+            bool run = e.Mode == 0 || ((e.VX != 0 || e.VY != 0));
+            int ph = run ? ((int)(e.T * 8)) % 2 : 0;
+            Color K = Color.FromArgb(28, 22, 36), body = Color.FromArgb(165, 105, 58), dark = Color.FromArgb(105, 62, 32), mane = Color.FromArgb(70, 42, 24);
+            // patas (alternam ao galopar)
+            float l1 = ph == 0 ? 0 : 1, l2 = ph == 0 ? 1 : 0;
+            HRect(g, K, e.X, e.Y, f, -9, 0, 3, 7 - l1); HRect(g, dark, e.X, e.Y, f, -8, 0, 1, 6 - l1);
+            HRect(g, K, e.X, e.Y, f, -4, 0, 3, 7 - l2); HRect(g, dark, e.X, e.Y, f, -3, 0, 1, 6 - l2);
+            HRect(g, K, e.X, e.Y, f, 3, 0, 3, 7 - l2); HRect(g, dark, e.X, e.Y, f, 4, 0, 1, 6 - l2);
+            HRect(g, K, e.X, e.Y, f, 7, 0, 3, 7 - l1); HRect(g, dark, e.X, e.Y, f, 8, 0, 1, 6 - l1);
+            // corpo, pescoco, cabeca, rabo
+            HRect(g, K, e.X, e.Y, f, -12, 6, 24, 10); HRect(g, body, e.X, e.Y, f, -11, 7, 22, 8);
+            HRect(g, K, e.X, e.Y, f, 8, 10, 7, 11); HRect(g, body, e.X, e.Y, f, 9, 11, 5, 9);
+            HRect(g, K, e.X, e.Y, f, 11, 17, 8, 6); HRect(g, body, e.X, e.Y, f, 12, 18, 6, 4); HRect(g, K, e.X, e.Y, f, 15, 20, 1, 1);
+            HRect(g, mane, e.X, e.Y, f, 7, 12, 2, 9); HRect(g, mane, e.X, e.Y, f, -15, 8, 4, 7);
+            // cela
+            HRect(g, Color.FromArgb(150, 40, 45), e.X, e.Y, f, -4, 14, 9, 2);
+            // cavaleiro (bokoblin) sentado no cavalo
+            Spr(g, boko[0], e.X - f * 1 * S, e.Y - 9 * S, f > 0);
+            // arco na frente do cavaleiro
+            HRect(g, K, e.X, e.Y, f, 8, 19, 2, 9); HRect(g, Color.FromArgb(135, 85, 45), e.X, e.Y, f, 8, 20, 1, 7); HRect(g, Color.White, e.X, e.Y, f, 7, 20, 1, 7);
         }
 
         void DrawPuff(Graphics g, Puff p)

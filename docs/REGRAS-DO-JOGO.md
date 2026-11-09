@@ -128,3 +128,7 @@ limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão 
 ## Comer maçã (inventário e fome do automático)
 - Inventário > Comida: clicar na maçã faz o herói comer (animação na tela ampliada). Maçã **crua** = **+0,5 coração**; assada na fogueira = mais. Com corações cheios a maçã não é gasta.
 - Automático: com **hp ≤ 1** e nenhum monstro dentro de **4 × 16 × S px** (4 tamanhos do Link), vai à árvore mais próxima com maçã, colhe e come uma (+0,5). Monstro chegando no raio cancela.
+
+## Onda final (cavaleiros bokoblin)
+- Modo jogo, nível máximo (NV 7): sequência de 7 inimigos (cavaleiro, gelatina, cavaleiro, cavaleiro, gelatina, cavaleiro, cavaleiro), 1 a cada 4-7 s, máximo 3 vivos. O dragão começa quando os 7 morreram e já houve 5 mortes no nível.
+- Cavaleiro: 3 de vida, velocidade 95% da do herói (53 S/s), aproxima até ~62-76 S e orbita em elipse atirando a cada 1,7-3 s. Flecha: 90 S/s, mira no herói com erro sorteado (±14 S/distância => ~50% erram); trajetória fixa.

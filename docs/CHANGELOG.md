@@ -1,5 +1,9 @@
 # Changelog (resumo)
 
+## 09/11/2026 — Onda final antes do dragão: bokoblins a cavalo
+- No **último nível** (NV 7, modo jogo) aparecem **2 gelatinas e 5 bokoblins montados em cavalos com arco** (nunca mais de 3 vivos ao mesmo tempo). O dragão só chega depois que os 7 forem derrotados (e das 5 mortes do nível).
+- Os cavaleiros **se aproximam um pouco e depois rodeiam o herói** atirando flechas; velocidade = **95% da do herói**. A mira é perto do herói mas **sem precisão (~50% das flechas erram)** e a flecha **não muda de rumo** depois de solta. Flecha de frente é bloqueada pelo escudo; tira 1 coração.
+
 ## 09/11/2026 — Cabelo com mais contraste e aba Roupas sem armas
 - Cabelo do herói agora **castanho** (antes amarelo, parecido com o rosto). Na aba **Roupas** do menu o herói aparece **sem espada, arco nem escudo**.
 
