@@ -444,6 +444,31 @@ namespace HeroiPet
             "...KkK..KkK...",
             "..KKKK..KKKK.."
         };
+        // Itens de evolucao (gorro e blusa) na mesma arte pixel do corpo do heroi: H/h/g = gorro (base/brilho/sombra), Q/h/g = blusa
+        public static string[] CapItem = {
+            "....KKKKKKKK....",
+            "...KHHhhHHHHK...",
+            "..KHHhHHHHHHgK..",
+            ".KHHHHHHHHHHHgK.",
+            "KHHHHHHHHHHHHHgK",
+            "KHHHHHHHHHHHHggK",
+            "KggggggggggggggK",
+            ".KKKKKKKKKKKKKK."
+        };
+        public static string[] ShirtItem = {
+            "...KKKKKKKKKK...",
+            "..KQQQKKKKQQQK..",
+            ".KQQQQQhhQQQQQK.",
+            "KQQQQQQQQQQQQQQK",
+            "KQQQQQQQQQQQQQQK",
+            "KgQQQKQQQQKQQQgK",
+            ".KKKKKQQQQKKKKK.",
+            "....KQQQQQQK....",
+            "....KQQQQQQK....",
+            "....KgQQQQgK....",
+            "....KBBBBBBK....",
+            "....KKKKKKKK...."
+        };
         public static string[] BatUp = {
             "KK..........KK",
             "KPK...KK...KPK",
@@ -548,7 +573,7 @@ namespace HeroiPet
         public int Type;          // 0 octorok, 1 morcego, 2 slime
         public float X, Y, VX, VY, KX, KY, T, Timer, Flash;
         public int HP, MaxHP, Face = 1, Mode;
-        public float TX, TY, RT; public bool Moving; public float Scale = 1f, SmokeT, GrowT, SparkT;      // dragao: destino, tempo para trocar de destino, esta andando
+        public float TX, TY, RT; public bool Moving; public float Scale = 1f, SmokeT, GrowT, SparkT, ShockT = 8f;      // dragao: destino, tempo para trocar de destino, esta andando
     }
     class Rock { public float X, Y, VX, VY, Life; public bool Fire, Homing; }
     class Arrow { public float X, Y, VX, VY; public bool Power; }
@@ -556,6 +581,7 @@ namespace HeroiPet
     class FlyApple { public float X0, Y0, T; }
     class CookApple { public float X0, Y0, X1, Y1, T, Dur; public int Idx, Dir; }
     class Fire { }
+    class Shock { public float X, Y, T; public bool Hit; }      // onda de choque do dragao
     class Smoke { public float X, Y, T, Sz; public float Life = 3.2f, Grow = 5f; }
     class Item { public int Kind; public float X, Y, T; public bool Reward; public float VX, VY; }   // 0 coracao, 1 verde, 2 azul, 3 vermelha
     class Puff { public int Kind; public float X, Y, T; }  // 0 morte, 1 faisca, 2 spawn
@@ -882,6 +908,8 @@ namespace HeroiPet
         }
 
         public Rectangle ButtonRect { get { return btn; } }
+        public bool Ready { get { return ms >= 300; } }
+        public void Retry() { Action cb = onRetry; onRetry = null; try { Close(); } catch { } if (cb != null) cb(); }      // 'Tentar de novo' pelo teclado (Enter)
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
@@ -925,6 +953,7 @@ namespace HeroiPet
                 bp.CloseAllFigures();
                 g.FillPath(bg, bp); bp.Dispose();
                 g.DrawString("Tentar de novo", bf, white, new RectangleF(btn.X, btn.Y, btn.Width, btn.Height), c);
+                using (Font sm = new Font("Segoe UI", 17 * sc, FontStyle.Regular, GraphicsUnit.Pixel)) g.DrawString("ou aperte Enter", sm, white, new RectangleF(btn.X, btn.Bottom + 2 * sc, btn.Width, 24 * sc), c);
             }
         }
     }
@@ -1095,6 +1124,9 @@ namespace HeroiPet
             Color[] bk = { Color.FromArgb(215, 55, 55), Color.FromArgb(205, 92, 48), Color.FromArgb(176, 86, 42), Color.FromArgb(142, 74, 36) };
             for (int i = 0; i < 4; i++) { Dictionary<char, Color> ob = Art.Ov('R', bk[i]); ob['G'] = i == 0 ? Color.FromArgb(58, 165, 62) : Color.FromArgb(104, 110, 40); appleBake[i] = Art.Make(Art.AppleSm, S, ob); }
             heroFront = Art.Make(Art.HeroRecolor(Art.HeroFront), S, hov);
+            Dictionary<char, Color> capOv = Art.Ov('H', Color.FromArgb(150, 80, 205)); capOv['h'] = Color.FromArgb(205, 150, 240); capOv['g'] = Color.FromArgb(96, 50, 140);
+            Dictionary<char, Color> shOv = Art.Ov('Q', Color.FromArgb(70, 125, 235)); shOv['h'] = Color.FromArgb(135, 180, 255); shOv['g'] = Color.FromArgb(45, 85, 190);
+            evoItemSpr[0] = Art.Make(Art.CapItem, S, capOv); evoItemSpr[1] = Art.Make(Art.ShirtItem, S, shOv);
             heroFrontWave = Art.Make(Art.HeroRecolor(Art.HeroFrontWave), S, hov);
             octo[0] = Art.Make(Art.OctoA, S, null); octo[1] = Art.Make(Art.OctoB, S, null);
             bat[0] = Art.Make(Art.BatUp, S, null); bat[1] = Art.Make(Art.BatDown, S, null);
@@ -1213,6 +1245,7 @@ namespace HeroiPet
                 if (shadowLayer != null && shadowLayer.IsHandleCreated) SetWindowPos(shadowLayer.Handle, Handle, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010 | 0x0200);   // logo abaixo do heroi
                 if (shield != null) { if (front) shield.PushTop(); else shield.PushBottom(); }
             }
+            if (deathForm != null && !deathForm.IsDisposed && deathForm.Ready && IsDown(0x0D)) deathForm.Retry();      // Enter = Tentar de novo (se a janela estiver escondida atras de um aplicativo)
             if (shield != null) shield.PassThrough(IsDown(0x11));        // Ctrl apertado: cliques passam para a area de trabalho
             double now = clock.Elapsed.TotalSeconds;
             float dt = (float)Math.Min(0.05, now - lastT);
@@ -1311,6 +1344,7 @@ namespace HeroiPet
             UpdateCookApples(dt);
             UpdateEnemies(dt);
             UpdateRocks(dt);
+            UpdateShocks(dt);
             UpdateItems(dt);
             for (int i = puffs.Count - 1; i >= 0; i--)
             {
@@ -1330,6 +1364,7 @@ namespace HeroiPet
         int evoNext;                         // proximo estagio a anunciar (1 a 4; 5 = acabou)
         Queue<int> evoQueue = new Queue<int>();
         EvoAnim evo;
+        Sprite[] evoItemSpr = new Sprite[2];      // gorro e blusa em pixel art (iguais ao corpo)
         Font evoFont;
         const float EvoFly = 1.5f;
 
@@ -1433,6 +1468,12 @@ namespace HeroiPet
         // desenha o equipamento (formas em unidades u; a cor-chave nao permite transparencia, entao so cores solidas)
         void DrawEvoItem(Graphics g, int stage, float cx, float cy, float u)
         {
+            if (stage == 2 || stage == 3)      // gorro / blusa: mesma arte pixel do corpo do heroi, ampliada
+            {
+                Sprite sp = evoItemSpr[stage - 2]; float k = u / S * 1.7f, w = sp.W * k, h = sp.H * k;
+                g.DrawImage(sp.R, cx - w / 2f, cy - h / 2f, w, h);
+                return;
+            }
             Color dark = Color.FromArgb(28, 22, 36);
             using (Pen ol = new Pen(dark, Math.Max(1f, u * 0.7f)))
             using (SolidBrush dk = new SolidBrush(dark))
@@ -2021,7 +2062,7 @@ namespace HeroiPet
         {
             bossPhase = 0; killsAtMax = 0; bossT = 0; atePhase1 = false; playEatT = 0; endStarted = false; bossSpawned = false;
             if (boss != null) { enemies.Remove(boss); boss = null; }
-            smokes.Clear(); rewardSpawned = false; msgT = 0; items.RemoveAll(delegate (Item it) { return it.Reward; });
+            shocks.Clear(); smokes.Clear(); rewardSpawned = false; msgT = 0; items.RemoveAll(delegate (Item it) { return it.Reward; });
             rocks.RemoveAll(delegate (Rock r) { return r.Fire; });
             for (int i = 0; i < 5; i++) { reserved[i] = false; bakeTs[i] = 0; }
             if (cookState == 0) { fireK = 0; for (int i = 0; i < 5; i++) onFire[i] = false; }
@@ -2075,7 +2116,7 @@ namespace HeroiPet
 
         void BossDefeated(Enemy e)
         {
-            bossPhase = 5; bossT = 0; endStarted = false; rewardSpawned = false; msgT = 0;
+            shocks.Clear(); bossPhase = 5; bossT = 0; endStarted = false; rewardSpawned = false; msgT = 0;
             bossDeadX = e.X; bossDeadY = e.Y; bossDeadFace = e.Face;
             rocks.Clear();
             for (int k = 0; k < 8; k++)
@@ -2338,7 +2379,7 @@ namespace HeroiPet
             dead = false; deadT = 0; hp = MaxHP; inv = 2f; kvx = kvy = 0;
             hx = bossPhase >= 3 ? W * 0.15f : W / 2; hy = H / 2;
             puffs.Add(new Puff { Kind = 2, X = hx, Y = hy });
-            if (DragonAlive()) { boss.HP = boss.MaxHP; rocks.RemoveAll(delegate (Rock r) { return r.Fire; }); }     // o dragao recupera toda a vida quando o heroi morre
+            if (DragonAlive()) { shocks.Clear(); boss.ShockT = 8f; boss.HP = boss.MaxHP; rocks.RemoveAll(delegate (Rock r) { return r.Fire; }); }     // o dragao recupera toda a vida quando o heroi morre
             Say("Voltei!");
         }
 
@@ -2836,6 +2877,12 @@ namespace HeroiPet
                     {
                         e.Timer -= dt;
                         e.RT -= dt; e.Moving = false;
+                        if (e.HP * 100 <= e.MaxHP * 15)      // ultimos 15% de vida: a cada 8 s, onda de choque (tira 2 coracoes)
+                        {
+                            e.ShockT -= dt;
+                            if (e.ShockT <= 0) { e.ShockT = 8f; shocks.Add(new Shock { X = e.X, Y = e.Y - 2 * S }); }
+                        }
+                        else e.ShockT = 8f;
                         if (e.Mode == 0)
                         {
                             bool furia = e.HP * 2 <= e.MaxHP;                          // metade da vida: vermelho, +10% maior, mais rapido, solta fumaca, mais fogo
@@ -2985,6 +3032,54 @@ namespace HeroiPet
             }
         }
 
+        // ---------- onda de choque do dragao ----------
+        List<Shock> shocks = new List<Shock>();
+        const float ShockWarn = 1.5f, ShockExpand = 1.3f;       // pisca 3 vezes (1,5 s) e depois irradia por 1,3 s
+        float ShockR { get { return 80 * S; } }
+        void UpdateShocks(float dt)
+        {
+            for (int i = shocks.Count - 1; i >= 0; i--)
+            {
+                Shock s = shocks[i]; s.T += dt;
+                if (s.T >= ShockWarn && s.T < ShockWarn + ShockExpand && !s.Hit && !dead)
+                {
+                    float r = ShockR * (s.T - ShockWarn) / ShockExpand;
+                    float dx = hx - s.X, dy = (hy - s.Y) / 0.7f, n = (float)Math.Sqrt(dx * dx + dy * dy);
+                    if (Math.Abs(n - r) < 7 * S) { s.Hit = true; HurtHero(s.X, s.Y, 2f, true); }      // encostou na onda: 2 coracoes
+                }
+                if (s.T > ShockWarn + ShockExpand + 0.25f) shocks.RemoveAt(i);
+            }
+        }
+        void DrawShocks(Graphics g)
+        {
+            foreach (Shock s in shocks)
+            {
+                float R = ShockR;
+                if (s.T < ShockWarn)
+                {
+                    if (((int)(s.T / 0.25f)) % 2 != 0) continue;       // pisca tres vezes
+                    using (Pen p1 = new Pen(Color.FromArgb(225, 55, 60), 2 * S))
+                    using (Pen p2 = new Pen(Color.FromArgb(255, 150, 60), S))
+                    {
+                        g.DrawEllipse(p1, s.X - R, s.Y - R * 0.7f, 2 * R, 1.4f * R);
+                        g.DrawEllipse(p2, s.X - R * 0.5f, s.Y - R * 0.35f, R, 0.7f * R);
+                    }
+                }
+                else
+                {
+                    float r = ShockR * Math.Min(1f, (s.T - ShockWarn) / ShockExpand);
+                    using (Pen o = new Pen(Color.FromArgb(225, 70, 40), 8 * S))
+                    using (Pen m = new Pen(Color.FromArgb(255, 170, 60), 5 * S))
+                    using (Pen w = new Pen(Color.FromArgb(255, 245, 190), 2 * S))
+                    {
+                        g.DrawEllipse(o, s.X - r, s.Y - r * 0.7f, 2 * r, 1.4f * r);
+                        g.DrawEllipse(m, s.X - r, s.Y - r * 0.7f, 2 * r, 1.4f * r);
+                        g.DrawEllipse(w, s.X - r, s.Y - r * 0.7f, 2 * r, 1.4f * r);
+                    }
+                }
+            }
+        }
+
         void UpdateRocks(float dt)
         {
             for (int i = rocks.Count - 1; i >= 0; i--)
@@ -3101,6 +3196,7 @@ namespace HeroiPet
             }
 
             DrawDragonGhost(g);
+            DrawShocks(g);
             // entidades ordenadas por Y (heroi incluso)
             List<object> ents = new List<object>();
             foreach (Enemy en in enemies) ents.Add(en);
