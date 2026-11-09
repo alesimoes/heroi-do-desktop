@@ -1377,7 +1377,7 @@ function drawHero() {
   shadow(hero.x, hero.y, 12);
   const fr = hero.walking ? Math.floor(hero.walkT * 9) % 2 : 0, bob = (hero.walking && fr === 1) ? S : 0;
   spr(fr ? SP.heroB : SP.heroA, hero.x, hero.y - bob, right);
-  if (previewBare) { const ay = hero.y - bob - 7 * S, tc = tunicColor(), dk = '#' + [1, 3, 5].map((i) => Math.floor(parseInt(tc.substr(i, 2), 16) * 0.75).toString(16).padStart(2, '0')).join(''); for (const sd of [-1, 1]) { const ax = hero.x + sd * 4 * S; rect(dk, ax - S, ay, 2 * S, 3 * S); rect('#fad0a5', ax - S, ay + 3 * S, 2 * S, 2 * S); } return; }
+  if (previewBare) { const ay = hero.y - bob - 7 * S; for (const sd of [-1, 1]) { const ax = hero.x + sd * 4 * S; rect(tunicColor(), ax - S, ay, 2 * S, 2 * S); rect('#fad0a5', ax - S, ay + 2 * S, 2 * S, 2 * S); } return; }
   const sx = hero.x - f * 3 * S - 3 * S, sy = hero.y - bob - 11 * S; drawShieldBody(sx, sy);
   if (cookState === 6) { const p = (cookT % 1.2) / 1.2; if (Math.floor(cookT / 1.2) <= 4) drawBakeApple(3, hero.x + f * 5 * S, hero.y - bob - 9 * S, 2.3 - 1.7 * p); }
   else if (playEatT > 0) { const sc2 = 2.3 - 1.7 * Math.min(1, playEatT / 0.9); if (eatRaw) { const a = SP.apple, w = a.w * sc2 * 0.8, h = a.h * sc2 * 0.8; ctx.drawImage(a.r, Math.round(hero.x + f * 5 * S - w / 2), Math.round(hero.y - bob - 9 * S - h / 2), Math.round(w), Math.round(h)); } else drawBakeApple(3, hero.x + f * 5 * S, hero.y - bob - 9 * S, sc2); }
