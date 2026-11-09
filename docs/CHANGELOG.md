@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 09/11/2026 — Armas evoluídas dão o dobro de dano
+- **Arco prateado** (evolução 1): flechas com o dobro de dano. **Espada azulada / Espada Mestre** (evolução 4): o dobro de dano. Vale também contra o dragão (flecha 100, espada 300).
+
 ## 09/11/2026 — Onda de choque do dragão
 - Nos **últimos 15% de vida**, a cada 8 s o dragão lança uma **onda de choque**: a área pisca 3 vezes, a onda irradia ao redor dele e, se encostar no herói, tira **2 corações**.
 

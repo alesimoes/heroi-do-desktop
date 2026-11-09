@@ -686,7 +686,7 @@ function hurtHero(fx, fy, dmg = 1, ignoreInv = false) {
 }
 function doSwing() {
   const cx = hero.x + hero.face * 8 * S, R = 18 * S;
-  for (let i = enemies.length - 1; i >= 0; i--) { const e = enemies[i]; const dx = e.x - cx, dy = e.y - hero.y; const rad = e.type === 3 ? R + 14 * S * DK * (e.scale || 1) : R; if (dx * dx + dy * dy < rad * rad) damageEnemy(e, e.type === 3 ? 150 : 1); }
+  for (let i = enemies.length - 1; i >= 0; i--) { const e = enemies[i]; const dx = e.x - cx, dy = e.y - hero.y; const rad = e.type === 3 ? R + 14 * S * DK * (e.scale || 1) : R; if (dx * dx + dy * dy < rad * rad) damageEnemy(e, (e.type === 3 ? 150 : 1) * (evoStage >= 4 ? 2 : 1)); }      // espada azulada (evolucao 4): o dobro de dano
   for (let i = rocks.length - 1; i >= 0; i--) { const r = rocks[i]; const dx = r.x - cx, dy = r.y - (hero.y - 6 * S); if (dx * dx + dy * dy < R * R) { puffs.push({ kind: 1, x: r.x, y: r.y, t: 0 }); rocks.splice(i, 1); } }
 }
 function damageEnemy(e, dmg) {
@@ -784,12 +784,15 @@ function updateEnemies(dt) {
     e.x += e.kx * dt; e.y += e.ky * dt; const dm = Math.min(1, 8 * dt); e.kx -= e.kx * dm; e.ky -= e.ky * dm;
     e.x = Math.max(4 * S, Math.min(W - 4 * S, e.x)); e.y = Math.max(12 * S, Math.min(H, e.y));
     if (!hero.dead && hero.inv <= 0) {
-      const cx = hero.x - e.x, cy = hero.y - e.y, rc = e.type === 3 ? (e.t > 1.5 ? 15 * S * DK * (e.scale || 1) : 0) : 9 * S;
-      if (cx * cx + cy * cy < rc * rc) hurtHero(e.x, e.y, 0.5);      // encostar em monstro: meio coracao
+      const cx = hero.x - e.x, cy = hero.y - e.y;
+      let toca;      // contato: dragao tem hitbox menor que o alcance da espada
+      if (e.type === 3) { const rx = 11 * S * DK * (e.scale || 1), ry = 5.5 * S * DK * (e.scale || 1); toca = e.t > 1.5 && (cx * cx) / (rx * rx) + (cy * cy) / (ry * ry) < 1; }      // dragao: so patas/corpo (elipse no chao); a espada alcanca mais longe
+      else toca = cx * cx + cy * cy < (9 * S) ** 2;
+      if (toca) hurtHero(e.x, e.y, 0.5);      // encostar em monstro: meio coracao
     }
   }
 }
-// ---------- onda de choque do dragao: pisca 3 vezes (1,5 s), irradia por 1,3 s, tira 2 coracoes ----------
+// ---------- onda de choque do dragao (ultimos 15% de vida): pisca 3 vezes (1,5 s), irradia por 1,3 s, tira 2 coracoes ----------
 const SHOCK_WARN = 1.5, SHOCK_EXPAND = 1.3;
 function updateShocks(dt) {
   const R = 80 * S;
@@ -841,7 +844,7 @@ function updateArrows(dt) {
     let gone = a.x < -30 || a.y < -30 || a.x > W + 30 || a.y > H + 30;
     for (let k = enemies.length - 1; k >= 0 && !gone; k--) {
       const en = enemies[k], dx = en.x - a.x, dy = (en.y - (en.type === 1 ? 9 * S : (en.type === 3 ? 12 * S * DK * (en.scale || 1) : 4 * S))) - a.y, hitR = en.type === 3 ? 14 * S * DK * (en.scale || 1) : 7 * S;
-      if (dx * dx + dy * dy < hitR * hitR) { damageEnemy(en, en.type === 3 ? 50 : 1); gone = true; }
+      if (dx * dx + dy * dy < hitR * hitR) { damageEnemy(en, (en.type === 3 ? 50 : 1) * ((!a.power && evoStage >= 1) ? 2 : 1)); gone = true; }      // arco prateado (evolucao 1): o dobro de dano (flecha de poder nao muda)
     }
     if (gone) arrows.splice(i, 1);
   }

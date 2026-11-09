@@ -1305,7 +1305,7 @@ namespace HeroiPet
                     Enemy en = enemies[k];
                     float dx = en.X - a.X, dy = (en.Y - (en.Type == 1 ? 9 * S : (en.Type == 3 ? 12 * S * DK * en.Scale : 4 * S))) - a.Y;
                     float hitR = en.Type == 3 ? 14 * S * DK * en.Scale : 7 * S;
-                    if (dx * dx + dy * dy < hitR * hitR) { DamageEnemy(en, en.Type == 3 ? 50 : 1); gone = true; }
+                    if (dx * dx + dy * dy < hitR * hitR) { DamageEnemy(en, (en.Type == 3 ? 50 : 1) * ((!a.Power && evoStage >= 1) ? 2 : 1)); gone = true; }      // arco prateado (evolucao 1): o dobro de dano (flecha de poder nao muda)
                 }
                 if (gone) arrows.RemoveAt(i);
             }
@@ -2797,7 +2797,7 @@ namespace HeroiPet
             {
                 Enemy e = enemies[i];
                 float dx = e.X - cx, dy = e.Y - hy;
-                { float rad = e.Type == 3 ? R + 14 * S * DK * e.Scale : R; if (dx * dx + dy * dy < rad * rad) DamageEnemy(e, e.Type == 3 ? 150 : 1); }
+                { float rad = e.Type == 3 ? R + 14 * S * DK * e.Scale : R; if (dx * dx + dy * dy < rad * rad) DamageEnemy(e, (e.Type == 3 ? 150 : 1) * (evoStage >= 4 ? 2 : 1)); }      // espada azulada (evolucao 4): o dobro de dano
             }
             for (int i = rocks.Count - 1; i >= 0; i--)
             {
@@ -3027,7 +3027,16 @@ namespace HeroiPet
                 if (!dead && inv <= 0)
                 {
                     float cx = hx - e.X, cy = hy - e.Y;
-                    { float rc = e.Type == 3 ? (e.T > 1.5f ? 15 * S * DK * e.Scale : 0) : 9 * S; if (cx * cx + cy * cy < rc * rc) HurtHero(e.X, e.Y, 0.5f); }      // encostar em monstro: meio coracao
+                    {
+                        bool toca;
+                        if (e.Type == 3)      // dragao: so as patas/corpo (elipse no chao); o alcance da espada passa disso, entao da para bater sem ser tocado
+                        {
+                            float rx = 11 * S * DK * e.Scale, ry = 5.5f * S * DK * e.Scale;
+                            toca = e.T > 1.5f && (cx * cx) / (rx * rx) + (cy * cy) / (ry * ry) < 1f;
+                        }
+                        else toca = cx * cx + cy * cy < (9 * S) * (9 * S);
+                        if (toca) HurtHero(e.X, e.Y, 0.5f);      // encostar em monstro: meio coracao
+                    }      // encostar em monstro: meio coracao
                 }
             }
         }

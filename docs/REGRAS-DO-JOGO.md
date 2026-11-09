@@ -62,10 +62,10 @@ Conta **todo monstro derrotado no modo automático** (inclui os do poder). O tot
 
 | Evolução | Monstros | Item |
 |---|---|---|
-| 1 | 1000 | **Arco de metal** (prateado) |
+| 1 | 1000 | **Arco de metal** (prateado): **flechas dão o dobro de dano** (a flecha de poder não muda) |
 | 2 | +500 (1500) | **Gorro roxo** |
 | 3 | +500 (2000) | **Blusa azul** |
-| 4 | +1000 (3000) | **Espada Mestre** (lâmina azul-clara, guarda azul, punho roxo) e **escudo vermelho** com quadrado amarelo |
+| 4 | +1000 (3000) | **Espada Mestre** (lâmina azul-clara, guarda azul, punho roxo): **a espada dá o dobro de dano**; e **escudo vermelho** com quadrado amarelo |
 
 Ao conquistar: o item aparece **bem grande no meio da tela** com o número de monstros que foram precisos (1000, 500, 500, 1000) e
 o **jogo pausa**. Ao apertar o botão **USAR ITEM** o jogo volta, o item **diminui até o tamanho normal e voa até o herói**, que o veste.
