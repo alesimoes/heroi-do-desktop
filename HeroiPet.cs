@@ -1074,6 +1074,7 @@ namespace HeroiPet
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--lanche") >= 0) apples = 5;
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--jogar") >= 0) SetPlayMode(true);
             foreach (string ar in Environment.GetCommandLineArgs()) if (ar.StartsWith("--nivel") && ar.Length == 8 && char.IsDigit(ar[7])) StartLevelTest(ar[7] - '0');      // --nivel6, --nivel7...
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "--dragao") >= 0) StartDragonTest();
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--chefao") >= 0) StartBossTest();   // teste rapido do lanche
             timer = new System.Windows.Forms.Timer();
             timer.Interval = 30;
@@ -1614,6 +1615,7 @@ namespace HeroiPet
             menu.Items.Add("Colher macas e dormir (2 min)", null, delegate { if (calmState == 0) { forceLong = true; nextCalm = 0; } });
             menu.Items.Add("Atalho: ir para o nível 6", null, delegate { StartLevelTest(6); });
             menu.Items.Add("Atalho: ir para o nível 7 (cavaleiros)", null, delegate { StartLevelTest(7); });
+            menu.Items.Add("Teste: ir para a luta do dragão", null, delegate { StartDragonTest(); });
             ToolStripMenuItem pause = new ToolStripMenuItem("Pausar"); pauseItem = pause;
             pause.Click += delegate { paused = !paused; pause.Text = paused ? "Continuar" : "Pausar"; };
             menu.Items.Add(pause);

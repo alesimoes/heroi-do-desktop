@@ -138,6 +138,7 @@ html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout
     <button id="mApples">Dar 5 maçãs (lanche)</button>
     <button id="mLv6">Atalho: ir para o nível 6</button>
     <button id="mLv7">Atalho: ir para o nível 7 (cavaleiros)</button>
+    <button id="mDragon">Teste: ir para a luta do dragão</button>
     <button id="mPause" aria-pressed="false">Pausar</button>
     <button id="mInv">Inventário (Espaço)</button>
     <button id="mFull" aria-pressed="false">Tela cheia</button>
@@ -1536,7 +1537,7 @@ $('mNap').addEventListener('click', () => { if (!playMode && calmState === 0) ne
 $('mHarvest').addEventListener('click', () => { if (!playMode && calmState === 0) { forceLong = true; nextCalm = 0; } closeMenu(); });
 $('mApples').addEventListener('click', () => { hero.apples = Math.max(hero.apples, 5); closeMenu(); });
 // PERIODO DE TESTE: coloca o jogador logo antes da luta com o dragao (modo jogo, nivel maximo, vida cheia, fogueira ja explodindo)
-function startLevelTest(nv) {      // ATALHO: modo jogo direto no nivel nv (NV 1..7)
+function startLevelTest(nv) {      // ATALHO (NV 6 e 7): modo jogo direto no nivel nv (NV 1..7)
   nv = Math.max(1, Math.min(7, nv)); if (!playMode) setPlayMode(true); else resetBoss();
   enemies.length = 0; rocks.length = 0; arrows.length = 0; items.length = 0; puffs.length = 0;
   hero.rupees = (nv - 1) * 25; lastStep = rupeeStep(); setMaxHp(5 + Math.max(0, Math.min(3, lastStep - 3))); hero.hp = hero.maxHp; hero.dead = false; deathWait = false; closeDeath(); hero.inv = 2; hero.apples = 0; powerT = 0; hero.x = W / 2; hero.y = H / 2; spawnTimer = 1.5; say('Nível ' + nv);
@@ -1550,6 +1551,8 @@ function startDragonTest() {
 }
 $('mLv6').addEventListener('click', () => { $('intro').hidden = true; startLevelTest(6); closeMenu(); });
 $('mLv7').addEventListener('click', () => { $('intro').hidden = true; startLevelTest(7); closeMenu(); });
+$('mDragon').addEventListener('click', () => { startDragonTest(); closeMenu(); });
+if (/[?&]dragao\b/.test(location.search)) setTimeout(() => { $('intro').hidden = true; startDragonTest(); }, 400);
 if (/[?&]nivel=(\d)/.test(location.search)) setTimeout(() => { $('intro').hidden = true; startLevelTest(+RegExp.$1); }, 400);
 $('mPause').addEventListener('click', () => { setPaused(!paused); closeMenu(); });
 $('evoBtn').addEventListener('click', useEvoItem);
