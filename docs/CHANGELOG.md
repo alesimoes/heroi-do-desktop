@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 09/11/2026 — Baú e roupas nos dois modos
+- O baú, uma vez que aparece, fica disponível no **modo jogável e no automático** (aperte 4). Os anúncios de evolução/tesouro e a aparência do herói valem nos dois modos.
+
 ## 09/11/2026 — Escudo roxo no baú
 - O tesouro do baú agora inclui um **escudo circular roxo escuro com um quadrado azul**, um pouco menor que o atual.
 

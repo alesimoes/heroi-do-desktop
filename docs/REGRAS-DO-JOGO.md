@@ -71,7 +71,10 @@ Ao conquistar: o item aparece **bem grande no meio da tela** com o número de mo
 o **jogo pausa**. Ao apertar o botão **USAR ITEM** o jogo volta, o item **diminui até o tamanho normal e voa até o herói**, que o veste.
 Teste rápido: `HeroiPet.exe --evolucao` (desktop) ou `?evolucao` na URL (web) — o próximo monstro dá a 1ª evolução.
 
-## Baú do Rei (só no modo automático)
+## Baú do Rei
+- **A contagem é feita no modo automático**, mas depois que o baú aparece ele **fica disponível nos dois modos** (automático e jogável); o painel de comandos do modo jogo
+  ganha a linha "4: abrir o baú". O baú fica escondido durante a luta com o dragão. As roupas das evoluções e do baú **mudam a aparência do herói nos dois modos**,
+  e o anúncio do item grande (com o botão USAR ITEM) também aparece nos dois.
 - Depois de **5000 monstros vermelhos (octoroks) e bokoblins** derrotados no modo automático, aparece um **baú** no cenário (62% da largura, 34% da altura).
   **Morcegos e gelatinas NÃO contam.** (Interpretação do pedido: "monstros vermelhos e bokoblins" contam; "morcegos e bokoblins não contam" foi entendido como morcegos e gelatinas.)
 - Em cima do baú aparece **"APERTE 4 PARA ABRIR"** (na web em celular: "TOQUE NO BAÚ PARA ABRIR"). Ao apertar **4**, o herói **vai até o baú** e o abre.

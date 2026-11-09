@@ -519,7 +519,7 @@ function countKill() {
 const evoWaiting = () => evo !== null && evo.wait;
 function updateEvo(dt) {
   if (!evo) {
-    if (!evoQueue.length || playMode) return;
+    if (!evoQueue.length) return;      // o anuncio aparece nos dois modos (automatico e jogavel)
     evo = { stage: evoQueue.shift(), t: 0, wait: true }; placeEvoBtn();      // o jogo pausa ate apertar USAR ITEM
     return;
   }
@@ -600,12 +600,11 @@ if (/[?&]bau\b/.test(location.search)) { chestState = 1; kingGear = false; }    
 function saveChest() { try { localStorage.setItem('heroi_monstros_bau', String(chestKills)); localStorage.setItem('heroi_bau', String(chestState)); } catch (_) {} }
 function countChestKill() { if (chestState !== 0) return; chestKills++; if (chestKills % 10 === 0) saveChest(); if (chestKills >= CHEST_NEEDED) { chestState = 1; saveChest(); say('Um baú apareceu!'); } }
 const chestX = () => W * 0.62, chestY = () => H * 0.34;
-function chestStart() { if (chestState === 1 && chestOpenT <= 0 && !chestGo && !playMode) { chestGo = true; if (calmState !== 0) endCalm(false); say('Vou abrir!'); } }
-function chestTap() { if (chestState === 1 && !playMode && Math.hypot(mx - chestX(), my - (chestY() - 8 * S)) < 16 * S) chestStart(); }
+function chestStart() { if (chestState === 1 && chestOpenT <= 0 && !chestGo && bossPhase === 0) { chestGo = true; if (calmState !== 0) endCalm(false); say('Vou abrir!'); } }
+function chestTap() { if (chestState === 1 && Math.hypot(mx - chestX(), my - (chestY() - 8 * S)) < 16 * S) chestStart(); }
 function updateChest(dt) {
-  if (playMode) { chestGo = false; return; }
-  if (hero.dead) chestGo = false;
-  if (chestState === 1 && chestOpenT <= 0) { const k4 = keys.has('Digit4') || keys.has('Numpad4'); if (k4 && !prev4) chestStart(); prev4 = k4; }
+  if (hero.dead || bossPhase !== 0) chestGo = false;      // o bau vale nos dois modos; fica parado durante a luta com o dragao
+  if (chestState === 1 && chestOpenT <= 0 && bossPhase === 0) { const k4 = keys.has('Digit4') || keys.has('Numpad4'); if (k4 && !prev4) chestStart(); prev4 = k4; }
   if (chestOpenT > 0) { chestOpenT += dt; if (chestOpenT >= 1.4) { chestOpenT = 0; chestState = 2; chestGo = false; saveChest(); evoQueue.push(5); } }      // o tesouro aparece grande (como as evolucoes)
 }
 function updateChestHero(dt) {
@@ -617,7 +616,7 @@ function updateChestHero(dt) {
   clampHero();
 }
 function drawChest() {
-  if (playMode || chestState !== 1) return;
+  if (chestState !== 1 || bossPhase !== 0) return;
   const x = chestX(), y = chestY(), open = chestOpenT > 0 ? Math.min(1, chestOpenT / 0.5) : 0, K = '#1c1624', WOOD = '#965f2d', WOOD2 = '#734620', GOLD = '#ffcd28', GOLD2 = '#c88c14';
   shadow(x, y, 22);
   rect(K, x - 10 * S, y - 10 * S, 20 * S, 11 * S); rect(WOOD, x - 9 * S, y - 9 * S, 18 * S, 9 * S); rect(WOOD2, x - 9 * S, y - 4 * S, 18 * S, S);
@@ -631,7 +630,7 @@ function drawChest() {
   }
 }
 function drawChestPrompt() {
-  if (playMode || chestState !== 1 || chestOpenT > 0 || chestGo) return;
+  if (chestState !== 1 || bossPhase !== 0 || chestOpenT > 0 || chestGo) return;
   const t = touchMode ? 'TOQUE NO BAÚ PARA ABRIR' : 'APERTE 4 PARA ABRIR', fs = 3.4 * S, pad = 2 * S, wtxt = t.length * fs, bx = chestX() - wtxt / 2 - pad, by = chestY() - 17 * S - fs - 6 * S - Math.abs(Math.sin(time * 3)) * 2 * S;
   rect('#1c1624', bx - S, by - S, wtxt + 2 * pad + 2 * S, fs + 2 * pad + 2 * S); rect('#2e283e', bx, by, wtxt + 2 * pad, fs + 2 * pad); rect('#f7be46', bx, by, wtxt + 2 * pad, S);
   text(t, chestX(), by + pad, '#ffdc5a', fs, 'center');
@@ -1366,7 +1365,7 @@ function drawHud() {
     text('Dragão', W / 2, y + bh + 2 * S, '#fff', 3.4 * S, 'center');
   }
   if (playMode && !touchMode) {
-    const lines = ['COMANDOS', 'Mouse apertado: andar', '1: espada', '2: arco', '3: colher / assar / comer maçã', 'Espaço: pausar'], fs = 3 * S, lh = fs + 2 * S;
+    const lines = ['COMANDOS', 'Mouse apertado: andar', '1: espada', '2: arco', '3: colher / assar / comer maçã', ...(chestState === 1 ? ['4: abrir o baú'] : []), 'Espaço: pausar'], fs = 3 * S, lh = fs + 2 * S;
     ctx.font = 'bold ' + fs + 'px "Press Start 2P", Consolas, monospace'; let wmax = 0; lines.forEach((l) => { wmax = Math.max(wmax, ctx.measureText(l).width); });
     const pad = 3 * S, bw = wmax + pad * 2, bh = lines.length * lh + pad * 2, x = W - bw - 4 * S, y = 4 * S;
     rect('#1c1624', x - S, y - S, bw + 2 * S, bh + 2 * S); rect('#2e283e', x, y, bw, bh); rect('#f7be46', x, y, bw, S);

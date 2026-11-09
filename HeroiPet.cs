@@ -1427,7 +1427,7 @@ namespace HeroiPet
         {
             if (evo == null)
             {
-                if (evoQueue.Count == 0 || playMode) return;
+                if (evoQueue.Count == 0) return;      // o anuncio aparece nos dois modos (automatico e jogavel)
                 evo = new EvoAnim(); evo.Stage = evoQueue.Dequeue(); evo.T = 0; evo.Wait = true;      // o jogo pausa ate apertar "USAR ITEM"
                 try
                 {
@@ -1613,9 +1613,8 @@ namespace HeroiPet
         }
         void UpdateChest(float dt)
         {
-            if (playMode) { chestGo = false; return; }
-            if (dead) chestGo = false;
-            if (chestState == 1 && chestOpenT <= 0)
+            if (dead || bossPhase != 0) chestGo = false;      // o bau vale nos dois modos; fica parado durante a luta com o dragao
+            if (chestState == 1 && chestOpenT <= 0 && bossPhase == 0)
             {
                 bool k4 = IsDown(0x34) || IsDown(0x64);      // tecla 4 (fileira de cima ou teclado numerico)
                 if (k4 && !prev4 && !chestGo) { chestGo = true; if (calmState != 0) EndCalm(false); Say("Vou abrir!"); }
@@ -1642,7 +1641,7 @@ namespace HeroiPet
 
         void DrawChest(Graphics g)
         {
-            if (playMode || chestState != 1) return;
+            if (chestState != 1 || bossPhase != 0) return;
             float x = ChestX, y = ChestY;
             float open = chestOpenT > 0 ? Math.Min(1f, chestOpenT / 0.5f) : 0f;
             Shadow(g, x, y, 22);
@@ -1678,7 +1677,7 @@ namespace HeroiPet
         }
         void DrawChestPrompt(Graphics g)
         {
-            if (playMode || chestState != 1 || chestOpenT > 0 || chestGo) return;
+            if (chestState != 1 || bossPhase != 0 || chestOpenT > 0 || chestGo) return;
             string t = "APERTE 4 PARA ABRIR";
             SizeF sz = g.MeasureString(t, font);
             float pad = 2 * S, x = ChestX - sz.Width / 2, y = ChestY - 17 * S - sz.Height - 4 * S - (float)Math.Abs(Math.Sin(time * 3)) * 2 * S;
@@ -2544,13 +2543,15 @@ namespace HeroiPet
         void DrawControlsHelp(Graphics g)
         {
             if (helpFont == null) helpFont = new Font("Consolas", Math.Max(9, S * 4), FontStyle.Bold, GraphicsUnit.Pixel);
-            string[] lines = {
+            List<string> lineList = new List<string> {
                 "COMANDOS",
                 "Mouse apertado: andar",
                 "1: espada",
                 "2: arco",
-                "3: colher / assar / comer maçã",
-                "Espaço: pausar" };
+                "3: colher / assar / comer maçã" };
+            if (chestState == 1) lineList.Add("4: abrir o baú");
+            lineList.Add("Espaço: pausar");
+            string[] lines = lineList.ToArray();
             float lh = helpFont.Height + S, wmax = 0;
             foreach (string s in lines) wmax = Math.Max(wmax, g.MeasureString(s, helpFont).Width);
             float pad = 3 * S, bw = wmax + pad * 2 + 6 * S, bh = lines.Length * lh + pad * 2;
