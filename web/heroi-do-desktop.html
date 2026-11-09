@@ -1,0 +1,1290 @@
+<title>Herói do Desktop</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+/* Campo de aventura em pixel art: painéis escuros sobre um gramado.
+   Tokens: tinta (fundo), painel, linha, texto, ouro (destaque), vermelho (perigo), verde (ok). */
+:root {
+  --ink: #0f0d18; --panel: #1b1830; --panel2: #2a2646; --line: #413b6c;
+  --text: #f1eefc; --mute: #b9b3da; --gold: #f7be46; --red: #e8434b; --green: #5cb964;
+  --display: "Press Start 2P", ui-monospace, Consolas, monospace;
+  --body: "Chakra Petch", system-ui, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--ink); color: var(--text); font: 15px/1.45 var(--body); overflow: hidden; touch-action: none; }
+#app { position: relative; width: 100%; height: 100%; }
+canvas#c { position: absolute; inset: 0; width: 100%; height: 100%; display: block; image-rendering: pixelated; cursor: crosshair; }
+button { font: inherit; color: var(--text); background: var(--panel2); border: 2px solid var(--line); border-radius: 6px; padding: 9px 14px; cursor: pointer; text-align: left; }
+button:hover { border-color: var(--gold); }
+button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+button.primary { background: var(--gold); color: #231a05; border-color: var(--gold); font-weight: 700; text-align: center; }
+button.primary:hover { filter: brightness(1.08); }
+
+/* Menu */
+#menuBtn { position: absolute; left: max(12px, env(safe-area-inset-left, 0px)); top: max(12px, env(safe-area-inset-top, 0px)); z-index: 5; font-weight: 600; padding: 8px 12px; }
+#menu { position: absolute; left: max(12px, env(safe-area-inset-left, 0px)); top: calc(max(12px, env(safe-area-inset-top, 0px)) + 46px); z-index: 5; width: min(300px, calc(100% - 24px)); background: var(--panel); border: 2px solid var(--line); border-radius: 8px; padding: 10px; display: grid; gap: 6px; }
+#menu h3 { margin: 4px 2px 2px; font: 9px/1.4 var(--display); color: var(--gold); letter-spacing: .05em; }
+#menu .sep { height: 1px; background: var(--line); margin: 4px 0; }
+#evoBtn { position: fixed; z-index: 7; transform: translateX(-50%); padding: 12px 28px; font: 700 18px var(--display); letter-spacing: .04em; background: #f5cd46; color: #281c0a; border: 3px solid #1c1624; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 0 #1c1624; }
+#evoBtn:hover { background: #ffe07a; }
+#evoBtn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+#menu .lbl { font-size: 12px; opacity: .8; }
+#menu .size { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+#menu .size button { padding-left: 4px; padding-right: 4px; }
+#menu .size button[aria-pressed="true"]::before { content: ""; }
+#menu button[aria-pressed="true"] { border-color: var(--gold); background: #3a3258; }
+#menu button[aria-pressed="true"]::before { content: "● "; color: var(--gold); }
+
+/* Avisos e telas */
+#toast { position: absolute; left: 50%; top: max(16px, env(safe-area-inset-top, 0px)); transform: translateX(-50%) translateY(-20px); z-index: 7; width: min(440px, calc(100% - 32px)); background: var(--panel); border: 2px solid var(--line); border-left: 8px solid var(--gold); border-radius: 8px; padding: 14px 16px; opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s; }
+#toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast b { display: block; font: 11px/1.5 var(--display); margin-bottom: 8px; }
+#toast span { color: var(--mute); }
+.overlay { position: absolute; inset: 0; z-index: 8; display: grid; place-items: center; background: rgba(8, 6, 16, .72); padding: 16px; }
+.overlay[hidden] { display: none !important; }
+.card { background: var(--panel); border: 3px solid var(--line); border-radius: 10px; padding: 26px 28px; width: min(520px, 100%); display: grid; gap: 14px; justify-items: center; text-align: center; }
+.card h1 { margin: 0; font: clamp(16px, 4vw, 24px)/1.5 var(--display); text-wrap: balance; }
+.card p { margin: 0; color: var(--mute); max-width: 46ch; text-wrap: pretty; }
+.card .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+#death .card { border-color: var(--red); }
+#death h1 { color: var(--red); font-size: clamp(18px, 5vw, 30px); }
+#intro .keys { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; text-align: left; font-size: 14px; background: var(--ink); border-radius: 8px; padding: 12px 14px; width: 100%; box-sizing: border-box; }
+#intro kbd { font: 700 12px var(--display); color: var(--gold); }
+#credits { background: rgba(8, 6, 16, .88); overflow: hidden; }
+#credits .win { position: relative; width: min(560px, 100%); height: min(560px, 100%); background: #12101e; border: 3px solid var(--gold); border-radius: 12px; overflow: hidden; text-align: center; }
+#credits .title { position: absolute; inset: 0; display: grid; place-content: center; gap: 14px; }
+#credits .title h1 { margin: 0; font: clamp(22px, 6vw, 38px)/1.4 var(--display); color: var(--gold); text-shadow: 3px 3px 0 #000; }
+#credits .title p { margin: 0; color: var(--text); }
+#credits .roll { position: absolute; left: 0; right: 0; top: 100%; padding: 0 16px; }
+#credits .roll h2 { margin: 28px 0 6px; font: 13px/1.5 var(--display); color: var(--gold); }
+#credits .roll p { margin: 0; font-size: 17px; }
+#credits.rolling .title { animation: fadeout .8s forwards; }
+#credits.rolling .roll { animation: roll 26s linear forwards; }
+@keyframes fadeout { to { opacity: 0; } }
+@keyframes roll { from { transform: translateY(0); } to { transform: translateY(calc(-100% - min(560px, 100vh))); } }
+
+/* Botões de toque */
+html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-text-size-adjust: 100%; overscroll-behavior: none; }
+#touch { position: absolute; right: max(18px, env(safe-area-inset-right, 0px)); bottom: max(14px, env(safe-area-inset-bottom, 0px)); z-index: 4; display: none; width: 190px; height: 150px; }
+#touch button { position: absolute; width: 74px; height: 74px; border-radius: 50%; text-align: center; font: 12px var(--display); padding: 0; background: rgba(27, 24, 48, .62); border: 2px solid rgba(255,255,255,.35); user-select: none; -webkit-user-select: none; touch-action: none; }
+#touch button.on { background: var(--gold); color: #231a05; }
+#touch button[data-k="1"] { right: 0; bottom: 38px; width: 86px; height: 86px; }
+#touch button[data-k="2"] { right: 96px; bottom: 0; }
+#touch button[data-k="3"] { right: 70px; bottom: 82px; width: 62px; height: 62px; }
+#dpad { position: absolute; left: max(18px, env(safe-area-inset-left, 0px)); bottom: max(14px, env(safe-area-inset-bottom, 0px)); z-index: 4; display: none; width: 150px; height: 150px; border-radius: 50%; background: rgba(27, 24, 48, .5); border: 2px solid rgba(255,255,255,.3); touch-action: none; }
+#dpad i { position: absolute; font: normal 22px var(--display); color: rgba(255,255,255,.75); pointer-events: none; }
+#dpad i:nth-child(1) { left: 62px; top: 8px; } #dpad i:nth-child(2) { left: 62px; bottom: 8px; } #dpad i:nth-child(3) { left: 10px; top: 60px; } #dpad i:nth-child(4) { right: 10px; top: 60px; }
+#dpad b { position: absolute; left: 50px; top: 50px; width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,.35); pointer-events: none; }
+#touch.show, #dpad.show { display: block; }
+#rot { position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 14px; background: var(--ink); color: var(--text); text-align: center; padding: 24px; font: 15px/1.5 var(--body); }
+#rot .ph { font-size: 54px; display: inline-block; animation: rotph 2s ease-in-out infinite; }
+@keyframes rotph { 0%, 30% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
+@media (pointer: coarse) and (orientation: portrait) { #rot { display: flex; } }
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 500px) { #touch { transform: scale(.85); transform-origin: right bottom; } #dpad { transform: scale(.85); transform-origin: left bottom; } }
+#sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+@media (prefers-reduced-motion: reduce) { #toast { transition: none; } #credits.rolling .roll { animation-duration: 40s; } }
+</style>
+
+<div id="app">
+  <canvas id="c" aria-label="Campo do jogo"></canvas>
+  <button id="menuBtn" aria-expanded="false" aria-controls="menu">☰ Menu</button>
+  <div id="menu" hidden>
+    <h3>MODO</h3>
+    <button id="mAuto" aria-pressed="true">Deixar rodando (automático)</button>
+    <button id="mPlay" aria-pressed="false">Jogar (você controla)</button>
+    <div class="sep"></div>
+    <h3>FERRAMENTAS</h3>
+    <button id="mEnemy">Invocar inimigo</button>
+    <button id="mHeal">Curar herói</button>
+    <button id="mNap">Soneca agora</button>
+    <button id="mHarvest">Colher maçãs e dormir (2 min)</button>
+    <button id="mApples">Dar 5 maçãs (lanche)</button>
+    <button id="mPause" aria-pressed="false">Pausar</button>
+    <button id="mFull" aria-pressed="false">Tela cheia</button>
+    <div class="sep"></div>
+    <div class="lbl">Tamanho do herói e do cenário</div>
+    <div class="size"><button id="mSize0" aria-pressed="false">Pequeno</button><button id="mSize1" aria-pressed="true">Normal</button><button id="mSize2" aria-pressed="false">Grande</button></div>
+    <div class="sep"></div>
+    <button id="mAbout">Sobre</button>
+  </div>
+  <div id="toast" role="status" aria-live="polite"><b id="toastT"></b><span id="toastS"></span></div>
+  <button id="evoBtn" hidden>USAR ITEM</button>
+  <div id="dpad" aria-hidden="true"><i>▲</i><i>▼</i><i>◀</i><i>▶</i><b></b></div>
+  <div id="touch" aria-hidden="true">
+    <button data-k="1">ESPADA</button><button data-k="2">ARCO</button><button data-k="3">COLHER</button>
+  </div>
+  <div id="rot"><div class="ph">📱</div><b>Deite o telefone</b><span>O jogo funciona com o celular na horizontal:<br>direcional no polegar esquerdo, ações no direito.</span></div>
+
+  <div id="intro" class="overlay">
+    <div class="card">
+      <h1>Herói do Desktop</h1>
+      <p>Um herói de pixel art que luta, colhe maçãs e assa o próprio lanche. Deixe ele rodando sozinho ou assuma o controle.</p>
+      <div class="keys">
+        <kbd>MOUSE</kbd><span>segure para andar até o cursor</span>
+        <kbd>1</kbd><span>espada</span>
+        <kbd>2</kbd><span>arco, mira no cursor</span>
+        <kbd>3</kbd><span>colher, assar e comer maçãs</span>
+      </div>
+      <div class="row">
+        <button id="goPlay" class="primary">Jogar</button>
+        <button id="goAuto">Deixar rodando</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="death" class="overlay" hidden>
+    <div class="card">
+      <h1>VOCÊ MORREU</h1>
+      <p id="deathMsg">Você perde 10 rupias ao tentar de novo.</p>
+      <button id="retry" class="primary">Tentar de novo</button>
+    </div>
+  </div>
+
+  <div id="about" class="overlay" hidden>
+    <div class="card">
+      <h1>Herói do Desktop</h1>
+      <p>Um herói pixel-art que luta, colhe maçãs, assa o próprio lanche e enfrenta um dragão. Nasceu como um bichinho de área de trabalho no Windows e ganhou esta versão para o navegador.</p>
+      <div class="keys" style="grid-template-columns:auto 1fr">
+        <kbd>IDEIA</kbd><span>Alexandre</span><kbd>CRIAÇÃO</kbd><span>Bia Krepel</span><kbd>PROGRAMAÇÃO</kbd><span>Claude</span>
+      </div>
+      <button id="aboutClose" class="primary">Fechar</button>
+    </div>
+  </div>
+  <div id="credits" class="overlay" hidden>
+    <div class="win">
+      <div class="title"><h1>FIM DE JOGO</h1><p>Você derrotou o Dragão!</p></div>
+      <div class="roll">
+        <h2>CRÉDITOS</h2>
+        <h2>Ideia</h2><p>Alexandre</p>
+        <h2>Criação</h2><p>Bia Krepel</p>
+        <h2>Programação</h2><p>Claude</p>
+        <h2>Herói</h2><p>Link, o aventureiro da área de trabalho</p>
+        <h2>Inimigos</h2><p>Octoroks, morcegos e slimes</p>
+        <h2>Chefão</h2><p>O Dragão da Fogueira</p>
+        <h2>Cenário</h2><p>Macieiras, fogueira e um campo sem fim</p>
+        <p style="margin-top:56px">Obrigado por jogar!</p>
+      </div>
+    </div>
+  </div>
+  <div id="sr" aria-live="polite"></div>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = (id) => document.getElementById(id);
+const cv = $('c'), ctx = cv.getContext('2d');
+const rnd = Math.random;
+const TAU = Math.PI * 2;
+
+/* ============================ ARTE ============================ */
+const PAL = { K:'#1c1624', G:'#3aa53e', g:'#1e6e2d', Y:'#f0c850', S:'#fad0a5', B:'#87552d', W:'#f5f5f5', R:'#d73737', E:'#ffeb46',
+  U:'#467deb', L:'#aad7ff', A:'#a5a5af', M:'#ebffeb', N:'#78cd55', b:'#5f3c1e', r:'#96282d', T:'#e4be7d', t:'#c4965a', D:'#2d2230',
+  O:'#fa9628', p:'#60328c', P:'#9650cd', k:'#e26a5c', h:'#f0e8be', H:'#3aa53e', Q:'#3aa53e' };
+const ROWS = {
+  heroA: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.","KGGGYYYYYYSSK.","KGGYYYYYYYSSSK",".KYYYYYYYSKSSK","..KYYYYYYSSSK.","..KYYYYYSSSK..","..KYYKGGGGKK..","..KGGGGGGGGGK.","..KGGGGGGGGGK.","..KGGGGGGGGSK.","..KBBBBBBBBBK.","...KWWK.KWWK..","...KBBK.KBBK.."],
+  heroB: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.","KGGGYYYYYYSSK.","KGGYYYYYYYSSSK",".KYYYYYYYSKSSK","..KYYYYYYSSSK.","..KYYYYYSSSK..","..KYYKGGGGKK..","..KGGGGGGGGGK.","..KGGGGGGGGGK.","..KGGGGGGGGSK.","..KBBBBBBBBBK.","....KWWKWWK...","....KBBKBBK..."],
+  front: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.","KYYYYYYYYYYYYK","KYYYSSSSSSYYYK",".KYYSKSSKSYYK.","..KYSSSSSSYK..","...KSSSSSSK...","...KKGGGGKK...","..KGGGGGGGGK..",".KSGGGGGGGGSK.",".KSGGGGGGGGSK.","..KBBBBBBBBK..","..KWWWKKWWWK..","..KBBBK.KBBBK."],
+  wave: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.","KYYYYYYYYYYYYK","KYYYSSSSSSYYYK",".KYYSKSSKSYYK.","..KYSSSSSSYK..","...KSSSSSSK...","...KKGGGGKK...","..KGGGGGGGGK..",".KSGGGGGGGGGK.",".KSGGGGGGGGGK.","..KBBBBBBBBK..","..KWWWKKWWWK..","..KBBBK.KBBBK."],
+  octoA: ["...KKKKKK...","..KRRRRRRK..",".KRRRRRRRRK.","KRRWWRRWWRRK","KRRWKRRWKRRK","KRRRRRRRRRRK","KRRRKKKKRRRK",".KRRRRRRRRK.","..KKRRRRKK..",".KR.K..K.RK."],
+  octoB: ["...KKKKKK...","..KRRRRRRK..",".KRRRRRRRRK.","KRRWWRRWWRRK","KRRWKRRWKRRK","KRRRRRRRRRRK","KRRRKKKKRRRK",".KRRRRRRRRK.","..KKRRRRKK..","..KR.KK.RK.."],
+  batUp: ["KK..........KK","KPK...KK...KPK","KPPK.KPPPK.KPK","KPPPKPEPEPKPPK",".KPPPPPPPPPPK.","..KKPPPPPPKK..","....KKPPKK....","......KK......"],
+  batDown: ["......KK......","....KKPPKK....","..KKPPPPPPKK..",".KPPPPEPEPPPPK","KPK.KPPPPK.KPK","KK...KKKK...KK","..............",".............."],
+  bokoA: ["..h.......h...","..KKKKKKKKK...",".KkkkkkkkkK...",".KkWKkkWKkkK..",".KkkkkkkkkK...",".KkkKWKWKkkK..","..KkkkkkkkK.BB",".KkBBBBBBkK.bB",".KkBBBBBBkK.bB",".KkkBBBBkkK.bB","..KKBBBBKK..bB","...KkK..KkK...","...KkK..KkK...","..KKKK..KKKK.."],
+  bokoB: ["..h.......h...","..KKKKKKKKK...",".KkkkkkkkkK...",".KkWKkkWKkkK..",".KkkkkkkkkK...",".KkkKWKWKkkK..","..KkkkkkkkK.BB",".KkBBBBBBkK.bB",".KkBBBBBBkK.bB",".KkkBBBBkkK.bB","..KKBBBBKK..bB","..KkK....KkK..",".KkK......KkK.",".KKK......KKK."],
+  bokoC: ["..h.......hbB.","..KKKKKKKKKbB.",".KkkkkkkkkKbB.",".KkWKkkWKkkKbB",".KkkkkkkkkKbB.",".KkkKWKWKkkKbB","..KkkkkkkkK.bB",".KkBBBBBBkK.bB",".KkBBBBBBkK...",".KkkBBBBkkK...","..KKBBBBKK....","...KkK..KkK...","...KkK..KkK...","..KKKK..KKKK.."],
+  slimeTall: ["....KKKK....","..KKUUUUKK..",".KULLUUUUUK.",".KULUUUUUUK.","KUUWKUUWKUUK","KUUUUUUUUUUK","KUUUUUUUUUUK",".KKUUUUUUKK.","...KKKKKK..."],
+  slimeFlat: ["............","............","............","...KKKKKK...",".KKUULUUUKK.","KUULUUUUUUUK","KUWKUUUWKUUK","KUUUUUUUUUUK",".KKKKKKKKKK."],
+  heart: [".KK.KK.","KRRKRRK","KRWRRRK","KRRRRRK",".KRRRK.","..KRK..","...K..."],
+  rupee: ["..K..",".KGK.","KGMGK","KGMGK","KGGGK","KGGGK",".KGK.","..K.."],
+  rock: [".KK.","KAAK","KAAK",".KK."],
+  apple: [".BG.","KRRK","KRRK",".KK."],
+  appleBig: ["...B.GG.",".KKKKKK.","KRRRRRRK","KRMRRRRK","KRRRRRRK","KRRRRRRK",".KRRRRK.","..KKKK.."],
+  fire0: ["...KK...","..KOOK..",".KOYYOK.","KOYEEYOK","KOYEEYOK",".KOYYOK.","..KOOK..","...KK..."],
+  fire1: ["..K..K..","..KOOK..",".KOYYOK.","KOYEEYOK","KOYEEYOK",".KOYYOK.","..KOOK..","..K..K.."]
+};
+function treeRows() {
+  const w = 20, h = 24, g = Array.from({ length: h }, () => Array(w).fill('.'));
+  const disc = (x, y, cx, cy, r) => (x - cx) ** 2 + (y - cy) ** 2 <= r * r;
+  const can = (x, y) => disc(x, y, 10, 8, 7.3) || disc(x, y, 5, 11, 5.3) || disc(x, y, 15, 11, 5.3);
+  for (let y = 15; y <= 22; y++) { const fl = y >= 21 ? 1 : 0; g[y][7 - fl] = 'K'; g[y][12 + fl] = 'K'; for (let x = 8 - fl; x <= 11 + fl; x++) g[y][x] = x >= 10 + fl ? 'b' : 'B'; }
+  for (let x = 6; x <= 13; x++) g[23][x] = 'K';
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (!can(x, y)) continue;
+    const edge = x === 0 || y === 0 || x === w - 1 || y === h - 1 || !can(x - 1, y) || !can(x + 1, y) || !can(x, y - 1) || !can(x, y + 1);
+    let c = 'G'; if (x + y < 17) c = 'N'; else if (y >= 13 && x >= 9) c = 'g';
+    g[y][x] = edge ? 'K' : c;
+  }
+  return g.map((r) => r.join(''));
+}
+function dragonRows(open) {
+  const w = 48, h = 40, ox = 3, oy = 3, g = Array.from({ length: h }, () => Array(w).fill('.'));
+  const ell = (cx, cy, rx, ry, c) => { for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const dx = (x - cx) / rx, dy = (y - cy) / ry; if (dx * dx + dy * dy <= 1) g[y][x] = c; } };
+  const tri = (ax, ay, bx, by, cx, cy, c) => { for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const d1 = (x - bx) * (ay - by) - (ax - bx) * (y - by), d2 = (x - cx) * (by - cy) - (bx - cx) * (y - cy), d3 = (x - ax) * (cy - ay) - (cx - ax) * (y - ay);
+    if (!((d1 < 0 || d2 < 0 || d3 < 0) && (d1 > 0 || d2 > 0 || d3 > 0))) g[y][x] = c; } };
+  tri(6 + ox, 18 + oy, 13 + ox, 1 + oy, 25 + ox, 17 + oy, 'p'); tri(9 + ox, 16 + oy, 13.5 + ox, 5 + oy, 21 + ox, 15 + oy, 'P');
+  ell(6 + ox, 27 + oy, 3.4, 2.8, 'P'); ell(3.5 + ox, 29.8 + oy, 2.5, 2.1, 'P'); ell(1.4 + ox, 31.5 + oy, 1.7, 1.5, 'P');
+  tri(-1 + ox, 29.5 + oy, 3 + ox, 31 + oy, 0 + ox, 34 + oy, 'W');
+  ell(12 + ox, 31.5 + oy, 3.6, 2.8, 'p'); ell(23.5 + ox, 31.5 + oy, 3.8, 2.8, 'P');
+  ell(17 + ox, 22 + oy, 11.8, 9.6, 'P'); ell(20.5 + ox, 24.5 + oy, 6.6, 6.6, 'Y');
+  ell(25 + ox, 15.5 + oy, 4.6, 5.2, 'P'); ell(28.5 + ox, 11 + oy, 4.6, 4.6, 'P');
+  if (!open) { ell(31.5 + ox, 9 + oy, 6.6, 5.0, 'P'); ell(36.5 + ox, 11 + oy, 4.6, 3.4, 'P'); ell(35.5 + ox, 13.4 + oy, 4.4, 1.2, 'p'); }
+  else { ell(31.5 + ox, 8 + oy, 6.6, 4.3, 'P'); ell(36.5 + ox, 9.2 + oy, 4.6, 2.5, 'P'); ell(36.8 + ox, 13.2 + oy, 4.6, 2.5, 'D'); ell(38 + ox, 13.2 + oy, 2.4, 1.3, 'O'); ell(35.8 + ox, 16.6 + oy, 4.6, 1.9, 'p');
+    for (let tx = 34; tx <= 40; tx += 2) { g[11 + oy][tx + ox] = 'W'; g[15 + oy][tx + ox] = 'W'; } }
+  ell(28.5 + ox, 3.6 + oy, 1.1, 1.6, 'W'); ell(27 + ox, 1.8 + oy, 0.9, 1.2, 'W'); ell(33.5 + ox, 3.4 + oy, 1.1, 1.6, 'W'); ell(35 + ox, 1.6 + oy, 0.9, 1.2, 'W');
+  ell(33.4 + ox, 7 + oy, 1.7, 1.7, 'E'); g[7 + oy][34 + ox] = 'K'; g[8 + oy][34 + ox] = 'K'; g[10 + oy][40 + ox] = 'K';
+  ell(10 + ox, 14 + oy, 1.3, 1.3, 'W'); ell(14 + ox, 12.4 + oy, 1.3, 1.3, 'W'); ell(18 + ox, 12 + oy, 1.3, 1.3, 'W'); ell(22 + ox, 13 + oy, 1.3, 1.3, 'W');
+  ell(25.5 + ox, 34.4 + oy, 0.8, 0.8, 'W'); ell(27.5 + ox, 34.2 + oy, 0.8, 0.8, 'W'); ell(14 + ox, 34.2 + oy, 0.8, 0.8, 'W');
+  const o = g.map((r) => r.slice());
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (g[y][x] !== '.') continue; let near = false;
+    for (let dy = -1; dy <= 1 && !near; dy++) for (let dx = -1; dx <= 1; dx++) { const yy = y + dy, xx = x + dx; if (yy >= 0 && yy < h && xx >= 0 && xx < w && g[yy][xx] !== '.') { near = true; break; } }
+    if (near) o[y][x] = 'K';
+  }
+  return o.map((r) => r.join(''));
+}
+const APPLE_SLOTS = [[7, 5], [13, 6], [10, 10], [4, 12], [15, 12]];
+
+function makeSprite(rows, s, over) {
+  const w = Math.max(...rows.map((r) => r.length)), h = rows.length;
+  const c = document.createElement('canvas'); c.width = w * s; c.height = h * s;
+  const g = c.getContext('2d');
+  rows.forEach((row, y) => { for (let x = 0; x < row.length; x++) { const ch = row[x]; if (ch === '.' || ch === ' ') continue; const col = (over && over[ch]) || PAL[ch]; if (!col) continue; g.fillStyle = col; g.fillRect(x * s, y * s, s, s); } });
+  const f = document.createElement('canvas'); f.width = c.width; f.height = c.height;
+  const fg = f.getContext('2d'); fg.translate(f.width, 0); fg.scale(-1, 1); fg.drawImage(c, 0, 0);
+  return { r: c, l: f, w: c.width, h: c.height };
+}
+
+/* ============================ ESTADO ============================ */
+let W = 800, H = 600, S = 3, DPR = 1, DK = 1.7;
+let SP = {}, bg = null;
+let time = 0, paused = false;
+
+// herói
+const hero = { x: 0, y: 0, face: 1, hp: 5, maxHp: 5, rupees: 0, apples: 0, inv: 0, atkCool: 0, atkT: 0, attacking: false, hitDone: false,
+  walking: false, walkT: 0, dead: false, deadT: 0, kvx: 0, kvy: 0, bowing: false, bowT: 0, bowCool: 0, aimX: 1, aimY: 0, speech: '', speechT: 0 };
+let wanderX = 0, wanderY = 0, wanderWait = 1, spawnTimer = 2, killCount = 0;
+const enemies = [], rocks = [], arrows = [], items = [], puffs = [], trees = [], flyApples = [], cookApples = [], smokes = [];
+let playMode = false;
+// pausas (modo automatico)
+let calmState = 0, calmT = 0, calmDur = 0, nextCalm = 120 + rnd() * 180, phase = 0, phaseT = 0, pickT = 0, picksLeft = 0, curTree = null, harvest = false, forceLong = false, lastLong = false;
+// lanche / fogueira
+let cookState = 0, cookT = 0, bakeT = 0, fireK = 0, fireX = 0, fireY = 0, throwIdx = 0, lastEat = -1, toastShown = false;
+const onFire = [false, false, false, false, false], reserved = [false, false, false, false, false], bakeTs = [0, 0, 0, 0, 0];
+// modo jogo
+let lastStep = 0, killsAtMax = 0, playPickT = 0, playTree = null, pickedFlag = false, prev3 = false, playEatT = 0;
+// chefao
+let bossPhase = 0, bossT = 0, atePhase1 = false, endStarted = false, bossSpawned = false, boss = null, leaveX = 0, leaveY = 0, bossDeadX = 0, bossDeadY = 0;
+let deathWait = false;
+
+/* ============================ ENTRADA ============================ */
+const keys = new Set(); const touchKeys = { 1: false, 2: false, 3: false };
+let mouseDown = false, mx = 0, my = 0, pointerSeen = false;
+const isDown = (n) => keys.has('Digit' + n) || keys.has('Numpad' + n) || touchKeys[n];
+addEventListener('keydown', (e) => { keys.add(e.code); if (/^(Digit|Numpad)[123]$/.test(e.code)) e.preventDefault(); });
+addEventListener('keyup', (e) => keys.delete(e.code));
+addEventListener('blur', () => { keys.clear(); mouseDown = false; });
+function pointerPos(e) { const r = cv.getBoundingClientRect(); mx = (e.clientX - r.left) * (cv.width / r.width); my = (e.clientY - r.top) * (cv.height / r.height); pointerSeen = true; }
+cv.addEventListener('pointerdown', (e) => { mouseDown = true; pointerPos(e); try { cv.setPointerCapture(e.pointerId); } catch (_) {} closeMenu(); });
+cv.addEventListener('pointermove', pointerPos);
+cv.addEventListener('pointerup', () => { mouseDown = false; });
+cv.addEventListener('pointercancel', () => { mouseDown = false; });
+cv.addEventListener('contextmenu', (e) => e.preventDefault());
+document.querySelectorAll('#touch button').forEach((b) => {
+  const k = +b.dataset.k;
+  b.addEventListener('pointerdown', (e) => { e.preventDefault(); touchKeys[k] = true; b.classList.add('on'); try { b.setPointerCapture(e.pointerId); } catch (_) {} });
+  const up = () => { touchKeys[k] = false; b.classList.remove('on'); };
+  b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up);
+});
+const touchMode = matchMedia('(pointer: coarse)').matches || /[?&]touch\b/.test(location.search);
+let dpx = 0, dpy = 0, aimX = 1, aimY = 0;   // direcional virtual (polegar esquerdo)
+if (touchMode) {
+  $('touch').classList.add('show'); $('dpad').classList.add('show');
+  const dp = $('dpad'), knob = dp.querySelector('b'); let dpId = null;
+  const dpSet = (e) => {
+    const r = dp.getBoundingClientRect(), R = r.width / 2;
+    let ux = (e.clientX - (r.left + R)) / R, uy = (e.clientY - (r.top + R)) / R; const l = Math.hypot(ux, uy);
+    if (l > 1) { ux /= l; uy /= l; }
+    if (l < 0.22) { dpx = dpy = 0; } else { dpx = ux / Math.max(l, 1); dpy = uy / Math.max(l, 1); aimX = dpx; aimY = dpy; }
+    knob.style.transform = 'translate(' + ux * R * 0.5 + 'px,' + uy * R * 0.5 + 'px)';
+  };
+  const dpEnd = () => { dpId = null; dpx = dpy = 0; knob.style.transform = ''; };
+  dp.addEventListener('pointerdown', (e) => { e.preventDefault(); dpId = e.pointerId; try { dp.setPointerCapture(e.pointerId); } catch (_) {} dpSet(e); closeMenu(); });
+  dp.addEventListener('pointermove', (e) => { if (e.pointerId === dpId) dpSet(e); });
+  dp.addEventListener('pointerup', dpEnd); dp.addEventListener('pointercancel', dpEnd);
+  // sem zoom: bloqueia pinca e duplo toque
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach((n) => document.addEventListener(n, (e) => e.preventDefault()));
+  document.addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  let lastTouchEnd = 0; document.addEventListener('touchend', (e) => { const t = Date.now(); if (t - lastTouchEnd < 350) e.preventDefault(); lastTouchEnd = t; }, { passive: false });
+  // tela cheia + paisagem no primeiro toque (quando o navegador permitir)
+}
+
+/* ============================ TELA E SPRITES ============================ */
+function buildSprites() {
+  const ov = (c, col, extra) => Object.assign({ [c]: col }, extra || {});
+  const dS = Math.round(S * 1.7); DK = dS / S;
+  const hov = {}; if (evoStage >= 2) hov.H = '#9650cd'; if (evoStage >= 3) hov.Q = '#467deb';      // evolucao 2: gorro roxo; 3: blusa azul
+  SP = {
+    heroA: makeSprite(heroRows(ROWS.heroA), S, hov), heroB: makeSprite(heroRows(ROWS.heroB), S, hov), front: makeSprite(heroRows(ROWS.front), S, hov), wave: makeSprite(heroRows(ROWS.wave), S, hov),
+    octo: [makeSprite(ROWS.octoA, S), makeSprite(ROWS.octoB, S)], bat: [makeSprite(ROWS.batUp, S), makeSprite(ROWS.batDown, S)],
+    slime: [makeSprite(ROWS.slimeTall, S), makeSprite(ROWS.slimeFlat, S)],
+    boko: [makeSprite(ROWS.bokoA, S), makeSprite(ROWS.bokoB, S), makeSprite(ROWS.bokoC, S)],
+    heroPow: [tintBlue(makeSprite(ROWS.heroA, S)), tintBlue(makeSprite(ROWS.heroB, S))],
+    heart: makeSprite(ROWS.heart, S), heartE: makeSprite(ROWS.heart, S, { R: '#46465a', W: '#69697a' }),
+    rupee: [makeSprite(ROWS.rupee, S), makeSprite(ROWS.rupee, S, { G: '#467deb' }), makeSprite(ROWS.rupee, S, { G: '#e63c3c' }), makeSprite(ROWS.rupee, S, { G: '#f0c83c' }), makeSprite(ROWS.rupee, S, { G: '#9650cd' })],
+    rock: makeSprite(ROWS.rock, S), apple: makeSprite(ROWS.apple, S), appleHud: makeSprite(ROWS.appleBig, S),
+    bake: ['#d73737', '#cd5c30', '#b0562a', '#8e4a24'].map((c, i) => makeSprite(ROWS.apple, S, { R: c, G: i === 0 ? '#3aa53e' : '#686e28' })),
+    tree: makeSprite(treeRows(), S), dragon: [makeSprite(dragonRows(false), dS), makeSprite(dragonRows(true), dS)],
+    fire: [makeSprite(ROWS.fire0, S + 1), makeSprite(ROWS.fire1, S + 1)]
+  };
+}
+/* ============================ CENARIO ELABORADO ============================ */
+Object.assign(PAL, { a: '#c8c8d4', d: '#78788a', f: '#e8d070', F: '#c0a040', m: '#c85a5a', c: '#f4b0c8', v: '#b080e0', o: '#e07830', s: '#8a8a9c' });
+function gridRows(w, h, fn) { const g = Array.from({ length: h }, () => Array(w).fill('.')); const set = (x, y, c) => { if (x >= 0 && y >= 0 && x < w && y < h) g[y][x] = c; }; const rc = (x, y, ww, hh, c) => { for (let j = 0; j < hh; j++) for (let i = 0; i < ww; i++) set(x + i, y + j, c); }; fn(set, rc); return g.map((r) => r.join('')); }
+Object.assign(ROWS, {
+  propRock: ["....KKKK....", "..KKaaaaKK..", ".KaaaAAAAdK.", "KaaaAAAAAAdK", "KaAAAAAAGGdK", "KAAAAAAAAAdK", ".KddddddddK.", "..KKKKKKKK.."],
+  flower: ["..Y...R..", ".YWY.RRR.", "..Y..GR..", "G.G...G..", ".GG..GG..", "..G.GG.G.", "...GGG..."],
+  flower2: [".W...c...", "WYW.ccc..", ".W..GcG..", "G.G..G...", ".GG.GG.G.", "..GGGG...", "...GG...."],
+  mush: ["..KKK..", ".KRWRK.", "KRRRWRK", ".KKTKK.", "..KTK..", "..KTK.."],
+  stump: ["..KKKKKK..", ".KtttttTK.", "KtBBBBBtK.", "KtBBttBtK.", ".KTTTTTK..", ".KBBBBBK..", "..KKKKK..."],
+  sign: ["KKKKKKKKKK", "KTTTTTTTTK", "KTtttttttK", "KTTTTTTTTK", ".KKKbbKKK.", "....bb....", "....bb....", "....bb....", "....bb....", "....bb....", "...KbbK..."],
+  barrel: ["..KKKK..", ".KBBBBK.", "KBBttBBK", "KKKKKKKK", "KBBttBBK", "KBBBBBBK", "KKKKKKKK", "KBBttBBK", ".KBBBBK.", "..KKKK.."],
+  hay: [".....KKKKKK.....", "...KKffFfffKK...", "..KffffFfffffK..", ".KffFffffffFffK.", ".KfffffFffffffK.", "KffFffffffFfffFK", "KfffffFffffffffK", "KFfffffffFffffFK", "KfffFfffffffFffK", "KKfffffFffffffKK", ".KKKKKKKKKKKKKK."],
+  reed: ["..G..", ".GG.G", "G.G.G", "G.G.G", "..G.."]
+});
+ROWS.well = gridRows(18, 18, (set, rc) => { rc(2, 9, 14, 8, 'A'); for (let x = 2; x < 16; x += 3) rc(x, 11, 1, 6, 'd'); rc(2, 9, 14, 1, 'a'); rc(3, 10, 12, 3, 'w'); rc(1, 8, 16, 1, 'K'); rc(1, 17, 16, 1, 'K'); rc(1, 8, 1, 10, 'K'); rc(16, 8, 1, 10, 'K'); rc(2, 3, 2, 6, 'B'); rc(14, 3, 2, 6, 'B'); rc(1, 1, 16, 3, 'r'); rc(1, 1, 16, 1, 'R'); rc(0, 4, 18, 1, 'K'); rc(8, 4, 1, 4, 'b'); rc(7, 7, 3, 2, 'A'); });
+ROWS.cabin = gridRows(40, 34, (set, rc) => {
+  rc(4, 14, 32, 19, 'T'); for (let y = 16; y < 33; y += 3) rc(4, y, 32, 1, 't'); rc(4, 32, 32, 1, 'B');
+  for (let r = 0; r < 13; r++) { const half = 3 + r * 1.55; for (let x = Math.round(20 - half); x <= Math.round(20 + half); x++) set(x, 1 + r, r % 3 === 0 ? 'R' : 'r'); set(Math.round(20 - half) - 1, 1 + r, 'K'); set(Math.round(20 + half) + 1, 1 + r, 'K'); }
+  rc(16, 0, 8, 1, 'K'); rc(0, 14, 40, 1, 'K'); rc(3, 14, 1, 19, 'K'); rc(36, 14, 1, 19, 'K'); rc(3, 33, 34, 1, 'K');
+  rc(27, 2, 4, 8, 'A'); rc(27, 2, 1, 8, 'a'); rc(30, 2, 1, 8, 'd'); rc(26, 1, 6, 1, 'K'); rc(26, 10, 6, 1, 'K');
+  rc(17, 22, 7, 11, 'B'); rc(18, 23, 5, 10, 'D'); set(21, 28, 'Y'); rc(16, 21, 9, 1, 'K'); rc(16, 22, 1, 11, 'K'); rc(24, 22, 1, 11, 'K');
+  rc(7, 19, 6, 6, 'K'); rc(8, 20, 4, 4, 'L'); rc(10, 20, 1, 4, 'K'); rc(8, 22, 4, 1, 'K'); rc(28, 19, 6, 6, 'K'); rc(29, 20, 4, 4, 'L'); rc(31, 20, 1, 4, 'K'); rc(29, 22, 4, 1, 'K');
+  rc(6, 25, 8, 1, 'b'); rc(27, 25, 8, 1, 'b'); set(8, 26, 'R'); set(10, 26, 'Y'); set(29, 26, 'c'); set(31, 26, 'R');
+});
+
+function buildProps() {
+  const m = (rows, over) => makeSprite(rows, S, over);
+  Object.assign(SP, { propRock: m(ROWS.propRock), flower: [m(ROWS.flower), m(ROWS.flower2)], mush: m(ROWS.mush), stump: m(ROWS.stump), sign: m(ROWS.sign), barrel: m(ROWS.barrel), hay: m(ROWS.hay), well: m(ROWS.well), cabin: m(ROWS.cabin), reed: m(ROWS.reed) });
+}
+// props grandes: ficam atras ou na frente do heroi conforme a altura (ordenados por y)
+const PROPS = [
+  { k: 'cabin', fx: 0.80, fy: 0.27 }, { k: 'well', fx: 0.63, fy: 0.32 }, { k: 'barrel', fx: 0.705, fy: 0.40 }, { k: 'barrel', fx: 0.73, fy: 0.42 }, { k: 'hay', fx: 0.585, fy: 0.45 },
+  { k: 'sign', fx: 0.10, fy: 0.64 }, { k: 'propRock', fx: 0.38, fy: 0.17 }, { k: 'propRock', fx: 0.41, fy: 0.19 }, { k: 'propRock', fx: 0.93, fy: 0.67 }, { k: 'propRock', fx: 0.47, fy: 0.93 },
+  { k: 'stump', fx: 0.52, fy: 0.15 }, { k: 'stump', fx: 0.06, fy: 0.47 }, { k: 'propRock', fx: 0.045, fy: 0.80 }
+];
+function propEnts() { return PROPS.map((p) => { const x = Math.round(p.fx * W), y = Math.round(p.fy * H); return { y, f: () => { shadow(x, y, SP[p.k].w / S * 0.9); spr(SP[p.k], x, y, true); } }; }); }
+
+// ---- fundo: terreno, trilha, lagoa, floresta, cercas, flores ----
+let SCENE = null;
+function buildBackground() {
+  bg = document.createElement('canvas'); bg.width = W; bg.height = H;
+  const g = bg.getContext('2d'), T = S * 8; let seed = 1234; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const B = (c, x, y, w, h) => { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), w, h); };       // bloco em pixels da tela
+  const snap = (v) => Math.floor(v / S) * S;
+  // base xadrez suave
+  for (let y = 0; y < H; y += T) for (let x = 0; x < W; x += T) B(((x / T + y / T) & 1) ? '#5a9a46' : '#5f9f4a', x, y, T, T);
+  // manchas grandes de terreno (clareiras e trechos mais escuros)
+  for (let i = 0; i < 14; i++) {
+    const cx = r() * W, cy = r() * H, rx = (40 + r() * 90) * S / 3, ry = rx * (0.5 + r() * 0.4), col = r() < 0.5 ? '#68a94f' : '#4f8c3e';
+    for (let y = snap(cy - ry); y <= cy + ry; y += S) for (let x = snap(cx - rx); x <= cx + rx; x += S) { const dx = (x - cx) / rx, dy = (y - cy) / ry, d = dx * dx + dy * dy; if (d < 1 && (d < 0.78 || r() < 0.5)) B(col, x, y, S, S); }
+  }
+  // trilha de terra serpenteando pelo campo
+  const pts = [[-0.05, 0.74], [0.16, 0.68], [0.34, 0.78], [0.52, 0.72], [0.70, 0.80], [0.88, 0.70], [1.06, 0.62]].map(([a, b]) => [a * W, b * H]);
+  const cr = (p0, p1, p2, p3, t) => { const t2 = t * t, t3 = t2 * t; return [0.5 * ((2 * p1[0]) + (-p0[0] + p2[0]) * t + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3), 0.5 * ((2 * p1[1]) + (-p0[1] + p2[1]) * t + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2 + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3)]; };
+  const path = []; for (let i = 0; i < pts.length - 1; i++) for (let t = 0; t < 1; t += 0.02) path.push(cr(pts[Math.max(0, i - 1)], pts[i], pts[i + 1], pts[Math.min(pts.length - 1, i + 2)], t));
+  const brush = (cx, cy, rad, col) => { for (let y = snap(cy - rad * S); y <= cy + rad * S; y += S) for (let x = snap(cx - rad * S); x <= cx + rad * S; x += S) if ((x - cx) ** 2 + (y - cy) ** 2 <= (rad * S) ** 2) B(col, x, y, S, S); };
+  path.forEach(([x, y]) => brush(x, y, 6.5, '#8e6234')); path.forEach(([x, y]) => brush(x, y, 5.4, '#b98648'));
+  path.forEach(([x, y], i) => { if (i % 3 === 0) { brush(x + (r() - 0.5) * 4 * S, y + (r() - 0.5) * 4 * S, 2.4, '#c99a58'); } if (i % 7 === 0) { const px = snap(x + (r() - 0.5) * 8 * S), py = snap(y + (r() - 0.5) * 6 * S); B('#8a8a98', px, py, S, S); B('#b8b8c6', px, py, S, S / 2 | 0 || S); } });
+  const onPath = (x, y, pad) => path.some(([px, py]) => (px - x) ** 2 + (py - y) ** 2 < ((6.5 + pad) * S) ** 2);
+  // lagoa com margem de areia, juncos e vitorias-regias
+  const pond = { cx: W * 0.23, cy: H * 0.30, rx: Math.min(W * 0.14, 62 * S), ry: Math.min(H * 0.085, 36 * S) };
+  const inPond = (x, y, pad) => ((x - pond.cx) / (pond.rx + pad * S)) ** 2 + ((y - pond.cy) / (pond.ry + pad * S)) ** 2 < 1;
+  for (let y = snap(pond.cy - pond.ry - 5 * S); y <= pond.cy + pond.ry + 5 * S; y += S) for (let x = snap(pond.cx - pond.rx - 5 * S); x <= pond.cx + pond.rx + 5 * S; x += S) {
+    const d = ((x - pond.cx) / pond.rx) ** 2 + ((y - pond.cy) / pond.ry) ** 2, dn = ((x - pond.cx) / (pond.rx + 3.5 * S)) ** 2 + ((y - pond.cy) / (pond.ry + 3.5 * S)) ** 2, dm = ((x - pond.cx) / (pond.rx + 6 * S)) ** 2 + ((y - pond.cy) / (pond.ry + 6 * S)) ** 2;
+    if (d < 1) B(d < 0.35 ? '#2b66b8' : (d < 0.7 ? '#3a82cc' : '#4c98dc'), x, y, S, S); else if (dn < 1) B('#ead59c', x, y, S, S); else if (dm < 1 && r() < 0.35) B('#d8c488', x, y, S, S);
+  }
+  for (let i = 0; i < 26; i++) { const a = r() * TAU, rr = Math.sqrt(r()) * 0.9; B(r() < 0.5 ? '#a4d8ff' : '#7cb8f0', snap(pond.cx + Math.cos(a) * pond.rx * rr), snap(pond.cy + Math.sin(a) * pond.ry * rr), S * 2, S); }
+  for (let i = 0; i < 4; i++) { const a = 0.8 + i * 1.1, lx = snap(pond.cx + Math.cos(a) * pond.rx * 0.5), ly = snap(pond.cy + Math.sin(a) * pond.ry * 0.5); B('#2e8c3a', lx, ly, S * 4, S * 2); B('#58c060', lx, ly, S * 3, S); if (i % 2 === 0) B('#f4b0c8', lx + S, ly - S, S, S); }
+  SCENE = { pond, path };
+  // floresta no topo e nas laterais (so cenario, o heroi passa por baixo)
+  const tree = (cx, cy, rad) => { brush(cx, cy + 2 * S, rad + 1, '#14502a'); brush(cx, cy, rad, '#1f7a32'); brush(cx - rad * S * 0.25, cy - rad * S * 0.25, rad * 0.6, '#2f9a40'); for (let i = 0; i < 5; i++) B('#48b858', snap(cx - rad * S * 0.5 + r() * rad * S), snap(cy - rad * S * 0.6 + r() * rad * S * 0.5), S, S); };
+  for (let x = -S * 6; x < W + S * 6; x += S * (11 + r() * 4)) { tree(x, S * (3 + r() * 5), 8 + r() * 3); if (r() < 0.6) tree(x + S * 6, S * (12 + r() * 4), 7 + r() * 2); }
+  for (let y = S * 20; y < H; y += S * (14 + r() * 5)) { if (r() < 0.85) tree(-S * 2, y, 7 + r() * 3); if (r() < 0.8) tree(W + S * 2, y, 7 + r() * 3); }
+  // cercas de madeira
+  const fence = (x0, y0, n) => { for (let i = 0; i < n; i++) { const x = x0 + i * S * 9; B('#1c1624', x - S, y0 - S * 5, S * 4, S * 8); B('#a8683c', x, y0 - S * 4, S * 2, S * 6); B('#c88c58', x, y0 - S * 4, S, S * 6); } B('#1c1624', x0 - S, y0 - S * 3, S * 9 * (n - 1) + S * 3, S * 3); B('#b0703c', x0, y0 - S * 2, S * 9 * (n - 1) + S, S); B('#1c1624', x0 - S, y0 + 0, S * 9 * (n - 1) + S * 3, S * 2); B('#946034', x0, y0, S * 9 * (n - 1) + S, S); };
+  fence(W * 0.52, H * 0.50, 7); fence(W * 0.04, H * 0.58, 4);
+  // flores, cogumelos e tufos altos espalhados (sem cair na trilha, na lagoa nem no meio da tela)
+  const free = (x, y) => !onPath(x, y, 3) && !inPond(x, y, 8) && Math.hypot(x - W / 2, y - H / 2) > Math.min(W, H) * 0.16 && y > S * 22;
+  const stamp = (sp, x, y) => g.drawImage(sp.r, Math.round(x - sp.w / 2), Math.round(y - sp.h));
+  for (let i = 0, n = 0; i < 260 && n < 34; i++) { const x = r() * W, y = H * 0.12 + r() * H * 0.84; if (!free(x, y)) continue; n++; const k = r(); if (k < 0.5) stamp(SP.flower[n & 1], x, y); else if (k < 0.62) stamp(SP.mush, x, y); else { for (let j = 0; j < 4; j++) { const tx = snap(x + (j - 1.5) * S * 2), ty = snap(y - (j & 1) * S); B('#3f8a38', tx, ty, S, S * 3); B('#78cc5c', tx, ty, S, S); } } }
+  [[0.30, 0.25], [0.36, 0.30]].forEach(([fx, fy]) => { if (!inPond(W * fx, H * fy, 0)) stamp(SP.reed, W * fx, H * fy); });
+  for (let i = 0; i < 9; i++) { const a = i / 9 * TAU, x = pond.cx + Math.cos(a) * (pond.rx + 4 * S), y = pond.cy + Math.sin(a) * (pond.ry + 4 * S); if (!onPath(x, y, 1) && a > 0.4 && a < 2.8) stamp(SP.reed, x, y + S * 2); }
+}
+// ---- vida do cenario: sombras de nuvens, brilho na lagoa, fumaca da chamine e borboletas ----
+function drawAmbient() {
+  if (!SCENE) return; const t = time, pd = SCENE.pond;
+  ctx.fillStyle = '#ffffff';
+  for (let i = 0; i < 6; i++) { const ph = (t * 0.7 + i * 1.3) % 4, a = i * 2.1 + Math.floor(t * 0.7 / 4 + i) * 1.7; if (ph < 3) { const x = pd.cx + Math.cos(a) * pd.rx * 0.8 * ((i * 37) % 10 / 10 + 0.1), y = pd.cy + Math.sin(a) * pd.ry * 0.7 * ((i * 53) % 10 / 10 + 0.1); ctx.globalAlpha = Math.sin(ph / 3 * Math.PI); ctx.fillRect(Math.round(x), Math.round(y), S, S); ctx.fillRect(Math.round(x + S), Math.round(y), S, S); } }
+  ctx.globalAlpha = 1;
+  const cx = W * 0.80 + 7 * S, cy = H * 0.27 - 30 * S;                                       // fumaca da chamine
+  for (let i = 0; i < 4; i++) { const ph = (t * 0.35 + i * 0.25) % 1; ctx.fillStyle = 'rgba(235,235,245,' + (0.55 * (1 - ph)) + ')'; const sz = Math.round((2 + ph * 4) * S); ctx.fillRect(Math.round(cx + Math.sin(ph * 5 + i) * 3 * S), Math.round(cy - ph * 24 * S), sz, sz); }
+  for (let i = 0; i < 3; i++) { const bx = W * (0.3 + 0.2 * i) + Math.sin(t * 0.6 + i * 2) * 60 * S / 3 * 3, by = H * (0.45 + 0.12 * i) + Math.cos(t * 0.8 + i) * 22 * S, wing = Math.floor(t * 8 + i) % 2, col = ['#f7d34a', '#f4a0c8', '#a8d4ff'][i];
+    ctx.fillStyle = col; ctx.fillRect(Math.round(bx - S * (wing ? 2 : 1)), Math.round(by), S * (wing ? 2 : 1), S * 2); ctx.fillRect(Math.round(bx + S), Math.round(by), S * (wing ? 2 : 1), S * 2); ctx.fillStyle = '#1c1624'; ctx.fillRect(Math.round(bx), Math.round(by), S, S * 2); }
+  ctx.fillStyle = 'rgba(8,24,40,0.07)';
+  for (let i = 0; i < 3; i++) { const x = ((t * 14 * S / 3 + i * W / 2.2) % (W + 240 * S / 3)) - 120 * S / 3, y = H * (0.25 + 0.27 * i); ctx.beginPath(); ctx.ellipse(x, y, 90 * S / 3 * (1 + i * 0.2), 34 * S / 3, 0, 0, TAU); ctx.fill(); }
+}
+
+let sizeMode = 1;      // 0 pequeno, 1 normal, 2 grande (o cenario acompanha: tudo e escrito em unidades de S)
+try { const v = parseInt(localStorage.getItem('heroi_tamanho'), 10); if (v >= 0 && v <= 2) sizeMode = v; } catch (_) {}
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  const cw = Math.max(320, Math.floor(cv.clientWidth)), ch = Math.max(240, Math.floor(cv.clientHeight));
+  const nW = Math.floor(cw * DPR), nH = Math.floor(ch * DPR);
+  const baseS = Math.max(3, Math.round(nH / 300));
+  const nS = sizeMode === 0 ? Math.max(2, Math.round(baseS * 0.67)) : (sizeMode === 2 ? Math.round(baseS * 1.34) : baseS);      // tamanho: pequeno / normal / grande
+  const ratioX = W ? nW / W : 1, ratioY = H ? nH / H : 1;
+  const sChanged = nS !== S;
+  cv.width = nW; cv.height = nH; W = nW; H = nH; S = nS;
+  ctx.imageSmoothingEnabled = false;
+  buildSprites(); buildProps(); buildBackground();
+  if (!trees.length) placeTrees();
+  else { trees.forEach((t) => { t.x *= ratioX; t.y *= ratioY; }); [hero, ...enemies, ...items].forEach((o) => { o.x *= ratioX; o.y *= ratioY; }); fireX *= ratioX; fireY *= ratioY; }
+  if (sChanged) { /* os tamanhos se ajustam sozinhos: tudo e escrito em unidades de S */ }
+}
+function placeTrees() {
+  trees.length = 0;
+  [[0.90 + 0.04 * rnd(), 0.46 + 0.08 * rnd()], [0.86 + 0.05 * rnd(), 0.82 + 0.05 * rnd()], [0.10 + 0.12 * rnd(), 0.90]].forEach(([fx, fy]) => trees.push({ x: W * fx, y: H * fy, has: [true, true, true, true, true], regrow: [0, 0, 0, 0, 0] }));
+}
+const appleX = (t, i) => t.x - 10 * S + (APPLE_SLOTS[i][0] + 0.5) * S;
+const appleY = (t, i) => t.y - 24 * S + (APPLE_SLOTS[i][1] + 0.5) * S;
+const firstApple = (t) => t.has.indexOf(true);
+
+/* ============================ AVISOS ============================ */
+let toastTimer = 0;
+function toast(title, text, ms) {
+  $('toastT').textContent = title; $('toastS').textContent = text; $('toast').classList.add('on'); $('sr').textContent = title + '. ' + text;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').classList.remove('on'), ms || 4800);
+}
+function say(s) { hero.speech = s; hero.speechT = 0.8; }
+
+/* ============================ JOGO ============================ */
+const NEAR = (ax, ay, bx, by) => Math.hypot(ax - bx, ay - by);
+const clampHero = () => { hero.x = Math.max(6 * S, Math.min(W - 6 * S, hero.x)); hero.y = Math.max(17 * S, Math.min(H - S, hero.y)); };
+
+// valores: 1 verde, 5 azul, 20 vermelha, 10 amarela, 50 roxa. No modo jogo so caem as de 5 a 50, para nao demorar.
+const rupeeValue = (k) => [0, 1, 5, 20, 10, 50][k];
+function rupeeKind(r) { if (!playMode) { if (record >= 50) return r < 30 ? 1 : (r < 60 ? 2 : (r < 80 ? 4 : (r < 95 ? 3 : 5))); return r < 60 ? 1 : (r < 90 ? 2 : 3); } return r < 40 ? 2 : (r < 70 ? 4 : (r < 90 ? 3 : 5)); }
+function rupeeStep() { return Math.min(6, Math.floor(hero.rupees / 25)); }
+/* ---------- evolucao: monstros derrotados no automatico dao equipamentos ao heroi ---------- */
+// 1000 monstros: arco de metal | +500: gorro roxo | +500: blusa azul | +1000: Espada Mestre e escudo vermelho
+const EVO_THR = [1000, 1500, 2000, 3000], EVO_NEED = [1000, 500, 500, 1000], EVO_FLY = 1.5;
+const EVO_TITLE = ['ARCO DE METAL', 'GORRO ROXO', 'BLUSA AZUL', 'ESPADA MESTRE E ESCUDO VERMELHO'];
+let evoKills = 0, evoStage = 0, evoNext = 1, evo = null; const evoQueue = [];
+try { evoKills = Math.max(0, parseInt(localStorage.getItem('heroi_monstros') || '0', 10) || 0); } catch (_) {}
+while (evoStage < 4 && evoKills >= EVO_THR[evoStage]) evoStage++;
+evoNext = evoStage + 1;
+if (/[?&]evolucao\b/.test(location.search)) { evoKills = EVO_THR[0] - 1; evoStage = 0; evoNext = 1; }      // teste rapido: o proximo monstro da a 1a evolucao
+const heroRows = (rows) => rows.map((r, i) => r.replace(/G/g, i < 9 ? 'H' : 'Q'));
+function saveKills() { try { localStorage.setItem('heroi_monstros', String(evoKills)); } catch (_) {} }
+function countKill() {
+  evoKills++; if (evoKills % 5 === 0) saveKills();
+  if (evoNext <= 4 && evoKills >= EVO_THR[evoNext - 1]) { evoQueue.push(evoNext); evoNext++; saveKills(); }
+}
+const evoWaiting = () => evo !== null && evo.wait;
+function updateEvo(dt) {
+  if (!evo) {
+    if (!evoQueue.length || playMode) return;
+    evo = { stage: evoQueue.shift(), t: 0, wait: true }; placeEvoBtn();      // o jogo pausa ate apertar USAR ITEM
+    return;
+  }
+  if (evo.wait) return;
+  evo.t += dt;
+  if (evo.t >= EVO_FLY) {
+    evoStage = Math.max(evoStage, evo.stage); buildSprites(); buildProps();      // buildSprites recria o SP inteiro: os sprites do cenario precisam ser refeitos
+    for (let k = 0; k < 10; k++) puffs.push({ kind: k % 2, x: hero.x + (rnd() - 0.5) * 20 * S, y: hero.y - rnd() * 18 * S, t: 0 });
+    say('Evoluí!'); evo = null;
+  }
+}
+function placeEvoBtn() {
+  const b = $('evoBtn'), r = cv.getBoundingClientRect();
+  b.style.left = (r.left + (W / 2) / DPR) + 'px'; b.style.top = (r.top + (H / 2 + 44 * S) / DPR) + 'px'; b.hidden = false;
+  try { b.focus({ preventScroll: true }); } catch (_) {}
+}
+function useEvoItem() { if (evo) { evo.wait = false; evo.t = 0; } $('evoBtn').hidden = true; }
+function drawEvo() {
+  if (!evo) return;
+  const bigU = S * 3.4, normU = S * 0.55, cx = W / 2, cy = H / 2 - 10 * S; let u, x, y;
+  if (evo.wait) { u = bigU * (1 + 0.04 * Math.sin(performance.now() / 1000 * 6)); x = cx; y = cy; }
+  else { let q = evo.t / EVO_FLY; q = q * q * (3 - 2 * q); u = bigU + (normU - bigU) * q; x = cx + (hero.x - cx) * q; y = cy + (hero.y - 10 * S - cy) * q; }
+  drawEvoItem(evo.stage, x, y, u);
+  if (evo.wait || evo.t < 0.35) {
+    const ty = cy + 17 * bigU / 1.6;
+    text(EVO_TITLE[evo.stage - 1] + '!', W / 2, ty, '#ffdc5a', 4.2 * S, 'center');
+    text(EVO_NEED[evo.stage - 1] + ' MONSTROS DERROTADOS', W / 2, ty + 7 * S, '#fff', 3.4 * S, 'center');
+  }
+}
+function drawEvoItem(stage, cx, cy, u) {
+  const dark = '#1c1624'; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  const R = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); };
+  const poly = (pts, fill) => { ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = Math.max(1, u * 0.7); ctx.strokeStyle = dark; ctx.stroke(); };
+  const ell = (x, y, w, h, c) => { ctx.beginPath(); ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, TAU); ctx.fillStyle = c; ctx.fill(); };
+  if (stage === 1) {         // arco de metal
+    const pts = []; for (let i = 0; i < 13; i++) { const tt = (i - 6) / 6; pts.push([cx + (5 * tt * tt - 2.5) * u, cy + tt * 12 * u]); }
+    const line = (w, c) => { ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.lineWidth = w; ctx.strokeStyle = c; ctx.stroke(); };
+    line(u * 3.6, dark); line(u * 2, '#b9c0cd'); line(Math.max(1, u * 0.6), '#f0f5ff');
+    ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); ctx.lineTo(pts[12][0], pts[12][1]); ctx.lineWidth = Math.max(1, u * 0.5); ctx.strokeStyle = '#ebebeb'; ctx.stroke();
+    R(cx + 0.9 * u, cy - 2.5 * u, 3 * u, 5 * u, '#3c466e');
+  } else if (stage === 2) {  // gorro roxo
+    const p1 = '#9650cd', p2 = '#60328c';
+    ell(cx - 10 * u, cy - 11 * u, 20 * u, 17 * u, dark); ell(cx - 9 * u, cy - 10 * u, 18 * u, 15 * u, p1);
+    poly([[cx + 4 * u, cy - 9 * u], [cx + 13 * u, cy + 3 * u], [cx + 11 * u, cy + 9 * u], [cx + 3 * u, cy + 1 * u]], p2);
+    R(cx - 11 * u, cy + 2 * u, 22 * u, 5 * u, dark); R(cx - 10 * u, cy + 3 * u, 20 * u, 3 * u, p2);
+    ell(cx - 6 * u, cy - 8 * u, 5 * u, 3 * u, '#c896f0');
+  } else if (stage === 3) {  // blusa azul
+    const b1 = '#467deb', b2 = '#2d55be';
+    poly([[cx - 4 * u, cy - 10 * u], [cx + 4 * u, cy - 10 * u], [cx + 12 * u, cy - 5 * u], [cx + 9 * u, cy + 0.5 * u], [cx + 6 * u, cy - 2 * u], [cx + 6 * u, cy + 10 * u], [cx - 6 * u, cy + 10 * u], [cx - 6 * u, cy - 2 * u], [cx - 9 * u, cy + 0.5 * u], [cx - 12 * u, cy - 5 * u]], b1);
+    R(cx - 6 * u, cy + 8 * u, 12 * u, 2 * u, b2); ell(cx - 3 * u, cy - 11.5 * u, 6 * u, 4 * u, dark); ell(cx - 2.2 * u, cy - 11 * u, 4.4 * u, 3 * u, b2);
+  } else {                   // espada mestre + escudo vermelho
+    const sx = cx - 8 * u;
+    poly([[sx - 2 * u, cy + 3 * u], [sx - 2 * u, cy - 15 * u], [sx, cy - 19 * u], [sx + 2 * u, cy - 15 * u], [sx + 2 * u, cy + 3 * u]], '#cde8ff');
+    R(sx - 0.4 * u, cy - 16 * u, 0.8 * u, 18 * u, '#fff');
+    poly([[sx - 6 * u, cy + 3 * u], [sx + 6 * u, cy + 3 * u], [sx + 7 * u, cy + 6 * u], [sx - 7 * u, cy + 6 * u]], '#3c5fcd');
+    R(sx - 1.5 * u, cy + 3.5 * u, 3 * u, 2 * u, '#d7a028'); R(sx - 1.5 * u, cy + 6 * u, 3 * u, 7 * u, dark); R(sx - 0.8 * u, cy + 6 * u, 1.6 * u, 7 * u, '#503796'); ell(sx - 2 * u, cy + 12.5 * u, 4 * u, 3.5 * u, '#d7a028');
+    const hx2 = cx + 9 * u;
+    poly([[hx2 - 7 * u, cy - 8 * u], [hx2 + 7 * u, cy - 8 * u], [hx2 + 7 * u, cy + 3 * u], [hx2, cy + 12 * u], [hx2 - 7 * u, cy + 3 * u]], '#cd3232');
+    R(hx2 - 7 * u, cy - 8 * u, 2 * u, 11 * u, '#961e23'); R(hx2 - 3.4 * u, cy - 5.4 * u, 6.8 * u, 6.8 * u, dark); R(hx2 - 2.6 * u, cy - 4.6 * u, 5.2 * u, 5.2 * u, '#f5cd46');
+  }
+}
+
+/* ---------- modo poder: ao bater o recorde de rupias do automatico ---------- */
+let record = 0, nextPower = 25, powerT = 0, powerAng = 0, powerShootT = 0, powerSpinT = 0;
+try { record = parseInt(localStorage.getItem('heroi_recorde') || '0', 10) || 0; } catch (_) {}
+nextPower = Math.max(25, record + 1);
+function resetRecord() {      // regra pedida: o recorde zera quando passa de 80
+  record = 0; nextPower = 25; try { localStorage.setItem('heroi_recorde', '0'); } catch (_) {}
+}
+function saveRecord() {      // o recorde nunca diminui (vale o maior entre o guardado e o atual)
+  try { const old = parseInt(localStorage.getItem('heroi_recorde') || '0', 10) || 0; record = Math.max(record, old); localStorage.setItem('heroi_recorde', String(record)); } catch (_) {}
+}
+function tintBlue(sp) {
+  const mk = (src) => {
+    const c = document.createElement('canvas'); c.width = src.width; c.height = src.height; const g = c.getContext('2d'); g.drawImage(src, 0, 0);
+    const im = g.getImageData(0, 0, c.width, c.height), d = im.data;
+    for (let i = 0; i < d.length; i += 4) { if (d[i + 3] === 0) continue; const lum = (d[i] + d[i + 1] + d[i + 2]) / 3; if (lum < 60) { d[i] = 10; d[i + 1] = 20; d[i + 2] = 80; } else { d[i] = 70 + lum / 5; d[i + 1] = 170 + lum / 6; d[i + 2] = 255; } }
+    g.putImageData(im, 0, 0); return c;
+  };
+  return { r: mk(sp.r), l: mk(sp.l), w: sp.w, h: sp.h };
+}
+const SLIMES_FOR_POWER = 20;   // gelatinas que o heroi precisa derrotar para lancar o poder
+let slimeKills = 0, powerPending = false;        // gelatinas derrotadas desde o ultimo poder (zera ao chegar a 20); poder pendente
+let lootHold = false;     // do inicio do poder ate pegar tudo que caiu: itens nao somem e o lanche espera
+function updatePower(dt) {
+  if (lootHold && (playMode || (powerT <= 0 && items.length === 0))) { lootHold = false; nextPower = Math.max(nextPower, record + 1); }      // o que foi pego depois do poder nao dispara outro poder na hora
+  if (playMode) { powerPending = false; slimeKills = 0; if (powerT > 0) { powerT = 0; enemies.length = 0; rocks.length = 0; arrows.length = 0; hero.inv = 0; } return; }      // entrou no modo jogo: poder acaba em silencio, sem recompensa
+  if (hero.rupees > record) { record = hero.rupees; saveRecord(); }
+  if (record > 80) resetRecord();
+  if (powerT <= 0) { if (powerPending && !lootHold && !hero.dead && cookState === 0 && bossPhase === 0) { powerPending = false; startPower(); } return; }
+  powerT -= dt; if (powerT <= 0) endPower();
+}
+function startPower() {
+  if (calmState !== 0) endCalm(false);
+  powerT = 15; powerAng = 0; powerShootT = 0; powerSpinT = 0; lootHold = true; hero.attacking = false; hero.bowing = false; hero.inv = 0; spawnTimer = 0.8;
+  for (let k = 0; k < 9; k++) spawn(spawnType());      // 18x mais monstros: ja comeca com uma leva
+  say('PODER!');
+  for (let k = 0; k < 8; k++) puffs.push({ kind: k % 2, x: hero.x + (rnd() - 0.5) * 20 * S, y: hero.y - rnd() * 14 * S, t: 0 });
+}
+// fim do poder: os monstros que sobraram explodem, ele colhe macas (e depois assa e come, pelo ciclo normal do lanche)
+function endPower() {
+  powerT = 0; if (hero.rupees > record) record = hero.rupees; saveRecord(); if (record > 80) resetRecord();
+  hero.rupees = 0; nextPower = Math.max(25, record + 1);          // as rupias zeram; o proximo poder exige bater o recorde de novo
+  for (const e of enemies) for (let k = 0; k < 4; k++) puffs.push({ kind: k % 2, x: e.x + (rnd() - 0.5) * 10 * S, y: e.y - rnd() * 10 * S, t: 0 });
+  enemies.length = 0; rocks.length = 0; arrows.length = 0; spawnTimer = 16; hero.inv = 0; hero.attacking = false; hero.bowing = false;
+  const need = 3; let got = 0;      // durante o poder so da para pegar 3 macas: o lanche so acontece quando juntar 5 ou mais
+  for (const t of trees) for (let i = 0; i < 5 && got < need; i++) if (t.has[i]) { t.has[i] = false; t.regrow[i] = 60 + rnd() * 40; flyApples.push({ x0: appleX(t, i), y0: appleY(t, i), t: 0 }); got++; }
+  say('Uff!');
+}
+function updatePowerHero(dt) {
+  powerAng += dt; powerSpinT += dt;
+  hero.x = W / 2 + W * 0.36 * Math.cos(powerAng); hero.y = H / 2 + H * 0.34 * Math.sin(powerAng * 1.3);
+  hero.x = Math.max(6 * S, Math.min(W - 6 * S, hero.x)); hero.y = Math.max(17 * S, Math.min(H - 1 * S, hero.y));
+  hero.face = Math.floor(powerSpinT * 12) % 2 === 0 ? 1 : -1; hero.walking = true; hero.walkT += dt;
+  powerShootT -= dt;
+  while (powerShootT <= 0) {      // pode sair mais de um projetil por quadro, para manter 5x mais que antes
+    powerShootT += 0.05; let tg = null, bd = 1e18;
+    for (const e of enemies) { const d2 = (e.x - hero.x) ** 2 + (e.y - hero.y) ** 2; if (d2 < bd) { bd = d2; tg = e; } }
+    const ang = tg ? Math.atan2((tg.y - (tg.type === 1 ? 9 : 4) * S) - (hero.y - 8 * S), tg.x - hero.x) + (rnd() - 0.5) * 0.3 : powerSpinT * 9, sp = 260 * S;
+    arrows.push({ x: hero.x, y: hero.y - 8 * S, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, power: true });
+  }
+}
+function drawPowerHero() {
+  shadow(hero.x, hero.y, 12);
+  const cc = ['#fff', '#ffeb78', '#ffbe3c'];      // faiscas douradas: o heroi nao fica azul
+  for (let k = 0; k < 10; k++) { const a = powerSpinT * 7 + k * Math.PI * 2 / 10, rr = (12 + 3 * Math.sin(powerSpinT * 15 + k)) * S; rect(cc[k % 3], hero.x + Math.cos(a) * rr - S, hero.y - 8 * S + Math.sin(a) * rr * 0.8 - S, 2 * S, 2 * S); }
+  const fr = Math.floor(powerSpinT * 10) % 2; spr(fr ? SP.heroB : SP.heroA, hero.x, hero.y - (fr ? S : 0), hero.face > 0);
+}
+function drawPowerArrow(a) {
+  const l = Math.hypot(a.vx, a.vy); if (l < 1) return; const ux = a.vx / l, uy = a.vy / l, cc = ['#fff', '#78e6ff', '#3296ff', '#1e5adc'];
+  for (let k = 0; k < 4; k++) rect(cc[k], a.x - ux * k * 2.2 * S - S, a.y - uy * k * 2.2 * S - S, 2 * S, 2 * S);
+}
+function enemyCap() { if (!playMode) return powerT > 0 ? 72 : 4; const cap = 4 * 2 / 3 * (1 + 0.1 * rupeeStep()); const b = Math.floor(cap); return b + (rnd() < cap - b ? 1 : 0); }
+function spawnRateMul() { return playMode ? 1 + 0.1 * rupeeStep() : (powerT > 0 ? 18 : 1); }
+function spawnType() { if (!playMode) return rnd() < 0.15 ? 4 : Math.floor(rnd() * 3); const r = rnd(); return r < 0.25 ? 0 : (r < 0.55 ? 1 : (r < 0.85 ? 2 : 4)); }   // 4 = bokoblin (15%)
+function setMaxHp(m) { const old = hero.maxHp; hero.maxHp = m; hero.hp = m > old ? Math.min(m, hero.hp + (m - old)) : Math.min(hero.hp, m); }
+
+function spawn(type) {
+  const edge = Math.floor(rnd() * 4), m = 6 * S; let x, y;
+  if (edge === 0) { x = m; y = m * 3 + rnd() * (H - m * 6); } else if (edge === 1) { x = W - m; y = m * 3 + rnd() * (H - m * 6); }
+  else if (edge === 2) { x = m * 3 + rnd() * (W - m * 6); y = 16 * S; } else { x = m * 3 + rnd() * (W - m * 6); y = H - m; }
+  const e = { type, x, y, vx: 0, vy: 0, kx: 0, ky: 0, t: 0, timer: 0.8 + rnd(), flash: 0, hp: type === 1 ? 1 : (type === 4 ? 3 : 2), maxHp: 0, face: 1, mode: 0, tx: 0, ty: 0, rt: 0, moving: false };
+  e.maxHp = e.hp; puffs.push({ kind: 2, x, y, t: 0 }); enemies.push(e); return e;
+}
+function nearestMelee() { let b = null, bd = 1e18; for (const e of enemies) { if (e.type === 1) continue; const d = (e.x - hero.x) ** 2 + (e.y - hero.y) ** 2; if (d < bd) { bd = d; b = e; } } return b; }
+function nearestItem() { let b = null, bd = 1e18; for (const it of items) { const d = (it.x - hero.x) ** 2 + (it.y - hero.y) ** 2; if (d < bd) { bd = d; b = it; } } return b; }
+
+function startAttack(practice) {
+  hero.attacking = true; hero.atkT = 0; hero.hitDone = false;
+  if (rnd() < 0.45) say(['Hyaa!', 'Hah!', 'Yah!', 'Toma!'][Math.floor(rnd() * 4)]);
+}
+function moveHero(tx, ty, speed, dt) {
+  const dx = tx - hero.x, dy = ty - hero.y, d = Math.hypot(dx, dy);
+  if (d < 1) { hero.walking = false; return; }
+  const step = Math.min(d, speed * dt); hero.x += dx / d * step; hero.y += dy / d * step;
+  if (Math.abs(dx) > 2) hero.face = dx > 0 ? 1 : -1; hero.walking = true;
+}
+function hurtHero(fx, fy) {
+  if (hero.inv > 0 || hero.dead || powerT > 0) return;
+  hero.hp--; hero.inv = 1.2; hero.attacking = false; hero.atkCool = 0.3;
+  let dx = hero.x - fx, dy = hero.y - fy, d = Math.hypot(dx, dy); if (d < 1) { dx = -hero.face; dy = 0; d = 1; }
+  hero.kvx = dx / d * 120 * S; hero.kvy = dy / d * 120 * S;
+  if (hero.hp <= 0) { hero.hp = 0; hero.dead = true; hero.deadT = 3; puffs.push({ kind: 0, x: hero.x, y: hero.y - 6 * S, t: 0 }); }
+  else say('Ai!');
+}
+function doSwing() {
+  const cx = hero.x + hero.face * 8 * S, R = 18 * S;
+  for (let i = enemies.length - 1; i >= 0; i--) { const e = enemies[i]; const dx = e.x - cx, dy = e.y - hero.y; const rad = e.type === 3 ? R + 14 * S * DK : R; if (dx * dx + dy * dy < rad * rad) damageEnemy(e, e.type === 3 ? 150 : 1); }
+  for (let i = rocks.length - 1; i >= 0; i--) { const r = rocks[i]; const dx = r.x - cx, dy = r.y - (hero.y - 6 * S); if (dx * dx + dy * dy < R * R) { puffs.push({ kind: 1, x: r.x, y: r.y, t: 0 }); rocks.splice(i, 1); } }
+}
+function damageEnemy(e, dmg) {
+  if (e.type === 3 && e.t < 1.5) return;
+  e.hp -= dmg; e.flash = e.type === 3 ? 0.12 : 0.25;
+  let dx = e.x - hero.x, dy = e.y - hero.y, d = Math.hypot(dx, dy); if (d < 1) { dx = hero.face; dy = 0; d = 1; }
+  if (e.type !== 3) { e.kx = dx / d * 110 * S; e.ky = dy / d * 110 * S; }
+  puffs.push({ kind: 1, x: e.x, y: e.y - 5 * S, t: 0 });
+  if (e.hp <= 0) {
+    puffs.push({ kind: 0, x: e.x, y: e.y - 4 * S, t: 0 });
+    enemies.splice(enemies.indexOf(e), 1); killCount++;
+    if (e.type === 3) { bossDefeated(e); return; }
+    if (!playMode) countKill();      // evolucao: conta todo monstro derrotado no automatico
+    if (e.type === 2 && !playMode && powerT <= 0 && !lootHold) { slimeKills++; if (slimeKills >= SLIMES_FOR_POWER) { slimeKills = 0; powerPending = true; } }      // ao chegar a 20 o contador zera e o poder e lancado
+    if (playMode && bossPhase === 0 && rupeeStep() >= 6) killsAtMax++;
+    const roll = Math.floor(rnd() * 100);
+    if (roll < 20) items.push({ kind: 0, x: e.x, y: e.y, t: 0 });
+    else if (roll < 65) { items.push({ kind: rupeeKind(Math.floor(rnd() * 100)), x: e.x, y: e.y, t: 0 }); }
+  }
+}
+
+function updateEnemies(dt) {
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    const e = enemies[i]; e.t += dt; if (e.flash > 0) e.flash -= dt;
+    const dx = hero.x - e.x, dy = hero.y - e.y; let d = Math.hypot(dx, dy); if (d < 1) d = 1;
+    const ux = dx / d, uy = dy / d; if (Math.abs(dx) > 2) e.face = dx > 0 ? 1 : -1;
+    if (e.type === 3) {                                  // dragao
+      if (e.t > 1.5) {
+        e.timer -= dt; e.rt -= dt; e.moving = false;
+        if (e.mode === 0) {
+          const halfW = 24 * DK * S + 4 * S, topH = 40 * DK * S + 6 * S;
+          if (e.rt <= 0 || (e.tx - e.x) ** 2 + (e.ty - e.y) ** 2 < (3 * S) ** 2) {
+            const ang = rnd() * TAU, dist = (70 + rnd() * 40) * S;
+            e.tx = Math.max(halfW, Math.min(W - halfW, hero.x + Math.cos(ang) * dist)); e.ty = Math.max(topH, Math.min(H - 3 * S, hero.y + Math.sin(ang) * dist * 0.7)); e.rt = 2.5 + rnd() * 2;
+          }
+          const mdx = e.tx - e.x, mdy = e.ty - e.y, md = Math.hypot(mdx, mdy);
+          const tooClose = dx * dx + dy * dy < (22 * S * DK) ** 2;
+          if (tooClose && md > 1 && (mdx * dx + mdy * dy) > 0) e.rt = 0;
+          else if (md > 1) { e.x += mdx / md * 14 * S * dt; e.y += mdy / md * 14 * S * dt; e.moving = true; }
+        }
+        if (e.mode === 0) { if (e.timer <= 0) { e.mode = 1; e.timer = 0.6; } }
+        else if (e.timer <= 0) {
+          const homing = e.hp * 10 <= e.maxHp, rage = e.hp * 2 <= e.maxHp;
+          const mxp = e.x + e.face * 17 * S * DK, myp = e.y - 15 * S * DK, a0 = Math.atan2(hero.y - 6 * S - myp, hero.x - mxp), nb = rage ? 3 : 1;
+          for (let b = 0; b < nb; b++) { const ang = a0 + (b - (nb - 1) / 2) * 0.24, spd = homing ? 52 * S : 80 * S; rocks.push({ x: mxp, y: myp, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd, fire: true, homing, life: 0 }); }
+          e.mode = 0; e.timer = (1.5 + rnd() * 1.5) * (rage ? 0.7 : 1);
+        }
+      }
+    } else if (powerT > 0) {                              // poder do heroi: todos vao direto nele, com o dobro da velocidade
+      const sp = (e.type === 0 ? 16 : (e.type === 1 ? 30 : (e.type === 2 ? 28 : 26))) * 2 * S;
+      e.mode = 0; e.vx = ux * sp; e.vy = uy * sp; if (d > 3 * S) { e.x += e.vx * dt; e.y += e.vy * dt; }
+    } else if (e.type === 0) {                            // octorok
+      e.timer -= dt;
+      if (e.mode === 0) {
+        e.x += e.vx * dt; e.y += e.vy * dt;
+        if (e.timer <= 0) { e.mode = 1; e.timer = 0.6; e.vx = e.vy = 0; }
+        else if (e.vx === 0 && e.vy === 0) {
+          const sp = 16 * S;
+          if (rnd() < 0.65) { if (Math.abs(dx) > Math.abs(dy)) e.vx = Math.sign(dx) * sp; else e.vy = Math.sign(dy) * sp; }
+          else { const dir = Math.floor(rnd() * 4); e.vx = dir === 0 ? sp : (dir === 1 ? -sp : 0); e.vy = dir === 2 ? sp : (dir === 3 ? -sp : 0); }
+        }
+      } else if (e.timer <= 0) {
+        rocks.push({ x: e.x + e.face * 5 * S, y: e.y - 4 * S, vx: ux * 80 * S, vy: uy * 80 * S, fire: false, homing: false, life: 0 });
+        e.mode = 0; e.timer = 1.5 + rnd() * 1.5; e.vx = e.vy = 0;
+      }
+    } else if (e.type === 1) {                            // morcego
+      const wob = Math.sin(e.t * 5) * 26 * S;
+      e.vx = ux * 30 * S - uy * wob * 0.6; e.vy = uy * 30 * S + ux * wob * 0.6; e.x += e.vx * dt; e.y += e.vy * dt;
+    } else if (e.type === 4) {                             // bokoblin: persegue, levanta o porrete e bate
+      e.timer -= dt;
+      if (e.mode === 0) {
+        if (d > 12 * S) { e.x += ux * 26 * S * dt; e.y += uy * 26 * S * dt; }
+        if (d < 16 * S && e.timer <= 0) { e.mode = 1; e.timer = 0.55; }
+      } else if (e.mode === 1) {
+        if (e.timer <= 0) { if (d < 20 * S) hurtHero(e.x, e.y); puffs.push({ kind: 1, x: e.x + e.face * 12 * S, y: e.y - 3 * S, t: 0 }); e.mode = 2; e.timer = 0.8; }
+      } else if (e.timer <= 0) { e.mode = 0; e.timer = 0.2; }
+    } else {                                               // slime
+      e.timer -= dt;
+      if (e.mode === 0 && e.timer <= 0) { e.mode = 1; e.timer = 0.45; }
+      else if (e.mode === 1) { e.x += ux * 55 * S * dt; e.y += uy * 55 * S * dt; if (e.timer <= 0) { e.mode = 0; e.timer = 0.7 + rnd() * 0.5; } }
+    }
+    e.x += e.kx * dt; e.y += e.ky * dt; const dm = Math.min(1, 8 * dt); e.kx -= e.kx * dm; e.ky -= e.ky * dm;
+    e.x = Math.max(4 * S, Math.min(W - 4 * S, e.x)); e.y = Math.max(12 * S, Math.min(H, e.y));
+    if (!hero.dead && hero.inv <= 0) {
+      const cx = hero.x - e.x, cy = hero.y - e.y, rc = e.type === 3 ? (e.t > 1.5 ? 15 * S * DK : 0) : 9 * S;
+      if (cx * cx + cy * cy < rc * rc) hurtHero(e.x, e.y);
+    }
+  }
+}
+function updateRocks(dt) {
+  for (let i = rocks.length - 1; i >= 0; i--) {
+    const r = rocks[i];
+    if (r.homing) {
+      r.life += dt;
+      let ca = Math.atan2(r.vy, r.vx); const ta = Math.atan2(hero.y - 6 * S - r.y, hero.x - r.x);
+      let da = ta - ca; while (da > Math.PI) da -= TAU; while (da < -Math.PI) da += TAU;
+      const mt = 1.8 * dt; da = Math.max(-mt, Math.min(mt, da)); ca += da; r.vx = Math.cos(ca) * 52 * S; r.vy = Math.sin(ca) * 52 * S;
+      if (r.life >= 3) {
+        for (let k = 0; k < 7; k++) puffs.push({ kind: k % 2, x: r.x + (rnd() - 0.5) * 14 * S, y: r.y + (rnd() - 0.5) * 14 * S, t: 0 });
+        const ex = hero.x - r.x, ey = hero.y - 6 * S - r.y; if (!hero.dead && ex * ex + ey * ey < (16 * S) ** 2) hurtHero(r.x, r.y);
+        rocks.splice(i, 1); continue;
+      }
+    }
+    r.x += r.vx * dt; r.y += r.vy * dt;
+    if (r.x < -20 || r.y < -20 || r.x > W + 20 || r.y > H + 20) { rocks.splice(i, 1); continue; }
+    if (hero.dead) continue;
+    const dx = r.x - hero.x, dy = r.y - (hero.y - 6 * S), rr = r.fire ? 9 * S : 7 * S;
+    if (dx * dx + dy * dy < rr * rr) {
+      const sp = Math.hypot(r.vx, r.vy);
+      if (sp > 0 && (r.vx * hero.face) / sp < -0.35) puffs.push({ kind: 1, x: hero.x + hero.face * 3 * S, y: hero.y - 7 * S, t: 0 });
+      else hurtHero(r.x - r.vx, r.y - r.vy);
+      rocks.splice(i, 1);
+    }
+  }
+}
+function updateArrows(dt) {
+  for (let i = arrows.length - 1; i >= 0; i--) {
+    const a = arrows[i]; a.x += a.vx * dt; a.y += a.vy * dt;
+    let gone = a.x < -30 || a.y < -30 || a.x > W + 30 || a.y > H + 30;
+    for (let k = enemies.length - 1; k >= 0 && !gone; k--) {
+      const en = enemies[k], dx = en.x - a.x, dy = (en.y - (en.type === 1 ? 9 * S : (en.type === 3 ? 12 * S * DK : 4 * S))) - a.y, hitR = en.type === 3 ? 14 * S * DK : 7 * S;
+      if (dx * dx + dy * dy < hitR * hitR) { damageEnemy(en, en.type === 3 ? 50 : 1); gone = true; }
+    }
+    if (gone) arrows.splice(i, 1);
+  }
+}
+// itens (rupias e coracoes) somem em 15 s, inclusive depois do poder
+function updateItems(dt) {
+  for (let i = items.length - 1; i >= 0; i--) {
+    const it = items[i]; it.t += dt; if (it.t > 15) { items.splice(i, 1); continue; } if (hero.dead) continue;
+    if ((it.x - hero.x) ** 2 + (it.y - hero.y) ** 2 < (8 * S) ** 2) {
+      if (it.kind === 0) { if (hero.hp < hero.maxHp) hero.hp++; } else hero.rupees += rupeeValue(it.kind);
+      puffs.push({ kind: 1, x: it.x, y: it.y - 4 * S, t: 0 }); items.splice(i, 1);
+    }
+  }
+}
+
+/* ---------- piloto automatico cuidadoso ---------- */
+const TUNE = { safe: 22, low: 30, dodge: 13, bat: 12, item: 22, atk: 13.5 };
+function tryDodge(dt) {
+  for (const r of rocks) {
+    const v2 = r.vx * r.vx + r.vy * r.vy; if (v2 < 1) continue;
+    const rx = hero.x - r.x, ry = hero.y - 6 * S - r.y, t = (rx * r.vx + ry * r.vy) / v2; if (t < 0 || t > 1.1) continue;
+    const px = rx - r.vx * t, py = ry - r.vy * t, pd = Math.hypot(px, py); if (pd > TUNE.dodge * S) continue;
+    const sp = Math.sqrt(v2); let nx, ny; if (pd < 0.5) { nx = -r.vy / sp; ny = r.vx / sp; } else { nx = px / pd; ny = py / pd; }
+    const keep = hero.face; moveHero(hero.x + nx * 100, hero.y + ny * 100, 100 * S, dt); hero.face = keep; return true;
+  }
+  return false;
+}
+function aimAndShoot(e, dt) {
+  hero.bowing = true;
+  const d = NEAR(e.x, e.y, hero.x, hero.y), lead = d / (210 * S);
+  const tx = e.x + e.vx * lead, ty = e.y - (e.type === 1 ? 9 : 4) * S + e.vy * lead;
+  const sx = hero.x + hero.face * 7 * S, sy = hero.y - 8 * S; let ax = tx - sx, ay = ty - sy, al = Math.hypot(ax, ay); if (al < 1) { ax = hero.face; ay = 0; al = 1; }
+  hero.aimX = ax / al; hero.aimY = ay / al; if (Math.abs(hero.aimX) > 0.15) hero.face = hero.aimX > 0 ? 1 : -1;
+  hero.bowT += dt;
+  if (hero.bowT >= 0.4 && hero.bowCool <= 0) { arrows.push({ x: sx, y: sy, vx: hero.aimX * 210 * S, vy: hero.aimY * 210 * S }); hero.bowT = 0; hero.bowCool = 0.35; if (rnd() < 0.2) say('Toma!'); }
+}
+function retreat(dt) {
+  let rx = 0, ry = 0; const R = 34 * S;
+  for (const e of enemies) { const d = NEAR(e.x, e.y, hero.x, hero.y); if (d > R || d < 0.5) continue; const w = (R - d) / R; rx += (hero.x - e.x) / d * w; ry += (hero.y - e.y) / d * w; }
+  const m = Math.hypot(rx, ry); if (m < 0.01) return; rx /= m; ry /= m;
+  if (hero.x < 10 * S && rx < 0) { rx = 0; ry = ry >= 0 ? 1 : -1; } if (hero.x > W - 10 * S && rx > 0) { rx = 0; ry = ry >= 0 ? 1 : -1; }
+  if (hero.y < 28 * S && ry < 0) { ry = 0; rx = rx >= 0 ? 1 : -1; } if (hero.y > H - 4 * S && ry > 0) { ry = 0; rx = rx >= 0 ? 1 : -1; }
+  moveHero(hero.x + rx * 100, hero.y + ry * 100, 64 * S, dt);
+}
+const itemSafe = (it) => enemies.every((e) => (e.x - it.x) ** 2 + (e.y - it.y) ** 2 >= (24 * S) ** 2);
+function autoControl(dt) {
+  hero.bowCool -= dt;
+  let near = null, nd = 1e18, crowd = 0;
+  for (const e of enemies) { const d = NEAR(e.x, e.y, hero.x, hero.y); if (d < nd) { nd = d; near = e; } if (d < 30 * S) crowd++; }
+  const lowHp = hero.hp <= 2, safe = (lowHp ? TUNE.low : TUNE.safe) * S;
+  if (tryDodge(dt)) { hero.bowT = 0; return; }
+  if (near && near.type !== 1 && nd < 110 * S) {
+    const it0 = nearestItem(); if (it0 && nd >= TUNE.item * S) { moveHero(it0.x, it0.y, 56 * S, dt); hero.bowT = 0; return; }
+    if (Math.abs(near.x - hero.x) > 2) hero.face = near.x >= hero.x ? 1 : -1;
+    if (nd < TUNE.atk * S && hero.atkCool <= 0) startAttack(false); else if (nd > (TUNE.atk - 3) * S) moveHero(near.x, near.y, 52 * S, dt);
+    hero.bowT = 0; return;
+  }
+  if (near && nd < (near.type === 1 && !lowHp ? TUNE.bat * S : safe)) {
+    const cornered = hero.x < 10 * S || hero.x > W - 10 * S || hero.y < 28 * S || hero.y > H - 4 * S;
+    const melee = hero.atkCool <= 0 && nd < 15 * S && ((crowd <= 1 && !lowHp) || (cornered && nd < 13 * S));
+    if (melee) { hero.face = near.x >= hero.x ? 1 : -1; startAttack(false); return; }
+    retreat(dt); aimAndShoot(near, dt); return;
+  }
+  const it = nearestItem();
+  if (near && nd < 140 * S) {
+    if (it && nd > 45 * S && itemSafe(it)) { moveHero(it.x, it.y, 56 * S, dt); hero.bowT = 0; return; }
+    aimAndShoot(near, dt); if (nd > 120 * S) moveHero(near.x, near.y, 36 * S, dt); return;
+  }
+  hero.bowT = 0;
+  if (it && itemSafe(it)) { moveHero(it.x, it.y, 56 * S, dt); return; }
+  if (wanderWait > 0) { wanderWait -= dt; if (wanderWait <= 0) { wanderX = 10 * S + rnd() * (W - 20 * S); wanderY = 28 * S + rnd() * (H - 34 * S); } }
+  else { moveHero(wanderX, wanderY, 24 * S, dt); if (!hero.walking) { wanderWait = 1.5 + rnd() * 3; if (rnd() < 0.25) startAttack(true); else if (rnd() < 0.3) hero.face = -hero.face; } }
+}
+
+/* ---------- pausas: acena, colhe macas e dorme (modo automatico) ---------- */
+function nearestTreeWithApples() { let b = null, bd = 1e18; for (const t of trees) { if (firstApple(t) < 0) continue; const d = (t.x - hero.x) ** 2 + (t.y - hero.y) ** 2; if (d < bd) { bd = d; b = t; } } return b; }
+function endCalm(startled) { calmState = 0; calmT = 0; nextCalm = 120 + rnd() * 180; spawnTimer = startled ? 1 : 3; wanderWait = 1; say(startled ? '!' : 'Hm?'); }
+function updateCalmState(dt) {
+  if (calmState === 0) { if (cookState === 0 && !playMode) nextCalm -= dt; if (nextCalm <= 0 && !hero.dead && !playMode && powerT <= 0) calmState = 1; }
+  else if (calmState === 1) {
+    if (!enemies.length && !rocks.length && !items.length && !hero.dead && !hero.attacking) {
+      calmState = 2; calmT = 0; hero.speechT = 0;
+      const longest = forceLong || (!lastLong && rnd() < 0.4) || (rnd() < 0.15 && false); lastLong = longest; forceLong = false;
+      calmDur = longest ? 120 : 30 + rnd() * 80; curTree = null; harvest = false;
+      if (longest) { curTree = nearestTreeWithApples(); harvest = !!curTree; }
+      phase = harvest ? 0 : 2; phaseT = 0; pickT = 0;
+    }
+  } else { calmT += dt; if (enemies.length || hero.dead) endCalm(true); else if (calmT >= calmDur) endCalm(false); }
+}
+function updateCalmHero(dt) {
+  phaseT += dt;
+  if (phase === 0) {
+    if (!curTree) { phase = 2; phaseT = 0; }
+    else { moveHero(curTree.x + (hero.x < curTree.x ? -1 : 1) * 9 * S, curTree.y + 2 * S, 38 * S, dt); if (hero.walking) hero.walkT += dt; else { phase = 1; phaseT = 0; pickT = 0; picksLeft = 3; hero.face = hero.x < curTree.x ? 1 : -1; } }
+  } else if (phase === 1) {
+    pickT += dt;
+    if (pickT >= 1.5) { pickT = 0; const idx = firstApple(curTree); if (idx >= 0 && picksLeft > 0) { curTree.has[idx] = false; curTree.regrow[idx] = 60 + rnd() * 40; flyApples.push({ x0: appleX(curTree, idx), y0: appleY(curTree, idx), t: 0 }); picksLeft--; } else picksLeft = 0; }
+    if (picksLeft <= 0 && pickT >= 0.9) { phase = 2; phaseT = 0; }
+  } else if (phase === 2 && phaseT >= 1.5) { phase = harvest ? 4 : 3; phaseT = 0; }
+  else if (phase === 3) { if (phaseT > 0.1 && phaseT < 0.2 && hero.speechT <= 0) say('Oi!'); if (phaseT > 1.9 && phaseT < 2.0 && hero.speechT <= 0) say('Oi!'); if (phaseT >= 3.5) { phase = 4; phaseT = 0; } }
+  else if (phase === 4 && phaseT >= 1.2) { phase = 5; phaseT = 0; }
+  clampHero();
+}
+
+/* ---------- lanche: fogueira e macas assadas ---------- */
+const slotX = (i) => fireX + (i < 3 ? (i - 1) * 6.2 * S : (i - 3.5) * 6.2 * S);
+const slotY = (i) => fireY - 3.5 * S - (i < 3 ? 0 : 5.2 * S);
+const bakeIdx = () => cookState >= 5 ? 3 : Math.min(3, Math.floor(bakeT / 10 * 4));
+function launchApple(x0, y0, x1, y1, idx, dir) { cookApples.push({ x0, y0, x1, y1, idx, dir, t: 0, dur: 0.6 }); }
+function abortCook() { if (cookState >= 3 && cookState <= 5) hero.apples += 5; cookState = 0; fireK = 0; cookApples.length = 0; onFire.fill(false); }
+function updateCookApples(dt) {
+  for (let i = cookApples.length - 1; i >= 0; i--) { const a = cookApples[i]; a.t += dt; if (a.t >= a.dur) { if (a.dir === 1) { onFire[a.idx] = true; reserved[a.idx] = false; } cookApples.splice(i, 1); } }
+}
+function updateCook(dt) {
+  cookT += dt; if (enemies.length) { abortCook(); return; }
+  const hx = hero.x + hero.face * 6 * S, hy = hero.y - 10 * S;
+  if (cookState === 1) { moveHero(fireX - 14 * S, fireY + 3 * S, 44 * S, dt); if (hero.walking) hero.walkT += dt; else { cookState = 2; cookT = 0; hero.face = 1; say('Hora do lanche!'); } }
+  else if (cookState === 2) { fireK = Math.min(1, cookT / 1.6); if (cookT >= 1.9) { cookState = 3; cookT = 0; throwIdx = 0; hero.apples = Math.max(0, hero.apples - 5); } }
+  else if (cookState === 3) { while (throwIdx < 5 && cookT >= throwIdx * 0.4) { launchApple(hx, hy, slotX(throwIdx), slotY(throwIdx), throwIdx, 1); throwIdx++; } if (throwIdx >= 5 && !cookApples.length) { cookState = 4; cookT = 0; bakeT = 0; } }
+  else if (cookState === 4) { bakeT += dt; if (bakeT >= 5 && bakeT < 5.1 && hero.speechT <= 0) say('Que cheiro bom...'); if (bakeT >= 10) { cookState = 5; cookT = 0; throwIdx = 0; say('Prontas!'); } }
+  else if (cookState === 5) { while (throwIdx < 5 && cookT >= throwIdx * 0.35) { const kk = 4 - throwIdx; onFire[kk] = false; launchApple(slotX(kk), slotY(kk), hx, hy, kk, -1); throwIdx++; } if (throwIdx >= 5 && !cookApples.length) { cookState = 6; cookT = 0; lastEat = -1; } }
+  else if (cookState === 6) { const idx = Math.floor(cookT / 1.2); if (idx !== lastEat) { if (lastEat >= 0 && hero.hp < hero.maxHp) hero.hp++; lastEat = idx; if (idx < 5) say('Nham!'); } if (cookT >= 6) { cookState = 7; cookT = 0; say('Que delícia!'); } }
+  else if (cookState === 7) { fireK = Math.max(0, 1 - cookT / 1.5); if (cookT >= 1.5) { cookState = 0; fireK = 0; } }
+  clampHero();
+}
+
+/* ---------- modo jogo ---------- */
+function checkRupeeLevel() {
+  const step = rupeeStep(); if (step <= lastStep) return;
+  for (let s = lastStep + 1; s <= step; s++) if (s >= 4 && hero.maxHp < 8) { hero.maxHp++; hero.hp = Math.min(hero.maxHp, hero.hp + 1); puffs.push({ kind: 1, x: hero.x, y: hero.y - 10 * S, t: 0 }); say('+1 coração!'); }
+  lastStep = step;
+}
+function playerControl(dt) {
+  hero.bowCool -= dt;
+  let cx = mx, cy = my; const k1 = isDown(1), k2 = isDown(2), k3 = isDown(3);
+  if (touchMode) {   // celular: mira e espada seguem a direcao do direcional; sem cursor
+    const ax = Math.abs(aimX) < 0.01 && Math.abs(aimY) < 0.01 ? hero.face : aimX, ay = Math.abs(aimX) < 0.01 && Math.abs(aimY) < 0.01 ? 0 : aimY;
+    cx = hero.x + ax * 40 * S; cy = hero.y - 8 * S + ay * 40 * S;
+  }
+  if (playEatT > 0) { playEatT += dt; if (playEatT >= 0.9) { playEatT = 0; hero.hp = Math.min(hero.maxHp, hero.hp + 2); atePhase1 = true; say('Nham!'); } prev3 = k3; return; }
+  if (playPickT > 0) {
+    playPickT += dt; pickT = playPickT;
+    if (!pickedFlag && playPickT >= 0.4 && playTree) { const idx = firstApple(playTree); if (idx >= 0) { playTree.has[idx] = false; playTree.regrow[idx] = 60 + rnd() * 40; flyApples.push({ x0: appleX(playTree, idx), y0: appleY(playTree, idx), t: 0 }); } pickedFlag = true; }
+    if (playPickT >= 0.8) playPickT = 0; prev3 = k3; return;
+  }
+  if (k3 && !prev3 && bossPhase === 1 && fireInteract()) { prev3 = true; return; }
+  if (k3 && !prev3) {
+    let best = null, bd = 18 * S; for (const t of trees) { if (firstApple(t) < 0) continue; const d = NEAR(t.x, t.y, hero.x, hero.y); if (d < bd) { bd = d; best = t; } }
+    prev3 = true; if (best) { playTree = best; playPickT = 0.001; pickedFlag = false; pickT = 0; hero.face = best.x >= hero.x ? 1 : -1; return; } say('Sem maçãs aqui');
+  }
+  prev3 = k3;
+  if (k1 && hero.atkCool <= 0) { if (Math.abs(cx - hero.x) > 2) hero.face = cx >= hero.x ? 1 : -1; startAttack(false); return; }
+  if (k2) {
+    hero.bowing = true; const sx = hero.x + hero.face * 7 * S, sy = hero.y - 8 * S; let ax = cx - sx, ay = cy - sy, al = Math.hypot(ax, ay); if (al < 1) { ax = hero.face; ay = 0; al = 1; }
+    hero.aimX = ax / al; hero.aimY = ay / al; if (Math.abs(hero.aimX) > 0.15) hero.face = hero.aimX > 0 ? 1 : -1;
+    hero.bowT += dt; if (hero.bowT >= 0.4 && hero.bowCool <= 0) { arrows.push({ x: sx, y: sy, vx: hero.aimX * 210 * S, vy: hero.aimY * 210 * S }); hero.bowT = 0; hero.bowCool = 0.35; }
+  } else hero.bowT = 0;
+  if (touchMode) {
+    if (dpx || dpy) { const keep = hero.face; moveHero(hero.x + dpx * 100 * S, hero.y + dpy * 100 * S, 56 * S * Math.min(1, Math.hypot(dpx, dpy)), dt); if (hero.bowing) hero.face = keep; hero.x = Math.max(4 * S, Math.min(W - 4 * S, hero.x)); hero.y = Math.max(12 * S, Math.min(H - 2 * S, hero.y)); }
+    else hero.walking = false;
+    return;
+  }
+  if (mouseDown && NEAR(cx, cy, hero.x, hero.y) > 3 * S) { const keep = hero.face; moveHero(cx, cy, 56 * S, dt); if (hero.bowing) hero.face = keep; }
+}
+// Ao entrar no modo jogo: o heroi vai para o meio da tela e os monstros do modo automatico somem
+function enterPlay() {
+  for (const e of enemies) puffs.push({ kind: 0, x: e.x, y: e.y - 4 * S, t: 0 });
+  enemies.length = 0; rocks.length = 0; arrows.length = 0;
+  if (cookState !== 0) abortCook();
+  if (hero.dead) { hero.dead = false; hero.hp = hero.maxHp; }
+  hero.x = W / 2; hero.y = H / 2; hero.kvx = hero.kvy = 0; hero.inv = 1; hero.walking = false;
+  hero.rupees = 0; hero.apples = 0; flyApples.length = 0; toastShown = false;   // o que foi juntado no automatico some
+  puffs.push({ kind: 2, x: hero.x, y: hero.y, t: 0 }); spawnTimer = 2.5;
+}
+function setPlayMode(on) {
+  const was = playMode;
+  playMode = on; hero.attacking = false; hero.bowing = false; hero.bowT = 0; playPickT = 0; closeDeath(); resetBoss();
+  $('mAuto').setAttribute('aria-pressed', String(!on)); $('mPlay').setAttribute('aria-pressed', String(on));
+  if (on) { if (!was) enterPlay(); if (calmState !== 0) endCalm(false); lastStep = rupeeStep(); setMaxHp(5 + Math.max(0, Math.min(3, lastStep - 3))); toast('Modo jogo ligado', touchMode ? 'Direcional: andar · botões: espada, arco, colher' : 'Mouse: andar · 1 espada · 2 arco · 3 colher', 4200); }
+  else { setMaxHp(5); hero.rupees = 0; lastStep = 0; nextCalm = 120 + rnd() * 180; }
+}
+
+/* ---------- chefao: dragao ---------- */
+function resetBoss() {
+  bossPhase = 0; killsAtMax = 0; bossT = 0; atePhase1 = false; playEatT = 0; endStarted = false; bossSpawned = false;
+  if (boss) { const i = enemies.indexOf(boss); if (i >= 0) enemies.splice(i, 1); boss = null; }
+  smokes.length = 0; for (let i = rocks.length - 1; i >= 0; i--) if (rocks[i].fire) rocks.splice(i, 1);
+  reserved.fill(false); bakeTs.fill(0); if (cookState === 0) { fireK = 0; onFire.fill(false); }
+  $('credits').hidden = true; $('credits').classList.remove('rolling');
+}
+function startFinalPhase() {
+  bossPhase = 1; bossT = 0; atePhase1 = false; playEatT = 0;
+  for (const e of enemies) { puffs.push({ kind: 0, x: e.x, y: e.y - 4 * S, t: 0 }, { kind: 1, x: e.x - 3 * S, y: e.y - 8 * S, t: 0 }, { kind: 1, x: e.x + 3 * S, y: e.y, t: 0 }); }
+  enemies.length = 0; rocks.length = 0; fireX = W / 2; fireY = H / 2; fireK = 0; onFire.fill(false); reserved.fill(false); bakeTs.fill(0); cookApples.length = 0;
+  toast('Nível máximo!', 'Colha maçãs com a tecla 3, coloque-as na fogueira e coma, também com a tecla 3. Isso regenera sua vida.', 11000);
+}
+function fireExplode() {
+  for (let k = 0; k < 10; k++) puffs.push({ kind: k % 2, x: fireX + (rnd() - 0.5) * 20 * S, y: fireY - rnd() * 12 * S, t: 0 });
+  for (let k = 0; k < 18; k++) smokes.push({ x: fireX + (rnd() - 0.5) * 14 * S, y: fireY - rnd() * 6 * S, t: -rnd() * 0.7, sz: 3 + rnd() * 3 });
+  fireK = 0; onFire.fill(false); reserved.fill(false); cookApples.length = 0;
+}
+function spawnDragon() {
+  bossSpawned = true; boss = { type: 3, x: fireX, y: fireY + 8 * S, vx: 0, vy: 0, kx: 0, ky: 0, t: 0, timer: 1.5, flash: 0, hp: 2500, maxHp: 2500, face: hero.x >= fireX ? 1 : -1, mode: 0, tx: 0, ty: 0, rt: 0, moving: false };
+  enemies.push(boss); for (let k = 0; k < 6; k++) puffs.push({ kind: 2, x: fireX + (rnd() - 0.5) * 16 * S, y: fireY - rnd() * 10 * S, t: 0 });
+}
+function bossDefeated(e) {
+  bossPhase = 5; bossT = 0; endStarted = false; bossDeadX = e.x; bossDeadY = e.y; rocks.length = 0;
+  for (let k = 0; k < 8; k++) puffs.push({ kind: k % 2, x: e.x + (rnd() - 0.5) * 30 * S, y: e.y - rnd() * 24 * S, t: 0 });
+}
+function bossLeave(dt) {
+  moveHero(leaveX, leaveY, 52 * S, dt); if (hero.walking) hero.walkT += dt;
+  else if (bossT > 0.3) { bossPhase = 3; bossT = 0; bossSpawned = false; hero.face = fireX >= hero.x ? 1 : -1; fireExplode(); }
+  clampHero();
+}
+function updateBoss(dt) {
+  if (!playMode) return;
+  if (bossPhase === 0) { if (killsAtMax >= 5) startFinalPhase(); return; }
+  bossT += dt; for (let i = 0; i < 5; i++) if (onFire[i]) bakeTs[i] += dt;
+  for (let i = smokes.length - 1; i >= 0; i--) { smokes[i].t += dt; if (smokes[i].t > 3.2) smokes.splice(i, 1); }
+  if (bossPhase === 1) {
+    fireK = Math.min(1, bossT / 1.5);
+    if (atePhase1 && playEatT <= 0 && hero.hp >= hero.maxHp && !cookApples.length && !hero.dead) {
+      bossPhase = 2; bossT = 0; const side = hero.x >= fireX ? 1 : -1; leaveX = Math.max(10 * S, Math.min(W - 10 * S, fireX + side * 95 * S)); leaveY = fireY + 10 * S; say('Hora de sair daqui!');
+    }
+  } else if (bossPhase === 3) { if (!bossSpawned && bossT >= 0.9) spawnDragon(); if (bossT >= 3.2) bossPhase = 4; }
+  else if (bossPhase === 5) {
+    if (Math.floor(bossT * 8) !== Math.floor((bossT - dt) * 8) && bossT < 2.2) puffs.push({ kind: Math.floor(rnd() * 2), x: bossDeadX + (rnd() - 0.5) * 30 * S, y: bossDeadY - rnd() * 24 * S, t: 0 });
+    if (bossT >= 2.4 && !endStarted) { endStarted = true; showCredits(); }
+  }
+}
+function fireInteract() {
+  if (NEAR(fireX, fireY, hero.x, hero.y) > 24 * S) return false;
+  let free = -1; for (let i = 0; i < 5; i++) if (!onFire[i] && !reserved[i]) { free = i; break; }
+  if (hero.apples > 0 && free >= 0) { hero.apples--; reserved[free] = true; bakeTs[free] = 0; hero.face = fireX >= hero.x ? 1 : -1; launchApple(hero.x + hero.face * 6 * S, hero.y - 10 * S, slotX(free), slotY(free), free, 1); say('Na fogueira!'); return true; }
+  for (let i = 4; i >= 0; i--) if (onFire[i] && bakeTs[i] >= 10) { onFire[i] = false; playEatT = 0.001; hero.face = fireX >= hero.x ? 1 : -1; return true; }
+  say(onFire.some(Boolean) || reserved.some(Boolean) ? 'Ainda assando...' : 'Sem maçãs'); return true;
+}
+
+/* ---------- morte e creditos ---------- */
+function showDeath() { deathWait = true; const lose = Math.min(10, hero.rupees); $('deathMsg').textContent = lose > 0 ? 'Você perde ' + lose + ' rupias ao tentar de novo.' : 'Você não tem rupias para perder.'; $('death').hidden = false; $('retry').focus(); }
+function closeDeath() { deathWait = false; $('death').hidden = true; }
+function doRetry() {
+  closeDeath(); hero.rupees = hero.rupees > 10 ? hero.rupees - 10 : 0;
+  const step = rupeeStep(); lastStep = step; setMaxHp(5 + Math.max(0, Math.min(3, step - 3)));
+  hero.dead = false; hero.deadT = 0; hero.hp = hero.maxHp; hero.inv = 2; hero.kvx = hero.kvy = 0;
+  hero.x = bossPhase >= 3 ? W * 0.15 : W / 2; hero.y = H / 2; puffs.push({ kind: 2, x: hero.x, y: hero.y, t: 0 }); say('Voltei!');
+  if (boss && enemies.indexOf(boss) >= 0) { boss.hp = boss.maxHp; for (let i = rocks.length - 1; i >= 0; i--) if (rocks[i].fire) rocks.splice(i, 1); }   // o dragao recupera toda a vida quando o heroi morre
+}
+function showCredits() {
+  const c = $('credits'); c.hidden = false; c.classList.remove('rolling'); toastHide();
+  setTimeout(() => { c.classList.add('rolling'); }, 4500);
+  setTimeout(() => { c.hidden = true; c.classList.remove('rolling'); setPlayMode(false); }, 4500 + 26500);
+}
+function toastHide() { $('toast').classList.remove('on'); }
+
+/* ============================ ATUALIZACAO ============================ */
+function step(dt) {
+  time += dt;
+  if (deathWait) { puffs.forEach((p) => { p.t += dt; }); for (let i = puffs.length - 1; i >= 0; i--) if (puffs[i].t > 0.45) puffs.splice(i, 1); if (hero.speechT > 0) hero.speechT -= dt; return; }
+  updateCalmState(dt);
+  spawnTimer -= dt;
+  if (spawnTimer <= 0) { spawnTimer = (3 + rnd() * 4) / spawnRateMul(); if (enemies.length < enemyCap() && !hero.dead && calmState === 0 && cookState === 0 && bossPhase === 0) spawn(spawnType()); }
+  updatePower(dt);
+  updateEvo(dt);
+  updateHero(dt);
+  if (playMode) checkRupeeLevel();
+  updateBoss(dt);
+  if (hero.apples >= 5 && !toastShown && bossPhase === 0) { toastShown = true; toast('Link juntou 5 maçãs!', 'Ele vai assar e comer um lanche.', 4800); }
+  if (hero.apples < 5) toastShown = false;
+  if (cookState === 0 && calmState === 0 && bossPhase === 0 && powerT <= 0 && !lootHold && hero.apples >= 5 && !enemies.length && !rocks.length && !hero.dead && !hero.attacking && !hero.bowing && !playMode) { cookState = 1; cookT = 0; fireK = 0; fireX = W / 2; fireY = H / 2; onFire.fill(false); }
+  updateCookApples(dt);
+  updateEnemies(dt); updateRocks(dt); updateArrows(dt); updateItems(dt);
+  for (let i = flyApples.length - 1; i >= 0; i--) { flyApples[i].t += dt; if (flyApples[i].t >= 0.6) { hero.apples++; puffs.push({ kind: 1, x: hero.x + hero.face * 6 * S, y: hero.y - 20 * S, t: 0 }); flyApples.splice(i, 1); } }
+  for (const t of trees) for (let i = 0; i < 5; i++) if (!t.has[i]) { t.regrow[i] -= dt; if (t.regrow[i] <= 0) t.has[i] = true; }
+  for (let i = puffs.length - 1; i >= 0; i--) { puffs[i].t += dt; if (puffs[i].t > 0.45) puffs.splice(i, 1); }
+  if (hero.speechT > 0) hero.speechT -= dt;
+}
+function updateHero(dt) {
+  hero.walking = false; hero.bowing = false;
+  if (powerT > 0) { updatePowerHero(dt); return; }
+  if (cookState !== 0 && !hero.dead) { updateCook(dt); return; }
+  if (bossPhase === 2 && !hero.dead) { bossLeave(dt); return; }
+  if (bossPhase === 3 && !hero.dead) { hero.face = fireX >= hero.x ? 1 : -1; return; }
+  if (calmState === 2 && !hero.dead) { updateCalmHero(dt); return; }
+  if (hero.dead) {
+    if (playMode) { if (!deathWait) showDeath(); return; }
+    hero.deadT -= dt; if (hero.deadT <= 0) { hero.dead = false; hero.hp = hero.maxHp; hero.inv = 2; hero.x = W / 2; hero.y = H / 2; puffs.push({ kind: 2, x: hero.x, y: hero.y, t: 0 }); say('Voltei!'); }
+    return;
+  }
+  hero.inv -= dt; hero.atkCool -= dt; hero.x += hero.kvx * dt; hero.y += hero.kvy * dt; const damp = Math.min(1, 9 * dt); hero.kvx -= hero.kvx * damp; hero.kvy -= hero.kvy * damp;
+  if (hero.attacking) { hero.atkT += dt; if (!hero.hitDone && hero.atkT >= 0.11) { hero.hitDone = true; doSwing(); } if (hero.atkT >= 0.32) { hero.attacking = false; hero.atkCool = 0.22; } }
+  else if (playMode) playerControl(dt); else autoControl(dt);
+  if (hero.walking) hero.walkT += dt; clampHero();
+}
+
+/* ============================ DESENHO ============================ */
+function spr(sp, cx, feetY, right) { ctx.drawImage(right ? sp.r : sp.l, Math.round(cx - sp.w / 2), Math.round(feetY - sp.h)); }
+function shadow(x, y, wTiles) { ctx.fillStyle = 'rgba(30,28,45,.38)'; ctx.beginPath(); ctx.ellipse(x, y + S * 0.5, wTiles * S / 2, S * 1.5, 0, 0, TAU); ctx.fill(); }
+function rect(c, x, y, w, h) { ctx.fillStyle = c; ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
+function text(s, x, y, color, size, align) {
+  ctx.font = 'bold ' + (size || 4 * S) + 'px "Press Start 2P", Consolas, monospace'; ctx.textAlign = align || 'left'; ctx.textBaseline = 'top';
+  ctx.lineWidth = Math.max(3, S); ctx.strokeStyle = '#1c1624'; ctx.lineJoin = 'round'; ctx.strokeText(s, x, y); ctx.fillStyle = color || '#fff'; ctx.fillText(s, x, y);
+}
+function drawBakeApple(idx, cx, cy, sc) { const sp = SP.bake[idx]; const w = sp.w * sc, h = sp.h * sc; ctx.drawImage(sp.r, Math.round(cx - w / 2), Math.round(cy - h / 2), Math.round(w), Math.round(h)); }
+
+function drawSword(handX, handY, aDeg, f) {
+  const a = aDeg * Math.PI / 180, dx = f * Math.cos(a), dy = Math.sin(a), px = -dy, py = dx, len = 14 * S, w = 1.2 * S;
+  ctx.fillStyle = evoStage >= 4 ? '#cde8ff' : '#e1ebf5'; ctx.strokeStyle = '#1c1624'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(handX + px * w, handY + py * w); ctx.lineTo(handX - px * w, handY - py * w); ctx.lineTo(handX + dx * len - px * w, handY + dy * len - py * w);
+  ctx.lineTo(handX + dx * (len + 3 * S), handY + dy * (len + 3 * S)); ctx.lineTo(handX + dx * len + px * w, handY + dy * len + py * w); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = evoStage >= 4 ? '#3c5fcd' : '#d7a028'; ctx.lineWidth = 2 * S; ctx.beginPath(); ctx.moveTo(handX + px * 3 * S, handY + py * 3 * S); ctx.lineTo(handX - px * 3 * S, handY - py * 3 * S); ctx.stroke();
+  ctx.strokeStyle = evoStage >= 4 ? '#503796' : '#87552d'; ctx.lineWidth = S + 1; ctx.beginPath(); ctx.moveTo(handX, handY); ctx.lineTo(handX - dx * 3 * S, handY - dy * 3 * S); ctx.stroke();
+}
+function drawShieldBody(sx, sy) { rect('#1c1624', sx - S, sy - S, 8 * S, 10 * S); rect(evoStage >= 4 ? '#cd3232' : '#375fcd', sx, sy, 6 * S, 8 * S); rect('#f5cd46', sx + 2 * S, sy + 2 * S, 2 * S, 3 * S); }
+function drawBow(f, bob) {
+  const cx = hero.x + f * 7 * S, cy = hero.y - bob - 8 * S, dx = hero.aimX, dy = hero.aimY, px = -dy, py = dx, pull = Math.min(1, hero.bowT / 0.4);
+  const strokeBow = (col, lw) => { ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.beginPath(); for (let i = 0; i < 9; i++) { const u = (i - 4) / 4, bend = 3 * S * (1 - u * u), x = cx + px * u * 7 * S + dx * bend, y = cy + py * u * 7 * S + dy * bend; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke(); };
+  if (evoStage >= 1) { strokeBow('#1c1624', S + 3); strokeBow('#b9c0cd', S + 1); strokeBow('#f0f5ff', 1); } else strokeBow('#87552d', S + 1);      // evolucao 1: arco de metal
+  const nx = cx - dx * pull * 5 * S, ny = cy - dy * pull * 5 * S; ctx.strokeStyle = '#ebebeb'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx + px * 7 * S, cy + py * 7 * S); ctx.lineTo(nx, ny); ctx.lineTo(cx - px * 7 * S, cy - py * 7 * S); ctx.stroke();
+  if (pull > 0.05) drawArrow(nx + dx * 10 * S, ny + dy * 10 * S, dx, dy);
+}
+function drawArrow(x, y, vx, vy) {
+  const sp = Math.hypot(vx, vy); if (sp < 1) return; const dx = vx / sp, dy = vy / sp, px = -dy, py = dx, len = 10 * S;
+  ctx.strokeStyle = '#87552d'; ctx.lineWidth = S; ctx.beginPath(); ctx.moveTo(x - dx * len, y - dy * len); ctx.lineTo(x, y); ctx.stroke();
+  ctx.strokeStyle = '#ebebeb'; ctx.beginPath(); ctx.moveTo(x - dx * len, y - dy * len); ctx.lineTo(x - dx * (len - 2 * S) + px * 2 * S, y - dy * (len - 2 * S) + py * 2 * S); ctx.moveTo(x - dx * len, y - dy * len); ctx.lineTo(x - dx * (len - 2 * S) - px * 2 * S, y - dy * (len - 2 * S) - py * 2 * S); ctx.stroke();
+  ctx.fillStyle = '#e1ebf5'; ctx.beginPath(); ctx.moveTo(x + dx * 3 * S, y + dy * 3 * S); ctx.lineTo(x + px * 1.5 * S, y + py * 1.5 * S); ctx.lineTo(x - px * 1.5 * S, y - py * 1.5 * S); ctx.fill();
+}
+function drawArm(x, y0, y1) { rect('#1c1624', x - 2 * S, y1, 4 * S, y0 - y1); rect(evoStage >= 3 ? '#467deb' : '#3aa53e', x - S, y1 + 3 * S, 2 * S, y0 - y1 - 3 * S); rect('#1c1624', x - 2 * S, y1 - 3 * S, 4 * S, 5 * S); rect('#fad0a5', x - S, y1 - 2 * S, 2 * S, 3 * S); }
+
+function drawHero() {
+  const f = hero.face, right = f > 0;
+  if (hero.dead) { shadow(hero.x, hero.y, 14); ctx.save(); ctx.translate(hero.x, hero.y - SP.heroA.w / 2); ctx.rotate(Math.PI / 2); ctx.drawImage(SP.heroA.r, -SP.heroA.w / 2, -SP.heroA.h / 2); ctx.restore(); if (Math.floor(time * 3) % 2 === 0) text('x_x', hero.x - 8 * S, hero.y - 14 * S, '#fff', 4 * S); return; }
+  if (powerT > 0) { drawPowerHero(); return; }
+  if (hero.inv > 0 && cookState === 0 && Math.floor(time * 14) % 2 === 0) return;
+  if (calmState === 2 && phase >= 2) { drawCalm(); return; }
+  shadow(hero.x, hero.y, 12);
+  const fr = hero.walking ? Math.floor(hero.walkT * 9) % 2 : 0, bob = (hero.walking && fr === 1) ? S : 0;
+  spr(fr ? SP.heroB : SP.heroA, hero.x, hero.y - bob, right);
+  const sx = hero.x - f * 3 * S - 3 * S, sy = hero.y - bob - 11 * S; drawShieldBody(sx, sy);
+  if (cookState === 6) { const p = (cookT % 1.2) / 1.2; if (Math.floor(cookT / 1.2) <= 4) drawBakeApple(3, hero.x + f * 5 * S, hero.y - bob - 9 * S, 2.3 - 1.7 * p); }
+  else if (playEatT > 0) drawBakeApple(3, hero.x + f * 5 * S, hero.y - bob - 9 * S, 2.3 - 1.7 * Math.min(1, playEatT / 0.9));
+  if (calmState === 2 || cookState !== 0 || playPickT > 0 || playEatT > 0) {
+    if ((calmState === 2 && phase === 1) || playPickT > 0) { const reach = Math.sin(Math.min(1, pickT / 1) * Math.PI / 2); const x = hero.x + f * 4 * S, y0 = hero.y - bob - 10 * S; drawArm(x, y0, y0 - (5 + 5 * reach) * S); }
+    return;
+  }
+  if (hero.bowing) { drawBow(f, bob); return; }
+  const handX = hero.x + f * 5 * S, handY = hero.y - bob - 4 * S, prog = hero.attacking ? Math.min(1, hero.atkT / 0.32) : 0;
+  const ang = hero.attacking ? -110 + 170 * (1 - Math.pow(1 - prog, 2)) : (hero.walking ? -70 : -80);
+  if (hero.attacking && prog > 0.2 && prog < 0.95) { ctx.fillStyle = '#ebf5ff'; for (let a = -110; a < ang; a += 10) { const r2 = a * Math.PI / 180; ctx.fillRect(Math.round(handX + f * Math.cos(r2) * 14 * S * 1.05 - S), Math.round(handY + Math.sin(r2) * 14 * S * 1.05 - S), 2 * S, 2 * S); } }
+  drawSword(handX, handY, ang, f);
+}
+function drawCalm() {
+  if (phase === 5) { shadow(hero.x, hero.y + S, 17); ctx.save(); ctx.translate(hero.x, hero.y + S - SP.heroA.w / 2); ctx.rotate(-Math.PI / 2); ctx.drawImage(SP.heroA.r, -SP.heroA.w / 2, -SP.heroA.h / 2); ctx.restore();
+    const zt = time * 0.8; for (let i = 0; i < 3; i++) { const ph = (zt + i * 0.33) % 1; text(i === 1 ? 'Z' : 'z', hero.x - 9 * S + ph * 8 * S + i * S, hero.y - 15 * S - ph * 14 * S, '#fff', 4 * S); } return; }
+  shadow(hero.x, hero.y, 12);
+  if (phase === 4) { spr(SP.front, hero.x, hero.y + 2 * S, true); return; }
+  const waving = phase === 3; spr(waving ? SP.wave : SP.front, hero.x, hero.y, true);
+  let q = phase === 2 ? Math.min(1, phaseT / 1.5) : 1; q = q * q * (3 - 2 * q);
+  drawShieldBody(hero.x - 7 * S + (-5 * S) * q, hero.y - 12 * S + 6 * S * q);
+  if (!waving) drawSword(hero.x + 6 * S, hero.y - 5 * S, -80 + 175 * q, 1);
+  else { const sw = Math.sin(time * 9) * 2 * S, ax = hero.x - 6 * S, ay = hero.y - 10 * S; rect('#1c1624', ax - 3 * S + sw * 0.5 - S, ay - 7 * S, 4 * S, 8 * S); rect(evoStage >= 3 ? '#467deb' : '#3aa53e', ax - 3 * S + sw * 0.5, ay - 6 * S, 2 * S, 6 * S); rect('#1c1624', ax - 5 * S + sw - S, ay - 11 * S, 5 * S, 5 * S); rect('#fad0a5', ax - 5 * S + sw, ay - 10 * S, 3 * S, 3 * S); }
+}
+function drawEnemy(e) {
+  if (e.flash > 0 && Math.floor(e.flash * 30) % 2 === 0) return;
+  const right = e.face > 0;
+  if (e.type === 3) {
+    shadow(e.x, e.y, 34 * DK); const k = e.t < 1.5 ? 0.15 + 0.85 * (e.t / 1.5) : 1, sp = SP.dragon[e.mode === 1 ? 1 : 0], w = sp.w * k, h = sp.h * k, bob = e.moving ? Math.abs(Math.sin(e.t * 7)) * 2 * S : 0;
+    ctx.drawImage(right ? sp.r : sp.l, Math.round(e.x - w / 2), Math.round(e.y - h - bob), Math.round(w), Math.round(h)); return;
+  }
+  if (e.type === 0) { shadow(e.x, e.y, 12); const fr = (e.mode === 0 && (e.vx !== 0 || e.vy !== 0)) ? Math.floor(e.t * 6) % 2 : 0; spr(SP.octo[fr], e.x, e.y, right); }
+  else if (e.type === 1) { shadow(e.x, e.y, 9); spr(SP.bat[Math.floor(e.t * 9) % 2], e.x, e.y - (9 * S + Math.sin(e.t * 6) * 2 * S), right); }
+  else if (e.type === 4) { shadow(e.x, e.y, 12); const far = Math.hypot(hero.x - e.x, hero.y - e.y) > 12 * S; spr(SP.boko[e.mode === 1 ? 2 : (e.mode === 0 && far ? Math.floor(e.t * 6) % 2 : 0)], e.x, e.y, right); }
+  else { shadow(e.x, e.y, 11); const hop = e.mode === 1 ? Math.sin((1 - e.timer / 0.45) * Math.PI) * 5 * S : 0; spr(SP.slime[e.mode === 1 ? 0 : 1], e.x, e.y - hop, right); }
+}
+function drawTree(t) { shadow(t.x, t.y, 16); spr(SP.tree, t.x, t.y, true); for (let i = 0; i < 5; i++) if (t.has[i]) spr(SP.apple, appleX(t, i), appleY(t, i) + SP.apple.h / 2, true); }
+function drawFire() {
+  if (fireK <= 0) return; const x = fireX, y = fireY; shadow(x, y + S, 16);
+  rect('#1c1624', x - 9 * S, y - 3 * S, 18 * S, 4 * S); rect('#87552d', x - 8 * S, y - 2 * S, 16 * S, 2 * S); rect('#5f3c1e', x - 8 * S, y - S, 16 * S, S);
+  for (let i = 0; i < 7; i++) { const sx = x - 10.5 * S + i * 3.5 * S; rect('#1c1624', sx - S, y + S, 3 * S, 2 * S); rect('#9696a2', sx, y + 1.5 * S, 1.5 * S, S); }
+  const cs = ['#de3e2c', '#fc982a', '#ffe860'], hs = [13, 10, 6], ws = [11, 7, 3];
+  for (let L = 0; L < 3; L++) { const h = Math.floor(hs[L] * fireK * (1 + 0.16 * Math.sin(time * 13 + L * 2))); for (let r = 0; r < h; r++) { const fr = r / Math.max(1, h), w = Math.max(1, Math.round(ws[L] * (1 - fr * fr * 0.92))), off = Math.round(Math.sin(time * 9 + r * 0.7 + L) * 0.7 * fr * 2); rect(cs[L], x - w * S / 2 + off * S, y - 3 * S - (r + 1) * S, w * S, S); } }
+  for (let i = 0; i < 4; i++) { const ph = (time * 0.9 + i * 0.27) % 1; if (ph > 0.75) continue; rect('#ffdc5a', x + Math.sin(ph * 7 + i * 2) * 5 * S, y - 12 * S * fireK - ph * 14 * S, S, S); }
+  for (let i = 0; i < 5; i++) {
+    if (!onFire[i]) continue; const bi = bossPhase === 1 ? Math.min(3, Math.floor(bakeTs[i] / 10 * 4)) : bakeIdx(); drawBakeApple(bi, slotX(i), slotY(i) - S, 1.5);
+    const baking = (cookState === 4 && bakeT > 3) || (bossPhase === 1 && bakeTs[i] > 3);
+    if (baking) for (let k2 = 0; k2 < 2; k2++) { const ph = (time * 0.8 + i * 0.31 + k2 * 0.5) % 1; if (ph > 0.85) continue; rect('#ebebf2', slotX(i) + Math.sin(ph * 6 + i) * S, slotY(i) - 6 * S - ph * 13 * S, S, S); }
+  }
+  for (let L = 1; L < 3; L++) { const h = Math.floor(hs[L] * fireK * (1 + 0.16 * Math.sin(time * 13 + L * 2))); for (let r = 7; r < h; r++) { const fr = r / Math.max(1, h), w = Math.max(1, Math.round(ws[L] * (1 - fr * fr * 0.92))), off = Math.round(Math.sin(time * 9 + r * 0.7 + L) * 0.7 * fr * 2); rect(cs[L], x - w * S / 2 + off * S, y - 3 * S - (r + 1) * S, w * S, S); } }
+}
+function drawPuff(p) {
+  const t = p.t / 0.45, c = p.kind === 0 ? '#fff' : (p.kind === 1 ? '#ffeb46' : '#aad7ff'), n = p.kind === 1 ? 6 : 8, rad = (p.kind === 2 ? 1 - t : t) * (p.kind === 1 ? 8 : 12) * S, sz = Math.max(1, (1 - t) * 3 * S);
+  ctx.fillStyle = c; for (let i = 0; i < n; i++) { const a = i * TAU / n + (p.kind === 2 ? t * 3 : 0); ctx.fillRect(Math.round(p.x + Math.cos(a) * rad - sz / 2), Math.round(p.y + Math.sin(a) * rad - sz / 2), Math.round(sz), Math.round(sz)); }
+}
+function drawHud() {
+  const hw = SP.heart.w + S, total = hero.maxHp * hw + 34 * S + 22 * S + (playMode ? 30 * S : 0), x0 = W / 2 - total / 2 + 4 * S, y0 = 4 * S;
+  for (let i = 0; i < hero.maxHp; i++) ctx.drawImage(i < hero.hp ? SP.heart.r : SP.heartE.r, Math.round(x0 + i * hw), Math.round(y0));
+  const rx = x0 + hero.maxHp * hw + 4 * S; ctx.drawImage(SP.rupee[0].r, Math.round(rx), Math.round(y0 - S)); text('x' + hero.rupees, rx + SP.rupee[0].w + 2 * S, y0 + S * 0.5, '#fff', 3.4 * S);
+  const ax = rx + SP.rupee[0].w + 2 * S + 18 * S; ctx.drawImage(SP.appleHud.r, Math.round(ax), Math.round(y0 - S)); text('x' + hero.apples, ax + SP.appleHud.w + 2 * S, y0 + S * 0.5, '#fff', 3.4 * S);
+  if (playMode) text('NV ' + (rupeeStep() + 1), ax + SP.appleHud.w + 2 * S + 16 * S, y0 + S * 0.5, '#ffdc5a', 3.4 * S);
+  if (!playMode) text(powerT > 0 ? 'PODER! ' + Math.ceil(powerT) + 's' : 'GELATINAS ' + slimeKills + '/' + SLIMES_FOR_POWER, W - 6 * S, 4 * S, powerT > 0 ? '#78e6ff' : '#96c8ff', 3.4 * S, 'right');
+  if (boss && enemies.includes(boss)) {
+    const bw = 60 * S, bh = 4 * S, x = W / 2 - bw / 2, y = 15 * S, fr = Math.max(0, boss.hp / boss.maxHp);
+    rect('#1c1624', x - S, y - S, bw + 2 * S, bh + 2 * S); rect('#461420', x, y, bw, bh); rect('#e13739', x, y, bw * fr, bh); rect('#ff8278', x, y, bw * fr, S);
+    text('Dragão', W / 2, y + bh + 2 * S, '#fff', 3.4 * S, 'center');
+  }
+  if (playMode && !touchMode) {
+    const lines = ['COMANDOS', 'Mouse apertado: andar', '1: espada', '2: arco', '3: colher / assar / comer maçã', 'Espaço: pausar'], fs = 3 * S, lh = fs + 2 * S;
+    ctx.font = 'bold ' + fs + 'px "Press Start 2P", Consolas, monospace'; let wmax = 0; lines.forEach((l) => { wmax = Math.max(wmax, ctx.measureText(l).width); });
+    const pad = 3 * S, bw = wmax + pad * 2, bh = lines.length * lh + pad * 2, x = W - bw - 4 * S, y = 4 * S;
+    rect('#1c1624', x - S, y - S, bw + 2 * S, bh + 2 * S); rect('#2e283e', x, y, bw, bh); rect('#f7be46', x, y, bw, S);
+    lines.forEach((l, i) => text(l, x + pad, y + pad + i * lh, i ? '#fff' : '#f7be46', fs));
+  }
+  if (hero.speechT > 0 && !hero.dead) text(hero.speech, hero.x, hero.y - 20 * S - 4 * S, '#fff', 3.6 * S, 'center');
+}
+function render() {
+  ctx.imageSmoothingEnabled = false; ctx.drawImage(bg, 0, 0); drawAmbient();
+  for (const it of items) { if (it.t > 12 && Math.floor(it.t * 8) % 2 === 0) continue; const bob = Math.abs(Math.sin(it.t * 4)) * 2 * S; shadow(it.x, it.y, 6); spr(it.kind === 0 ? SP.heart : SP.rupee[it.kind - 1], it.x, it.y - 2 * S - bob, true); }
+  const ents = [...propEnts(), ...enemies.map((e) => ({ y: e.y, f: () => drawEnemy(e) })), ...trees.map((t) => ({ y: t.y, f: () => drawTree(t) })), { y: hero.y, f: drawHero }];
+  if (cookState !== 0 || bossPhase === 1) ents.push({ y: fireY, f: drawFire });
+  ents.sort((a, b) => a.y - b.y).forEach((o) => o.f());
+  for (const r of rocks) { if (r.fire) { const fs = SP.fire[Math.floor(time * 12) % 2]; const k = r.homing ? 1.4 + (r.life > 2 ? 0.18 * Math.sin(r.life * 34) : 0) : 1, w = fs.w * k, h = fs.h * k; ctx.drawImage(fs.r, Math.round(r.x - w / 2), Math.round(r.y - h / 2), Math.round(w), Math.round(h)); } else spr(SP.rock, r.x, r.y + 2 * S, true); }
+  for (const a of arrows) { if (a.power) drawPowerArrow(a); else drawArrow(a.x, a.y, a.vx, a.vy); }
+  for (const fa of flyApples) { const u = Math.min(1, fa.t / 0.6), tx = hero.x + hero.face * 6 * S, ty = hero.y - 20 * S; spr(SP.apple, fa.x0 + (tx - fa.x0) * u, fa.y0 + (ty - fa.y0) * u - Math.sin(u * Math.PI) * 6 * S + SP.apple.h / 2, true); }
+  for (const a of cookApples) { const u = Math.min(1, a.t / a.dur); drawBakeApple(a.dir === 1 ? 0 : 3, a.x0 + (a.x1 - a.x0) * u, a.y0 + (a.y1 - a.y0) * u - Math.sin(u * Math.PI) * 10 * S, 1.5); }
+  for (const s of smokes) { if (s.t < 0) continue; const k = s.t / 3.2, sz = S * (s.sz + k * 5), sh = Math.floor(210 - 90 * k); ctx.fillStyle = 'rgb(' + sh + ',' + sh + ',' + (sh + 10) + ')'; ctx.fillRect(Math.round(s.x - sz / 2), Math.round(s.y - s.t * 11 * S - sz / 2), Math.round(sz), Math.round(sz)); }
+  puffs.forEach(drawPuff); drawHud(); drawEvo();
+  if (paused) {
+    ctx.fillStyle = 'rgba(8,6,16,.35)'; ctx.fillRect(0, 0, W, H);
+    const fsA = 7 * S, fsB = 3 * S, bw = Math.min(W - 8 * S, 120 * S), bh = 24 * S, bx = W / 2 - bw / 2, by = H * 0.28 - bh / 2;
+    rect('#1c1624', bx - S, by - S, bw + 2 * S, bh + 2 * S); rect('#2e283e', bx, by, bw, bh); rect('#f7be46', bx, by, bw, S);
+    text('PAUSADO', W / 2, by + 4 * S, '#f7be46', fsA, 'center'); text('Espaço para continuar', W / 2, by + 4 * S + fsA + 3 * S, '#fff', fsB, 'center');
+  }
+}
+
+/* ============================ MENU E CONTROLE ============================ */
+function closeMenu() { $('menu').hidden = true; $('menuBtn').setAttribute('aria-expanded', 'false'); }
+$('menuBtn').addEventListener('click', () => { const h = $('menu').hidden; $('menu').hidden = !h; $('menuBtn').setAttribute('aria-expanded', String(h)); });
+$('mAuto').addEventListener('click', () => { setPlayMode(false); closeMenu(); });
+$('mPlay').addEventListener('click', () => { setPlayMode(true); closeMenu(); });
+$('mEnemy').addEventListener('click', () => { spawn(Math.floor(rnd() * 3)); closeMenu(); });
+$('mHeal').addEventListener('click', () => { hero.hp = hero.maxHp; closeMenu(); });
+$('mNap').addEventListener('click', () => { if (!playMode && calmState === 0) nextCalm = 0; closeMenu(); });
+$('mHarvest').addEventListener('click', () => { if (!playMode && calmState === 0) { forceLong = true; nextCalm = 0; } closeMenu(); });
+$('mApples').addEventListener('click', () => { hero.apples = Math.max(hero.apples, 5); closeMenu(); });
+$('mPause').addEventListener('click', () => { setPaused(!paused); closeMenu(); });
+$('evoBtn').addEventListener('click', useEvoItem);
+function setSizeMode(m) {
+  sizeMode = m; try { localStorage.setItem('heroi_tamanho', String(m)); } catch (_) {}
+  for (let i = 0; i < 3; i++) $('mSize' + i).setAttribute('aria-pressed', String(i === m));
+  resize(); clampHero();
+}
+for (let i = 0; i < 3; i++) { $('mSize' + i).addEventListener('click', () => { setSizeMode(i); closeMenu(); }); $('mSize' + i).setAttribute('aria-pressed', String(i === sizeMode)); }
+$('retry').addEventListener('click', doRetry);
+$('mAbout').addEventListener('click', () => { closeMenu(); $('about').hidden = false; $('aboutClose').focus(); });
+$('aboutClose').addEventListener('click', () => { $('about').hidden = true; });
+addEventListener('keydown', (e) => { if (e.code === 'Escape' && !$('about').hidden) $('about').hidden = true; });
+// tela cheia: o navegador so permite pedir tela cheia a partir de um clique, entao ela abre ao tocar em "Jogar" / "Deixar rodando"
+function goFullscreen() {
+  try {
+    const el = document.documentElement;
+    if (document.fullscreenElement || !el.requestFullscreen) return;
+    el.requestFullscreen({ navigationUI: 'hide' }).then(() => { try { screen.orientation.lock('landscape').catch(() => {}); } catch (_) {} }).catch(() => {});
+  } catch (_) {}
+}
+function toggleFullscreen() { if (document.fullscreenElement) { try { document.exitFullscreen(); } catch (_) {} } else goFullscreen(); }
+document.addEventListener('fullscreenchange', () => { $('mFull').setAttribute('aria-pressed', String(!!document.fullscreenElement)); setTimeout(resize, 150); });
+$('mFull').addEventListener('click', () => { toggleFullscreen(); closeMenu(); });
+$('goPlay').addEventListener('click', () => { $('intro').hidden = true; goFullscreen(); setPlayMode(true); });
+$('goAuto').addEventListener('click', () => { $('intro').hidden = true; goFullscreen(); });
+addEventListener('keydown', (e) => { if (e.code === 'Escape') closeMenu(); });
+// Espaco pausa e continua o jogo (so no modo jogo, e nao quando uma tela de aviso esta aberta)
+function setPaused(p) { paused = p; $('mPause').setAttribute('aria-pressed', String(p)); $('mPause').textContent = p ? 'Continuar' : 'Pausar'; }
+addEventListener('keydown', (e) => {
+  if (e.code !== 'Space' || e.repeat || !playMode) return;
+  if (!$('intro').hidden || !$('death').hidden || !$('credits').hidden || !$('about').hidden) return;
+  e.preventDefault(); setPaused(!paused);
+});
+
+let last = performance.now(), acc = 0;
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (!paused && !document.hidden && !evoWaiting()) step(dt);      // com o item grande na tela o jogo pausa ate apertar USAR ITEM
+  render(); requestAnimationFrame(frame);
+}
+function boot() {
+  resize(); hero.x = W / 2; hero.y = H / 2; wanderX = hero.x; wanderY = hero.y;
+  addEventListener('resize', () => { resize(); });
+  requestAnimationFrame(frame);
+}
+(document.fonts && document.fonts.load ? document.fonts.load('12px "Press Start 2P"').catch(() => {}) : Promise.resolve()).then(boot, boot);
+
+// ganchos para teste automatico
+window.__jogo = { hero, enemies, rocks, arrows, items, trees, step, render, setPlayMode, spawn, get S() { return S; }, get W() { return W; }, get H() { return H; },
+  get st() { return { playMode, calmState, cookState, bossPhase, killsAtMax, deathWait, fireK, onFire: onFire.slice(), bakeTs: bakeTs.slice(), phase, boss }; },
+  set(o) { if ('mx' in o) mx = o.mx; if ('my' in o) my = o.my; if ('mouse' in o) mouseDown = o.mouse; if ('k' in o) Object.assign(touchKeys, o.k); if ('killsAtMax' in o) killsAtMax = o.killsAtMax; if ('nextCalm' in o) nextCalm = o.nextCalm; if ('forceLong' in o) forceLong = o.forceLong; },
+  doRetry, fireInteract, damageEnemy, startFinalPhase, startPower, get power() { return { powerT, record, nextPower }; }, setRupees(n) { hero.rupees = n; }, setSlimes(n) { slimeKills = n; }, countKill, get evoInfo() { return { evoKills, evoStage, evoNext, waiting: evoWaiting(), stage: evo && evo.stage }; }, forcePower() { powerPending = true; } };
+})();
+</script>

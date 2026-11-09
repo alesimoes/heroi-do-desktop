@@ -1,0 +1,32 @@
+name: Build (Windows)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compilar o jogo e o instalador (csc do .NET Framework 4)
+        shell: cmd
+        run: |
+          set CSC=%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe
+          if not exist installer\saida mkdir installer\saida
+          "%CSC%" /nologo /target:winexe /optimize+ /out:installer\saida\HeroiPet.exe /win32icon:installer\heroi.ico /r:System.Windows.Forms.dll /r:System.Drawing.dll HeroiPet.cs installer\InfoDoPrograma.cs
+          if errorlevel 1 exit /b 1
+          "%CSC%" /nologo /target:winexe /optimize+ /out:installer\saida\Instalador-HeroiDoDesktop.exe /win32icon:installer\heroi.ico /win32manifest:installer\app.manifest /resource:installer\saida\HeroiPet.exe,HeroiPet.exe /r:System.Windows.Forms.dll /r:System.Drawing.dll installer\Instalador.cs
+          if errorlevel 1 exit /b 1
+
+      - name: Guardar os binarios
+        uses: actions/upload-artifact@v4
+        with:
+          name: HeroiDoDesktop-Windows
+          path: installer/saida/*.exe
+
+      # Depois de aprovado no SignPath Foundation: enviar o artifact acima para assinatura
+      # (ver https://github.com/SignPath/github-action-submit-signing-request) e publicar o resultado em Releases.

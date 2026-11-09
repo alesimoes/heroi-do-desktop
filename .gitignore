@@ -1,0 +1,13 @@
+# binarios gerados (vao em Releases, nao no repositorio)
+*.exe
+installer/saida/
+# copia gerada da pagina web para o Firebase (copie web/heroi-do-desktop.html para firebase/public/index.html antes de publicar)
+firebase/public/
+firebase/.firebase/
+# versao descartada
+web/heroi-do-desktop-16bit.html
+# capturas e arquivos temporarios de teste
+tela*.png
+zoom*.png
+*.tmp
+Thumbs.db

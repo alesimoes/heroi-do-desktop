@@ -1,0 +1,32 @@
+HEROI DO DESKTOP - COMO INSTALAR
+=================================
+
+Dois cliques em "Instalador-HeroiDoDesktop.exe" e siga o assistente (nao precisa de administrador).
+
+SE O WINDOWS AVISAR QUE NAO E SEGURO
+------------------------------------
+O instalador ainda nao tem assinatura digital (certificado pago), entao o Windows desconfia de qualquer programa novo.
+O jogo nao tem virus: o codigo-fonte esta junto com o projeto e o programa so desenha o heroi na area de trabalho.
+
+1) Tela azul "O Windows protegeu o computador" (SmartScreen):
+   clique em "Mais informacoes" e depois em "Executar assim mesmo".
+
+2) Se o arquivo veio da internet, de e-mail, WhatsApp ou pendrive de outra pessoa e o Windows bloqueia sem dar opcao:
+   - clique com o botao direito no instalador > Propriedades;
+   - na parte de baixo, marque "Desbloquear" > OK;
+   - abra o instalador de novo.
+   (ou, no PowerShell:  Unblock-File "C:\caminho\Instalador-HeroiDoDesktop.exe" )
+
+3) Windows 11 com "Smart App Control" ligado (bloqueia programas sem assinatura e nao mostra "Executar assim mesmo"):
+   Configuracoes > Privacidade e seguranca > Seguranca do Windows > Controle de aplicativos e navegador >
+   Configuracoes do Smart App Control > Desativado.
+   ATENCAO: depois de desativado, o Smart App Control nao pode ser ligado de novo sem reinstalar o Windows.
+   Se preferir nao mexer nisso, jogue a versao web:  https://heroi-games-2026.web.app
+
+4) Antivirus de terceiros: se bloquear, escolha "permitir" / "adicionar excecao" para o arquivo.
+
+VERSAO WEB (sem instalar nada)
+------------------------------
+https://heroi-games-2026.web.app   (abre em tela cheia ao clicar em Jogar ou Deixar rodando)
+
+Ideia: Alexandre - Criacao: Bia Krepel - Programacao: Claude
