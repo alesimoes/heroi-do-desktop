@@ -21,6 +21,15 @@ enfrenta um **Dragão** no final. Existe também uma **versão web** do mesmo jo
 
 Todos os desenhos são pixel art **próprios**, gerados por código (tabelas de letras e formas), sem imagens de terceiros.
 
+## Download
+
+- **Versão web (recomendada, sem instalar nada):** https://heroi-games-2026.web.app
+- **Programa do Windows:** instalador na página de [Releases](https://github.com/alesimoes/heroi-do-desktop/releases) (ou compile você mesmo, abaixo).
+
+**Assinatura:** o instalador ainda **não é assinado**, então o Windows pode avisar que o aplicativo não é reconhecido
+(veja [`docs/COMO-INSTALAR.txt`](docs/COMO-INSTALAR.txt)). O pedido de assinatura gratuita à **SignPath Foundation** está sendo preparado;
+quando for aprovado, os instaladores serão assinados e esta página dirá: *Free code signing provided by SignPath.io, certificate by SignPath Foundation*.
+
 ## Como compilar (Windows)
 
 Não precisa instalar nada: o compilador C# já vem no Windows (.NET Framework 4).
