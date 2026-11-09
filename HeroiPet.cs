@@ -1339,14 +1339,11 @@ namespace HeroiPet
         }
         public void IconApple(Graphics g, float cx, float cy, float u)
         {
-            Color dark = Color.FromArgb(28, 22, 36);
-            using (SolidBrush dk = new SolidBrush(dark)) using (SolidBrush r = new SolidBrush(Color.FromArgb(215, 55, 55))) using (SolidBrush gr = new SolidBrush(Color.FromArgb(58, 165, 62))) using (SolidBrush sh = new SolidBrush(Color.FromArgb(255, 180, 170)))
-            {
-                g.FillEllipse(dk, cx - 11 * u, cy - 9 * u, 22 * u, 21 * u); g.FillEllipse(r, cx - 10 * u, cy - 8 * u, 20 * u, 19 * u);
-                g.FillEllipse(sh, cx - 6 * u, cy - 5 * u, 4 * u, 3 * u);
-                g.FillRectangle(dk, cx - 0.8f * u, cy - 13 * u, 1.6f * u, 5 * u);
-                g.FillEllipse(gr, cx + u, cy - 13 * u, 7 * u, 4 * u);
-            }
+            // a mesma maca em pixel art do indicador do topo da tela, ampliada
+            float sz = 24 * u; InterpolationMode im = g.InterpolationMode; PixelOffsetMode po = g.PixelOffsetMode;
+            g.InterpolationMode = InterpolationMode.NearestNeighbor; g.PixelOffsetMode = PixelOffsetMode.Half;
+            g.DrawImage(appleHud.R, cx - sz / 2f, cy - sz / 2f, sz, sz);
+            g.InterpolationMode = im; g.PixelOffsetMode = po;
         }
 
         class MenuForm : Form
@@ -4374,19 +4371,27 @@ namespace HeroiPet
             using (SolidBrush b = new SolidBrush(c))
                 g.FillRectangle(b, f > 0 ? ox + x * S : ox - (x + w) * S, oy - (y + h) * S, w * S, h * S);
         }
+        void DrawLeg(Graphics g, float hipX, float hipY, float deg, Color k, Color d)      // perna de 3x5 que gira em torno do quadril (topo)
+        {
+            GraphicsState st = g.Save();
+            g.TranslateTransform(hipX, hipY); g.RotateTransform(deg);
+            using (SolidBrush bk = new SolidBrush(k)) g.FillRectangle(bk, -1.5f * S, 0, 3 * S, 5 * S);
+            using (SolidBrush bd = new SolidBrush(d)) g.FillRectangle(bd, -0.5f * S, 0, 1 * S, 4 * S);
+            g.Restore(st);
+        }
         void DrawRider(Graphics g, Enemy e)
         {
             Shadow(g, e.X, e.Y, 13);
             int f = e.Face > 0 ? 1 : -1;
             bool run = e.Mode == 0 || e.VX != 0 || e.VY != 0;
-            // galope: as patas da frente vao um pouco para frente e as de tras um pouco para tras, depois voltam
-            float sw = run ? (float)Math.Round(2.0 * (1.0 - Math.Cos(e.T * 9.0)) / 2.0) : 0f;
+            // galope: as patas INCLINAM (giram no quadril): as da frente para frente, as de tras para tras, e voltam
+            float ang = run ? 24f * (1f - (float)Math.Cos(e.T * 9.0)) / 2f : 0f;
             Color K = Color.FromArgb(28, 22, 36), body = Color.FromArgb(165, 105, 58), dark = Color.FromArgb(105, 62, 32);
             // cavaleiro primeiro: as pernas dele ficam escondidas atras do corpo do cavalo
             Spr(g, boko[0], e.X, e.Y - 6 * S, f > 0);
             // patas: 2 de tras e 2 da frente
-            HRect(g, K, e.X, e.Y, f, -7 - sw, 0, 3, 5); HRect(g, dark, e.X, e.Y, f, -6 - sw, 0, 1, 4);
-            HRect(g, K, e.X, e.Y, f, 4 + sw, 0, 3, 5); HRect(g, dark, e.X, e.Y, f, 5 + sw, 0, 1, 4);
+            DrawLeg(g, e.X + f * -5.5f * S, e.Y - 5 * S, f * ang, K, dark);      // de tras: para tras
+            DrawLeg(g, e.X + f * 5.5f * S, e.Y - 5 * S, -f * ang, K, dark);      // da frente: para frente
             // corpo, pescoco, cabeca e rabo
             HRect(g, K, e.X, e.Y, f, -8, 3, 16, 8); HRect(g, body, e.X, e.Y, f, -7, 4, 14, 6);
             HRect(g, K, e.X, e.Y, f, 5, 8, 5, 6); HRect(g, body, e.X, e.Y, f, 6, 9, 3, 4);

@@ -1,3 +1,4 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Herói do Desktop</title>
 <!-- menu de pausa/equipamento (Espaço), sem gorro com a coroa -->
 
@@ -1436,7 +1437,7 @@ function drawCalm() {
   if (!waving) drawSword(hero.x + 6 * S, hero.y - 5 * S, -80 + 175 * q, 1);
   else { const sw = Math.sin(time * 9) * 2 * S, ax = hero.x - 6 * S, ay = hero.y - 10 * S; rect('#1c1624', ax - 3 * S + sw * 0.5 - S, ay - 7 * S, 4 * S, 8 * S); rect(tunicColor(), ax - 3 * S + sw * 0.5, ay - 6 * S, 2 * S, 6 * S); rect('#1c1624', ax - 5 * S + sw - S, ay - 11 * S, 5 * S, 5 * S); rect('#fad0a5', ax - 5 * S + sw, ay - 10 * S, 3 * S, 3 * S); }
 }
-// bokoblin montado num cavalo, com arco (retangulos; x vai para frente, y para cima, em unidades de S)
+// bokoblin montado num cavalo simples e pequeno, com arco (retangulos; x vai para frente, y para cima, em unidades de S)
 function hRect(e, f, c, x, y, w, h) { rect(c, f > 0 ? e.x + x * S : e.x - (x + w) * S, e.y - (y + h) * S, w * S, h * S); }
 function drawRider(e) {
   shadow(e.x, e.y, 13); const f = e.face > 0 ? 1 : -1, run = e.mode === 0 || e.vx || e.vy;
@@ -1676,3 +1677,5 @@ window.__jogo = { hero, enemies, rocks, arrows, items, trees, step, render, setP
   doRetry, fireInteract, damageEnemy, startFinalPhase, startPower, get power() { return { powerT, record, nextPower }; }, setRupees(n) { hero.rupees = n; }, setSlimes(n) { slimeKills = n; }, countKill, get evoInfo() { return { evoKills, evoStage, evoNext, waiting: evoWaiting(), stage: evo && evo.stage }; }, forcePower() { powerPending = true; }, get chestInfo() { return { chestKills, chestState, kingGear, chestGo, chestOpenT }; }, setChestKills(n) { chestKills = n; }, get shocks() { return shocks; }, testBoss() { fireX = W / 2; fireY = H / 2; bossPhase = 4; spawnDragon(); return boss; }, get bossInfo() { return { phase: bossPhase, bossT, rewardSpawned, msgT, endStarted, reward: items.filter((i) => i.reward).reduce((s, i) => s + rupeeValue(i.kind), 0), nItems: items.filter((i) => i.reward).length }; } };
 })();
 </script>
+
+</body></html>
