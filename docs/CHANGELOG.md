@@ -1,5 +1,9 @@
 # Changelog (resumo)
 
+## 09/11/2026 — Dano: bolas de fogo e meio coração
+- **Cada bola de fogo do dragão tira 1 coração** (antes algumas não davam dano: o escudo bloqueava as de frente e a invulnerabilidade engolia as seguintes).
+- **Encostar em um monstro tira meio coração**; corações com metades no HUD.
+
 ## 09/11/2026 — Dragão: crescimento lento e brilho
 - Ao ficar vermelho (metade da vida) o dragão **cresce devagar (3 s) até 1,2×** (mais 10% além dos 10% anteriores) e **brilha** com faíscas durante o crescimento.
 

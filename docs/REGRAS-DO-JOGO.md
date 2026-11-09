@@ -20,7 +20,9 @@ Unidades: distâncias em "unidades de sprite" (múltiplos de `S`). Tempos em seg
 - Sorteio no modo jogo: octorok 25%, morcego 30%, slime 30%, **bokoblin 15%**. No automático: 15% bokoblin, o resto 1/3 cada.
 - Quando o herói morre e tenta de novo, o **dragão recupera toda a vida** (5000) e as bolas de fogo somem.
 - Aparecem nas bordas a cada 3–7 s (dividido pelo multiplicador de rupias no modo jogo), máx. 4 (automático).
-- Contato machuca (raio 9). Herói perde 1 coração e fica invulnerável 1,2 s.
+- **Dano ao herói:** **encostar em um monstro tira meio coração (0,5)**; pedra de octorok e golpe de bokoblin tiram 1. **Cada bola de fogo do dragão tira 1 coração**,
+  **não é bloqueada pelo escudo** e **ignora a invulnerabilidade** (3 bolas do leque = 3 corações). Depois de qualquer dano o herói fica invulnerável 1,2 s (menos para bolas de fogo).
+  Os corações aceitam metades (meio coração aparece pela metade).
 - No **modo jogo** o sorteio é: octorok 30%, morcego 35%, slime 35% (octoroks 10% menos frequentes).
 
 ## Herói

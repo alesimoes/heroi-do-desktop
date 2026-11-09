@@ -345,7 +345,7 @@ function buildSprites() {
     slime: [makeSprite(ROWS.slimeTall, S), makeSprite(ROWS.slimeFlat, S)],
     boko: [makeSprite(ROWS.bokoA, S), makeSprite(ROWS.bokoB, S), makeSprite(ROWS.bokoC, S)],
     heroPow: [tintBlue(makeSprite(ROWS.heroA, S)), tintBlue(makeSprite(ROWS.heroB, S))],
-    heart: makeSprite(ROWS.heart, S), heartE: makeSprite(ROWS.heart, S, { R: '#46465a', W: '#69697a' }),
+    heart: makeSprite(ROWS.heart, S), heartE: makeSprite(ROWS.heart, S, { R: '#46465a', W: '#69697a' }), heartH: (() => { const e = makeSprite(ROWS.heart, S, { R: '#46465a', W: '#69697a' }), f = makeSprite(ROWS.heart, S), mk = (a, b) => { const c = document.createElement('canvas'); c.width = a.width; c.height = a.height; const g = c.getContext('2d'); g.drawImage(a, 0, 0); g.drawImage(b, 0, 0, b.width / 2, b.height, 0, 0, b.width / 2, b.height); return c; }; return { r: mk(e.r, f.r), l: mk(e.l, f.l), w: e.w, h: e.h }; })(),
     rupee: [makeSprite(ROWS.rupee, S), makeSprite(ROWS.rupee, S, { G: '#467deb' }), makeSprite(ROWS.rupee, S, { G: '#e63c3c' }), makeSprite(ROWS.rupee, S, { G: '#f0c83c' }), makeSprite(ROWS.rupee, S, { G: '#9650cd' }), makeSprite(ROWS.rupee, S * 2, { G: '#ffcd28' })],      // [5] = 300 (recompensa do dragao): dourada e grande
     rock: makeSprite(ROWS.rock, S), apple: makeSprite(ROWS.apple, S), appleHud: makeSprite(ROWS.appleBig, S),
     bake: ['#d73737', '#cd5c30', '#b0562a', '#8e4a24'].map((c, i) => makeSprite(ROWS.apple, S, { R: c, G: i === 0 ? '#3aa53e' : '#686e28' })),
@@ -669,9 +669,10 @@ function moveHero(tx, ty, speed, dt) {
   const step = Math.min(d, speed * dt); hero.x += dx / d * step; hero.y += dy / d * step;
   if (Math.abs(dx) > 2) hero.face = dx > 0 ? 1 : -1; hero.walking = true;
 }
-function hurtHero(fx, fy) {
-  if (hero.inv > 0 || hero.dead || powerT > 0) return;
-  hero.hp--; hero.inv = 1.2; hero.attacking = false; hero.atkCool = 0.3;
+// dano: 1 coracao por padrao; encostar em monstro tira meio (0,5); bola de fogo tira 1 e ignora o escudo e a invulnerabilidade
+function hurtHero(fx, fy, dmg = 1, ignoreInv = false) {
+  if ((hero.inv > 0 && !ignoreInv) || hero.dead || powerT > 0) return;
+  hero.hp -= dmg; hero.inv = 1.2; hero.attacking = false; hero.atkCool = 0.3;
   let dx = hero.x - fx, dy = hero.y - fy, d = Math.hypot(dx, dy); if (d < 1) { dx = -hero.face; dy = 0; d = 1; }
   hero.kvx = dx / d * 120 * S; hero.kvy = dy / d * 120 * S;
   if (hero.hp <= 0) { hero.hp = 0; hero.dead = true; hero.deadT = 3; puffs.push({ kind: 0, x: hero.x, y: hero.y - 6 * S, t: 0 }); }
@@ -777,7 +778,7 @@ function updateEnemies(dt) {
     e.x = Math.max(4 * S, Math.min(W - 4 * S, e.x)); e.y = Math.max(12 * S, Math.min(H, e.y));
     if (!hero.dead && hero.inv <= 0) {
       const cx = hero.x - e.x, cy = hero.y - e.y, rc = e.type === 3 ? (e.t > 1.5 ? 15 * S * DK * (e.scale || 1) : 0) : 9 * S;
-      if (cx * cx + cy * cy < rc * rc) hurtHero(e.x, e.y);
+      if (cx * cx + cy * cy < rc * rc) hurtHero(e.x, e.y, 0.5);      // encostar em monstro: meio coracao
     }
   }
 }
@@ -791,7 +792,7 @@ function updateRocks(dt) {
       const mt = 1.8 * dt; da = Math.max(-mt, Math.min(mt, da)); ca += da; r.vx = Math.cos(ca) * 52 * S; r.vy = Math.sin(ca) * 52 * S;
       if (r.life >= 3) {
         for (let k = 0; k < 7; k++) puffs.push({ kind: k % 2, x: r.x + (rnd() - 0.5) * 14 * S, y: r.y + (rnd() - 0.5) * 14 * S, t: 0 });
-        const ex = hero.x - r.x, ey = hero.y - 6 * S - r.y; if (!hero.dead && ex * ex + ey * ey < (16 * S) ** 2) hurtHero(r.x, r.y);
+        const ex = hero.x - r.x, ey = hero.y - 6 * S - r.y; if (!hero.dead && ex * ex + ey * ey < (16 * S) ** 2) hurtHero(r.x, r.y, 1, true);
         rocks.splice(i, 1); continue;
       }
     }
@@ -801,8 +802,8 @@ function updateRocks(dt) {
     const dx = r.x - hero.x, dy = r.y - (hero.y - 6 * S), rr = r.fire ? 9 * S : 7 * S;
     if (dx * dx + dy * dy < rr * rr) {
       const sp = Math.hypot(r.vx, r.vy);
-      if (sp > 0 && (r.vx * hero.face) / sp < -0.35) puffs.push({ kind: 1, x: hero.x + hero.face * 3 * S, y: hero.y - 7 * S, t: 0 });
-      else hurtHero(r.x - r.vx, r.y - r.vy);
+      if (!r.fire && sp > 0 && (r.vx * hero.face) / sp < -0.35) puffs.push({ kind: 1, x: hero.x + hero.face * 3 * S, y: hero.y - 7 * S, t: 0 });      // pedra de frente: escudo (bola de fogo nao e bloqueada)
+      else hurtHero(r.x - r.vx, r.y - r.vy, 1, !!r.fire);      // cada bola de fogo tira 1 coracao, mesmo durante a invulnerabilidade
       rocks.splice(i, 1);
     }
   }
@@ -826,7 +827,7 @@ function updateItems(dt) {
     else it.t += dt;
     if (it.t > 15) { items.splice(i, 1); continue; } if (hero.dead) continue;
     if ((it.x - hero.x) ** 2 + (it.y - hero.y) ** 2 < (8 * S) ** 2) {
-      if (it.kind === 0) { if (hero.hp < hero.maxHp) hero.hp++; } else hero.rupees += rupeeValue(it.kind);
+      if (it.kind === 0) { if (hero.hp < hero.maxHp) hero.hp = Math.min(hero.maxHp, hero.hp + 1); } else hero.rupees += rupeeValue(it.kind);
       puffs.push({ kind: 1, x: it.x, y: it.y - 4 * S, t: 0 }); items.splice(i, 1);
     }
   }
@@ -938,7 +939,7 @@ function updateCook(dt) {
   else if (cookState === 3) { while (throwIdx < 5 && cookT >= throwIdx * 0.4) { launchApple(hx, hy, slotX(throwIdx), slotY(throwIdx), throwIdx, 1); throwIdx++; } if (throwIdx >= 5 && !cookApples.length) { cookState = 4; cookT = 0; bakeT = 0; } }
   else if (cookState === 4) { bakeT += dt; if (bakeT >= 5 && bakeT < 5.1 && hero.speechT <= 0) say('Que cheiro bom...'); if (bakeT >= 10) { cookState = 5; cookT = 0; throwIdx = 0; say('Prontas!'); } }
   else if (cookState === 5) { while (throwIdx < 5 && cookT >= throwIdx * 0.35) { const kk = 4 - throwIdx; onFire[kk] = false; launchApple(slotX(kk), slotY(kk), hx, hy, kk, -1); throwIdx++; } if (throwIdx >= 5 && !cookApples.length) { cookState = 6; cookT = 0; lastEat = -1; } }
-  else if (cookState === 6) { const idx = Math.floor(cookT / 1.2); if (idx !== lastEat) { if (lastEat >= 0 && hero.hp < hero.maxHp) hero.hp++; lastEat = idx; if (idx < 5) say('Nham!'); } if (cookT >= 6) { cookState = 7; cookT = 0; say('Que delícia!'); } }
+  else if (cookState === 6) { const idx = Math.floor(cookT / 1.2); if (idx !== lastEat) { if (lastEat >= 0 && hero.hp < hero.maxHp) hero.hp = Math.min(hero.maxHp, hero.hp + 1); lastEat = idx; if (idx < 5) say('Nham!'); } if (cookT >= 6) { cookState = 7; cookT = 0; say('Que delícia!'); } }
   else if (cookState === 7) { fireK = Math.max(0, 1 - cookT / 1.5); if (cookT >= 1.5) { cookState = 0; fireK = 0; } }
   clampHero();
 }
@@ -1235,7 +1236,7 @@ function drawPuff(p) {
 }
 function drawHud() {
   const hw = SP.heart.w + S, total = hero.maxHp * hw + 34 * S + 22 * S + (playMode ? 30 * S : 0), x0 = W / 2 - total / 2 + 4 * S, y0 = 4 * S;
-  for (let i = 0; i < hero.maxHp; i++) ctx.drawImage(i < hero.hp ? SP.heart.r : SP.heartE.r, Math.round(x0 + i * hw), Math.round(y0));
+  for (let i = 0; i < hero.maxHp; i++) ctx.drawImage(i + 1 <= hero.hp ? SP.heart.r : (i + 0.5 <= hero.hp ? SP.heartH.r : SP.heartE.r), Math.round(x0 + i * hw), Math.round(y0));
   const rx = x0 + hero.maxHp * hw + 4 * S; ctx.drawImage(SP.rupee[0].r, Math.round(rx), Math.round(y0 - S)); text('x' + hero.rupees, rx + SP.rupee[0].w + 2 * S, y0 + S * 0.5, '#fff', 3.4 * S);
   const ax = rx + SP.rupee[0].w + 2 * S + 18 * S; ctx.drawImage(SP.appleHud.r, Math.round(ax), Math.round(y0 - S)); text('x' + hero.apples, ax + SP.appleHud.w + 2 * S, y0 + S * 0.5, '#fff', 3.4 * S);
   if (playMode) text('NV ' + (rupeeStep() + 1), ax + SP.appleHud.w + 2 * S + 16 * S, y0 + S * 0.5, '#ffdc5a', 3.4 * S);

@@ -946,7 +946,7 @@ namespace HeroiPet
         Sprite[] heroWalk = new Sprite[2];
         Sprite heroDead;
         Sprite[] octo = new Sprite[2], bat = new Sprite[2], slime = new Sprite[2], boko = new Sprite[3];
-        Sprite heartFull, heartEmpty, rockSpr;
+        Sprite heartFull, heartEmpty, heartHalf, rockSpr;
         Sprite[] rupeeSpr = new Sprite[6];
         Font font;
 
@@ -959,7 +959,8 @@ namespace HeroiPet
         // heroi
         int MaxHP = 5;
         float hx, hy, kvx, kvy, walkT, atkT, atkCool, inv, deadT, wx, wy, wait, speechT;
-        int hface = 1, hp = 5, rupees;
+        int hface = 1, rupees;
+        float hp = 5;                        // coracoes (aceita meio coracao: encostar em monstro tira 0,5)
         bool walking, attacking, hitDone, dead, swingPractice;
         string speech = "";
         int calmState;                    // 0 normal, 1 aguardando limpar a tela, 2 descansando
@@ -1103,6 +1104,9 @@ namespace HeroiPet
             Dictionary<char, Color> gray = Art.Ov('R', Color.FromArgb(70, 70, 82));
             gray['W'] = Color.FromArgb(105, 105, 118);
             heartEmpty = Art.Make(Art.Heart, S, gray);
+            Bitmap halfBmp = (Bitmap)heartEmpty.R.Clone();      // meio coracao: metade esquerda cheia sobre o coracao vazio
+            using (Graphics hg = Graphics.FromImage(halfBmp)) hg.DrawImage(heartFull.R, new Rectangle(0, 0, heartFull.W / 2, heartFull.H), new Rectangle(0, 0, heartFull.W / 2, heartFull.H), GraphicsUnit.Pixel);
+            heartHalf = new Sprite(); heartHalf.R = halfBmp; heartHalf.L = halfBmp; heartHalf.W = halfBmp.Width; heartHalf.H = halfBmp.Height;
             rockSpr = Art.Make(Art.Rock, S, null);
             rupeeSpr[0] = Art.Make(Art.Rupee, S, null);
             rupeeSpr[1] = Art.Make(Art.Rupee, S, Art.Ov('G', Color.FromArgb(70, 125, 235)));
@@ -1763,7 +1767,7 @@ namespace HeroiPet
                 int idx = (int)(cookT / 1.2f);
                 if (idx != lastEat)
                 {
-                    if (lastEat >= 0 && hp < MaxHP) hp++;           // terminou de comer uma maca: recupera 1 coracao
+                    if (lastEat >= 0 && hp < MaxHP) hp = Math.Min(MaxHP, hp + 1f);           // terminou de comer uma maca: recupera 1 coracao
                     lastEat = idx;
                     if (idx < 5) Say("Nham!");
                 }
@@ -2798,10 +2802,11 @@ namespace HeroiPet
             }
         }
 
-        void HurtHero(float fromX, float fromY)
+        // dano: 1 coracao por padrao; encostar em monstro tira meio (0,5); bola de fogo tira 1 e ignora o escudo e o tempo de invulnerabilidade
+        void HurtHero(float fromX, float fromY, float dmg = 1f, bool ignoreInv = false)
         {
-            if (inv > 0 || dead || powerT > 0) return;
-            hp--; hurtCount++; inv = 1.2f; attacking = false; atkCool = 0.3f;
+            if ((inv > 0 && !ignoreInv) || dead || powerT > 0) return;
+            hp -= dmg; hurtCount++; inv = 1.2f; attacking = false; atkCool = 0.3f;
             float dx = hx - fromX, dy = hy - fromY, d = (float)Math.Sqrt(dx * dx + dy * dy);
             if (d < 1) { dx = -hface; dy = 0; d = 1; }
             kvx = dx / d * 120 * S; kvy = dy / d * 120 * S;
@@ -2975,7 +2980,7 @@ namespace HeroiPet
                 if (!dead && inv <= 0)
                 {
                     float cx = hx - e.X, cy = hy - e.Y;
-                    { float rc = e.Type == 3 ? (e.T > 1.5f ? 15 * S * DK * e.Scale : 0) : 9 * S; if (cx * cx + cy * cy < rc * rc) HurtHero(e.X, e.Y); }
+                    { float rc = e.Type == 3 ? (e.T > 1.5f ? 15 * S * DK * e.Scale : 0) : 9 * S; if (cx * cx + cy * cy < rc * rc) HurtHero(e.X, e.Y, 0.5f); }      // encostar em monstro: meio coracao
                 }
             }
         }
@@ -3001,7 +3006,7 @@ namespace HeroiPet
                         for (int k = 0; k < 7; k++)
                             puffs.Add(new Puff { Kind = k % 2, X = r.X + ((float)rnd.NextDouble() - 0.5f) * 14 * S, Y = r.Y + ((float)rnd.NextDouble() - 0.5f) * 14 * S });
                         float ex = hx - r.X, ey = (hy - 6 * S) - r.Y;
-                        if (!dead && ex * ex + ey * ey < (16 * S) * (16 * S)) HurtHero(r.X, r.Y);
+                        if (!dead && ex * ex + ey * ey < (16 * S) * (16 * S)) HurtHero(r.X, r.Y, 1f, true);
                         rocks.RemoveAt(i); continue;
                     }
                 }
@@ -3013,9 +3018,9 @@ namespace HeroiPet
                 if (dx * dx + dy * dy < rr7 * rr7)
                 {
                     float sp = (float)Math.Sqrt(r.VX * r.VX + r.VY * r.VY);
-                    bool blocked = sp > 0 && (r.VX * hface) / sp < -0.35f;   // vem de frente: escudo!
+                    bool blocked = !r.Fire && sp > 0 && (r.VX * hface) / sp < -0.35f;   // pedra vem de frente: escudo! (bola de fogo nao e bloqueada)
                     if (blocked) puffs.Add(new Puff { Kind = 1, X = hx + hface * 3 * S, Y = hy - 7 * S });
-                    else HurtHero(r.X - r.VX, r.Y - r.VY);
+                    else HurtHero(r.X - r.VX, r.Y - r.VY, 1f, r.Fire);      // cada bola de fogo tira 1 coracao, mesmo durante a invulnerabilidade
                     rocks.RemoveAt(i);
                 }
             }
@@ -3038,7 +3043,7 @@ namespace HeroiPet
                 float dx = it.X - hx, dy = it.Y - hy;
                 if (dx * dx + dy * dy < (8 * S) * (8 * S))
                 {
-                    if (it.Kind == 0) { if (hp < MaxHP) hp++; }
+                    if (it.Kind == 0) { if (hp < MaxHP) hp = Math.Min(MaxHP, hp + 1f); }
                     else rupees += RupeeValue(it.Kind);
                     puffs.Add(new Puff { Kind = 1, X = it.X, Y = it.Y - 4 * S });
                     items.RemoveAt(i);
@@ -3536,7 +3541,7 @@ namespace HeroiPet
             float total = MaxHP * hw + 34 * S + 22 * S + (playMode ? 30 * S : 0);
             float x0 = W / 2 - total / 2, y0 = 4 * S;
             for (int i = 0; i < MaxHP; i++)
-                g.DrawImage((i < hp ? heartFull : heartEmpty).R, (int)(x0 + i * hw), (int)y0);
+                g.DrawImage((i + 1 <= hp ? heartFull : (i + 0.5f <= hp ? heartHalf : heartEmpty)).R, (int)(x0 + i * hw), (int)y0);
             float rx = x0 + MaxHP * hw + 4 * S;
             g.DrawImage(rupeeSpr[0].R, (int)rx, (int)y0 - S);
             DrawText(g, "x" + rupees, rx + rupeeSpr[0].W + 2 * S, y0, Color.White);
