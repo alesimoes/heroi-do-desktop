@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 09/11/2026 — Ícones do inventário em pixel art
+- **Blusas:** mangas mais finas e curtas (antes grossas demais em relação ao resto). **Coroa de ouro** redesenhada em pixel art (igual ao estilo dos outros itens; também no anúncio do tesouro).
+
 ## 09/11/2026 — Inventário sem legenda
 - Tirada a legenda (Arco/Espada/Escudo/Gorro/Roupa/Fadinha) debaixo do personagem no menu; o herói ficou **centralizado** no quadro.
 

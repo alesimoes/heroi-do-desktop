@@ -478,15 +478,26 @@ namespace HeroiPet
             "...KKKKKKKKKK...",
             "..KQQQKKKKQQQK..",
             ".KQQQQQhhQQQQQK.",
-            "KQQQQQQQQQQQQQQK",
-            "KQQQQQQQQQQQQQQK",
-            "KgQQQKQQQQKQQQgK",
-            ".KKKKKQQQQKKKKK.",
+            ".KQQQQQQQQQQQQK.",
+            ".KgQKQQQQQQKQgK.",
+            ".KKKKQQQQQQKKKK.",
             "....KQQQQQQK....",
             "....KQQQQQQK....",
             "....KgQQQQgK....",
             "....KBBBBBBK....",
             "....KKKKKKKK...."
+};
+        // coroa de ouro em pixel art (C ouro, c ouro escuro, R rubi, U safira)
+        public static string[] CrownItem = {
+            "......KKKK......",
+            "..KK..KCCK..KK..",
+            ".KCCK.KCCK.KCCK.",
+            ".KCCKKCCCCKKCCK.",
+            ".KCCCCCCCCCCCCK.",
+            ".KCCCCCRRCCCCCK.",
+            ".KCUCCCRRCCCUCK.",
+            ".KccccccccccccK.",
+            ".KKKKKKKKKKKKKK."
         };
         public static string[] BatUp = {
             "KK..........KK",
@@ -1307,7 +1318,11 @@ namespace HeroiPet
         void DrawItemSpr(Graphics g, Sprite sp, float cx, float cy, float u)
         {
             if (sp == null) return;
-            float k = u / S * 1.7f, w = sp.W * k, h = sp.H * k; g.DrawImage(sp.R, cx - w / 2f, cy - h / 2f, w, h);
+            float k = u / S * 1.7f, w = sp.W * k, h = sp.H * k;
+            InterpolationMode im = g.InterpolationMode; PixelOffsetMode po = g.PixelOffsetMode;
+            g.InterpolationMode = InterpolationMode.NearestNeighbor; g.PixelOffsetMode = PixelOffsetMode.Half;      // pixel art: sem borrar
+            g.DrawImage(sp.R, cx - w / 2f, cy - h / 2f, w, h);
+            g.InterpolationMode = im; g.PixelOffsetMode = po;
         }
         void IconSword(Graphics g, float cx, float cy, float u, bool master)
         {
@@ -1572,6 +1587,8 @@ namespace HeroiPet
             Dictionary<char, Color> gsOv = Art.Ov('Q', Color.FromArgb(58, 165, 62)); gsOv['h'] = Color.FromArgb(130, 210, 120); gsOv['g'] = Color.FromArgb(30, 110, 45);
             Dictionary<char, Color> rbOv = Art.Ov('Q', Color.FromArgb(190, 35, 60)); rbOv['h'] = Color.FromArgb(235, 100, 120); rbOv['g'] = Color.FromArgb(130, 20, 40);
             menuSpr[0] = Art.Make(Art.CapItem, S, gcOv); menuSpr[1] = Art.Make(Art.ShirtItem, S, gsOv); menuSpr[2] = Art.Make(Art.ShirtItem, S, rbOv);
+            Dictionary<char, Color> crOv = Art.Ov('C', Color.FromArgb(255, 205, 40)); crOv['c'] = Color.FromArgb(215, 150, 20); crOv['R'] = Color.FromArgb(215, 40, 60); crOv['U'] = Color.FromArgb(70, 125, 235);
+            menuSpr[3] = Art.Make(Art.CrownItem, S, crOv);
             heroFrontWave = Art.Make(Art.HeroRecolor(Art.HeroFrontWave), S, hov);
             octo[0] = Art.Make(Art.OctoA, S, null); octo[1] = Art.Make(Art.OctoB, S, null);
             bat[0] = Art.Make(Art.BatUp, S, null); bat[1] = Art.Make(Art.BatDown, S, null);
@@ -1819,7 +1836,7 @@ namespace HeroiPet
         int evoNext;                         // proximo estagio a anunciar (1 a 4; 5 = acabou)
         Queue<int> evoQueue = new Queue<int>();
         EvoAnim evo;
-        Sprite[] menuSpr = new Sprite[3];      // gorro verde, blusa verde e roupa de rei em pixel art (para o menu)
+        Sprite[] menuSpr = new Sprite[4];      // gorro verde, blusa verde e roupa de rei em pixel art (para o menu)
         Sprite[] evoItemSpr = new Sprite[2];      // gorro e blusa em pixel art (iguais ao corpo)
         Font evoFont;
         const float EvoFly = 1.5f;
@@ -2301,22 +2318,9 @@ namespace HeroiPet
                 g.FillRectangle(bl, cx - 3 * u, cy - 3 * u, 6 * u, 6 * u);
             }
         }
-        void DrawCrownItem(Graphics g, float cx, float cy, float u)
+        void DrawCrownItem(Graphics g, float cx, float cy, float u)      // coroa em pixel art (a mesma do menu e do tesouro)
         {
-            Color dark = Color.FromArgb(28, 22, 36);
-            using (Pen ol = new Pen(dark, Math.Max(1f, u * 0.7f)))
-            using (SolidBrush go = new SolidBrush(Color.FromArgb(255, 205, 40)))
-            using (SolidBrush go2 = new SolidBrush(Color.FromArgb(215, 150, 20)))
-            using (SolidBrush red = new SolidBrush(Color.FromArgb(215, 40, 60)))
-            using (SolidBrush blu = new SolidBrush(Color.FromArgb(70, 125, 235)))
-            {
-                ol.LineJoin = LineJoin.Round;
-                PointF[] cr = { new PointF(cx - 9 * u, cy + 4 * u), new PointF(cx - 9 * u, cy - 5 * u), new PointF(cx - 4.5f * u, cy - 1 * u), new PointF(cx, cy - 7 * u), new PointF(cx + 4.5f * u, cy - 1 * u), new PointF(cx + 9 * u, cy - 5 * u), new PointF(cx + 9 * u, cy + 4 * u) };
-                g.FillPolygon(go, cr); g.DrawPolygon(ol, cr);
-                g.FillRectangle(go2, cx - 9 * u, cy + 1.5f * u, 18 * u, 2.5f * u);
-                g.FillEllipse(red, cx - 1.5f * u, cy - 2 * u, 3 * u, 3 * u); g.FillEllipse(blu, cx - 6.5f * u, cy - 0.5f * u, 2 * u, 2 * u); g.FillEllipse(blu, cx + 4.5f * u, cy - 0.5f * u, 2 * u, 2 * u);
-                foreach (float px in new float[] { -9f, 0f, 9f }) g.FillEllipse(go, cx + (px - 1) * u, cy + (px == 0 ? -8f : -6f) * u, 2 * u, 2 * u);
-            }
+            DrawItemSpr(g, menuSpr[3], cx, cy, u * 1.0f);
         }
         void DrawRobeItem(Graphics g, float cx, float cy, float u)
         {

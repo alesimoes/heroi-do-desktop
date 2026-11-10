@@ -242,8 +242,9 @@ const ROWS = {
   bokoA: ["..h.......h...","..KKKKKKKKK...",".KkkkkkkkkK...",".KkWKkkWKkkK..",".KkkkkkkkkK...",".KkkKWKWKkkK..","..KkkkkkkkK.BB",".KkBBBBBBkK.bB",".KkBBBBBBkK.bB",".KkkBBBBkkK.bB","..KKBBBBKK..bB","...KkK..KkK...","...KkK..KkK...","..KKKK..KKKK.."],
   bokoB: ["..h.......h...","..KKKKKKKKK...",".KkkkkkkkkK...",".KkWKkkWKkkK..",".KkkkkkkkkK...",".KkkKWKWKkkK..","..KkkkkkkkK.BB",".KkBBBBBBkK.bB",".KkBBBBBBkK.bB",".KkkBBBBkkK.bB","..KKBBBBKK..bB","..KkK....KkK..",".KkK......KkK.",".KKK......KKK."],
   bokoC: ["..h.......hbB.","..KKKKKKKKKbB.",".KkkkkkkkkKbB.",".KkWKkkWKkkKbB",".KkkkkkkkkKbB.",".KkkKWKWKkkKbB","..KkkkkkkkK.bB",".KkBBBBBBkK.bB",".KkBBBBBBkK...",".KkkBBBBkkK...","..KKBBBBKK....","...KkK..KkK...","...KkK..KkK...","..KKKK..KKKK.."],
+  crownItem: ["......KKKK......","..KK..KCCK..KK..",".KCCK.KCCK.KCCK.",".KCCKKCCCCKKCCK.",".KCCCCCCCCCCCCK.",".KCCCCCRRCCCCCK.",".KCUCCCRRCCCUCK.",".KccccccccccccK.",".KKKKKKKKKKKKKK."],
   capItem: ["....KKKKKKKK....","...KHHhhHHHHK...","..KHHhHHHHHHgK..",".KHHHHHHHHHHHgK.","KHHHHHHHHHHHHHgK","KHHHHHHHHHHHHggK","KggggggggggggggK",".KKKKKKKKKKKKKK."],
-  shirtItem: ["...KKKKKKKKKK...","..KQQQKKKKQQQK..",".KQQQQQhhQQQQQK.","KQQQQQQQQQQQQQQK","KQQQQQQQQQQQQQQK","KgQQQKQQQQKQQQgK",".KKKKKQQQQKKKKK.","....KQQQQQQK....","....KQQQQQQK....","....KgQQQQgK....","....KBBBBBBK....","....KKKKKKKK...."],
+  shirtItem: ["...KKKKKKKKKK...","..KQQQKKKKQQQK..",".KQQQQQhhQQQQQK.",".KQQQQQQQQQQQQK.",".KgQKQQQQQQKQgK.",".KKKKQQQQQQKKKK.","....KQQQQQQK....","....KQQQQQQK....","....KgQQQQgK....","....KBBBBBBK....","....KKKKKKKK...."],
   slimeTall: ["....KKKK....","..KKUUUUKK..",".KULLUUUUUK.",".KULUUUUUUK.","KUUWKUUWKUUK","KUUUUUUUUUUK","KUUUUUUUUUUK",".KKUUUUUUKK.","...KKKKKK..."],
   slimeFlat: ["............","............","............","...KKKKKK...",".KKUULUUUKK.","KUULUUUUUUUK","KUWKUUUWKUUK","KUUUUUUUUUUK",".KKKKKKKKKK."],
   heart: [".KK.KK.","KRRKRRK","KRWRRRK","KRRRRRK",".KRRRK.","..KRK..","...K..."],
@@ -384,7 +385,7 @@ function buildSprites() {
     slime: [makeSprite(ROWS.slimeTall, S), makeSprite(ROWS.slimeFlat, S)],
     boko: [makeSprite(ROWS.bokoA, S), makeSprite(ROWS.bokoB, S), makeSprite(ROWS.bokoC, S)],
     capItem: makeSprite(ROWS.capItem, S, { H: '#9650cd', h: '#cd96f0', g: '#60328c' }), shirtItem: makeSprite(ROWS.shirtItem, S, { Q: '#467deb', h: '#87b4ff', g: '#2d55be' }),
-    capGreen: makeSprite(ROWS.capItem, S, { H: '#3aa53e', h: '#82d278', g: '#1e6e2d' }), shirtGreen: makeSprite(ROWS.shirtItem, S, { Q: '#3aa53e', h: '#82d278', g: '#1e6e2d' }), robeItem: makeSprite(ROWS.shirtItem, S, { Q: '#be233c', h: '#eb6478', g: '#821428' }),
+    crown: makeSprite(ROWS.crownItem, S, { C: '#ffcd28', c: '#d79614', R: '#d7283c', U: '#467deb' }), capGreen: makeSprite(ROWS.capItem, S, { H: '#3aa53e', h: '#82d278', g: '#1e6e2d' }), shirtGreen: makeSprite(ROWS.shirtItem, S, { Q: '#3aa53e', h: '#82d278', g: '#1e6e2d' }), robeItem: makeSprite(ROWS.shirtItem, S, { Q: '#be233c', h: '#eb6478', g: '#821428' }),
     heroPow: [tintBlue(makeSprite(ROWS.heroA, S)), tintBlue(makeSprite(ROWS.heroB, S))],
     heart: makeSprite(ROWS.heart, S), heartE: makeSprite(ROWS.heart, S, { R: '#46465a', W: '#69697a' }), heartH: (() => { const e = makeSprite(ROWS.heart, S, { R: '#46465a', W: '#69697a' }), f = makeSprite(ROWS.heart, S), mk = (a, b) => { const c = document.createElement('canvas'); c.width = a.width; c.height = a.height; const g = c.getContext('2d'); g.drawImage(a, 0, 0); g.drawImage(b, 0, 0, b.width / 2, b.height, 0, 0, b.width / 2, b.height); return c; }; return { r: mk(e.r, f.r), l: mk(e.l, f.l), w: e.w, h: e.h }; })(),
     rupee: [makeSprite(ROWS.rupee, S), makeSprite(ROWS.rupee, S, { G: '#467deb' }), makeSprite(ROWS.rupee, S, { G: '#e63c3c' }), makeSprite(ROWS.rupee, S, { G: '#f0c83c' }), makeSprite(ROWS.rupee, S, { G: '#9650cd' }), makeSprite(ROWS.rupee, S * 2, { G: '#ffcd28' })],      // [5] = 300 (recompensa do dragao): dourada e grande
@@ -768,13 +769,7 @@ function drawChestPrompt() {
   text(t, chestX(), by + pad, '#ffdc5a', fs, 'center');
 }
 // itens do tesouro (anuncio grande)
-function drawCrownItem(cx, cy, u) {
-  const dark = '#1c1624', g = (pts, fill) => { ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = Math.max(1, u * 0.7); ctx.strokeStyle = dark; ctx.lineJoin = 'round'; ctx.stroke(); };
-  const ell = (x, y, w, h, c) => { ctx.beginPath(); ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, TAU); ctx.fillStyle = c; ctx.fill(); };
-  g([[cx - 9 * u, cy + 4 * u], [cx - 9 * u, cy - 5 * u], [cx - 4.5 * u, cy - u], [cx, cy - 7 * u], [cx + 4.5 * u, cy - u], [cx + 9 * u, cy - 5 * u], [cx + 9 * u, cy + 4 * u]], '#ffcd28');
-  rect('#d79614', cx - 9 * u, cy + 1.5 * u, 18 * u, 2.5 * u); ell(cx - 1.5 * u, cy - 2 * u, 3 * u, 3 * u, '#d7283c'); ell(cx - 6.5 * u, cy - 0.5 * u, 2 * u, 2 * u, '#467deb'); ell(cx + 4.5 * u, cy - 0.5 * u, 2 * u, 2 * u, '#467deb');
-  for (const px of [-9, 0, 9]) ell(cx + (px - 1) * u, cy + (px === 0 ? -8 : -6) * u, 2 * u, 2 * u, '#ffcd28');
-}
+function drawCrownItem(cx, cy, u) { itemSpr(SP.crown, cx, cy, u); }      // coroa em pixel art (a mesma do menu e do tesouro)
 function drawRobeItem(cx, cy, u) {
   const dark = '#1c1624'; ctx.beginPath(); [[-5, -10], [5, -10], [12, -5], [9, 0.5], [7, -2], [8, 12], [-8, 12], [-7, -2], [-9, 0.5], [-12, -5]].forEach((p, i) => i ? ctx.lineTo(cx + p[0] * u, cy + p[1] * u) : ctx.moveTo(cx + p[0] * u, cy + p[1] * u));
   ctx.closePath(); ctx.fillStyle = '#be233c'; ctx.fill(); ctx.lineWidth = Math.max(1, u * 0.7); ctx.strokeStyle = dark; ctx.lineJoin = 'round'; ctx.stroke();
@@ -1682,7 +1677,7 @@ function drawHeroPreview() {      // heroi equipado, ampliado (muda na hora ao t
   const sv = { pt: pickT, ax: hero.aimX, ay: hero.aimY, bt: hero.bowT, x: hero.x, y: hero.y, f: hero.face, w: hero.walking, a: hero.attacking, b: hero.bowing, d: hero.dead, i: hero.inv, p: powerT, c: calmState, k: cookState, pp: playPickT, pe: playEatT, er: eatRaw };
   try {
     hero.x = 0; hero.y = 0; hero.face = 1; hero.walking = false; hero.attacking = false; hero.bowing = invBow; hero.aimX = 1; hero.aimY = 0; hero.bowT = 0.4; hero.dead = false; hero.inv = 0; powerT = 0; calmState = 0; cookState = 0; playPickT = invPickT; pickT = invPickT; playEatT = invEatT; eatRaw = invEatT > 0; previewBare = invTab === 1;
-    const k = Math.max(1, (pc.height * 0.8) / (30 * S)); g.setTransform(k, 0, 0, k, pc.width / 2, pc.height / 2 + 13.5 * S * k); /* sem legenda: centralizado */ withCtx(g, () => { drawHero(); if (fairyState === 1) drawFairyShape(9 * S, -25 * S, S, eqFairy, false, Math.floor(time * 16) % 2 === 0); });
+    const k = Math.max(1, (pc.height * 0.8) / (30 * S)); g.setTransform(k, 0, 0, k, pc.width / 2, pc.height / 2 + 13.5 * S * k); /* sem legenda: heroi centralizado */ withCtx(g, () => { drawHero(); if (fairyState === 1) drawFairyShape(9 * S, -25 * S, S, eqFairy, false, Math.floor(time * 16) % 2 === 0); });
   } finally { pickT = sv.pt; hero.aimX = sv.ax; hero.aimY = sv.ay; hero.bowT = sv.bt; hero.x = sv.x; hero.y = sv.y; hero.face = sv.f; hero.walking = sv.w; hero.attacking = sv.a; hero.bowing = sv.b; hero.dead = sv.d; hero.inv = sv.i; powerT = sv.p; calmState = sv.c; cookState = sv.k; playPickT = sv.pp; playEatT = sv.pe; eatRaw = sv.er; previewBare = false; g.setTransform(1, 0, 0, 1, 0, 0); }
 }
 function renderInv() {
