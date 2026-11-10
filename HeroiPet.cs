@@ -2153,10 +2153,10 @@ namespace HeroiPet
             if (fairyState != 1) return;
             int wf = ((int)(time * 16)) % 2;      // asas batendo
             bool hot = FairyReady && ((int)(time * 7)) % 2 == 0;      // pronta: pisca e fica mais amarela
-            using (SolidBrush glow = new SolidBrush(hot ? Color.FromArgb(255, 205, 20) : Color.FromArgb(255, 245, 160)))
+            using (SolidBrush glow = new SolidBrush(hot ? Color.FromArgb(255, 205, 20) : (fairySkin == 1 ? Color.FromArgb(245, 130, 195) : Color.FromArgb(255, 245, 160))))      // aparencia nova: corpo rosa
             using (SolidBrush wing = new SolidBrush(fairySkin == 1 ? Color.FromArgb(40, 50, 150) : Color.FromArgb(190, 225, 255)))      // aparencia nova: azul escuro
-            using (SolidBrush wing2 = new SolidBrush(fairySkin == 1 ? Color.FromArgb(235, 120, 190) : Color.FromArgb(235, 245, 255)))      // ... com rosa
-            using (SolidBrush core = new SolidBrush(hot ? Color.FromArgb(255, 255, 110) : Color.White))
+            using (SolidBrush wing2 = new SolidBrush(fairySkin == 1 ? Color.FromArgb(70, 85, 190) : Color.FromArgb(235, 245, 255)))      // ... asas azul escuro (meio um tom mais claro)
+            using (SolidBrush core = new SolidBrush(hot ? Color.FromArgb(255, 255, 110) : (fairySkin == 1 ? Color.FromArgb(255, 225, 240) : Color.White)))
             {
                 float u = S;
                 g.FillRectangle(glow, fx - 2 * u, fy - u, 4 * u, 2 * u);      // bolinha menor que as asas

@@ -725,9 +725,9 @@ function updateFairy(dt) {
 }
 function drawFairy() {
   if (fairyState !== 1) return;
-  const x = fairy.x, y = fairy.y, u = S, wy = Math.floor(time * 16) % 2 === 0 ? -3 * u : -u, hot = fairy.cool <= 0 && Math.floor(time * 7) % 2 === 0, gc = hot ? '#ffcd14' : '#fff5a0';      // pronta: pisca e fica mais amarela
-  rect(gc, x - 2 * u, y - u, 4 * u, 2 * u); rect(gc, x - u, y - 2 * u, 2 * u, 4 * u); rect(hot ? '#ffff6e' : '#fff', x - u, y - u, 2 * u, 2 * u);
-  const wc = fairySkin === 1 ? '#283296' : '#bee1ff', wc2 = fairySkin === 1 ? '#eb78be' : '#ebf5ff';      // aparencia nova: asas azul escuro com rosa
+  const x = fairy.x, y = fairy.y, u = S, wy = Math.floor(time * 16) % 2 === 0 ? -3 * u : -u, hot = fairy.cool <= 0 && Math.floor(time * 7) % 2 === 0, gc = hot ? '#ffcd14' : (fairySkin === 1 ? '#f582c3' : '#fff5a0');      // pronta: pisca e fica mais amarela
+  rect(gc, x - 2 * u, y - u, 4 * u, 2 * u); rect(gc, x - u, y - 2 * u, 2 * u, 4 * u); rect(hot ? '#ffff6e' : (fairySkin === 1 ? '#ffe1f0' : '#fff'), x - u, y - u, 2 * u, 2 * u);
+  const wc = fairySkin === 1 ? '#283296' : '#bee1ff', wc2 = fairySkin === 1 ? '#4655be' : '#ebf5ff';      // aparencia nova: corpo rosa e asas azul escuro
   rect(wc, x - 6 * u, y + wy - u, 3 * u, 2 * u); rect(wc2, x - 5 * u, y + wy, 2 * u, u); rect(wc, x + 3 * u, y + wy - u, 3 * u, 2 * u); rect(wc2, x + 3 * u, y + wy, 2 * u, u);
 }function updateChest(dt) {
   if (hero.dead || bossPhase !== 0) chestGo = false;      // o bau vale nos dois modos; fica parado durante a luta com o dragao
