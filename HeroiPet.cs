@@ -1675,9 +1675,7 @@ namespace HeroiPet
             menu.Items.Add(mAutoItem); menu.Items.Add(mPlayItem); menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add("Invocar inimigo", null, delegate { Spawn(rnd.Next(3)); });
             menu.Items.Add("Curar heroi", null, delegate { hp = MaxHP; });
-            menu.Items.Add("Dar 5 maçãs (lanche)", null, delegate { apples = Math.Max(apples, 5); });
             menu.Items.Add("Soneca agora", null, delegate { if (calmState == 0) nextCalm = 0; });
-            menu.Items.Add("Colher macas e dormir (2 min)", null, delegate { if (calmState == 0) { forceLong = true; nextCalm = 0; } });
             ToolStripMenuItem pause = new ToolStripMenuItem("Pausar"); pauseItem = pause;
             pause.Click += delegate { paused = !paused; pause.Text = paused ? "Continuar" : "Pausar"; };
             menu.Items.Add(pause);

@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 10/11/2026 — Itens de menu removidos
+- Removidas as opções **Colher maçãs e dormir (2 min)** e **Dar 5 maçãs (lanche)** (menu da bandeja no desktop e menu da página na web).
+
 ## 09/11/2026 — Colher maçã pelo inventário
 - O botão **Colher maçã** do inventário agora fecha o menu e o herói **vai até a macieira mais próxima e colhe 2 maçãs** (que voam para o inventário). **Enquanto isso não nascem monstros** (nem a onda final). Vale nos dois modos. O braço esticado para pegar a maçã tem a **manga da cor da roupa** que ele estiver usando (verde, azul ou manto do rei).
 
