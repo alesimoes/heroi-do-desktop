@@ -1700,7 +1700,7 @@ function drawIcon(cat, id, cx, cy, u) {      // desenha o icone no 'ctx' atual
 function itemSpr(sp, cx, cy, u) { const k = u / S * 1.7, w = sp.w * k, h = sp.h * k; ctx.drawImage(sp.r, Math.round(cx - w / 2), Math.round(cy - h / 2), Math.round(w), Math.round(h)); }
 function iconCanvas(cat, id) { const c = document.createElement('canvas'); c.width = c.height = 72; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; withCtx(g, () => drawIcon(cat, id, 36, 34, 2.1)); return c; }
 function appleIcon() { const c = document.createElement('canvas'); c.width = c.height = 72; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(SP.appleHud.r, 4, 4, 64, 64); return c; }      // a mesma maca em pixel art do indicador do topo
-// heroi de frente no inventario: o sprite frontal atual, escudo baixado ao lado, espada ou arco na mao direita (sem armas na aba Roupas)
+// heroi de frente no inventario (corpo estreito, escudo no braco, espada inteira): o sprite frontal atual, escudo baixado ao lado, espada ou arco na mao direita (sem armas na aba Roupas)
 function drawHeroFrontPreview() {
   spr(SP.frontInv, hero.x, hero.y, true);      // mesma aparencia atual de frente (cabeca e franja da pausa), com o corpo mais estreito
   if (!previewBare) {
@@ -1711,7 +1711,6 @@ function drawHeroFrontPreview() {
       drawSword(hx0, hy0, -80, 1);
       ctx.lineCap = 'butt'; ctx.strokeStyle = '#1c1624'; ctx.lineWidth = 3.4 * S; ctx.beginPath(); ctx.moveTo(hx0, hy0); ctx.lineTo(gx, gy); ctx.stroke();
       ctx.strokeStyle = eqSword === 1 ? '#503796' : '#87552d'; ctx.lineWidth = 2 * S; ctx.beginPath(); ctx.moveTo(hx0, hy0); ctx.lineTo(gx, gy); ctx.stroke();
-      rect(eqSword === 1 ? '#3c5fcd' : '#d7a028', gx - S, gy - S, 2 * S, 2 * S);      // cabo e pomo: a espada inteira
     }
   }
   if (invEatT > 0) { const a = SP.apple, sc2 = 2.3 - 1.7 * Math.min(1, invEatT / 0.9), w = a.w * sc2 * 0.8, h = a.h * sc2 * 0.8; ctx.drawImage(a.r, Math.round(hero.x - w / 2), Math.round(hero.y - 8 * S - h / 2), Math.round(w), Math.round(h)); }      // comendo a maca crua, de frente

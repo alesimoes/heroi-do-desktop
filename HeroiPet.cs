@@ -1411,11 +1411,10 @@ namespace HeroiPet
             {
                 g.FillPolygon(bl, blade); g.DrawPolygon(ol, blade);
                 g.DrawLine(gd, handX + px * 3 * S, handY + py * 3 * S, handX - px * 3 * S, handY - py * 3 * S);
-                // cabo e pomo (a espada inteira, com a mao segurando o cabo)
+                // cabo (sem quadrado no fim); a mao segura o cabo
                 float gx1 = handX, gy1 = handY, gx2 = handX - dx * 4 * S, gy2 = handY - dy * 4 * S;
                 using (Pen go = new Pen(Color.FromArgb(28, 22, 36), 3.4f * S)) using (Pen gp = new Pen(GripColor(), 2 * S))
                 { g.DrawLine(go, gx1, gy1, gx2, gy2); g.DrawLine(gp, gx1, gy1, gx2, gy2); }
-                using (SolidBrush pb = new SolidBrush(GuardColor())) g.FillRectangle(pb, gx2 - S, gy2 - S, 2 * S, 2 * S);
             }
         }
         void DrawFrontBow(Graphics g, float x, float y)      // arco vertical na mao direita (de frente)

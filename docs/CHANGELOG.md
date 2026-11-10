@@ -1,7 +1,7 @@
 # Changelog (resumo)
 
 ## 10/11/2026 — Inventário: corpo mais estreito, escudo e espada corrigidos
-- O herói de frente no inventário ficou com o **corpo mais estreito** (mesma cabeça e franja). O **escudo** agora fica encostado no braço esquerdo (antes ficava deslocado) e a **espada** aparece inteira, com **cabo e pomo** (faltava um pedaço). Desktop e web.
+- O herói de frente no inventário ficou com o **corpo mais estreito** (mesma cabeça e franja). O **escudo** agora fica encostado no braço esquerdo (antes ficava deslocado) e a **espada** aparece inteira, com **cabo** (faltava um pedaço; sem o quadradinho no fim). Desktop e web.
 
 ## 10/11/2026 — Herói de frente no inventário
 - No inventário o herói aparece **totalmente de frente** (a mesma aparência atual do herói de frente, a das pausas), com o escudo baixado ao lado e espada ou arco na mão direita (sem armas na aba Roupas). Desktop e web.
