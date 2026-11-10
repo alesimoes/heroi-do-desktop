@@ -134,6 +134,7 @@ html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout
     <button id="mEnemy">Invocar inimigo</button>
     <button id="mHeal">Curar herói</button>
     <button id="mNap">Soneca agora</button>
+    <button id="mPhase2">Atalho: ir para a Fase 2</button>
     <button id="mPause" aria-pressed="false">Pausar</button>
     <button id="mInv">Inventário (Espaço)</button>
     <button id="mFull" aria-pressed="false">Tela cheia</button>
@@ -243,7 +244,7 @@ const ROWS = {
   bokoC: ["..h.......hbB.","..KKKKKKKKKbB.",".KkkkkkkkkKbB.",".KkWKkkWKkkKbB",".KkkkkkkkkKbB.",".KkkKWKWKkkKbB","..KkkkkkkkK.bB",".KkBBBBBBkK.bB",".KkBBBBBBkK...",".KkkBBBBkkK...","..KKBBBBKK....","...KkK..KkK...","...KkK..KkK...","..KKKK..KKKK.."],
   /* roupa de rei (blusa, nao vestido): blusa vermelha com faixa dourada no pescoco e na barra */
   robeIcon: ["...KKKKKKKKKK...","..KQQCCCCCCQQK..",".KQQQQCCCCQQQQK.",".KQQQQQCCQQQQQK.",".KgQKQQQQQQKQgK.",".KKKKQQQQQQKKKK.","....KQQQQQQK....","....KQQQQQQK....","....KgQQQQgK....","....KCCCCCCK....","....KKKKKKKK...."],
-  hammerItem: ["..KKKKKKKKKKKK..",".KhhhhhhhhhhhhK.",".KhGGGGGGGGGGgK.",".KGGGGGccGGGGgK.",".KGGGGcCCcGGGgK.",".KGGGGGccGGGGgK.",".KgGGGGGGGGGggK.",".KKKKKKKKKKKKKK.",".....KBBBBK.....",".....KBbBBK.....",".....KBbBBK.....",".....KBBBBK.....",".....KBbBBK.....",".....KBBBBK.....",".....KBBBBK.....","......KKKK......"],
+  mageRows: ["......KKKKKK......","....KKRRRRRRKK....","...KRRRRRRRRRRK...","..KRRRRRRRRRRRRK..","..KRRRKKKKKKRRRK..","..KRRKKKKKKKKRRK..","..KRRKEEKKEEKRRK..","..KRRKKKKKKKKRRK..","..KRRRKKKKKKRRRK..","...KRRRRKKRRRRK...","..KRRRRRRRRRRRRK..",".KRRRGRRRRRRGRRRK.",".KRrRRGRRRRGRRrRK.",".KRrRRRGGGGRRRrRK.",".KRrRRRRRRRRRRrRK.",".KRrrRRRRRRRRrrRK.",".KRrrRRRRRRRRrrRK.","KRRrrRRRRRRRRrrRRK","KRRrrRRRRRRRRrrRRK","KRRRRRRRRRRRRRRRRK","KGGGGGGGGGGGGGGGGK","KKKKKKKKKKKKKKKKKK"],  hammerItem: ["..KKKKKKKKKKKK..",".KhhhhhhhhhhhhK.",".KhGGGGGGGGGGgK.",".KGGGGGccGGGGgK.",".KGGGGcCCcGGGgK.",".KGGGGGccGGGGgK.",".KgGGGGGGGGGggK.",".KKKKKKKKKKKKKK.",".....KBBBBK.....",".....KBbBBK.....",".....KBbBBK.....",".....KBBBBK.....",".....KBbBBK.....",".....KBBBBK.....",".....KBBBBK.....","......KKKK......"],
   flameItem: [".......KK.......","......KYYK......",".....KOYYOK.....","......KOYOK.....",".....KOYYOK.....","......KOYOK.....",".....KOYYOK.....","......KOYOK.....",".....KOYYOK.....","......KOOK......","...KKKKOOKKKK...","..KRRRRRRRRRRK..","...KKKKKKKKKK...",".....KBBBK......",".....KBbBK......","......KKK......."],  crownItem: ["......KKKK......","..KK..KCCK..KK..",".KCCK.KCCK.KCCK.",".KCCKKCCCCKKCCK.",".KCCCCCCCCCCCCK.",".KCCCCCRRCCCCCK.",".KCUCCCRRCCCUCK.",".KccccccccccccK.",".KKKKKKKKKKKKKK."],
   capItem: ["....KKKKKKKK....","...KHHhhHHHHK...","..KHHhHHHHHHgK..",".KHHHHHHHHHHHgK.","KHHHHHHHHHHHHHgK","KHHHHHHHHHHHHggK","KggggggggggggggK",".KKKKKKKKKKKKKK."],
   shirtItem: ["...KKKKKKKKKK...","..KQQQKKKKQQQK..",".KQQQQQhhQQQQQK.",".KQQQQQQQQQQQQK.",".KgQKQQQQQQKQgK.",".KKKKQQQQQQKKKK.","....KQQQQQQK....","....KQQQQQQK....","....KgQQQQgK....","....KBBBBBBK....","....KKKKKKKK...."],
@@ -386,6 +387,20 @@ const OUTSETS = [
   { name: 'mar', hat: '#1ea0aa', tunic: '#1c7d96', pants: '#14506e', shoes: '#f0e6c8' }];
 const SET_THR = [4500, 6000, 8000, 10500, 14000];      // total de monstros derrotados (evoKills) para liberar cada conjunto
 const shadeHex = (hex, t) => { const n = parseInt(hex.slice(1), 16), c = [n >> 16 & 255, n >> 8 & 255, n & 255].map((v) => Math.round(t >= 0 ? v + (255 - v) * t : v * (1 + t))); return '#' + c.map((v) => v.toString(16).padStart(2, '0')).join(''); };
+/* ---------- FASE 2 ----------
+   Depois de vencer o Dragao comeca a FASE 2: os mesmos 7 niveis (agora a cada 40 rupias), monstros sombrios com o dobro de vida e, no fim, o vilao:
+   o FEITICEIRO SOMBRIO (8000 de vida), que teleporta, lanca aneis de esferas, tiros mirados e invoca gelatinas. */
+let phase2 = false, bossDeadMage = false;
+function tintDark(sp) {
+  const mk = (src) => {
+    const c = document.createElement('canvas'); c.width = src.width; c.height = src.height; const g = c.getContext('2d'); g.drawImage(src, 0, 0);
+    const im = g.getImageData(0, 0, c.width, c.height), d = im.data;
+    for (let i = 0; i < d.length; i += 4) { if (d[i + 3] === 0) continue; d[i] = Math.min(255, d[i] * 0.55 + 30); d[i + 1] = Math.min(255, d[i + 1] * 0.38 + 12); d[i + 2] = Math.min(255, d[i + 2] * 0.62 + 58); }
+    g.putImageData(im, 0, 0); return c;
+  };
+  return { r: mk(sp.r), l: mk(sp.l), w: sp.w, h: sp.h };
+}
+const P2 = (sp) => (phase2 ? tintDark(sp) : sp);      // fase 2: octorok, morcego, gelatina e bokoblin em tons sombrios
 function buildSprites() {
   const ov = (c, col, extra) => Object.assign({ [c]: col }, extra || {});
   const dS = Math.round(S * 1.7); DK = dS / S;
@@ -396,9 +411,9 @@ function buildSprites() {
   const setCap = OUTSETS.map((o) => makeSprite(ROWS.capItem, S, { H: o.hat, h: shadeHex(o.hat, 0.4), g: shadeHex(o.hat, -0.4) })), setShirt = OUTSETS.map((o) => makeSprite(ROWS.shirtItem, S, { Q: o.tunic, h: shadeHex(o.tunic, 0.4), g: shadeHex(o.tunic, -0.4) }));
   SP = {
     heroA: makeSprite(heroRows(ROWS.heroA), S, hov), heroB: makeSprite(heroRows(ROWS.heroB), S, hov), front: makeSprite(heroRows(ROWS.front), S, hov), frontInv: makeSprite(heroRows(ROWS.frontInv), S, hov), wave: makeSprite(heroRows(ROWS.wave), S, hov),
-    octo: [makeSprite(ROWS.octoA, S), makeSprite(ROWS.octoB, S)], bat: [makeSprite(ROWS.batUp, S), makeSprite(ROWS.batDown, S)],
-    slime: [makeSprite(ROWS.slimeTall, S), makeSprite(ROWS.slimeFlat, S)],
-    boko: [makeSprite(ROWS.bokoA, S), makeSprite(ROWS.bokoB, S), makeSprite(ROWS.bokoC, S)],
+    octo: [P2(makeSprite(ROWS.octoA, S)), P2(makeSprite(ROWS.octoB, S))], bat: [P2(makeSprite(ROWS.batUp, S)), P2(makeSprite(ROWS.batDown, S))],
+    slime: [P2(makeSprite(ROWS.slimeTall, S)), P2(makeSprite(ROWS.slimeFlat, S))],
+    boko: [P2(makeSprite(ROWS.bokoA, S)), P2(makeSprite(ROWS.bokoB, S)), P2(makeSprite(ROWS.bokoC, S))], mage: makeSprite(ROWS.mageRows, Math.round(S * 1.6), { R: '#692da5', r: '#401a6e', E: '#fff05a', G: '#ffcd28' }),
     capItem: makeSprite(ROWS.capItem, S, { H: '#9650cd', h: '#cd96f0', g: '#60328c' }), shirtItem: makeSprite(ROWS.shirtItem, S, { Q: '#467deb', h: '#87b4ff', g: '#2d55be' }),
     crown: makeSprite(ROWS.crownItem, S, { C: '#ffcd28', c: '#d79614', R: '#d7283c', U: '#467deb' }), capGreen: makeSprite(ROWS.capItem, S, { H: '#3aa53e', h: '#82d278', g: '#1e6e2d' }), shirtGreen: makeSprite(ROWS.shirtItem, S, { Q: '#3aa53e', h: '#82d278', g: '#1e6e2d' }), robeItem: makeSprite(ROWS.robeIcon, S, { Q: '#be233c', g: '#821428', C: '#ffcd28' }),
     setCap, setShirt,
@@ -548,7 +563,7 @@ const clampHero = () => { hero.x = Math.max(6 * S, Math.min(W - 6 * S, hero.x));
 // valores: 1 verde, 5 azul, 20 vermelha, 10 amarela, 50 roxa. No modo jogo so caem as de 5 a 50, para nao demorar.
 const rupeeValue = (k) => [0, 1, 5, 20, 10, 50, 300][k];
 function rupeeKind(r) { if (!playMode) { if (record >= 50) return r < 30 ? 1 : (r < 60 ? 2 : (r < 80 ? 4 : (r < 95 ? 3 : 5))); return r < 60 ? 1 : (r < 90 ? 2 : 3); } return r < 40 ? 2 : (r < 70 ? 4 : (r < 90 ? 3 : 5)); }
-function rupeeStep() { return Math.min(6, Math.floor(hero.rupees / 25)); }
+function rupeeStep() { return Math.min(6, Math.floor(hero.rupees / (phase2 ? 40 : 25))); }
 /* ---------- evolucao: monstros derrotados no automatico dao equipamentos ao heroi ---------- */
 // 1000 monstros: arco de metal | +500: gorro roxo | +500: blusa azul | +1000: Espada Mestre e escudo vermelho
 const EVO_THR = [1000, 1500, 2000, 3000], EVO_NEED = [1000, 500, 500, 1000], EVO_FLY = 1.5;
@@ -675,10 +690,12 @@ function unlockWeapon(i) {      // arma nova: ja vem equipada, com aviso
   validateEquip(); saveEquip(); showNewItem(); say('Arma nova: ' + WPN_NAME[i] + '!');
   for (let k = 0; k < 10; k++) puffs.push({ kind: k % 2, x: hero.x + (rnd() - 0.5) * 20 * S, y: hero.y - rnd() * 18 * S, t: 0 });
 }
-function fireArrows(sx, sy) {      // arco de cristal: duas flechas em leque; os outros: uma
-  if (eqBow === 2) { const a0 = Math.atan2(hero.aimY, hero.aimX); for (const k of [-1, 1]) { const a = a0 + k * 0.11; arrows.push({ x: sx, y: sy + k * S, vx: Math.cos(a) * 210 * S, vy: Math.sin(a) * 210 * S, crystal: true }); } }
+let crystalQ = -1;      // arco de cristal: a 2a flecha sai logo depois da 1a, no mesmo rumo
+function fireArrows(sx, sy) {
+  if (eqBow === 2) { arrows.push({ x: sx, y: sy, vx: hero.aimX * 210 * S, vy: hero.aimY * 210 * S, crystal: true }); crystalQ = 0.09; }
   else arrows.push({ x: sx, y: sy, vx: hero.aimX * 210 * S, vy: hero.aimY * 210 * S });
 }
+function updateCrystalQueue(dt) { if (crystalQ < 0) return; crystalQ -= dt; if (crystalQ > 0) return; crystalQ = -1; if (hero.dead || eqBow !== 2) return; arrows.push({ x: hero.x + hero.face * 7 * S, y: hero.y - 8 * S, vx: hero.aimX * 210 * S, vy: hero.aimY * 210 * S, crystal: true }); }
 function ownBow(i) { return i === 0 || (i === 1 && evoStage >= 1) || (i === 2 && weaponsOwned() >= 3); }
 function ownSword(i) { return i === 0 || (i === 1 && evoStage >= 4) || (i === 2 && weaponsOwned() >= 1) || (i === 3 && weaponsOwned() >= 2); }
 function ownShield(i) { return i === 0 || (i === 1 && evoStage >= 4) || (i === 2 && kingGear); }
@@ -740,7 +757,7 @@ function countFairyKill() {
 }
 function fairyCommand(silent) {      // silent = chamada automatica (modo automatico); comanda a fadinha a derrotar o monstro mais perto do heroi (so quando ela esta pronta; nao ataca o dragao)
   const F = fairy; if (fairyState !== 1 || F.cool > 0 || F.target || bossPhase !== 0 || hero.dead) return;
-  let best = null, bd = 1e18; for (const e of enemies) { if (e.type === 3) continue; const d = (e.x - hero.x) ** 2 + (e.y - hero.y) ** 2; if (d < bd) { bd = d; best = e; } }
+  let best = null, bd = 1e18; for (const e of enemies) { if (e.type === 3 || e.type === 7) continue; const d = (e.x - hero.x) ** 2 + (e.y - hero.y) ** 2; if (d < bd) { bd = d; best = e; } }
   if (best) { F.target = best; F.ph = 1; F.orbit = 0; F.cool = 30; } else if (!silent) say('Sem alvo');
 }
 function updateFairy(dt) {
@@ -752,7 +769,7 @@ function updateFairy(dt) {
   if (F.target && enemies.indexOf(F.target) < 0) { F.target = null; F.ph = 0; }
   if (bossPhase !== 0 || hero.dead) { F.target = null; F.ph = 0; }
   if (!F.target && bossPhase === 0 && !hero.dead) {
-    let bd = 1e18; for (const e of enemies) { if (!e.fairy || e.wave || e.type === 3) continue; const d = (e.x - F.x) ** 2 + (e.y - F.y) ** 2; if (d < bd) { bd = d; F.target = e; } }
+    let bd = 1e18; for (const e of enemies) { if (!e.fairy || e.wave || e.type === 3 || e.type === 7) continue; const d = (e.x - F.x) ** 2 + (e.y - F.y) ** 2; if (d < bd) { bd = d; F.target = e; } }
     if (F.target) { F.ph = 1; F.orbit = 0; }
   }
   const ox = F.x, oy = F.y;
@@ -905,7 +922,7 @@ function drawPowerArrow(a) {
   const l = Math.hypot(a.vx, a.vy); if (l < 1) return; const ux = a.vx / l, uy = a.vy / l, cc = ['#fff', '#78e6ff', '#3296ff', '#1e5adc'];
   for (let k = 0; k < 4; k++) rect(cc[k], a.x - ux * k * 2.2 * S - S, a.y - uy * k * 2.2 * S - S, 2 * S, 2 * S);
 }
-function enemyCap() { if (!playMode) return powerT > 0 ? 72 : 4; const cap = 4 * 2 / 3 * (1 + 0.1 * rupeeStep()); const b = Math.floor(cap); return b + (rnd() < cap - b ? 1 : 0); }
+function enemyCap() { if (!playMode) return powerT > 0 ? 72 : 4; const cap = 4 * 2 / 3 * (1 + 0.1 * rupeeStep()) * (phase2 ? 1.3 : 1); const b = Math.floor(cap); return b + (rnd() < cap - b ? 1 : 0); }
 function spawnRateMul() { return playMode ? 1 + 0.1 * rupeeStep() : (powerT > 0 ? 18 : 1); }
 function spawnType() { if (!playMode) return rnd() < 0.15 ? 4 : Math.floor(rnd() * 3); const r = rnd(); return r < 0.25 ? 0 : (r < 0.55 ? 1 : (r < 0.85 ? 2 : 4)); }   // 4 = bokoblin (15%)
 function setMaxHp(m) { const old = hero.maxHp; hero.maxHp = m; hero.hp = m > old ? Math.min(m, hero.hp + (m - old)) : Math.min(hero.hp, m); }
@@ -914,7 +931,7 @@ function spawn(type) {
   const edge = Math.floor(rnd() * 4), m = 6 * S; let x, y;
   if (edge === 0) { x = m; y = m * 3 + rnd() * (H - m * 6); } else if (edge === 1) { x = W - m; y = m * 3 + rnd() * (H - m * 6); }
   else if (edge === 2) { x = m * 3 + rnd() * (W - m * 6); y = 16 * S; } else { x = m * 3 + rnd() * (W - m * 6); y = H - m; }
-  const e = { type, x, y, vx: 0, vy: 0, kx: 0, ky: 0, t: 0, timer: 0.8 + rnd(), flash: 0, hp: type === 1 ? 50 : (type === 2 ? 50 : (type === 0 ? 200 : (type === 5 ? 250 : 100))), maxHp: 0, face: 1, mode: 0, tx: 0, ty: 0, rt: 0, moving: false };
+  const e = { type, x, y, vx: 0, vy: 0, kx: 0, ky: 0, t: 0, timer: 0.8 + rnd(), flash: 0, hp: (type === 1 ? 50 : (type === 2 ? 50 : (type === 0 ? 200 : (type === 5 ? 250 : 100)))) * (phase2 ? 2 : 1), maxHp: 0, face: 1, mode: 0, tx: 0, ty: 0, rt: 0, moving: false };
   e.maxHp = e.hp; puffs.push({ kind: 2, x, y, t: 0 }); if (fairyState === 1 && type !== 3 && rnd() < 0.20) e.fairy = true;      // a fadinha derrota 20% dos monsters que aparecem
   enemies.push(e); return e;
 }
@@ -942,11 +959,11 @@ function hurtHero(fx, fy, dmg = 1, ignoreInv = false) {
 }
 function doSwing() {
   const cx = hero.x + hero.face * 8 * S, R = 18 * S;
-  for (let i = enemies.length - 1; i >= 0; i--) { const e = enemies[i]; const dx = e.x - cx, dy = e.y - hero.y; const rad = e.type === 3 ? R + 14 * S * DK * (e.scale || 1) : R; if (dx * dx + dy * dy < rad * rad) damageEnemy(e, swordDamage()); }      // 150 comum | 300 Espada Mestre | 600 marreta | 450 espada de chamas
+  for (let i = enemies.length - 1; i >= 0; i--) { const e = enemies[i]; const dx = e.x - cx, dy = e.y - hero.y; const rad = e.type === 3 ? R + 14 * S * DK * (e.scale || 1) : (e.type === 7 ? R + 8 * S : R); if (dx * dx + dy * dy < rad * rad) damageEnemy(e, swordDamage()); }      // 150 comum | 300 Espada Mestre | 600 marreta | 450 espada de chamas
   for (let i = rocks.length - 1; i >= 0; i--) { const r = rocks[i]; const dx = r.x - cx, dy = r.y - (hero.y - 6 * S); if (dx * dx + dy * dy < R * R) { puffs.push({ kind: 1, x: r.x, y: r.y, t: 0 }); rocks.splice(i, 1); } }
 }
 function damageEnemy(e, dmg) {
-  if (e.type === 3 && e.t < 1.5) return;
+  if ((e.type === 3 || e.type === 7) && e.t < 1.5) return;
   e.hp -= dmg; e.flash = e.type === 3 ? 0.12 : 0.25;
   let dx = e.x - hero.x, dy = e.y - hero.y, d = Math.hypot(dx, dy); if (d < 1) { dx = hero.face; dy = 0; d = 1; }
   if (e.type !== 3) { e.kx = dx / d * 110 * S; e.ky = dy / d * 110 * S; }
@@ -954,7 +971,7 @@ function damageEnemy(e, dmg) {
   if (e.hp <= 0) {
     puffs.push({ kind: 0, x: e.x, y: e.y - 4 * S, t: 0 });
     enemies.splice(enemies.indexOf(e), 1); killCount++;
-    if (e.type === 3) { bossDefeated(e); return; }
+    if (e.type === 3 || e.type === 7) { bossDefeated(e); return; }
     if (!playMode) countKill();      // evolucao: conta todo monstro derrotado no automatico
     if (!playMode) countFairyKill();      // depois da roupa de rei: mais 50 monstros dao a fadinha
     if (!playMode && (e.type === 0 || e.type === 4)) countChestKill();      // bau do rei: so octoroks (vermelhos) e bokoblins contam (morcegos e gelatinas nao)
@@ -1006,6 +1023,8 @@ function updateEnemies(dt) {
           e.mode = 0; e.timer = (1.5 + rnd() * 1.5) * (rage ? 1 / 1.2 : 1);      // furia: bolas de fogo 20% mais frequentes
         }
       }
+    } else if (e.type === 7) {                            // Feiticeiro Sombrio (vilao da fase 2)
+      updateMage(e, dt);
     } else if (powerT > 0) {                              // poder do heroi: todos vao direto nele, com o dobro da velocidade
       const sp = (e.type === 0 ? 16 : (e.type === 1 ? 30 : (e.type === 2 ? 28 : 26))) * 2 * S;
       e.mode = 0; e.vx = ux * sp; e.vy = uy * sp; if (d > 3 * S) { e.x += e.vx * dt; e.y += e.vy * dt; }
@@ -1128,7 +1147,7 @@ function updateArrows(dt) {
     const a = arrows[i]; a.x += a.vx * dt; a.y += a.vy * dt;
     let gone = a.x < -30 || a.y < -30 || a.x > W + 30 || a.y > H + 30;
     for (let k = enemies.length - 1; k >= 0 && !gone; k--) {
-      const en = enemies[k], dx = en.x - a.x, dy = (en.y - (en.type === 1 ? 9 * S : (en.type === 5 ? 9 * S : (en.type === 3 ? 12 * S * DK * (en.scale || 1) : 4 * S)))) - a.y, hitR = en.type === 3 ? 14 * S * DK * (en.scale || 1) : (en.type === 5 ? 9 * S : 7 * S);
+      const en = enemies[k], dx = en.x - a.x, dy = (en.y - (en.type === 1 ? 9 * S : (en.type === 5 ? 9 * S : (en.type === 7 ? 14 * S : (en.type === 3 ? 12 * S * DK * (en.scale || 1) : 4 * S))))) - a.y, hitR = en.type === 3 ? 14 * S * DK * (en.scale || 1) : (en.type === 7 ? 11 * S : (en.type === 5 ? 9 * S : 7 * S));
       if (dx * dx + dy * dy < hitR * hitR) { damageEnemy(en, a.power ? 9999999 : 50 * (eqBow >= 1 ? 2 : 1)); gone = true; }      // flecha do poder azul = 9999999 (como a fadinha); dano do arco igual ao do dragao (50); arco prateado (evolucao 1): o dobro de dano (flecha de poder nao muda)
     }
     if (gone) arrows.splice(i, 1);
@@ -1335,6 +1354,7 @@ function enterPlay() {
 function setPlayMode(on) {
   const was = playMode;
   playMode = on; hero.attacking = false; hero.bowing = false; hero.bowT = 0; playPickT = 0; closeDeath(); resetBoss();
+  if (!on && phase2) { phase2 = false; buildSprites(); buildProps(); }      // saiu do jogo: a fase 2 acaba
   $('mAuto').setAttribute('aria-pressed', String(!on)); $('mPlay').setAttribute('aria-pressed', String(on));
   if (on) { if (!was) enterPlay(); if (calmState !== 0) endCalm(false); lastStep = rupeeStep(); setMaxHp(5 + Math.max(0, Math.min(3, lastStep - 3))); toast('Modo jogo ligado', touchMode ? 'Direcional: andar · botões: espada, arco, colher' : 'Mouse: andar · 1 espada · 2 arco · 3 colher', 4200); }
   else { setMaxHp(5); hero.rupees = 0; lastStep = 0; nextCalm = 120 + rnd() * 180; }
@@ -1359,12 +1379,60 @@ function fireExplode() {
   for (let k = 0; k < 18; k++) smokes.push({ x: fireX + (rnd() - 0.5) * 14 * S, y: fireY - rnd() * 6 * S, t: -rnd() * 0.7, sz: 3 + rnd() * 3 });
   fireK = 0; onFire.fill(false); reserved.fill(false); cookApples.length = 0;
 }
-function spawnDragon() {
+function startPhase2() {
+  phase2 = true; resetBoss(); buildSprites(); buildProps();
+  enemies.length = 0; rocks.length = 0; arrows.length = 0; items.length = 0; puffs.length = 0;
+  hero.rupees = 0; lastStep = 0; setMaxHp(Math.max(hero.maxHp, 8)); hero.hp = hero.maxHp; hero.dead = false; deathWait = false; closeDeath(); hero.inv = 2; hero.apples = 0; hero.x = W / 2; hero.y = H / 2; spawnTimer = 2; killsAtMax = 0;
+  say('Fase 2!');
+}
+function startPhase2Test() { if (!playMode) setPlayMode(true); startPhase2(); }      // atalho: direto na fase 2 (nivel 1)
+function spawnMage() {
+  bossSpawned = true; boss = { type: 7, x: fireX, y: fireY + 8 * S, vx: 0, vy: 0, kx: 0, ky: 0, t: 0, timer: 2, flash: 0, hp: 8000, maxHp: 8000, face: hero.x >= fireX ? 1 : -1, mode: 0, tx: 0, ty: 0, rt: 0, moving: false, sparkT: 0 };
+  enemies.push(boss); for (let k = 0; k < 8; k++) puffs.push({ kind: 2, x: fireX + (rnd() - 0.5) * 16 * S, y: fireY - rnd() * 12 * S, t: 0 });
+}
+function mageOrb(x, y, ang, spd) { rocks.push({ x, y, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd, fire: false, homing: false, life: 0, orb: true }); }
+function updateMage(e, dt) {
+  if (e.t < 1.5) return;      // ainda surgindo da fumaca
+  const rage = e.hp * 2 <= e.maxHp;
+  if (e.mode === 2) {      // sumiu: reaparece perto do heroi
+    e.rt -= dt;
+    if (e.rt <= 0) {
+      const a = rnd() * TAU, dist = (70 + rnd() * 40) * S;
+      e.x = Math.max(14 * S, Math.min(W - 14 * S, hero.x + Math.cos(a) * dist)); e.y = Math.max(30 * S, Math.min(H - 4 * S, hero.y + Math.sin(a) * dist * 0.7));
+      for (let k = 0; k < 6; k++) puffs.push({ kind: 2, x: e.x + (rnd() - 0.5) * 14 * S, y: e.y - rnd() * 18 * S, t: 0 });
+      e.mode = 0; e.timer = 0.8;
+    }
+    return;
+  }
+  e.sparkT -= dt;      // flutua devagar em volta do heroi (nunca encosta)
+  if (e.sparkT <= 0 || (e.tx - e.x) ** 2 + (e.ty - e.y) ** 2 < (3 * S) ** 2) {
+    const a = rnd() * TAU, dist = (75 + rnd() * 40) * S;
+    e.tx = Math.max(14 * S, Math.min(W - 14 * S, hero.x + Math.cos(a) * dist)); e.ty = Math.max(30 * S, Math.min(H - 4 * S, hero.y + Math.sin(a) * dist * 0.7)); e.sparkT = 2.5 + rnd() * 1.5;
+  }
+  const mx = e.tx - e.x, my = e.ty - e.y, md = Math.hypot(mx, my);
+  if (md > 1) { const v = (rage ? 30 : 22) * S * dt; e.x += mx / md * Math.min(md, v); e.y += my / md * Math.min(md, v); e.moving = true; } else e.moving = false;
+  e.timer -= dt; if (e.timer > 0) return;
+  const ox = e.x, oy = e.y - 16 * S, atk = Math.floor(rnd() * 4);
+  if (atk === 0) { const n = rage ? 16 : 12, off = rnd() * Math.PI; for (let i = 0; i < n; i++) mageOrb(ox, oy, off + i * TAU / n, 60 * S); }      // anel de esferas (12, ou 16 com furia)
+  else if (atk === 1) { const a0 = Math.atan2(hero.y - 6 * S - oy, hero.x - ox), n = rage ? 5 : 3; for (let i = 0; i < n; i++) mageOrb(ox, oy, a0 + (i - (n - 1) / 2) * 0.22, 88 * S); }      // tiro mirado em leque
+  else if (atk === 2) { for (let k = 0; k < 6; k++) puffs.push({ kind: 2, x: e.x + (rnd() - 0.5) * 14 * S, y: e.y - rnd() * 18 * S, t: 0 }); e.mode = 2; e.rt = 0.5; }      // teleporte
+  else {      // invoca 2 gelatinas sombrias (no maximo 4 vivas)
+    const alive = enemies.filter((m) => m.type === 2).length;
+    if (alive < 4) for (let i = 0; i < 2; i++) { const m = spawn(2); m.x = e.x + (i === 0 ? -10 : 10) * S; m.y = e.y + 2 * S; } else mageOrb(ox, oy, Math.atan2(hero.y - 6 * S - oy, hero.x - ox), 88 * S);
+  }
+  e.timer = (rage ? 1.3 : 2.1) + rnd() * 0.6;
+}
+function drawMage(e) {
+  if (e.mode === 2) return;      // invisivel durante o teleporte
+  shadow(e.x, e.y, 18); const sp = SP.mage, k = e.t < 1.5 ? 0.15 + 0.85 * (e.t / 1.5) : 1, w = sp.w * k, h = sp.h * k, bob = Math.sin(e.t * 3) * 2 * S + 6 * S;
+  ctx.drawImage(e.face > 0 ? sp.r : sp.l, Math.round(e.x - w / 2), Math.round(e.y - h - bob), Math.round(w), Math.round(h));
+  if (e.timer < 0.4 && e.t >= 1.5) { const ox = e.x + e.face * 9 * S, oy = e.y - h * 0.55 - bob; rect('#c878ff', ox - 3 * S, oy - 3 * S, 6 * S, 6 * S); rect('#f0dcff', ox - S, oy - S, 2 * S, 2 * S); }      // esfera carregando
+}function spawnDragon() {
   bossSpawned = true; boss = { type: 3, x: fireX, y: fireY + 8 * S, vx: 0, vy: 0, kx: 0, ky: 0, t: 0, timer: 1.5, flash: 0, hp: 5000, maxHp: 5000, face: hero.x >= fireX ? 1 : -1, mode: 0, tx: 0, ty: 0, rt: 0, moving: false, scale: 1, smokeT: 0, growT: 0, sparkT: 0, shockT: 8 };
   enemies.push(boss); for (let k = 0; k < 6; k++) puffs.push({ kind: 2, x: fireX + (rnd() - 0.5) * 16 * S, y: fireY - rnd() * 10 * S, t: 0 });
 }
 function bossDefeated(e) {
-  shocks.length = 0; bossPhase = 5; bossT = 0; endStarted = false; rewardSpawned = false; msgT = 0; bossDeadX = e.x; bossDeadY = e.y; bossDeadFace = e.face; rocks.length = 0;
+  shocks.length = 0; bossPhase = 5; bossT = 0; endStarted = false; rewardSpawned = false; msgT = 0; bossDeadX = e.x; bossDeadY = e.y; bossDeadFace = e.face; bossDeadMage = e.type === 7; rocks.length = 0;
   for (let k = 0; k < 8; k++) puffs.push({ kind: k % 2, x: e.x + (rnd() - 0.5) * 30 * S, y: e.y - rnd() * 24 * S, t: 0 });
 }
 // explosao do dragao: 1000 rupias em valores diferentes (2x300 + 4x50 + 5x20 + 8x10 + 3x5 + 5x1 = 1000)
@@ -1377,6 +1445,7 @@ function spawnDragonReward() {
 }
 function drawDragonGhost() {      // o dragao derrotado volta ao normal e pisca antes de explodir
   if (bossPhase !== 5 || rewardSpawned || Math.floor(bossT * 12) % 2 === 0) return;
+  if (bossDeadMage) { const m = SP.mage; shadow(bossDeadX, bossDeadY, 16); ctx.drawImage(m.r, Math.round(bossDeadX - m.w / 2), Math.round(bossDeadY - m.h), m.w, m.h); return; }
   const sp = SP.dragon[0]; shadow(bossDeadX, bossDeadY, 34 * DK);
   ctx.drawImage(bossDeadFace > 0 ? sp.r : sp.l, Math.round(bossDeadX - sp.w / 2), Math.round(bossDeadY - sp.h), sp.w, sp.h);
 }
@@ -1384,7 +1453,7 @@ function drawBossMsg() {
   if (msgT <= 0) return;
   const fs = Math.min(5.2 * S, (W - 12 * S) / 28 * 1.05), pad = 6 * S, bw = Math.min(W - 6 * S, 28 * fs + 2 * pad), bh = fs + 2 * pad, x = W / 2 - bw / 2, y = H / 2 - bh / 2;
   rect('#1c1624', x - S, y - S, bw + 2 * S, bh + 2 * S); rect('#2e283e', x, y, bw, bh); rect('#f7be46', x, y, bw, S);
-  text('ESPERE POR MAIS ATUALIZAÇÕES', W / 2, y + pad, '#ffdc5a', fs, 'center');
+  text(phase2 ? 'VOCÊ VENCEU A FASE 2!' : 'AGORA VEM A FASE 2!', W / 2, y + pad, '#ffdc5a', fs, 'center');
 }
 function bossLeave(dt) {
   moveHero(leaveX, leaveY, 52 * S, dt); if (hero.walking) hero.walkT += dt;
@@ -1409,7 +1478,7 @@ function updateBoss(dt) {
     if (atePhase1 && playEatT <= 0 && hero.hp >= hero.maxHp && !cookApples.length && !hero.dead) {
       bossPhase = 2; bossT = 0; const side = hero.x >= fireX ? 1 : -1; leaveX = Math.max(10 * S, Math.min(W - 10 * S, fireX + side * 95 * S)); leaveY = fireY + 10 * S; say('Hora de sair daqui!');
     }
-  } else if (bossPhase === 3) { if (!bossSpawned && bossT >= 0.9) spawnDragon(); if (bossT >= 3.2) bossPhase = 4; }
+  } else if (bossPhase === 3) { if (!bossSpawned && bossT >= 0.9) { if (phase2) spawnMage(); else spawnDragon(); } if (bossT >= 3.2) bossPhase = 4; }
   else if (bossPhase === 5) {
     // 0-1,3 s: o dragao volta ao normal (sem vermelho, tamanho normal) e pisca; depois EXPLODE e solta 1000 rupias
     if (bossT >= 1.3 && !rewardSpawned) { rewardSpawned = true; spawnDragonReward(); }
@@ -1441,7 +1510,7 @@ function doRetry() {
 function showCredits() {
   const c = $('credits'); c.hidden = false; c.classList.remove('rolling'); toastHide();
   setTimeout(() => { c.classList.add('rolling'); }, 4500);
-  setTimeout(() => { c.hidden = true; c.classList.remove('rolling'); setPlayMode(false); }, 4500 + 26500);
+  setTimeout(() => { c.hidden = true; c.classList.remove('rolling'); if (!phase2) startPhase2(); else setPlayMode(false); }, 4500 + 26500);      // depois do dragao comeca a FASE 2; depois do Feiticeiro acaba
 }
 function toastHide() { $('toast').classList.remove('on'); }
 
@@ -1461,7 +1530,7 @@ function step(dt) {
   if (hero.apples < 5) toastShown = false;
   if (cookState === 0 && calmState === 0 && bossPhase === 0 && powerT <= 0 && !lootHold && hero.apples >= 5 && !enemies.length && !rocks.length && !hero.dead && !hero.attacking && !hero.bowing && !playMode) { cookState = 1; cookT = 0; fireK = 0; fireX = W / 2; fireY = H / 2; onFire.fill(false); }
   updateCookApples(dt);
-  updateEnemies(dt); updateRocks(dt); updateShocks(dt); updateArrows(dt); updateItems(dt);
+  updateEnemies(dt); updateCrystalQueue(dt); updateRocks(dt); updateShocks(dt); updateArrows(dt); updateItems(dt);
   for (let i = flyApples.length - 1; i >= 0; i--) { flyApples[i].t += dt; if (flyApples[i].t >= 0.6) { hero.apples++; puffs.push({ kind: 1, x: hero.x + hero.face * 6 * S, y: hero.y - 20 * S, t: 0 }); flyApples.splice(i, 1); } }
   for (const t of trees) for (let i = 0; i < 5; i++) if (!t.has[i]) { t.regrow[i] -= dt; if (t.regrow[i] <= 0) t.has[i] = true; }
   for (let i = puffs.length - 1; i >= 0; i--) { puffs[i].t += dt; if (puffs[i].t > 0.45) puffs.splice(i, 1); }
@@ -1612,6 +1681,7 @@ function drawEnemy(e) {
     const k = (e.t < 1.5 ? 0.15 + 0.85 * (e.t / 1.5) : 1) * (e.scale || 1), sp = ((e.hp * 2 <= e.maxHp && e.growT < 3 && Math.floor(time * 8) % 2 === 0) ? SP.dragonGlow : (e.hp * 2 <= e.maxHp ? SP.dragonRed : SP.dragon))[e.mode === 1 ? 1 : 0], w = sp.w * k, h = sp.h * k, bob = e.moving ? Math.abs(Math.sin(e.t * 7)) * 2 * S : 0;
     ctx.drawImage(right ? sp.r : sp.l, Math.round(e.x - w / 2), Math.round(e.y - h - bob), Math.round(w), Math.round(h)); return;
   }
+  if (e.type === 7) { drawMage(e); return; }
   if (e.type === 0) { shadow(e.x, e.y, 12); const fr = (e.mode === 0 && (e.vx !== 0 || e.vy !== 0)) ? Math.floor(e.t * 6) % 2 : 0; spr(SP.octo[fr], e.x, e.y, right); }
   else if (e.type === 1) { shadow(e.x, e.y, 9); spr(SP.bat[Math.floor(e.t * 9) % 2], e.x, e.y - (9 * S + Math.sin(e.t * 6) * 2 * S), right); }
   else if (e.type === 5) drawRider(e);
@@ -1642,12 +1712,12 @@ function drawHud() {
   for (let i = 0; i < hero.maxHp; i++) ctx.drawImage(i + 1 <= hero.hp ? SP.heart.r : (i + 0.5 <= hero.hp ? SP.heartH.r : SP.heartE.r), Math.round(x0 + i * hw), Math.round(y0));
   const rx = x0 + hero.maxHp * hw + 4 * S; ctx.drawImage(SP.rupee[0].r, Math.round(rx), Math.round(y0 - S)); text('x' + hero.rupees, rx + SP.rupee[0].w + 2 * S, y0 + S * 0.5, '#fff', 3.4 * S);
   const ax = rx + SP.rupee[0].w + 2 * S + 18 * S; ctx.drawImage(SP.appleHud.r, Math.round(ax), Math.round(y0 - S)); text('x' + hero.apples, ax + SP.appleHud.w + 2 * S, y0 + S * 0.5, '#fff', 3.4 * S);
-  if (playMode) text('NV ' + (rupeeStep() + 1), ax + SP.appleHud.w + 2 * S + 16 * S, y0 + S * 0.5, '#ffdc5a', 3.4 * S);
+  if (playMode) text((phase2 ? 'F2 ' : '') + 'NV ' + (rupeeStep() + 1), ax + SP.appleHud.w + 2 * S + 16 * S, y0 + S * 0.5, '#ffdc5a', 3.4 * S);
   if (!playMode) text(powerT > 0 ? 'PODER! ' + Math.ceil(powerT) + 's' : 'GELATINAS ' + slimeKills + '/' + SLIMES_FOR_POWER, W - 6 * S, 4 * S, powerT > 0 ? '#78e6ff' : '#96c8ff', 3.4 * S, 'right');
   if (boss && enemies.includes(boss)) {
     const bw = 60 * S, bh = 4 * S, x = W / 2 - bw / 2, y = 15 * S, fr = Math.max(0, boss.hp / boss.maxHp);
     rect('#1c1624', x - S, y - S, bw + 2 * S, bh + 2 * S); rect('#461420', x, y, bw, bh); rect('#e13739', x, y, bw * fr, bh); rect('#ff8278', x, y, bw * fr, S);
-    text('Dragão', W / 2, y + bh + 2 * S, '#fff', 3.4 * S, 'center');
+    text(boss && boss.type === 7 ? 'Feiticeiro Sombrio' : 'Dragão', W / 2, y + bh + 2 * S, '#fff', 3.4 * S, 'center');
   }
   if (playMode && !touchMode) {
     const lines = ['COMANDOS', 'Mouse apertado: andar', '1: espada', '2: arco', '3: colher / assar / comer maçã', ...(chestState === 1 ? ['4: abrir o baú'] : []), 'Espaço: pausar'], fs = 3 * S, lh = fs + 2 * S;
@@ -1666,7 +1736,7 @@ function render() {
   if (cookState !== 0 || bossPhase === 1) ents.push({ y: fireY, f: drawFire });
   ents.sort((a, b) => a.y - b.y).forEach((o) => o.f());
   drawFairy();
-  for (const r of rocks) { if (r.fire) { const fs = SP.fire[Math.floor(time * 12) % 2]; const k = r.homing ? 1.4 + (r.life > 2 ? 0.18 * Math.sin(r.life * 34) : 0) : 1, w = fs.w * k, h = fs.h * k; ctx.drawImage(fs.r, Math.round(r.x - w / 2), Math.round(r.y - h / 2), Math.round(w), Math.round(h)); } else if (r.arrow) drawArrow(r.x, r.y, r.vx, r.vy); else spr(SP.rock, r.x, r.y + 2 * S, true); }
+  for (const r of rocks) { if (r.orb) { rect('#1c1624', r.x - 4 * S, r.y - 4 * S, 8 * S, 8 * S); rect('#9646e6', r.x - 3 * S, r.y - 3 * S, 6 * S, 6 * S); rect('#ebd2ff', r.x - S, r.y - S, 2 * S, 2 * S); } else if (r.fire) { const fs = SP.fire[Math.floor(time * 12) % 2]; const k = r.homing ? 1.4 + (r.life > 2 ? 0.18 * Math.sin(r.life * 34) : 0) : 1, w = fs.w * k, h = fs.h * k; ctx.drawImage(fs.r, Math.round(r.x - w / 2), Math.round(r.y - h / 2), Math.round(w), Math.round(h)); } else if (r.arrow) drawArrow(r.x, r.y, r.vx, r.vy); else spr(SP.rock, r.x, r.y + 2 * S, true); }
   for (const a of arrows) { if (a.power) drawPowerArrow(a); else drawArrow(a.x, a.y, a.vx, a.vy); if (a.crystal) rect('#78ebf5', a.x - S, a.y - S, 2 * S, 2 * S); }
   for (const fa of flyApples) { const u = Math.min(1, fa.t / 0.6), tx = hero.x + hero.face * 6 * S, ty = hero.y - 20 * S; spr(SP.apple, fa.x0 + (tx - fa.x0) * u, fa.y0 + (ty - fa.y0) * u - Math.sin(u * Math.PI) * 6 * S + SP.apple.h / 2, true); }
   for (const a of cookApples) { const u = Math.min(1, a.t / a.dur); drawBakeApple(a.dir === 1 ? 0 : 3, a.x0 + (a.x1 - a.x0) * u, a.y0 + (a.y1 - a.y0) * u - Math.sin(u * Math.PI) * 10 * S, 1.5); }
@@ -1688,6 +1758,8 @@ $('mPlay').addEventListener('click', () => { setPlayMode(true); closeMenu(); });
 $('mEnemy').addEventListener('click', () => { spawn(Math.floor(rnd() * 3)); closeMenu(); });
 $('mHeal').addEventListener('click', () => { hero.hp = hero.maxHp; closeMenu(); });
 $('mNap').addEventListener('click', () => { if (!playMode && calmState === 0) nextCalm = 0; closeMenu(); });
+$('mPhase2').addEventListener('click', () => { $('intro').hidden = true; startPhase2Test(); closeMenu(); });
+if (/[?&]fase2\b/.test(location.search)) setTimeout(() => { $('intro').hidden = true; startPhase2Test(); }, 400);
 $('mPause').addEventListener('click', () => { setPaused(!paused); closeMenu(); });
 $('evoBtn').addEventListener('click', useEvoItem);
 function setSizeMode(m) {
@@ -1782,7 +1854,7 @@ function renderInv() {
       if (!owns(cat, id)) return;
       const b = document.createElement('button'); b.className = 'card'; const eq = getEq(cat) === id; b.setAttribute('aria-pressed', String(eq));
       b.appendChild(iconCanvas(cat, id)); const s = document.createElement('span'); s.textContent = eq ? 'EQUIPADO' : name; b.appendChild(s);
-      b.addEventListener('click', () => { if (cat === 0) invBow = true; else if (cat === 1 || cat === 2) invBow = false; equipItem(cat, id); }); const show = () => { info.innerHTML = '<b>' + name + '</b><br>' + INV_DESC[cat][id];      // nome e descricao em duas linhas }; b.addEventListener('mouseenter', show); b.addEventListener('focus', show);
+      b.addEventListener('click', () => { if (cat === 0) invBow = true; else if (cat === 1 || cat === 2) invBow = false; equipItem(cat, id); }); const show = () => { info.innerHTML = '<b>' + name + '</b><br>' + INV_DESC[cat][id]; }; /* nome e descricao empilhados em duas linhas */ b.addEventListener('mouseenter', show); b.addEventListener('focus', show);
       row.appendChild(b);
     });
   };
@@ -1858,6 +1930,7 @@ function boot() {
 window.__jogo = { hero, enemies, rocks, arrows, items, trees, step, render, setPlayMode, spawn, get S() { return S; }, get W() { return W; }, get H() { return H; },
   get st() { return { playMode, calmState, cookState, bossPhase, killsAtMax, deathWait, fireK, onFire: onFire.slice(), bakeTs: bakeTs.slice(), phase, boss }; },
   set(o) { if ('mx' in o) mx = o.mx; if ('my' in o) my = o.my; if ('mouse' in o) mouseDown = o.mouse; if ('k' in o) Object.assign(touchKeys, o.k); if ('killsAtMax' in o) killsAtMax = o.killsAtMax; if ('nextCalm' in o) nextCalm = o.nextCalm; if ('forceLong' in o) forceLong = o.forceLong; },
+  phase2Test: { start: startPhase2Test, spawnMage() { fireX = W / 2; fireY = H / 2; bossPhase = 4; spawnMage(); return boss; }, get info() { return { phase2, bossPhase, step: rupeeStep(), orbs: rocks.filter((r) => r.orb).length, bossHp: boss && boss.hp }; } },
   weaponsTest: { all() { wpnTest = true; }, setKills(n) { wpnKills = n; wpnKnown = 0; while (wpnKnown < 3 && wpnKills >= WPN_THR[wpnKnown]) wpnKnown++; }, equip(sw, bow) { eqSword = sw; eqBow = bow; buildSprites(); buildProps(); }, get info() { return { wpnKills, wpnKnown, eqSword, eqBow, owned: weaponsOwned(), dmg: swordDamage() }; } },
   setsTest: { all() { setsTest = true; buildSprites(); buildProps(); }, setKills(n) { setKills = n; setsKnown = 0; while (setsKnown < 5 && setKills >= SET_THR[setsKnown]) setsKnown++; }, equip(i) { eqHat = 3 + i; eqTunic = 3 + i; buildSprites(); buildProps(); }, get info() { return { evoKills, setKills, setsKnown, eqHat, eqTunic, owned: setsOwned() }; } },
   fairyTest: { give() { kingGear = true; fairyState = 1; }, giveSkin(n) { kingGear = true; fairyState = 1; fairySkin = n || 1; eqFairy = fairySkin; }, get look() { return eqFairy; }, setKills(n) { kingGear = true; fairyState = 0; fairyKills = n; }, get info() { return { fairyState, fairyKills, ph: fairy.ph, x: fairy.x, y: fairy.y }; } },
