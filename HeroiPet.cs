@@ -1790,7 +1790,7 @@ namespace HeroiPet
                     Enemy en = enemies[k];
                     float dx = en.X - a.X, dy = (en.Y - (en.Type == 1 ? 9 * S : (en.Type == 5 ? 9 * S : (en.Type == 3 ? 12 * S * DK * en.Scale : 4 * S)))) - a.Y;
                     float hitR = en.Type == 3 ? 14 * S * DK * en.Scale : (en.Type == 5 ? 9 * S : 7 * S);
-                    if (dx * dx + dy * dy < hitR * hitR) { DamageEnemy(en, (en.Type == 3 ? 50 : 1) * ((!a.Power && eqBow == 1) ? 2 : 1)); gone = true; }      // arco prateado (evolucao 1): o dobro de dano (flecha de poder nao muda)
+                    if (dx * dx + dy * dy < hitR * hitR) { DamageEnemy(en, 50 * ((!a.Power && eqBow == 1) ? 2 : 1)); gone = true; }      // arco prateado (evolucao 1): o dobro de dano (flecha de poder nao muda)
                 }
                 if (gone) arrows.RemoveAt(i);
             }
@@ -3387,7 +3387,7 @@ namespace HeroiPet
             else if (edge == 1) { e.X = W - m; e.Y = m * 3 + (float)rnd.NextDouble() * (H - m * 6); }
             else if (edge == 2) { e.X = m * 3 + (float)rnd.NextDouble() * (W - m * 6); e.Y = 16 * S; }
             else { e.X = m * 3 + (float)rnd.NextDouble() * (W - m * 6); e.Y = H - m; }
-            e.HP = type == 1 ? 50 : (type == 2 ? 50 : (type == 0 ? 200 : (type == 5 ? 250 : 3)));      // morcego 50, gelatina 50, octorok (vermelho) 200, bokoblin a cavalo 250, bokoblin comum 3
+            e.HP = type == 1 ? 50 : (type == 2 ? 50 : (type == 0 ? 200 : (type == 5 ? 250 : 100)));      // morcego 50, gelatina 50, octorok (vermelho) 200, bokoblin a cavalo 250, bokoblin comum 100
             e.Timer = 0.8f + (float)rnd.NextDouble();
             puffs.Add(new Puff { Kind = 2, X = e.X, Y = e.Y });
             if (fairyState == 1 && type != 3 && rnd.NextDouble() < 0.20) e.Fairy = true;      // a fadinha derrota 20% dos monstros que aparecem
@@ -3690,7 +3690,7 @@ namespace HeroiPet
             {
                 Enemy e = enemies[i];
                 float dx = e.X - cx, dy = e.Y - hy;
-                { float rad = e.Type == 3 ? R + 14 * S * DK * e.Scale : R; if (dx * dx + dy * dy < rad * rad) DamageEnemy(e, (e.Type == 3 ? 150 : 1) * (eqSword == 1 ? 2 : 1)); }      // espada azulada (evolucao 4): o dobro de dano
+                { float rad = e.Type == 3 ? R + 14 * S * DK * e.Scale : R; if (dx * dx + dy * dy < rad * rad) DamageEnemy(e, 150 * (eqSword == 1 ? 2 : 1)); }      // espada azulada (evolucao 4): o dobro de dano
             }
             for (int i = rocks.Count - 1; i >= 0; i--)
             {

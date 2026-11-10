@@ -1,5 +1,9 @@
 # Changelog (resumo)
 
+## 09/11/2026 — Vida dos monstros e dano das armas
+- Vida: bokoblin a cavalo **250**, octorok **200**, bokoblin normal **100**, gelatina **50**, morcego **50**. A fadinha continua matando na hora.
+- Dano das armas igual ao do dragão em todos os monstros: arco **50** (arco de metal **100**), espada **150** (Espada Mestre **300**).
+
 ## 09/11/2026 — Roupa de rei no inventário
 - Ícone da **roupa de rei** em pixel art: **blusa** vermelha (mesmo corte das outras) com **faixa dourada no pescoço** e **barra dourada** embaixo.
 
