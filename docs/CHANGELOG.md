@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 10/11/2026 — 3 armas novas (marreta, espada de chamas, arco de cristal)
+- **Marreta trovão** (500 monstros): usa as **duas mãos** (sem escudo), golpe lento, área grande, 600 de dano. **Espada de chamas** (1000): lâmina de fogo ondulada, golpes muito rápidos, 450 de dano. **Arco de cristal** (1500): atira **2 flechas de cristal em leque** (100 de dano cada). Liberadas **uma depois da outra**, 500 monstros cada, por um contador próprio que **começa em zero ao instalar** (registro `MonstrosArmas` / `heroi_monstros_armas`), só no automático. Já vêm equipadas ao liberar; aparecem em Armas. Teste: `--armas` / `?armas`. Valores provisórios para o usuário refinar.
+
 ## 10/11/2026 — Nova ordem dos prêmios
 - O **conjunto de rei** só conta **depois da fadinha**; a **fadinha** vem 50 monstros depois das 4 evoluções. A **fadinha rosa** vem **100 monstros depois do baú** (folha 1000, estrela 1500). Tabela completa em REGRAS-DO-JOGO.md.
 

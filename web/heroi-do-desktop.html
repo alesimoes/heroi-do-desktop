@@ -735,7 +735,7 @@ function saveFairy() { try { localStorage.setItem('heroi_monstros_fada', String(
 function countFairyKill() {
   if (fairyState === 1 && kingGear && fairySkin < 3) {      // depois da fadinha: 500 / 1000 / 1500 monstros dao as aparencias 1 (rosa), 2 (folha) e 3 (estrela)
     fairyKills2++; if (fairyKills2 % 25 === 0) saveFairy();
-    if (fairyKills2 >= (fairySkin === 0 ? 100 : FAIRY_SKIN_NEEDED * (fairySkin + 1)))      // rosa: 100 monstros depois do bau; folha 1000; estrela 1500
+    if (fairyKills2 >= (fairySkin === 0 ? 100 : FAIRY_SKIN_NEEDED * (fairySkin + 1)))      // rosa: 100 monstros depois do bau (conjunto de rei); folha 1000; estrela 1500
     { fairySkin++; eqFairy = fairySkin; saveFairy(); say('Fadinha nova!'); for (let k = 0; k < 10; k++) puffs.push({ kind: 1, x: fairy.x + (rnd() - 0.5) * 24 * S, y: fairy.y + (rnd() - 0.5) * 16 * S, t: 0 }); }
     return;
   }

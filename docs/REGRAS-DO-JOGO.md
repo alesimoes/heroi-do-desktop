@@ -180,3 +180,10 @@ limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão 
 | — | Conjuntos areia/gelo/fogo/noite/mar | 4500 / 6000 / 8000 / 10500 / 14000 monstros (contador próprio, começa ao instalar) |
 | — | Poder (15 s) | 20 gelatinas |
 | — | Modo jogo | níveis por 25 rupias; NV 7 = cavaleiros; Dragão dá 1000 rupias |
+
+## Armas novas (uma depois da outra, 500 monstros cada)
+- Contador próprio (`wpnKills`/`MonstrosArmas`, começa em ZERO ao instalar a versão; só conta no automático): **500 → Marreta trovão · 1000 → Espada de chamas · 1500 → Arco de cristal**. Ao liberar já vem equipada (aviso NOVO ITEM).
+- **Marreta trovão:** ocupa as **duas mãos** (o escudo some e não bloqueia pedras), golpe lento (acerta aos 0,30 s, dura 0,55 s, recarga 0,40 s), **área 27 S** (a normal é 18), **600** de dano.
+- **Espada de chamas:** lâmina laranja ondulada com miolo amarelo e guarda vermelha; acerta aos 0,07 s, dura 0,20 s, recarga 0,08 s; **450** de dano.
+- **Arco de cristal:** turquesa com joia laranja; **2 flechas** em leque (±0,11 rad), **100** de dano cada, ponta de cristal.
+- Dano das armas: espada 150 · Espada Mestre 300 · marreta 600 · espada de chamas 450 · flecha 50 (×2 prateado/cristal). Teste: `--armas` / `?armas`.
