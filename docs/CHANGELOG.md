@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 10/11/2026 — Franja maior
+- A franja do herói ficou **um pouco maior**: o cabelo cobre mais a testa e desce um pouco sobre o olho (de perfil) e um pixel a mais na testa (de frente e dormindo).
+
 ## 10/11/2026 — Herói de frente
 - Cabeça redonda (cabelo em volta do rosto), **franja cobrindo o olho direito do herói** e pé corrigido (alinhado com a perna). Desktop e web.
 
