@@ -2352,6 +2352,7 @@ namespace HeroiPet
         // Depois de conseguir a roupa de rei, mais 50 monstros derrotados (modo automatico) dao uma fadinha. Ela voa perto da cabeca do heroi e derrota 20% dos
         // monstros que aparecem: voa ate o monstro, gira rapido em volta da cabeca dele (um pouco acima) e ele cai. Vale nos dois modos.
         const int FairyKillsNeeded = 50;
+        const int FairyPinkKillsNeeded = 100;      // 100 monstros depois do bau: fadinha rosa
         const int FairySkinKillsNeeded = 500;      // 500 monstros depois da fadinha: asas azul escuro com rosa
         int fairyKills2, fairySkin, eqFairy;      // eqFairy: aparencia escolhida no inventario (0 normal | 1 rosa)
         int fairyKills, fairyState, fairyPh;      // fairyState: 0 contando | 1 tem a fadinha;  fairyPh: 0 segue o heroi | 1 voa ate o alvo | 2 gira em volta
@@ -2378,11 +2379,11 @@ namespace HeroiPet
         }
         void CountFairyKill()
         {
-            if (fairyState == 1 && fairySkin < 3)      // depois da fadinha: 500 / 1000 / 1500 monstros dao as aparencias 1 (rosa), 2 (folha) e 3 (estrela)
+            if (fairyState == 1 && kingGear && fairySkin < 3)      // depois do bau (conjunto de rei): 100 / 1000 / 1500 monstros dao as aparencias 1 (rosa), 2 (folha) e 3 (estrela)
             {
                 fairyKills2++;
                 if (fairyKills2 % 25 == 0) SaveFairy();
-                if (fairyKills2 >= FairySkinKillsNeeded * (fairySkin + 1)) { fairySkin++; eqFairy = fairySkin; SaveFairy(); Say("Fadinha nova!"); for (int k = 0; k < 10; k++) puffs.Add(new Puff { Kind = 1, X = fx + ((float)rnd.NextDouble() - 0.5f) * 24 * S, Y = fy + ((float)rnd.NextDouble() - 0.5f) * 16 * S }); }
+                if (fairyKills2 >= (fairySkin == 0 ? FairyPinkKillsNeeded : FairySkinKillsNeeded * (fairySkin + 1))) { fairySkin++; eqFairy = fairySkin; SaveFairy(); Say("Fadinha nova!"); for (int k = 0; k < 10; k++) puffs.Add(new Puff { Kind = 1, X = fx + ((float)rnd.NextDouble() - 0.5f) * 24 * S, Y = fy + ((float)rnd.NextDouble() - 0.5f) * 16 * S }); }
                 return;
             }
             if (fairyState != 0 || evoStage < 4) return;      // a fadinha vem depois das 4 evolucoes (e antes do conjunto de rei)

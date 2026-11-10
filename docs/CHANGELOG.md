@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 10/11/2026 — Nova ordem dos prêmios
+- O **conjunto de rei** só conta **depois da fadinha**; a **fadinha** vem 50 monstros depois das 4 evoluções. A **fadinha rosa** vem **100 monstros depois do baú** (folha 1000, estrela 1500). Tabela completa em REGRAS-DO-JOGO.md.
+
 ## 10/11/2026 — Mais duas aparências da fadinha
 - Novas aparências: **folha** (corpo verde, asas douradas; +1000 monstros depois da fadinha) e **estrela** (corpo violeta, asas turquesa; +1500). A rosa continua em +500. Aparecem em Roupas > Fadinha. Teste: `--fada4` / `?fada4`.
 

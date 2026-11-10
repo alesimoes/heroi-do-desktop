@@ -165,3 +165,18 @@ limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão 
 - Cada conjunto troca gorro, blusa, calça e sapatos de uma só vez de cor (o gorro e a blusa podem ser combinados de conjuntos diferentes no inventário). Libera por um **contador próprio (`setKills`, registro `MonstrosConjuntos` / `localStorage heroi_monstros_conjuntos`) que começa em ZERO ao instalar esta versão** — não herda os monstros de versões antigas (`evoKills` continua valendo só para as evoluções, que não mudam). Só conta no automático: **areia 4500 · gelo 6000 · fogo 8000 · noite 10500 · mar 14000**. Ao liberar, já vem vestido (aviso NOVO ITEM + partículas). Sem animação se já estava liberado ao abrir o jogo.
 - Cores (gorro / blusa / calça / sapatos): areia #E2BA60 / #CD7634 / #966437 / #603A1E · gelo #CDECFF / #78BEEB / #507DBE / #EBF5FF · fogo #E1481E / #B9261C / #462624 / #FAAF2D · noite #5242B4 / #3A328C / #221E50 / #CDAF46 · mar #1EA0AA / #1C7D96 / #14506E / #F0E6C8.
 - Código: `Sets`/`SetThr`/`SetsOwned`/`UnlockSet` (desktop) e `OUTSETS`/`SET_THR`/`setsOwned`/`unlockSet` (web). Teste: `--conjuntos` / `?conjuntos`.
+
+## Tabela de prêmios (ordem em que o herói ganha)
+| Ordem | Prêmio | Quando libera |
+|---|---|---|
+| 1 | Arco de metal (dobro de dano) | 1000 monstros (total, automático) |
+| 2 | Gorro roxo | 1500 |
+| 3 | Blusa azul | 2000 |
+| 4 | Espada Mestre + escudo vermelho | 3000 |
+| 5 | **Fadinha** | +50 monstros depois das 4 evoluções |
+| 6 | **Conjunto de rei** (coroa, manto, calça, sapatos, escudo roxo) | depois da fadinha: 5000 octoroks+bokoblins, abrir o baú com a tecla 4 |
+| 7 | Fadinha rosa | +100 monstros depois do baú |
+| 8 | Fadinha folha / estrela | 1000 / 1500 monstros depois do baú |
+| — | Conjuntos areia/gelo/fogo/noite/mar | 4500 / 6000 / 8000 / 10500 / 14000 monstros (contador próprio, começa ao instalar) |
+| — | Poder (15 s) | 20 gelatinas |
+| — | Modo jogo | níveis por 25 rupias; NV 7 = cavaleiros; Dragão dá 1000 rupias |
