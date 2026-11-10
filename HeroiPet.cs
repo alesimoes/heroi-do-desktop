@@ -1172,7 +1172,7 @@ namespace HeroiPet
         {
             if (time >= newItemUntil) return;
             string t = "NOVO ITEM"; SizeF z = g.MeasureString(t, font);
-            float w = z.Width + 10 * S, h = z.Height + 4 * S, x = W - w - 6 * S, y = 16 * S;
+            float w = z.Width + 10 * S, h = z.Height + 4 * S, x = W - w - 6 * S, y = H - h - 8 * S;      // canto inferior direito
             using (SolidBrush k = new SolidBrush(Color.FromArgb(28, 22, 36))) using (SolidBrush bg = new SolidBrush(Color.FromArgb(46, 40, 62))) using (SolidBrush gold = new SolidBrush(Color.FromArgb(247, 190, 70)))
             {
                 g.FillRectangle(k, x - S, y - S, w + 2 * S, h + 2 * S); g.FillRectangle(bg, x, y, w, h); g.FillRectangle(gold, x, y, S, h);
@@ -1183,7 +1183,7 @@ namespace HeroiPet
         {
             if (stage == 1) eqBow = 1; else if (stage == 2) eqHat = 1; else if (stage == 3) eqTunic = 1; else if (stage == 4) { eqSword = 1; eqShield = 1; } else if (stage == 5) { eqHat = 2; eqTunic = 2; eqShield = 2; }
             ValidateEquip(); SaveEquip();
-            newItemUntil = time + 3f;      // aviso "NOVO ITEM" no canto direito por 3 s
+            newItemUntil = time + 5f;      // aviso pequeno "NOVO ITEM" no canto inferior direito por 5 s
         }
         public void EquipItem(int cat, int id)      // cat: 0 arco, 1 espada, 2 escudo, 3 gorro, 4 roupa
         {
@@ -2075,7 +2075,7 @@ namespace HeroiPet
             if (fairyKills % 10 == 0) SaveFairy();
             if (fairyKills >= FairyKillsNeeded)
             {
-                fairyState = 1; SaveFairy(); fx = hx; fy = hy - 26 * S; Say("Uma fadinha!");
+                fairyState = 1; SaveFairy(); newItemUntil = time + 5f; fx = hx; fy = hy - 26 * S; Say("Uma fadinha!");
                 for (int k = 0; k < 10; k++) puffs.Add(new Puff { Kind = 1, X = fx + ((float)rnd.NextDouble() - 0.5f) * 24 * S, Y = fy + ((float)rnd.NextDouble() - 0.5f) * 16 * S });
             }
         }
