@@ -1704,11 +1704,11 @@ function appleIcon() { const c = document.createElement('canvas'); c.width = c.h
 function drawHeroFrontPreview() {
   spr(SP.frontInv, hero.x, hero.y, true);      // mesma aparencia atual de frente (cabeca e franja da pausa), com o corpo mais estreito
   if (!previewBare) {
-    drawShieldBody(hero.x - 10 * S, hero.y - 9 * S);      // escudo no braco esquerdo, encostado no corpo
+    drawShieldBody(hero.x - 9 * S, hero.y - 9 * S);      // escudo no braco esquerdo, encostado no corpo
     if (invBow) { const bx = hero.x + 7 * S, by = hero.y - 7 * S; ctx.lineCap = 'butt'; ctx.lineWidth = 4 * S; ctx.strokeStyle = '#1c1624'; ctx.beginPath(); ctx.ellipse(bx, by, 3 * S, 7 * S, 0, -Math.PI / 2, Math.PI / 2); ctx.stroke(); ctx.lineWidth = 2 * S; ctx.strokeStyle = eqBow === 1 ? '#c8cdd7' : '#87552d'; ctx.beginPath(); ctx.ellipse(bx, by, 3 * S, 7 * S, 0, -Math.PI / 2, Math.PI / 2); ctx.stroke(); ctx.lineWidth = Math.max(1, S * 0.6); ctx.strokeStyle = '#ebebeb'; ctx.beginPath(); ctx.moveTo(bx, by - 7 * S); ctx.lineTo(bx, by + 7 * S); ctx.stroke(); }
     else {
       const hx0 = hero.x + 5 * S, hy0 = hero.y - 6 * S, ang = -80 * Math.PI / 180, dx = Math.cos(ang), dy = Math.sin(ang), gx = hx0 - dx * 4 * S, gy = hy0 - dy * 4 * S;
-      drawSword(hx0, hy0, -80, 1);
+      drawSword(hx0, hy0, -80, 1);      // cabo sem quadrado no fim
       ctx.lineCap = 'butt'; ctx.strokeStyle = '#1c1624'; ctx.lineWidth = 3.4 * S; ctx.beginPath(); ctx.moveTo(hx0, hy0); ctx.lineTo(gx, gy); ctx.stroke();
       ctx.strokeStyle = eqSword === 1 ? '#503796' : '#87552d'; ctx.lineWidth = 2 * S; ctx.beginPath(); ctx.moveTo(hx0, hy0); ctx.lineTo(gx, gy); ctx.stroke();
     }

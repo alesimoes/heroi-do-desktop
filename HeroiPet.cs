@@ -1387,7 +1387,7 @@ namespace HeroiPet
             Spr(g, heroFrontInv, hx, hy, true);      // mesma aparencia atual de frente (cabeca e franja da pausa), com o corpo mais estreito
             if (!bare)
             {
-                DrawShieldBody(g, hx - 10 * S, hy - 9 * S);      // escudo no braco esquerdo, encostado no corpo (sem cobrir o rosto)
+                DrawShieldBody(g, hx - 9 * S, hy - 9 * S);      // escudo no braco esquerdo, encostado no corpo (sem cobrir o rosto)
                 if (bow) DrawFrontBow(g, hx + 7 * S, hy - 7 * S); else DrawSwordAt(g, hx + 5 * S, hy - 6 * S, -80f);
             }
             if (menuEatT > 0)      // comendo a maca crua, de frente
