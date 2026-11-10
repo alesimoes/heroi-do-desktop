@@ -658,7 +658,7 @@ function loadEquip() {
 }
 let newItemTimer = 0;
 function showNewItem() { const el = $('newItem'); el.style.bottom = touchMode ? '130px' : '';      // no celular fica acima dos botoes de toque
-  el.classList.add('on'); clearTimeout(newItemTimer); newItemTimer = setTimeout(() => el.classList.remove('on'), 5000); }      // aviso pequeno no canto inferior direito, por 5 s
+  el.classList.add('on'); clearTimeout(newItemTimer); newItemTimer = setTimeout(() => el.classList.remove('on'), 5000); }      // aviso pequeno "NOVO ITEM" no canto inferior direito da pagina, por 5 s (tambem ao ganhar a fadinha)
 function autoEquip(stage) { showNewItem(); if (stage === 1) eqBow = 1; else if (stage === 2) eqHat = 1; else if (stage === 3) eqTunic = 1; else if (stage === 4) { eqSword = 1; eqShield = 1; } else if (stage === 5) { eqHat = 2; eqTunic = 2; eqShield = 2; } validateEquip(); saveEquip(); }
 loadEquip(); syncTouchIcons();
 function saveChest() { try { localStorage.setItem('heroi_monstros_bau', String(chestKills)); localStorage.setItem('heroi_bau', String(chestState)); } catch (_) {} }
@@ -666,24 +666,40 @@ function countChestKill() { if (chestState !== 0 || evoStage < 4) return;      /
   chestKills++; if (chestKills % 10 === 0) saveChest(); if (chestKills >= CHEST_NEEDED) { chestState = 1; saveChest(); say('Um baú apareceu!'); } }
 const chestX = () => W * 0.62, chestY = () => H * 0.34;
 function chestStart() { if (chestState === 1 && chestOpenT <= 0 && !chestGo && bossPhase === 0) { chestGo = true; if (calmState !== 0) endCalm(false); say('Vou abrir!'); } }
-function chestTap() { if (chestState === 1 && Math.hypot(mx - chestX(), my - (chestY() - 8 * S)) < 16 * S) chestStart(); }
+function chestTap() { if (fairyState === 1 && fairy.cool <= 0 && Math.hypot(mx - fairy.x, my - fairy.y) < 14 * S) { fairyCommand(); return; }      // celular: tocar na fadinha pronta
+  if (chestState === 1 && Math.hypot(mx - chestX(), my - (chestY() - 8 * S)) < 16 * S) chestStart(); }
 /* ---------- FADINHA (ajudante; 50 monstros apos a roupa de rei) ----------
    Depois da roupa de rei, mais 50 monstros derrotados (modo automatico) dao uma fadinha. Ela voa perto da cabeca do heroi e derrota 20% dos monstros
    que aparecem: voa ate o monstro, gira rapido em volta da cabeca dele (um pouco acima) e ele cai. Vale nos dois modos. */
 const FAIRY_NEEDED = 50;
-let fairyKills = 0, fairyState = 0; const fairy = { x: 0, y: 0, t: 0, orbit: 0, trail: 0, ph: 0, target: null };      // fairyState: 0 contando | 1 tem a fadinha;  ph: 0 segue | 1 voa ate o alvo | 2 gira em volta
-try { fairyKills = Math.max(0, parseInt(localStorage.getItem('heroi_monstros_fada') || '0', 10) || 0); fairyState = Math.max(0, Math.min(1, parseInt(localStorage.getItem('heroi_fada') || '0', 10) || 0)); } catch (_) {}
+const FAIRY_SKIN_NEEDED = 500;      // 500 monstros depois da fadinha: asas azul escuro com rosa
+let fairyKills2 = 0, fairySkin = 0, fairyKills = 0, fairyState = 0; const fairy = { x: 0, y: 0, t: 0, orbit: 0, trail: 0, ph: 0, target: null, cool: 30, said: false, prev4: false };      // fairyState: 0 contando | 1 tem a fadinha;  ph: 0 segue | 1 voa ate o alvo | 2 gira em volta
+try { fairyKills = Math.max(0, parseInt(localStorage.getItem('heroi_monstros_fada') || '0', 10) || 0); fairyState = Math.max(0, Math.min(1, parseInt(localStorage.getItem('heroi_fada') || '0', 10) || 0)); fairyKills2 = Math.max(0, parseInt(localStorage.getItem('heroi_monstros_fada2') || '0', 10) || 0); fairySkin = Math.max(0, Math.min(1, parseInt(localStorage.getItem('heroi_fada_skin') || '0', 10) || 0)); } catch (_) {}
 if (fairyState === 0 && !kingGear) fairyKills = 0;
-if (/[?&]fada\b/.test(location.search)) { kingGear = true; fairyState = 1; }      // teste rapido: ja com a fadinha
-function saveFairy() { try { localStorage.setItem('heroi_monstros_fada', String(fairyKills)); localStorage.setItem('heroi_fada', String(fairyState)); } catch (_) {} }
+if (/[?&]fada\b/.test(location.search)) { kingGear = true; fairyState = 1; }
+if (/[?&]fada2\b/.test(location.search)) { kingGear = true; fairyState = 1; fairySkin = 1; }      // teste rapido: ja com a fadinha
+function saveFairy() { try { localStorage.setItem('heroi_monstros_fada', String(fairyKills)); localStorage.setItem('heroi_fada', String(fairyState)); localStorage.setItem('heroi_monstros_fada2', String(fairyKills2)); localStorage.setItem('heroi_fada_skin', String(fairySkin)); } catch (_) {} }
 function countFairyKill() {
+  if (fairyState === 1 && fairySkin === 0) {      // depois da fadinha: mais 500 monstros dao a aparencia nova (asas azul escuro e rosa)
+    fairyKills2++; if (fairyKills2 % 25 === 0) saveFairy();
+    if (fairyKills2 >= FAIRY_SKIN_NEEDED) { fairySkin = 1; saveFairy(); say('Fadinha nova!'); for (let k = 0; k < 10; k++) puffs.push({ kind: 1, x: fairy.x + (rnd() - 0.5) * 24 * S, y: fairy.y + (rnd() - 0.5) * 16 * S, t: 0 }); }
+    return;
+  }
   if (fairyState !== 0 || !kingGear) return;      // a contagem so comeca depois da roupa de rei
   fairyKills++; if (fairyKills % 10 === 0) saveFairy();
-  if (fairyKills >= FAIRY_NEEDED) { fairyState = 1; saveFairy(); showNewItem(); fairy.x = hero.x; fairy.y = hero.y - 26 * S; say('Uma fadinha!'); for (let k = 0; k < 10; k++) puffs.push({ kind: 1, x: fairy.x + (rnd() - 0.5) * 24 * S, y: fairy.y + (rnd() - 0.5) * 16 * S, t: 0 }); }
+  if (fairyKills >= FAIRY_NEEDED) { fairyState = 1; fairy.cool = 30; saveFairy(); showNewItem(); fairy.x = hero.x; fairy.y = hero.y - 26 * S; say('Uma fadinha!'); for (let k = 0; k < 10; k++) puffs.push({ kind: 1, x: fairy.x + (rnd() - 0.5) * 24 * S, y: fairy.y + (rnd() - 0.5) * 16 * S, t: 0 }); }
+}
+function fairyCommand() {      // comanda a fadinha a derrotar o monstro mais perto do heroi (so quando ela esta pronta; nao ataca o dragao)
+  const F = fairy; if (fairyState !== 1 || F.cool > 0 || F.target || bossPhase !== 0 || hero.dead) return;
+  let best = null, bd = 1e18; for (const e of enemies) { if (e.type === 3) continue; const d = (e.x - hero.x) ** 2 + (e.y - hero.y) ** 2; if (d < bd) { bd = d; best = e; } }
+  if (best) { F.target = best; F.ph = 1; F.orbit = 0; F.cool = 30; } else say('Sem alvo');
 }
 function updateFairy(dt) {
   if (fairyState !== 1) return;
   const F = fairy; F.t += dt;
+  if (F.cool > 0) { F.cool -= dt; if (F.cool <= 0) { F.cool = 0; F.said = false; } }      // a cada 30 s fica pronta: pisca amarela e ataca por comando (tecla 4 ou toque nela)
+  if (F.cool <= 0 && !F.said && !hero.dead) { F.said = true; say('Fadinha pronta: 4'); }
+  const k4 = keys.has('Digit4') || keys.has('Numpad4'); if (k4 && !F.prev4) fairyCommand(); F.prev4 = k4;
   if (F.target && enemies.indexOf(F.target) < 0) { F.target = null; F.ph = 0; }
   if (bossPhase !== 0 || hero.dead) { F.target = null; F.ph = 0; }
   if (!F.target && bossPhase === 0 && !hero.dead) {
@@ -709,9 +725,10 @@ function updateFairy(dt) {
 }
 function drawFairy() {
   if (fairyState !== 1) return;
-  const x = fairy.x, y = fairy.y, u = S, wy = Math.floor(time * 16) % 2 === 0 ? -3 * u : -u;
-  rect('#fff5a0', x - 2 * u, y - u, 4 * u, 2 * u); rect('#fff5a0', x - u, y - 2 * u, 2 * u, 4 * u); rect('#fff', x - u, y - u, 2 * u, 2 * u);
-  rect('#bee1ff', x - 6 * u, y + wy - u, 3 * u, 2 * u); rect('#ebf5ff', x - 5 * u, y + wy, 2 * u, u); rect('#bee1ff', x + 3 * u, y + wy - u, 3 * u, 2 * u); rect('#ebf5ff', x + 3 * u, y + wy, 2 * u, u);
+  const x = fairy.x, y = fairy.y, u = S, wy = Math.floor(time * 16) % 2 === 0 ? -3 * u : -u, hot = fairy.cool <= 0 && Math.floor(time * 7) % 2 === 0, gc = hot ? '#ffcd14' : '#fff5a0';      // pronta: pisca e fica mais amarela
+  rect(gc, x - 2 * u, y - u, 4 * u, 2 * u); rect(gc, x - u, y - 2 * u, 2 * u, 4 * u); rect(hot ? '#ffff6e' : '#fff', x - u, y - u, 2 * u, 2 * u);
+  const wc = fairySkin === 1 ? '#283296' : '#bee1ff', wc2 = fairySkin === 1 ? '#eb78be' : '#ebf5ff';      // aparencia nova: asas azul escuro com rosa
+  rect(wc, x - 6 * u, y + wy - u, 3 * u, 2 * u); rect(wc2, x - 5 * u, y + wy, 2 * u, u); rect(wc, x + 3 * u, y + wy - u, 3 * u, 2 * u); rect(wc2, x + 3 * u, y + wy, 2 * u, u);
 }function updateChest(dt) {
   if (hero.dead || bossPhase !== 0) chestGo = false;      // o bau vale nos dois modos; fica parado durante a luta com o dragao
   if (chestState === 1 && chestOpenT <= 0 && bossPhase === 0) { const k4 = keys.has('Digit4') || keys.has('Numpad4'); if (k4 && !prev4) chestStart(); prev4 = k4; }

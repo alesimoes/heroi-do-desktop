@@ -145,3 +145,6 @@ limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão 
 
 ## Aviso NOVO ITEM
 - Ao ganhar item, arma, roupa ou ajudante (fadinha) aparece um aviso pequeno **NOVO ITEM** no canto inferior direito por 5 s. No desktop ele é desenhado dentro da janela do herói (que fica abaixo dos aplicativos), então nunca cobre outros programas.
+
+## Fadinha: ataque por comando (tecla 4)
+- A cada **30 s** a fadinha fica **pronta**: pisca e fica **mais amarela** (e o herói diz *Fadinha pronta: 4*). Enquanto está assim, apertar **4** manda ela derrotar o **monstro mais perto do herói** (não ataca o dragão); depois a contagem de 30 s recomeça. Fora desse estado a tecla 4 não faz nada. Os 20% automáticos continuam. Web/celular: tocar na fadinha pronta.

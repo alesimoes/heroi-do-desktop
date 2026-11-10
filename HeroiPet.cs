@@ -2052,30 +2052,41 @@ namespace HeroiPet
         // Depois de conseguir a roupa de rei, mais 50 monstros derrotados (modo automatico) dao uma fadinha. Ela voa perto da cabeca do heroi e derrota 20% dos
         // monstros que aparecem: voa ate o monstro, gira rapido em volta da cabeca dele (um pouco acima) e ele cai. Vale nos dois modos.
         const int FairyKillsNeeded = 50;
+        const int FairySkinKillsNeeded = 500;      // 500 monstros depois da fadinha: asas azul escuro com rosa
+        int fairyKills2, fairySkin;
         int fairyKills, fairyState, fairyPh;      // fairyState: 0 contando | 1 tem a fadinha;  fairyPh: 0 segue o heroi | 1 voa ate o alvo | 2 gira em volta
-        float fx, fy, fairyT, fairyOrbit, fairyTrail; Enemy fairyTarget;
+        float fx, fy, fairyT, fairyOrbit, fairyTrail, fairyCool = 30f; Enemy fairyTarget; bool prevF4, fairyReadySaid;      // fairyCool: a cada 30 s a fadinha fica pronta (pisca amarela) e ataca por comando (tecla 4)
+        bool FairyReady { get { return fairyState == 1 && fairyCool <= 0; } }
         void FairyInit()
         {
-            fairyKills = 0; fairyState = 0;
+            fairyKills = 0; fairyState = 0; fairyKills2 = 0; fairySkin = 0;
             if (Environment.GetEnvironmentVariable("HEROI_TESTE") == null)
-                try { using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"Software\HeroiDoDesktop")) { if (k != null) { object a = k.GetValue("MonstrosFada"), b = k.GetValue("Fada"); if (a != null) fairyKills = Math.Max(0, Convert.ToInt32(a)); if (b != null) fairyState = Math.Max(0, Math.Min(1, Convert.ToInt32(b))); } } } catch { }
+                try { using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"Software\HeroiDoDesktop")) { if (k != null) { object a = k.GetValue("MonstrosFada"), b = k.GetValue("Fada"), c2 = k.GetValue("MonstrosFada2"), d2 = k.GetValue("FadaSkin"); if (c2 != null) fairyKills2 = Math.Max(0, Convert.ToInt32(c2)); if (d2 != null) fairySkin = Math.Max(0, Math.Min(1, Convert.ToInt32(d2))); if (a != null) fairyKills = Math.Max(0, Convert.ToInt32(a)); if (b != null) fairyState = Math.Max(0, Math.Min(1, Convert.ToInt32(b))); } } } catch { }
             if (fairyState == 0 && !kingGear) fairyKills = 0;
-            if (Array.IndexOf(Environment.GetCommandLineArgs(), "--fada") >= 0) { kingGear = true; fairyState = 1; }      // teste rapido: ja com a fadinha
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "--fada") >= 0) { kingGear = true; fairyState = 1; }
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "--fada2") >= 0) { kingGear = true; fairyState = 1; fairySkin = 1; }      // teste rapido: fadinha com as asas azul escuro e rosa      // teste rapido: ja com a fadinha
             fx = W / 2f; fy = H / 2f;
         }
         void SaveFairy()
         {
             if (Environment.GetEnvironmentVariable("HEROI_TESTE") != null) return;
-            try { using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"Software\HeroiDoDesktop")) { k.SetValue("MonstrosFada", fairyKills); k.SetValue("Fada", fairyState); } } catch { }
+            try { using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"Software\HeroiDoDesktop")) { k.SetValue("MonstrosFada", fairyKills); k.SetValue("Fada", fairyState); k.SetValue("MonstrosFada2", fairyKills2); k.SetValue("FadaSkin", fairySkin); } } catch { }
         }
         void CountFairyKill()
         {
+            if (fairyState == 1 && fairySkin == 0)      // depois da fadinha: mais 500 monstros dao a aparencia nova (asas azul escuro e rosa)
+            {
+                fairyKills2++;
+                if (fairyKills2 % 25 == 0) SaveFairy();
+                if (fairyKills2 >= FairySkinKillsNeeded) { fairySkin = 1; SaveFairy(); Say("Fadinha nova!"); for (int k = 0; k < 10; k++) puffs.Add(new Puff { Kind = 1, X = fx + ((float)rnd.NextDouble() - 0.5f) * 24 * S, Y = fy + ((float)rnd.NextDouble() - 0.5f) * 16 * S }); }
+                return;
+            }
             if (fairyState != 0 || !kingGear) return;      // a contagem so comeca depois da roupa de rei
             fairyKills++;
             if (fairyKills % 10 == 0) SaveFairy();
             if (fairyKills >= FairyKillsNeeded)
             {
-                fairyState = 1; SaveFairy(); newItemUntil = time + 5f; fx = hx; fy = hy - 26 * S; Say("Uma fadinha!");
+                fairyState = 1; fairyCool = 30f; SaveFairy(); newItemUntil = time + 5f; fx = hx; fy = hy - 26 * S; Say("Uma fadinha!");
                 for (int k = 0; k < 10; k++) puffs.Add(new Puff { Kind = 1, X = fx + ((float)rnd.NextDouble() - 0.5f) * 24 * S, Y = fy + ((float)rnd.NextDouble() - 0.5f) * 16 * S });
             }
         }
@@ -2083,6 +2094,17 @@ namespace HeroiPet
         {
             if (fairyState != 1) return;
             fairyT += dt;
+            if (fairyCool > 0) { fairyCool -= dt; if (fairyCool <= 0) { fairyCool = 0; fairyReadySaid = false; } }
+            if (FairyReady && !fairyReadySaid && !dead) { fairyReadySaid = true; Say("Fadinha pronta: 4"); }
+            bool k4 = IsDown(0x34) || IsDown(0x64);      // tecla 4: comanda a fadinha a atacar (so quando ela esta piscando em amarelo)
+            if (k4 && !prevF4 && FairyReady && fairyTarget == null && bossPhase == 0 && !dead)
+            {
+                Enemy best = null; float bd2 = float.MaxValue;      // o monstro mais perto do heroi (menos o dragao)
+                foreach (Enemy e in enemies) { if (e.Type == 3) continue; float d = (e.X - hx) * (e.X - hx) + (e.Y - hy) * (e.Y - hy); if (d < bd2) { bd2 = d; best = e; } }
+                if (best != null) { fairyTarget = best; fairyPh = 1; fairyOrbit = 0; fairyCool = 30f; }
+                else Say("Sem alvo");
+            }
+            prevF4 = k4;
             if (fairyTarget != null && !enemies.Contains(fairyTarget)) { fairyTarget = null; fairyPh = 0; }
             if (bossPhase != 0 || dead) { fairyTarget = null; fairyPh = 0; }
             if (fairyTarget == null && bossPhase == 0 && !dead)
@@ -2130,10 +2152,11 @@ namespace HeroiPet
         {
             if (fairyState != 1) return;
             int wf = ((int)(time * 16)) % 2;      // asas batendo
-            using (SolidBrush glow = new SolidBrush(Color.FromArgb(255, 245, 160)))
-            using (SolidBrush wing = new SolidBrush(Color.FromArgb(190, 225, 255)))
-            using (SolidBrush wing2 = new SolidBrush(Color.FromArgb(235, 245, 255)))
-            using (SolidBrush core = new SolidBrush(Color.White))
+            bool hot = FairyReady && ((int)(time * 7)) % 2 == 0;      // pronta: pisca e fica mais amarela
+            using (SolidBrush glow = new SolidBrush(hot ? Color.FromArgb(255, 205, 20) : Color.FromArgb(255, 245, 160)))
+            using (SolidBrush wing = new SolidBrush(fairySkin == 1 ? Color.FromArgb(40, 50, 150) : Color.FromArgb(190, 225, 255)))      // aparencia nova: azul escuro
+            using (SolidBrush wing2 = new SolidBrush(fairySkin == 1 ? Color.FromArgb(235, 120, 190) : Color.FromArgb(235, 245, 255)))      // ... com rosa
+            using (SolidBrush core = new SolidBrush(hot ? Color.FromArgb(255, 255, 110) : Color.White))
             {
                 float u = S;
                 g.FillRectangle(glow, fx - 2 * u, fy - u, 4 * u, 2 * u);      // bolinha menor que as asas
