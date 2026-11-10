@@ -388,7 +388,7 @@ const OUTSETS = [
 const SET_THR = [4500, 6000, 8000, 10500, 14000];      // total de monstros derrotados (evoKills) para liberar cada conjunto
 const shadeHex = (hex, t) => { const n = parseInt(hex.slice(1), 16), c = [n >> 16 & 255, n >> 8 & 255, n & 255].map((v) => Math.round(t >= 0 ? v + (255 - v) * t : v * (1 + t))); return '#' + c.map((v) => v.toString(16).padStart(2, '0')).join(''); };
 /* ---------- FASE 2 ----------
-   Depois de vencer o Dragao comeca a FASE 2: os mesmos 7 niveis (agora a cada 40 rupias), monstros sombrios com o dobro de vida e, no fim, o vilao:
+   Depois de vencer o Dragao comeca a FASE 2 (atalho ?fase2): os mesmos 7 niveis (agora a cada 40 rupias), monstros sombrios com o dobro de vida e, no fim, o vilao:
    o FEITICEIRO SOMBRIO (8000 de vida), que teleporta, lanca aneis de esferas, tiros mirados e invoca gelatinas. */
 let phase2 = false, bossDeadMage = false;
 function tintDark(sp) {
@@ -708,6 +708,7 @@ function unlockSet(i) {      // conjunto novo: ja vem vestido, com aviso
 }
 const ownFairy = (i) => (i === 0 && fairyState === 1) || (i >= 1 && fairySkin >= i);
 function owns(cat, id) { return [ownBow, ownSword, ownShield, ownHat, ownTunic, ownFairy][cat](id); }
+const fairyRate = () => (eqFairy === 3 ? 2 : 1);      // a fadinha de ESTRELA ataca o DOBRO de vezes: 40% dos monstros marcados e pronta a cada 15 s (as outras: 20% e 30 s)
 function getEq(cat) { return [eqBow, eqSword, eqShield, eqHat, eqTunic, eqFairy][cat]; }
 function bestEquip() { eqBow = evoStage >= 1 ? 1 : 0; eqSword = evoStage >= 4 ? 1 : 0; eqShield = kingGear ? 2 : (evoStage >= 4 ? 1 : 0); eqHat = kingGear ? 2 : (evoStage >= 2 ? 1 : 0); eqTunic = kingGear ? 2 : (evoStage >= 3 ? 1 : 0); }
 function validateEquip() { if (!ownBow(eqBow)) eqBow = 0; if (!ownSword(eqSword)) eqSword = 0; if (!ownShield(eqShield)) eqShield = 0; if (!ownHat(eqHat)) eqHat = 0; if (!ownTunic(eqTunic)) eqTunic = 0; }
@@ -753,12 +754,12 @@ function countFairyKill() {
   }
   if (fairyState !== 0 || evoStage < 4) return;      // a contagem so comeca depois da roupa de rei
   fairyKills++; if (fairyKills % 10 === 0) saveFairy();
-  if (fairyKills >= FAIRY_NEEDED) { fairyState = 1; fairy.cool = 30; saveFairy(); showNewItem(); fairy.x = hero.x; fairy.y = hero.y - 26 * S; say('Uma fadinha!'); for (let k = 0; k < 10; k++) puffs.push({ kind: 1, x: fairy.x + (rnd() - 0.5) * 24 * S, y: fairy.y + (rnd() - 0.5) * 16 * S, t: 0 }); }
+  if (fairyKills >= FAIRY_NEEDED) { fairyState = 1; fairy.cool = 30 / fairyRate(); saveFairy(); showNewItem(); fairy.x = hero.x; fairy.y = hero.y - 26 * S; say('Uma fadinha!'); for (let k = 0; k < 10; k++) puffs.push({ kind: 1, x: fairy.x + (rnd() - 0.5) * 24 * S, y: fairy.y + (rnd() - 0.5) * 16 * S, t: 0 }); }
 }
 function fairyCommand(silent) {      // silent = chamada automatica (modo automatico); comanda a fadinha a derrotar o monstro mais perto do heroi (so quando ela esta pronta; nao ataca o dragao)
   const F = fairy; if (fairyState !== 1 || F.cool > 0 || F.target || bossPhase !== 0 || hero.dead) return;
   let best = null, bd = 1e18; for (const e of enemies) { if (e.type === 3 || e.type === 7) continue; const d = (e.x - hero.x) ** 2 + (e.y - hero.y) ** 2; if (d < bd) { bd = d; best = e; } }
-  if (best) { F.target = best; F.ph = 1; F.orbit = 0; F.cool = 30; } else if (!silent) say('Sem alvo');
+  if (best) { F.target = best; F.ph = 1; F.orbit = 0; F.cool = 30 / fairyRate(); } else if (!silent) say('Sem alvo');
 }
 function updateFairy(dt) {
   if (fairyState !== 1) return;
@@ -932,7 +933,7 @@ function spawn(type) {
   if (edge === 0) { x = m; y = m * 3 + rnd() * (H - m * 6); } else if (edge === 1) { x = W - m; y = m * 3 + rnd() * (H - m * 6); }
   else if (edge === 2) { x = m * 3 + rnd() * (W - m * 6); y = 16 * S; } else { x = m * 3 + rnd() * (W - m * 6); y = H - m; }
   const e = { type, x, y, vx: 0, vy: 0, kx: 0, ky: 0, t: 0, timer: 0.8 + rnd(), flash: 0, hp: (type === 1 ? 50 : (type === 2 ? 50 : (type === 0 ? 200 : (type === 5 ? 250 : 100)))) * (phase2 ? 2 : 1), maxHp: 0, face: 1, mode: 0, tx: 0, ty: 0, rt: 0, moving: false };
-  e.maxHp = e.hp; puffs.push({ kind: 2, x, y, t: 0 }); if (fairyState === 1 && type !== 3 && rnd() < 0.20) e.fairy = true;      // a fadinha derrota 20% dos monsters que aparecem
+  e.maxHp = e.hp; puffs.push({ kind: 2, x, y, t: 0 }); if (fairyState === 1 && type !== 3 && rnd() < 0.20 * fairyRate()) e.fairy = true;      // a fadinha derrota 20% dos monstros que aparecem (40% com a fadinha de estrela)
   enemies.push(e); return e;
 }
 function nearestMelee() { let b = null, bd = 1e18; for (const e of enemies) { if (e.type === 1) continue; const d = (e.x - hero.x) ** 2 + (e.y - hero.y) ** 2; if (d < bd) { bd = d; b = e; } } return b; }

@@ -2413,6 +2413,7 @@ namespace HeroiPet
         int fairyKills2, fairySkin, eqFairy;      // eqFairy: aparencia escolhida no inventario (0 normal | 1 rosa)
         int fairyKills, fairyState, fairyPh;      // fairyState: 0 contando | 1 tem a fadinha;  fairyPh: 0 segue o heroi | 1 voa ate o alvo | 2 gira em volta
         float fx, fy, fairyT, fairyOrbit, fairyTrail, fairyCool = 30f; Enemy fairyTarget; bool prevF4, fairyReadySaid;      // fairyCool: a cada 30 s a fadinha fica pronta (pisca amarela) e ataca por comando (tecla 4)
+        float FairyRate { get { return eqFairy == 3 ? 2f : 1f; } }      // a fadinha de ESTRELA ataca o DOBRO de vezes: 40% dos monstros marcados e pronta a cada 15 s (as outras: 20% e 30 s)
         bool FairyReady { get { return fairyState == 1 && fairyCool <= 0; } }
         void FairyInit()
         {
@@ -2447,7 +2448,7 @@ namespace HeroiPet
             if (fairyKills % 10 == 0) SaveFairy();
             if (fairyKills >= FairyKillsNeeded)
             {
-                fairyState = 1; fairyCool = 30f; SaveFairy(); newItemUntil = time + 5f; fx = hx; fy = hy - 26 * S; Say("Uma fadinha!");
+                fairyState = 1; fairyCool = 30f / FairyRate; SaveFairy(); newItemUntil = time + 5f; fx = hx; fy = hy - 26 * S; Say("Uma fadinha!");
                 for (int k = 0; k < 10; k++) puffs.Add(new Puff { Kind = 1, X = fx + ((float)rnd.NextDouble() - 0.5f) * 24 * S, Y = fy + ((float)rnd.NextDouble() - 0.5f) * 16 * S });
             }
         }
@@ -2462,7 +2463,7 @@ namespace HeroiPet
             {
                 Enemy best = null; float bd2 = float.MaxValue;      // o monstro mais perto do heroi (menos o dragao)
                 foreach (Enemy e in enemies) { if (e.Type == 3 || e.Type == 7) continue; float d = (e.X - hx) * (e.X - hx) + (e.Y - hy) * (e.Y - hy); if (d < bd2) { bd2 = d; best = e; } }
-                if (best != null) { fairyTarget = best; fairyPh = 1; fairyOrbit = 0; fairyCool = 30f; }
+                if (best != null) { fairyTarget = best; fairyPh = 1; fairyOrbit = 0; fairyCool = 30f / FairyRate; }
                 else if (playMode) Say("Sem alvo");
             }
             prevF4 = k4;
@@ -3820,7 +3821,7 @@ namespace HeroiPet
             if (phase2) e.HP *= 2;      // fase 2: monstros com o dobro de vida      // morcego 50, gelatina 50, octorok (vermelho) 200, bokoblin a cavalo 250, bokoblin comum 100
             e.Timer = 0.8f + (float)rnd.NextDouble();
             puffs.Add(new Puff { Kind = 2, X = e.X, Y = e.Y });
-            if (fairyState == 1 && type != 3 && rnd.NextDouble() < 0.20) e.Fairy = true;      // a fadinha derrota 20% dos monstros que aparecem
+            if (fairyState == 1 && type != 3 && rnd.NextDouble() < 0.20 * FairyRate) e.Fairy = true;      // a fadinha derrota 20% dos monstros que aparecem (40% com a fadinha de estrela)
             enemies.Add(e);
             return e;
         }

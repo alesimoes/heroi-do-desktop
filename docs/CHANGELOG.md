@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 10/11/2026 — Fadinha de estrela ataca o dobro
+- Com a **fadinha de estrela** equipada ela ataca **o dobro de vezes**: **40%** dos monstros que nascem (as outras: 20%) e fica **pronta a cada 15 s** (as outras: 30 s), então também ataca mais no automático e pela tecla 4.
+
 ## 10/11/2026 — FASE 2 com vilão no fim
 - Depois de vencer o **Dragão** (e os créditos) o jogo agora **continua na Fase 2** (antes voltava ao automático): mais **7 níveis** (agora a cada **40 rupias**), monstros **sombrios** (tons roxos) com o **dobro de vida** e um pouco mais numerosos, e no fim o **vilão: Feiticeiro Sombrio** (8000 de vida). Ele flutua em volta do herói, lança **anéis de esferas**, **tiros mirados em leque**, **teleporta** e **invoca gelatinas**; com metade da vida entra em **fúria** (mais rápido, mais esferas). Ao vencê-lo: 1000 rupias, "VOCÊ VENCEU A FASE 2!", créditos e volta ao automático.
 - **Atalho:** `Atalho: ir para a Fase 2` no menu da bandeja / botão no menu da página, `--fase2` (desktop), `?fase2` (web): começa a Fase 2 direto no nível 1 (HUD mostra "F2 NV n").
