@@ -1,7 +1,7 @@
 # Changelog (resumo)
 
 ## 09/11/2026 — Colher maçã pelo inventário
-- O botão **Colher maçã** do inventário agora fecha o menu e o herói **vai até a macieira mais próxima e colhe 2 maçãs** (que voam para o inventário). **Enquanto isso não nascem monstros** (nem a onda final). Vale nos dois modos.
+- O botão **Colher maçã** do inventário agora fecha o menu e o herói **vai até a macieira mais próxima e colhe 2 maçãs** (que voam para o inventário). **Enquanto isso não nascem monstros** (nem a onda final). Vale nos dois modos. O braço esticado para pegar a maçã tem a **manga da cor da roupa** que ele estiver usando (verde, azul ou manto do rei).
 
 ## 09/11/2026 — Flechas do poder azul
 - As flechas azuis do poder agora dão **9999999** de dano (matam qualquer monstro na hora, como a fadinha).
