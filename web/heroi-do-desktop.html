@@ -231,7 +231,6 @@ const PAL = { K:'#1c1624', G:'#3aa53e', g:'#1e6e2d', Y:'#f0c850', S:'#fad0a5', V
 const ROWS = {
   heroA: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.","KGGGYYYYYYYSK.","KGGYYYYYYYYSSK",".KYYYYYYYYKSSK","..KYYYYYYSSSK.","..KYYYYYSSSK..","..KYYKGGGGKK..","..KGGGGGGGGGK.","..KGGGGGGGGGK.","..KGGGGGGGGSK.","..KBBBBBBBBBK.","...KWWK.KWWK..","...KBBK.KBBK.."],
   heroB: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.","KGGGYYYYYYYSK.","KGGYYYYYYYYSSK",".KYYYYYYYYKSSK","..KYYYYYYSSSK.","..KYYYYYSSSK..","..KYYKGGGGKK..","..KGGGGGGGGGK.","..KGGGGGGGGGK.","..KGGGGGGGGSK.","..KBBBBBBBBBK.","....KWWKWWK...","....KBBKBBK..."],
-  frontView: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.","KYYYYYYYYYYYYK","KYYYYSSSSYYYYK",".KYYSKSSKSYYK.","..KYSSSSSSYK..","...KSSSSSSK...","...KKGGGGKK...","..KGGGGGGGGK..",".KSGGGGGGGGSK.",".KSGGGGGGGGSK.","..KBBBBBBBBK..","..KWWWKKWWWK..","..KBBBKKBBBK.."],
   front: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.",".KYYYYYYYYYYK.",".KYYYYYSSSYYK.",".KYYYYSSKSSYK.","..KYSSSSSSYK..","...KSSSSSSK...","...KKGGGGKK...","..KGGGGGGGGK..",".KSGGGGGGGGSK.",".KSGGGGGGGGSK.","..KBBBBBBBBK..","..KWWWKKWWWK..","..KBBBKKBBBK.."],
   wave: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.",".KYYYYYYYYYYK.",".KYYYYYSSSYYK.",".KYYYYSSKSSYK.","..KYSSSSSSYK..","...KSSSSSSK...","...KKGGGGKK...","..KGGGGGGGGK..",".KSGGGGGGGGGK.",".KSGGGGGGGGGK.","..KBBBBBBBBK..","..KWWWKKWWWK..","..KBBBKKBBBK.."],
   octoA: ["...KKKKKK...","..KRRRRRRK..",".KRRRRRRRRK.","KRRWWRRWWRRK","KRRWKRRWKRRK","KRRRRRRRRRRK","KRRRKKKKRRRK",".KRRRRRRRRK.","..KKRRRRKK..",".KR.K..K.RK."],
@@ -394,7 +393,7 @@ function buildSprites() {
   if (eqTunic >= 3) { const o = OUTSETS[eqTunic - 3]; hov.Q = o.tunic; hov.J = o.pants; hov.Z = o.shoes; }
   const setCap = OUTSETS.map((o) => makeSprite(ROWS.capItem, S, { H: o.hat, h: shadeHex(o.hat, 0.4), g: shadeHex(o.hat, -0.4) })), setShirt = OUTSETS.map((o) => makeSprite(ROWS.shirtItem, S, { Q: o.tunic, h: shadeHex(o.tunic, 0.4), g: shadeHex(o.tunic, -0.4) }));
   SP = {
-    heroA: makeSprite(heroRows(ROWS.heroA), S, hov), heroB: makeSprite(heroRows(ROWS.heroB), S, hov), front: makeSprite(heroRows(ROWS.front), S, hov), frontView: makeSprite(heroRows(ROWS.frontView), S, hov), wave: makeSprite(heroRows(ROWS.wave), S, hov),
+    heroA: makeSprite(heroRows(ROWS.heroA), S, hov), heroB: makeSprite(heroRows(ROWS.heroB), S, hov), front: makeSprite(heroRows(ROWS.front), S, hov), wave: makeSprite(heroRows(ROWS.wave), S, hov),
     octo: [makeSprite(ROWS.octoA, S), makeSprite(ROWS.octoB, S)], bat: [makeSprite(ROWS.batUp, S), makeSprite(ROWS.batDown, S)],
     slime: [makeSprite(ROWS.slimeTall, S), makeSprite(ROWS.slimeFlat, S)],
     boko: [makeSprite(ROWS.bokoA, S), makeSprite(ROWS.bokoB, S), makeSprite(ROWS.bokoC, S)],
@@ -1700,9 +1699,9 @@ function drawIcon(cat, id, cx, cy, u) {      // desenha o icone no 'ctx' atual
 function itemSpr(sp, cx, cy, u) { const k = u / S * 1.7, w = sp.w * k, h = sp.h * k; ctx.drawImage(sp.r, Math.round(cx - w / 2), Math.round(cy - h / 2), Math.round(w), Math.round(h)); }
 function iconCanvas(cat, id) { const c = document.createElement('canvas'); c.width = c.height = 72; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; withCtx(g, () => drawIcon(cat, id, 36, 34, 2.1)); return c; }
 function appleIcon() { const c = document.createElement('canvas'); c.width = c.height = 72; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(SP.appleHud.r, 4, 4, 64, 64); return c; }      // a mesma maca em pixel art do indicador do topo
-// heroi de frente para o inventario: sprite frontal simetrico, escudo baixado ao lado, espada ou arco na mao direita (sem armas na aba Roupas)
+// heroi de frente no inventario: sprite frontal simetrico, escudo baixado ao lado, espada ou arco na mao direita (sem armas na aba Roupas)
 function drawHeroFrontPreview() {
-  spr(SP.frontView, hero.x, hero.y, true);
+  spr(SP.front, hero.x, hero.y, true);      // a mesma aparencia atual do heroi de frente (a das pausas)
   if (!previewBare) {
     drawShieldBody(hero.x - 12 * S, hero.y - 6 * S);
     if (invBow) { const bx = hero.x + 8 * S, by = hero.y - 7 * S; ctx.lineCap = 'butt'; ctx.lineWidth = 4 * S; ctx.strokeStyle = '#1c1624'; ctx.beginPath(); ctx.ellipse(bx, by, 3 * S, 7 * S, 0, -Math.PI / 2, Math.PI / 2); ctx.stroke(); ctx.lineWidth = 2 * S; ctx.strokeStyle = eqBow === 1 ? '#c8cdd7' : '#87552d'; ctx.beginPath(); ctx.ellipse(bx, by, 3 * S, 7 * S, 0, -Math.PI / 2, Math.PI / 2); ctx.stroke(); ctx.lineWidth = Math.max(1, S * 0.6); ctx.strokeStyle = '#ebebeb'; ctx.beginPath(); ctx.moveTo(bx, by - 7 * S); ctx.lineTo(bx, by + 7 * S); ctx.stroke(); }

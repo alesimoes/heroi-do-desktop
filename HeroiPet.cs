@@ -351,25 +351,6 @@ namespace HeroiPet
             ".KK."
         };
 
-        // heroi totalmente de frente (simetrico, dois olhos) para o inventario
-        public static string[] HeroFrontView = {
-            "....KKKKKK....",
-            "...KGGGGGGK...",
-            "..KGGGGGGGGK..",
-            ".KGGGGGGGGGGK.",
-            "KYYYYYYYYYYYYK",
-            "KYYYYSSSSYYYYK",
-            ".KYYSKSSKSYYK.",
-            "..KYSSSSSSYK..",
-            "...KSSSSSSK...",
-            "...KKGGGGKK...",
-            "..KGGGGGGGGK..",
-            ".KSGGGGGGGGSK.",
-            ".KSGGGGGGGGSK.",
-            "..KBBBBBBBBK..",
-            "..KWWWKKWWWK..",
-            "..KBBBKKBBBK.."
-        };
         // ---------- Heroi de frente ----------
         public static string[] HeroFront = {
             "....KKKKKK....",
@@ -1072,7 +1053,7 @@ namespace HeroiPet
         string speech = "";
         int calmState;                    // 0 normal, 1 aguardando limpar a tela, 2 descansando
         float calmT, nextCalm = 120f + 180f * (float)new Random().NextDouble();
-        Sprite heroFrontView, heroFront, heroFrontWave, heroSleepSpr, treeSpr, appleSpr, appleHud;
+        Sprite heroFront, heroFrontWave, heroSleepSpr, treeSpr, appleSpr, appleHud;
         List<Tree> trees = new List<Tree>();
         List<Arrow> arrows = new List<Arrow>();
         List<FlyApple> flyApples = new List<FlyApple>();
@@ -1384,7 +1365,7 @@ namespace HeroiPet
         // heroi de frente para o inventario: sprite frontal (com as maos dos dois lados), escudo no peito e espada ou arco na mao direita (sem armas na aba Roupas)
         void DrawHeroFrontPreview(Graphics g, bool bow, bool bare)
         {
-            Spr(g, heroFrontView, hx, hy, true);
+            Spr(g, heroFront, hx, hy, true);      // a mesma aparencia atual do heroi de frente (a das pausas)
             if (!bare)
             {
                 DrawShieldBody(g, hx - 12 * S, hy - 6 * S);      // escudo baixado ao lado (como na pausa), sem cobrir o rosto
@@ -1737,7 +1718,6 @@ namespace HeroiPet
             Color[] bk = { Color.FromArgb(215, 55, 55), Color.FromArgb(205, 92, 48), Color.FromArgb(176, 86, 42), Color.FromArgb(142, 74, 36) };
             for (int i = 0; i < 4; i++) { Dictionary<char, Color> ob = Art.Ov('R', bk[i]); ob['G'] = i == 0 ? Color.FromArgb(58, 165, 62) : Color.FromArgb(104, 110, 40); appleBake[i] = Art.Make(Art.AppleSm, S, ob); }
             heroFront = Art.Make(Art.HeroRecolor(Art.HeroFront), S, hov);
-            heroFrontView = Art.Make(Art.HeroRecolor(Art.HeroFrontView), S, hov);
             Dictionary<char, Color> capOv = Art.Ov('H', Color.FromArgb(150, 80, 205)); capOv['h'] = Color.FromArgb(205, 150, 240); capOv['g'] = Color.FromArgb(96, 50, 140);
             Dictionary<char, Color> shOv = Art.Ov('Q', Color.FromArgb(70, 125, 235)); shOv['h'] = Color.FromArgb(135, 180, 255); shOv['g'] = Color.FromArgb(45, 85, 190);
             evoItemSpr[0] = Art.Make(Art.CapItem, S, capOv); evoItemSpr[1] = Art.Make(Art.ShirtItem, S, shOv);
