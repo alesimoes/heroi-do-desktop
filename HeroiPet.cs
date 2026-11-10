@@ -1248,11 +1248,39 @@ namespace HeroiPet
         float menuEatT;
         float menuPickT;
         public bool MenuEating { get { return menuEatT > 0 || menuPickT > 0; } }
-        public string MenuPick()      // colher uma maca da arvore mais proxima que tenha: o heroi estica o braco no exemplo e a maca vai para o inventario
+        // "Colher maçã" no inventario: o menu fecha, o heroi vai ate a macieira mais proxima e colhe DUAS macas; enquanto isso nao nascem monstros.
+        public string MenuPick()
         {
             if (menuEatT > 0 || menuPickT > 0) return null;
-            if (NearestTreeWithApples() == null) return "Nenhuma árvore tem maçãs agora";
-            menuPickT = 0.001f; return null;
+            if (dead || cookState != 0 || powerT > 0 || bossPhase != 0 || chestGo || errandPh != 0) return "Agora não dá para colher";
+            Tree t = NearestTreeWithApples();
+            if (t == null) return "Nenhuma árvore tem maçãs agora";
+            errandTree = t; errandLeft = 2; errandPh = 1; pickedFlag = false;
+            if (calmState != 0) EndCalm(false);
+            CloseMenu(); return null;
+        }
+        int errandPh, errandLeft; Tree errandTree;      // errandPh: 0 nada | 1 indo ate a arvore | 2 colhendo
+        void ErrandAbort() { errandPh = 0; errandTree = null; playPickT = 0; }
+        void ErrandControl(float dt)
+        {
+            if (dead) { ErrandAbort(); return; }
+            if (errandPh == 1)
+            {
+                if (errandTree == null || FirstApple(errandTree) < 0) { errandTree = NearestTreeWithApples(); if (errandTree == null) { ErrandAbort(); return; } }
+                float d = (float)Math.Sqrt((errandTree.X - hx) * (errandTree.X - hx) + (errandTree.Y - hy) * (errandTree.Y - hy));
+                if (d > 12 * S) { MoveHero(errandTree.X, errandTree.Y, 56 * S, dt); return; }
+                hface = errandTree.X >= hx ? 1 : -1; playTree = errandTree; playPickT = 0.001f; pickedFlag = false; pickT = 0; errandPh = 2; return;
+            }
+            playPickT += dt; pickT = playPickT;
+            if (!pickedFlag && playPickT >= 0.4f)
+            {
+                int idx = FirstApple(errandTree);
+                if (idx < 0) { ErrandAbort(); return; }
+                errandTree.Has[idx] = false; errandTree.Regrow[idx] = 60f + (float)rnd.NextDouble() * 40f;
+                flyApples.Add(new FlyApple { X0 = AppleX(errandTree, idx), Y0 = AppleY(errandTree, idx) });      // a maca voa para o inventario
+                pickedFlag = true;
+            }
+            if (playPickT >= 0.8f) { playPickT = 0; errandLeft--; if (errandLeft <= 0) { ErrandAbort(); Say("Peguei!"); } else errandPh = 1; }
         }
         public string MenuEat()
         {
@@ -1811,7 +1839,7 @@ namespace HeroiPet
             if (spawnTimer <= 0)
             {
                 spawnTimer = (3f + (float)rnd.NextDouble() * 4f) / SpawnRateMul();
-                if (enemies.Count < EnemyCap() && !dead && calmState == 0 && cookState == 0 && bossPhase == 0) Spawn(SpawnType());
+                if (enemies.Count < EnemyCap() && !dead && calmState == 0 && cookState == 0 && bossPhase == 0 && errandPh == 0) Spawn(SpawnType());      // sem monstros enquanto colhe a pedido
             }
             UpdatePower(dt);
             UpdateEvo(dt);
@@ -3011,7 +3039,7 @@ namespace HeroiPet
         bool WaveDone() { return waveSpawned >= WaveSeq.Length && WaveAlive() == 0; }
         void UpdateWave(float dt)
         {
-            if (RupeeStep() < 6 || dead || waveSpawned >= WaveSeq.Length) return;
+            if (RupeeStep() < 6 || dead || errandPh != 0 || waveSpawned >= WaveSeq.Length) return;
             waveT -= dt;
             if (waveT <= 0 && WaveAlive() < 3) { Enemy e = Spawn(WaveSeq[waveSpawned]); e.Wave = true; e.Fairy = false; waveSpawned++; waveT = 4f + (float)rnd.NextDouble() * 3f; }
         }
@@ -3637,6 +3665,7 @@ namespace HeroiPet
                 if (!hitDone && atkT >= 0.11f) { hitDone = true; DoSwing(); }
                 if (atkT >= 0.32f) { attacking = false; atkCool = 0.22f; }
             }
+            else if (errandPh != 0) { ErrandControl(dt); }      // colhendo macas a pedido (inventario): o heroi anda sozinho ate a arvore
             else if (playMode) { PlayerControl(dt); }
             else
             {

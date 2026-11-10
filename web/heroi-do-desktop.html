@@ -1084,7 +1084,7 @@ function updateArrows(dt) {
     let gone = a.x < -30 || a.y < -30 || a.x > W + 30 || a.y > H + 30;
     for (let k = enemies.length - 1; k >= 0 && !gone; k--) {
       const en = enemies[k], dx = en.x - a.x, dy = (en.y - (en.type === 1 ? 9 * S : (en.type === 5 ? 9 * S : (en.type === 3 ? 12 * S * DK * (en.scale || 1) : 4 * S)))) - a.y, hitR = en.type === 3 ? 14 * S * DK * (en.scale || 1) : (en.type === 5 ? 9 * S : 7 * S);
-      if (dx * dx + dy * dy < hitR * hitR) { damageEnemy(en, a.power ? 9999999 : 50 * (eqBow === 1 ? 2 : 1)); gone = true; }      // dano do arco igual ao do dragao (50); arco prateado (evolucao 1): o dobro de dano (flecha de poder nao muda)
+      if (dx * dx + dy * dy < hitR * hitR) { damageEnemy(en, a.power ? 9999999 : 50 * (eqBow === 1 ? 2 : 1)); gone = true; }      // flecha do poder azul = 9999999 (como a fadinha); dano do arco igual ao do dragao (50); arco prateado (evolucao 1): o dobro de dano (flecha de poder nao muda)
     }
     if (gone) arrows.splice(i, 1);
   }
@@ -1351,7 +1351,7 @@ function bossLeave(dt) {
 const WAVE_SEQ = [5, 2, 5, 5, 2, 5, 5]; let waveSpawned = 0, waveT = 2;
 const waveAlive = () => enemies.filter((e) => e.wave).length, waveDone = () => waveSpawned >= WAVE_SEQ.length && waveAlive() === 0;
 function updateWave(dt) {
-  if (rupeeStep() < 6 || hero.dead || waveSpawned >= WAVE_SEQ.length) return;
+  if (rupeeStep() < 6 || hero.dead || errandPh || waveSpawned >= WAVE_SEQ.length) return;
   waveT -= dt; if (waveT <= 0 && waveAlive() < 3) { const e = spawn(WAVE_SEQ[waveSpawned]); e.wave = true; e.fairy = false; waveSpawned++; waveT = 4 + rnd() * 3; }
 }
 function updateBoss(dt) {
@@ -1406,7 +1406,7 @@ function step(dt) {
   if (deathWait) { puffs.forEach((p) => { p.t += dt; }); for (let i = puffs.length - 1; i >= 0; i--) if (puffs[i].t > 0.45) puffs.splice(i, 1); if (hero.speechT > 0) hero.speechT -= dt; return; }
   updateCalmState(dt);
   spawnTimer -= dt;
-  if (spawnTimer <= 0) { spawnTimer = (3 + rnd() * 4) / spawnRateMul(); if (enemies.length < enemyCap() && !hero.dead && calmState === 0 && cookState === 0 && bossPhase === 0) spawn(spawnType()); }
+  if (spawnTimer <= 0) { spawnTimer = (3 + rnd() * 4) / spawnRateMul(); if (enemies.length < enemyCap() && !hero.dead && calmState === 0 && cookState === 0 && bossPhase === 0 && !errandPh) spawn(spawnType()); }      // sem monstros enquanto colhe a pedido
   updatePower(dt);
   updateEvo(dt); updateChest(dt); updateFairy(dt);
   updateHero(dt);
@@ -1437,6 +1437,7 @@ function updateHero(dt) {
   }
   hero.inv -= dt; hero.atkCool -= dt; hero.x += hero.kvx * dt; hero.y += hero.kvy * dt; const damp = Math.min(1, 9 * dt); hero.kvx -= hero.kvx * damp; hero.kvy -= hero.kvy * damp;
   if (hero.attacking) { hero.atkT += dt; if (!hero.hitDone && hero.atkT >= 0.11) { hero.hitDone = true; doSwing(); } if (hero.atkT >= 0.32) { hero.attacking = false; hero.atkCool = 0.22; } }
+  else if (errandPh) errandControl(dt);      // colhendo macas a pedido (inventario): o heroi anda sozinho ate a arvore
   else if (playMode) playerControl(dt); else autoControl(dt);
   if (hero.walking) hero.walkT += dt; clampHero();
 }
@@ -1703,13 +1704,29 @@ function renderInv() {
     const pk = document.createElement('button'); pk.textContent = 'Colher maçã'; pk.style.cssText = eb.style.cssText.replace('#f7be46', '#69c85f'); pk.addEventListener('click', invPick); body.appendChild(pk); const p = document.createElement('div'); p.className = 'hint'; p.innerHTML = 'Maçã crua recupera meio coração.<br>Com 5 ou mais ele faz lanche na fogueira (assadas recuperam mais).'; body.appendChild(p); const hh = document.createElement('div'); hh.className = 'hint'; hh.style.color = '#f7be46'; hh.textContent = 'Corações: ' + (Math.round(hero.hp * 10) / 10) + ' / ' + hero.maxHp; body.appendChild(hh); if (invMsg) { const m = document.createElement('div'); m.className = 'hint'; m.style.color = '#ff6a4a'; m.textContent = invMsg; body.appendChild(m); } }
 }
 let invPickT = 0;
-function invPick() {      // colher uma maca da arvore mais proxima que tenha (botao "Colher maçã"): o heroi estica o braco no exemplo e a maca vai para o inventario
-  if (invEatT > 0 || invPickT > 0) return; invMsg = '';
-  if (!nearestTreeWithApples()) { invMsg = 'Nenhuma árvore tem maçãs agora'; renderInv(); return; }
-  invPickT = 0.001; invBow = false; let last = performance.now();
-  const iv = setInterval(() => { const now = performance.now(), dt = Math.min(0.1, (now - last) / 1000); last = now; invPickT += dt; if (invPickT >= 0.8 || !invOn) { clearInterval(iv); invPickT = 0; const t = nearestTreeWithApples(); if (invOn && t) { const i = firstApple(t); t.has[i] = false; t.regrow[i] = 60 + rnd() * 40; hero.apples++; } renderInv(); return; } drawHeroPreview(); }, 33);
+// "Colher maçã" no inventario: o menu fecha, o heroi vai ate a macieira mais proxima e colhe DUAS macas; enquanto isso nao nascem monstros.
+let errandPh = 0, errandLeft = 0, errandTree = null;      // errandPh: 0 nada | 1 indo ate a arvore | 2 colhendo
+function errandAbort() { errandPh = 0; errandTree = null; playPickT = 0; }
+function invPick() {
+  if (invEatT > 0) return; invMsg = '';
+  if (hero.dead || cookState !== 0 || powerT > 0 || bossPhase !== 0 || chestGo || errandPh) { invMsg = 'Agora não dá para colher'; renderInv(); return; }
+  const t = nearestTreeWithApples(); if (!t) { invMsg = 'Nenhuma árvore tem maçãs agora'; renderInv(); return; }
+  errandTree = t; errandLeft = 2; errandPh = 1; pickedFlag = false; if (calmState !== 0) endCalm(false); closeInv();
 }
-function invEat() {
+function errandControl(dt) {
+  if (hero.dead) { errandAbort(); return; }
+  if (errandPh === 1) {
+    if (!errandTree || firstApple(errandTree) < 0) { errandTree = nearestTreeWithApples(); if (!errandTree) { errandAbort(); return; } }
+    if (Math.hypot(errandTree.x - hero.x, errandTree.y - hero.y) > 12 * S) { moveHero(errandTree.x, errandTree.y, 56 * S, dt); return; }
+    hero.face = errandTree.x >= hero.x ? 1 : -1; playTree = errandTree; playPickT = 0.001; pickedFlag = false; pickT = 0; errandPh = 2; return;
+  }
+  playPickT += dt; pickT = playPickT;
+  if (!pickedFlag && playPickT >= 0.4) {
+    const idx = firstApple(errandTree); if (idx < 0) { errandAbort(); return; }
+    errandTree.has[idx] = false; errandTree.regrow[idx] = 60 + rnd() * 40; flyApples.push({ x0: appleX(errandTree, idx), y0: appleY(errandTree, idx), t: 0 }); pickedFlag = true;      // a maca voa para o inventario
+  }
+  if (playPickT >= 0.8) { playPickT = 0; errandLeft--; if (errandLeft <= 0) { errandAbort(); say('Peguei!'); } else errandPh = 1; }
+}function invEat() {
   if (invEatT > 0 || invPickT > 0) return; invMsg = '';
   if (hero.apples <= 0) invMsg = 'Sem maçãs'; else if (hero.hp >= hero.maxHp) invMsg = 'Corações cheios';
   if (invMsg) { renderInv(); return; }
