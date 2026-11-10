@@ -109,6 +109,32 @@ namespace HeroiPet
             return d;
         }
 
+        public static Func<Color, Color> Tint;      // fase 2: monstros em tons sombrios (aplicado a cada pixel ao montar o sprite)
+        // Feiticeiro Sombrio (vilao da fase 2): capuz roxo, olhos amarelos, barra dourada (R roxo, r sombra, E olhos, G ouro)
+        public static string[] MageRows = {
+            "......KKKKKK......",
+            "....KKRRRRRRKK....",
+            "...KRRRRRRRRRRK...",
+            "..KRRRRRRRRRRRRK..",
+            "..KRRRKKKKKKRRRK..",
+            "..KRRKKKKKKKKRRK..",
+            "..KRRKEEKKEEKRRK..",
+            "..KRRKKKKKKKKRRK..",
+            "..KRRRKKKKKKRRRK..",
+            "...KRRRRKKRRRRK...",
+            "..KRRRRRRRRRRRRK..",
+            ".KRRRGRRRRRRGRRRK.",
+            ".KRrRRGRRRRGRRrRK.",
+            ".KRrRRRGGGGRRRrRK.",
+            ".KRrRRRRRRRRRRrRK.",
+            ".KRrrRRRRRRRRrrRK.",
+            ".KRrrRRRRRRRRrrRK.",
+            "KRRrrRRRRRRRRrrRRK",
+            "KRRrrRRRRRRRRrrRRK",
+            "KRRRRRRRRRRRRRRRRK",
+            "KGGGGGGGGGGGGGGGGK",
+            "KKKKKKKKKKKKKKKKKK"
+        };
         public static Sprite Make(string[] rows, int s, Dictionary<char, Color> over)
         {
             int w = 0;
@@ -127,6 +153,7 @@ namespace HeroiPet
                         Color col;
                         if (over == null || !over.TryGetValue(c, out col))
                             if (!Pal.TryGetValue(c, out col)) continue;
+                        if (Tint != null) col = Tint(col);
                         using (SolidBrush br = new SolidBrush(col))
                             g.FillRectangle(br, x * s, y * s, s, s);
                     }
@@ -678,7 +705,7 @@ namespace HeroiPet
       //      // Wave: faz parte da onda final antes do dragao
         public float TX, TY, RT; public bool Moving; public float Scale = 1f, SmokeT, GrowT, SparkT, ShockT = 8f;      // dragao: destino, tempo para trocar de destino, esta andando
     }
-    class Rock { public float X, Y, VX, VY, Life; public bool Fire, Homing, Arrow; }      // Arrow: flecha dos bokoblins a cavalo
+    class Rock { public float X, Y, VX, VY, Life; public bool Fire, Homing, Arrow, Orb; }      // Orb: esfera sombria do Feiticeiro      // Arrow: flecha dos bokoblins a cavalo
     class Arrow { public float X, Y, VX, VY; public bool Power, Crystal; }
     class Tree { public float X, Y; public bool[] Has = new bool[5]; public float[] Regrow = new float[5]; }
     class FlyApple { public float X0, Y0, T; }
@@ -1514,19 +1541,46 @@ namespace HeroiPet
                 { g.DrawLine(go, gx1, gy1, gx2, gy2); g.DrawLine(gp, gx1, gy1, gx2, gy2); }
             }
         }
-        void DrawFrontBow(Graphics g, float x, float y)      // arco vertical na mao direita (de frente)
+        // ARCO em pixel art, igual no jogo, no menu de pausa, no inventario e no item grande: o arco e uma curva de quadradinhos (miolo de 1 unidade, contorno escuro de 1 unidade)
+        // dx,dy = para onde aponta (a barriga do arco vai para la); half = meia altura; bend = quanto a barriga avanca; eq: 0 madeira | 1 metal | 2 cristal
+        void PixelBow(Graphics g, float cx, float cy, float dx, float dy, float half, float bend, float unit, int eq)
         {
+            Color dk = Color.FromArgb(28, 22, 36);
+            Color main = eq == 2 ? Color.FromArgb(60, 200, 210) : (eq == 1 ? Color.FromArgb(185, 192, 205) : Color.FromArgb(135, 85, 45));
+            Color hi = eq == 2 ? Color.FromArgb(215, 255, 255) : (eq == 1 ? Color.FromArgb(240, 245, 255) : Color.FromArgb(185, 125, 70));
             SmoothingMode sm = g.SmoothingMode; g.SmoothingMode = SmoothingMode.None;
-            Color wood = eqBow == 2 ? Color.FromArgb(60, 200, 210) : (eqBow == 1 ? Color.FromArgb(200, 205, 215) : Color.FromArgb(135, 85, 45));
-            using (Pen ol = new Pen(Color.FromArgb(28, 22, 36), 4 * S)) using (Pen wp = new Pen(wood, 2 * S)) using (Pen st = new Pen(Color.FromArgb(235, 235, 235), Math.Max(1f, S * 0.6f)))
+            float px = -dy, py = dx; int n = Math.Max(10, (int)(half * 2 / unit * 1.6f));
+            PointF[] pts = new PointF[n + 1];
+            for (int i = 0; i <= n; i++)
             {
-                RectangleF r = new RectangleF(x - 3 * S, y - 7 * S, 6 * S, 14 * S);
-                g.DrawArc(ol, r, -90f, 180f); g.DrawArc(wp, r, -90f, 180f);
-                g.DrawLine(st, x, y - 7 * S, x, y + 7 * S);
+                float u = i / (float)n * 2f - 1f, b = bend * (1f - u * u);
+                float x = cx + px * u * half + dx * b, y = cy + py * u * half + dy * b;
+                pts[i] = new PointF((float)Math.Floor(x / unit) * unit, (float)Math.Floor(y / unit) * unit);
+            }
+            using (SolidBrush bd = new SolidBrush(dk)) using (SolidBrush bm = new SolidBrush(main)) using (SolidBrush bh = new SolidBrush(hi))
+            {
+                foreach (PointF p in pts) g.FillRectangle(bd, p.X - unit, p.Y - unit, 3 * unit, 3 * unit);
+                foreach (PointF p in pts) g.FillRectangle(bm, p.X, p.Y, unit, unit);
+                for (int i = 1; i < n; i += 3) g.FillRectangle(bh, pts[i].X, pts[i].Y, unit, unit);      // brilho
+                if (eq == 2)      // joia laranja no meio e pontas de cristal
+                {
+                    using (SolidBrush gem = new SolidBrush(Color.FromArgb(255, 170, 40))) g.FillRectangle(gem, pts[n / 2].X - unit / 2f, pts[n / 2].Y - unit / 2f, 2 * unit, 2 * unit);
+                    using (SolidBrush tip = new SolidBrush(Color.FromArgb(120, 235, 245))) { g.FillRectangle(tip, pts[0].X, pts[0].Y, unit, unit); g.FillRectangle(tip, pts[n].X, pts[n].Y, unit, unit); }
+                }
             }
             g.SmoothingMode = sm;
         }
-
+        void DrawFrontBow(Graphics g, float x, float y)      // arco vertical na mao direita (de frente), com a barriga para a direita
+        {
+            PixelBow(g, x, y, 1f, 0f, 7 * S, 3 * S, S, eqBow);
+            using (Pen st = new Pen(Color.FromArgb(235, 235, 235), Math.Max(1f, S * 0.5f))) g.DrawLine(st, x, y - 7 * S, x, y + 7 * S);
+        }
+        void BowIcon(Graphics g, int eq, float cx, float cy, float u)      // arco para icones e item grande (a barriga para a direita, como no jogo)
+        {
+            float half = 11 * u, unit = Math.Max(1f, u * 0.8f);
+            PixelBow(g, cx - 2 * u, cy, 1f, 0f, half, 5 * u, unit, eq);
+            using (Pen st = new Pen(Color.FromArgb(235, 235, 235), Math.Max(1f, u * 0.4f))) g.DrawLine(st, cx - 2 * u, cy - half, cx - 2 * u, cy + half);
+        }
         // icones dos itens (formas desenhadas por codigo)
         public void DrawIcon(Graphics g, int cat, int id, float cx, float cy, float u)
         {
@@ -1534,12 +1588,7 @@ namespace HeroiPet
             if (cat == 0)
             {
                 if (id == 1) { DrawEvoItem(g, 1, cx, cy, u * 0.85f); return; }
-                if (id == 2) { IconCrystalBow(g, cx, cy, u); return; }
-                PointF[] pts = new PointF[13];
-                for (int i = 0; i < 13; i++) { float tt = (i - 6) / 6f; pts[i] = new PointF(cx + (5f * tt * tt - 2.5f) * u * 0.85f, cy + tt * 12 * u * 0.85f); }
-                using (Pen o = new Pen(dark, u * 3.2f)) { o.StartCap = LineCap.Round; o.EndCap = LineCap.Round; g.DrawLines(o, pts); }
-                using (Pen m = new Pen(Color.FromArgb(135, 85, 45), u * 1.8f)) { m.StartCap = LineCap.Round; m.EndCap = LineCap.Round; g.DrawLines(m, pts); }
-                using (Pen s = new Pen(Color.FromArgb(235, 235, 235), Math.Max(1f, u * 0.4f))) g.DrawLine(s, pts[0], pts[12]);
+                BowIcon(g, id, cx, cy, u * 0.85f);
             }
             else if (cat == 1) { if (id >= 2) DrawItemSpr(g, wpnSpr[id - 2], cx, cy, u * 0.85f); else IconSword(g, cx, cy, u, id == 1); }
             else if (cat == 2) IconShield(g, cx, cy, u, id);
@@ -1866,10 +1915,14 @@ namespace HeroiPet
             Dictionary<char, Color> flOv = Art.Ov('O', Color.FromArgb(255, 140, 40)); flOv['Y'] = Color.FromArgb(255, 225, 90); flOv['R'] = Color.FromArgb(215, 60, 40); flOv['B'] = Color.FromArgb(110, 40, 40); flOv['b'] = Color.FromArgb(75, 25, 30);
             wpnSpr[1] = Art.Make(Art.FlameItem, S, flOv);
             heroFrontWave = Art.Make(Art.HeroRecolor(Art.HeroFrontWave), S, hov);
+            Art.Tint = phase2 ? (Func<Color, Color>)DarkTint : null;      // fase 2: octorok, morcego, gelatina e bokoblin em tons sombrios
             octo[0] = Art.Make(Art.OctoA, S, null); octo[1] = Art.Make(Art.OctoB, S, null);
             bat[0] = Art.Make(Art.BatUp, S, null); bat[1] = Art.Make(Art.BatDown, S, null);
             slime[0] = Art.Make(Art.SlimeTall, S, null); slime[1] = Art.Make(Art.SlimeFlat, S, null);
             boko[0] = Art.Make(Art.BokoA, S, null); boko[1] = Art.Make(Art.BokoB, S, null); boko[2] = Art.Make(Art.BokoC, S, null);
+            Art.Tint = null;
+            Dictionary<char, Color> mgOv = Art.Ov('R', Color.FromArgb(105, 45, 165)); mgOv['r'] = Color.FromArgb(64, 26, 110); mgOv['E'] = Color.FromArgb(255, 240, 90); mgOv['G'] = Color.FromArgb(255, 205, 40); mgOv['K'] = Color.FromArgb(28, 22, 36);
+            mageSpr = Art.Make(Art.MageRows, (int)Math.Round(S * 1.6), mgOv);
             heartFull = Art.Make(Art.Heart, S, null);
             Dictionary<char, Color> gray = Art.Ov('R', Color.FromArgb(70, 70, 82));
             gray['W'] = Color.FromArgb(105, 105, 118);
@@ -2237,16 +2290,7 @@ namespace HeroiPet
             using (SolidBrush dk = new SolidBrush(dark))
             {
                 ol.LineJoin = LineJoin.Round;
-                if (stage == 1)           // arco de metal
-                {
-                    PointF[] pts = new PointF[13];
-                    for (int i = 0; i < 13; i++) { float tt = (i - 6) / 6f; pts[i] = new PointF(cx + (5f * tt * tt - 2.5f) * u, cy + tt * 12 * u); }
-                    using (Pen o2 = new Pen(dark, u * 3.6f)) { o2.StartCap = LineCap.Round; o2.EndCap = LineCap.Round; g.DrawLines(o2, pts); }
-                    using (Pen m = new Pen(Color.FromArgb(185, 192, 205), u * 2f)) { m.StartCap = LineCap.Round; m.EndCap = LineCap.Round; g.DrawLines(m, pts); }
-                    using (Pen h = new Pen(Color.FromArgb(240, 245, 255), Math.Max(1f, u * 0.6f))) g.DrawLines(h, pts);
-                    using (Pen st = new Pen(Color.FromArgb(235, 235, 235), Math.Max(1f, u * 0.5f))) g.DrawLine(st, pts[0], pts[12]);
-                    using (SolidBrush gr = new SolidBrush(Color.FromArgb(60, 70, 110))) g.FillRectangle(gr, cx + 2.4f * u - 1.5f * u, cy - 2.5f * u, 3 * u, 5 * u);
-                }
+                if (stage == 1) BowIcon(g, 1, cx, cy, u);           // arco de metal
                 else if (stage == 2)      // gorro roxo
                 {
                     using (SolidBrush p1 = new SolidBrush(Color.FromArgb(150, 80, 205)))
@@ -4501,40 +4545,20 @@ namespace HeroiPet
 
         void DrawBow(Graphics g, float f, float bob)
         {
-            float cx = hx + f * 7 * S, cy = hy - bob - 8 * S;
+            float cx = hx + f * 8 * S, cy = hy - bob - 8 * S;
             float dx = aimX, dy = aimY, px = -dy, py = dx;
             float pull = Math.Min(1f, bowT / 0.4f);
-            PointF[] pts = new PointF[9];
-            for (int i = 0; i < 9; i++)
-            {
-                float u = (i - 4) / 4f, bend = 3 * S * (1 - u * u);
-                pts[i] = new PointF(cx + px * u * 7 * S + dx * bend, cy + py * u * 7 * S + dy * bend);
-            }
-            if (eqBow == 1)      // arco de metal (evolucao 1): prata com contorno escuro
-            {
-                using (Pen bo = new Pen(Color.FromArgb(28, 22, 36), S + 3)) g.DrawLines(bo, pts);
-                using (Pen bm = new Pen(Color.FromArgb(185, 192, 205), S + 1)) g.DrawLines(bm, pts);
-                using (Pen bh = new Pen(Color.FromArgb(240, 245, 255), 1)) g.DrawLines(bh, pts);
-            }
-            else if (eqBow == 2)      // arco de cristal: turquesa com brilho e uma joia no centro
-            {
-                using (Pen bo = new Pen(Color.FromArgb(28, 22, 36), S + 3)) g.DrawLines(bo, pts);
-                using (Pen bm = new Pen(Color.FromArgb(60, 200, 210), S + 1)) g.DrawLines(bm, pts);
-                using (Pen bh = new Pen(Color.FromArgb(215, 255, 255), 1)) g.DrawLines(bh, pts);
-                using (SolidBrush gem = new SolidBrush(Color.FromArgb(255, 170, 40))) g.FillRectangle(gem, pts[4].X - S, pts[4].Y - S, 2 * S, 2 * S);
-            }
-            else
-                using (Pen bw = new Pen(Color.FromArgb(135, 85, 45), S + 1))
-                    g.DrawLines(bw, pts);
-            float nx = cx - dx * pull * 5 * S, ny = cy - dy * pull * 5 * S;
+            PixelBow(g, cx, cy, dx, dy, 7 * S, 3 * S, S, eqBow);
+            float nx = cx - dx * pull * 3 * S, ny = cy - dy * pull * 3 * S;      // a corda vai ate a mao, sem entrar no rosto
             using (Pen st = new Pen(Color.FromArgb(235, 235, 235), 1))
             {
                 g.DrawLine(st, cx + px * 7 * S, cy + py * 7 * S, nx, ny);
                 g.DrawLine(st, nx, ny, cx - px * 7 * S, cy - py * 7 * S);
             }
+            using (SolidBrush sk = new SolidBrush(Color.FromArgb(250, 208, 165))) using (SolidBrush kb = new SolidBrush(Color.FromArgb(28, 22, 36)))
+            { g.FillRectangle(kb, cx - 2 * S, cy - 2 * S, 3 * S, 3 * S); g.FillRectangle(sk, cx - S, cy - S, S, S); }      // a mao no meio do arco
             if (pull > 0.05f) DrawArrow(g, nx + dx * 10 * S, ny + dy * 10 * S, dx, dy, 1f);
         }
-
         // braco esticado para colher a maca
         void DrawReach(Graphics g, float f, float bob)
         {
