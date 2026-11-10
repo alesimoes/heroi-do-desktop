@@ -153,3 +153,4 @@ limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão 
 - **Modo automático:** quando a fadinha fica pronta ela ataca **sozinha** o monstro mais perto (além dos 20% autônomos). **Modo jogo:** só os 20% são automáticos; o ataque pronto depende da tecla 4.
 
 - Inventário (aba Roupas): seção **Fadinha** (aparece ao ganhar a fadinha) com a aparência normal e a **rosa** (liberada após 500 monstros); a fadinha também aparece ao lado do herói ampliado. A escolha fica salva (registro `FadaLook` / `heroi_fada_look`).
+- Os brilhinhos que a fadinha solta são **azuis**; quando ela está pronta (piscando) soltam em maior quantidade.

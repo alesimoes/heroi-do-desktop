@@ -680,7 +680,7 @@ if (fairyState === 0 && !kingGear) fairyKills = 0;
 if (/[?&]fada\b/.test(location.search)) { kingGear = true; fairyState = 1; }
 if (/[?&]fada2\b/.test(location.search)) { kingGear = true; fairyState = 1; fairySkin = 1; }
 eqFairy = fairySkin; try { const lk = localStorage.getItem('heroi_fada_look'); if (lk !== null && !/[?&]fada2\b/.test(location.search)) eqFairy = Math.max(0, Math.min(1, parseInt(lk, 10) || 0)); } catch (_) {}
-if (eqFairy === 1 && fairySkin === 0) eqFairy = 0;      // aparencia escolhida no inventario (0 normal | 1 rosa)      // teste rapido: ja com a fadinha
+if (eqFairy === 1 && fairySkin === 0) eqFairy = 0;      // aparencia escolhida no inventario (aba Roupas): 0 normal | 1 rosa      // teste rapido: ja com a fadinha
 function saveFairy() { try { localStorage.setItem('heroi_monstros_fada', String(fairyKills)); localStorage.setItem('heroi_fada', String(fairyState)); localStorage.setItem('heroi_monstros_fada2', String(fairyKills2)); localStorage.setItem('heroi_fada_skin', String(fairySkin)); localStorage.setItem('heroi_fada_look', String(eqFairy)); } catch (_) {} }
 function countFairyKill() {
   if (fairyState === 1 && fairySkin === 0) {      // depois da fadinha: mais 500 monstros dao a aparencia nova (asas azul escuro e rosa)
