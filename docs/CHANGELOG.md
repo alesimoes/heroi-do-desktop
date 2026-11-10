@@ -1,7 +1,7 @@
 # Changelog (resumo)
 
 ## 09/11/2026 — Roupa de rei no inventário
-- Ícone da **roupa de rei** em pixel art com **faixa dourada no pescoço**, cinto e **barra dourada** (voltou a ter os detalhes do primeiro desenho).
+- Ícone da **roupa de rei** em pixel art: **blusa** vermelha (mesmo corte das outras) com **faixa dourada no pescoço** e **barra dourada** embaixo.
 
 ## 09/11/2026 — Ícones do inventário em pixel art
 - **Blusas:** mangas mais finas e curtas (antes grossas demais em relação ao resto). **Coroa de ouro** redesenhada em pixel art (igual ao estilo dos outros itens; também no anúncio do tesouro).

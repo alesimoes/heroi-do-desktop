@@ -242,7 +242,8 @@ const ROWS = {
   bokoA: ["..h.......h...","..KKKKKKKKK...",".KkkkkkkkkK...",".KkWKkkWKkkK..",".KkkkkkkkkK...",".KkkKWKWKkkK..","..KkkkkkkkK.BB",".KkBBBBBBkK.bB",".KkBBBBBBkK.bB",".KkkBBBBkkK.bB","..KKBBBBKK..bB","...KkK..KkK...","...KkK..KkK...","..KKKK..KKKK.."],
   bokoB: ["..h.......h...","..KKKKKKKKK...",".KkkkkkkkkK...",".KkWKkkWKkkK..",".KkkkkkkkkK...",".KkkKWKWKkkK..","..KkkkkkkkK.BB",".KkBBBBBBkK.bB",".KkBBBBBBkK.bB",".KkkBBBBkkK.bB","..KKBBBBKK..bB","..KkK....KkK..",".KkK......KkK.",".KKK......KKK."],
   bokoC: ["..h.......hbB.","..KKKKKKKKKbB.",".KkkkkkkkkKbB.",".KkWKkkWKkkKbB",".KkkkkkkkkKbB.",".KkkKWKWKkkKbB","..KkkkkkkkK.bB",".KkBBBBBBkK.bB",".KkBBBBBBkK...",".KkkBBBBkkK...","..KKBBBBKK....","...KkK..KkK...","...KkK..KkK...","..KKKK..KKKK.."],
-  robeIcon: ["...KKKKKKKKKK...","..KQQCCCCCCQQK..",".KQQQQCCCCQQQQK.",".KQQQQQCCQQQQQK.",".KgQKQQQQQQKQgK.",".KKKKQQQQQQKKKK.","....KQQQQQQK....","....KCCCCCCK....","....KQQQQQQK....","...KQQQQQQQQK...","..KgQQQQQQQQgK..","..KCCCCCCCCCCK..","..KKKKKKKKKKKK.."],
+  /* roupa de rei: blusa vermelha com faixa dourada no pescoco e na barra */
+  robeIcon: ["...KKKKKKKKKK...","..KQQCCCCCCQQK..",".KQQQQCCCCQQQQK.",".KQQQQQCCQQQQQK.",".KgQKQQQQQQKQgK.",".KKKKQQQQQQKKKK.","....KQQQQQQK....","....KQQQQQQK....","....KgQQQQgK....","....KCCCCCCK....","....KKKKKKKK...."],
   crownItem: ["......KKKK......","..KK..KCCK..KK..",".KCCK.KCCK.KCCK.",".KCCKKCCCCKKCCK.",".KCCCCCCCCCCCCK.",".KCCCCCRRCCCCCK.",".KCUCCCRRCCCUCK.",".KccccccccccccK.",".KKKKKKKKKKKKKK."],
   capItem: ["....KKKKKKKK....","...KHHhhHHHHK...","..KHHhHHHHHHgK..",".KHHHHHHHHHHHgK.","KHHHHHHHHHHHHHgK","KHHHHHHHHHHHHggK","KggggggggggggggK",".KKKKKKKKKKKKKK."],
   shirtItem: ["...KKKKKKKKKK...","..KQQQKKKKQQQK..",".KQQQQQhhQQQQQK.",".KQQQQQQQQQQQQK.",".KgQKQQQQQQKQgK.",".KKKKQQQQQQKKKK.","....KQQQQQQK....","....KQQQQQQK....","....KgQQQQgK....","....KBBBBBBK....","....KKKKKKKK...."],
@@ -868,7 +869,7 @@ function spawn(type) {
   const edge = Math.floor(rnd() * 4), m = 6 * S; let x, y;
   if (edge === 0) { x = m; y = m * 3 + rnd() * (H - m * 6); } else if (edge === 1) { x = W - m; y = m * 3 + rnd() * (H - m * 6); }
   else if (edge === 2) { x = m * 3 + rnd() * (W - m * 6); y = 16 * S; } else { x = m * 3 + rnd() * (W - m * 6); y = H - m; }
-  const e = { type, x, y, vx: 0, vy: 0, kx: 0, ky: 0, t: 0, timer: 0.8 + rnd(), flash: 0, hp: type === 1 ? 1 : ((type === 4 || type === 5) ? 3 : 2), maxHp: 0, face: 1, mode: 0, tx: 0, ty: 0, rt: 0, moving: false };
+  const e = { type, x, y, vx: 0, vy: 0, kx: 0, ky: 0, t: 0, timer: 0.8 + rnd(), flash: 0, hp: type === 1 ? 50 : (type === 2 ? 50 : (type === 0 ? 200 : (type === 5 ? 250 : 3))), maxHp: 0, face: 1, mode: 0, tx: 0, ty: 0, rt: 0, moving: false };
   e.maxHp = e.hp; puffs.push({ kind: 2, x, y, t: 0 }); if (fairyState === 1 && type !== 3 && rnd() < 0.20) e.fairy = true;      // a fadinha derrota 20% dos monsters que aparecem
   enemies.push(e); return e;
 }

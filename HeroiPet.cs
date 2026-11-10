@@ -487,7 +487,7 @@ namespace HeroiPet
             "....KBBBBBBK....",
             "....KKKKKKKK...."
 };
-        // roupa de rei em pixel art: manto vermelho (Q/g) com faixa dourada (C) no pescoco, cinto e barra
+        // roupa de rei em pixel art: blusa vermelha (Q/g) com faixa dourada (C) no pescoco e na barra
         public static string[] RobeItem = {
             "...KKKKKKKKKK...",
             "..KQQCCCCCCQQK..",
@@ -496,13 +496,11 @@ namespace HeroiPet
             ".KgQKQQQQQQKQgK.",
             ".KKKKQQQQQQKKKK.",
             "....KQQQQQQK....",
-            "....KCCCCCCK....",
             "....KQQQQQQK....",
-            "...KQQQQQQQQK...",
-            "..KgQQQQQQQQgK..",
-            "..KCCCCCCCCCCK..",
-            "..KKKKKKKKKKKK.."
-        };
+            "....KgQQQQgK....",
+            "....KCCCCCCK....",
+            "....KKKKKKKK...."
+};
         // coroa de ouro em pixel art (C ouro, c ouro escuro, R rubi, U safira)
         public static string[] CrownItem = {
             "......KKKK......",
@@ -3389,7 +3387,7 @@ namespace HeroiPet
             else if (edge == 1) { e.X = W - m; e.Y = m * 3 + (float)rnd.NextDouble() * (H - m * 6); }
             else if (edge == 2) { e.X = m * 3 + (float)rnd.NextDouble() * (W - m * 6); e.Y = 16 * S; }
             else { e.X = m * 3 + (float)rnd.NextDouble() * (W - m * 6); e.Y = H - m; }
-            e.HP = type == 1 ? 1 : ((type == 4 || type == 5) ? 3 : 2);
+            e.HP = type == 1 ? 50 : (type == 2 ? 50 : (type == 0 ? 200 : (type == 5 ? 250 : 3)));      // morcego 50, gelatina 50, octorok (vermelho) 200, bokoblin a cavalo 250, bokoblin comum 3
             e.Timer = 0.8f + (float)rnd.NextDouble();
             puffs.Add(new Puff { Kind = 2, X = e.X, Y = e.Y });
             if (fairyState == 1 && type != 3 && rnd.NextDouble() < 0.20) e.Fairy = true;      // a fadinha derrota 20% dos monstros que aparecem
