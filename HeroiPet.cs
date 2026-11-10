@@ -80,7 +80,7 @@ namespace HeroiPet
         };
 
         // separa o verde do gorro (linhas 0-8) do verde da roupa (linhas 9+) para poder recolorir cada um na evolucao
-        public static bool Crown, Robe;     // equipado: coroa de ouro / roupa de rei (com calca marrom e sapatos roxos)
+        public static bool Crown, Robe, Legs;      // Legs: conjunto com calca e sapatos coloridos (J/Z)     // equipado: coroa de ouro / roupa de rei (com calca marrom e sapatos roxos)
         public static string[] HeroRecolor(string[] rows)
         {
             List<string> r = new List<string>();
@@ -89,6 +89,7 @@ namespace HeroiPet
             {
                 string s = rows[i].Replace('Y', 'V').Replace('G', i < 9 ? (Crown ? 'V' : 'H') : 'Q');      // cabelo castanho ('V') para contrastar com o rosto; com a coroa: sem gorro (cabelo aparece) e a coroa fica sobre a cabeca
                 if (Crown && (i == 4 || i == 5) && s.StartsWith("KV")) s = ".K" + s.Substring(2);      // sem gorro: tira a pontinha do canto esquerdo da cabeca
+                if (Legs && !Robe) { if (i == 14) s = s.Replace('W', 'J'); else if (i == 15) s = s.Replace('B', 'Z'); }
                 if (Robe)
                 {
                     if (i == 9) s = s.Replace('Q', 'F');          // gola de pele
@@ -358,7 +359,7 @@ namespace HeroiPet
             ".KGGGGGGGGGGK.",
             "KYYYYYYYYYYYYK",
             "KYYYSSSSSSYYYK",
-            ".KYYSKSSKSYYK.",
+            ".KSYSKSSKSYSK.",
             "..KYSSSSSSYK..",
             "...KSSSSSSK...",
             "...KKGGGGKK...",
@@ -377,7 +378,7 @@ namespace HeroiPet
             ".KGGGGGGGGGGK.",
             "KYYYYYYYYYYYYK",
             "KYYYSSSSSSYYYK",
-            ".KYYSKSSKSYYK.",
+            ".KSYSKSSKSYSK.",
             "..KYSSSSSSYK..",
             "...KSSSSSSK...",
             "...KKGGGGKK...",
@@ -1160,8 +1161,28 @@ namespace HeroiPet
         bool OwnBow(int i) { return i == 0 || (i == 1 && evoStage >= 1); }
         bool OwnSword(int i) { return i == 0 || (i == 1 && evoStage >= 4); }
         bool OwnShield(int i) { return i == 0 || (i == 1 && evoStage >= 4) || (i == 2 && kingGear); }
-        bool OwnHat(int i) { return i == 0 || (i == 1 && evoStage >= 2) || (i == 2 && kingGear); }
-        bool OwnTunic(int i) { return i == 0 || (i == 1 && evoStage >= 3) || (i == 2 && kingGear); }
+        bool OwnHat(int i) { return i == 0 || (i == 1 && evoStage >= 2) || (i == 2 && kingGear) || (i >= 3 && i - 3 < SetsOwned); }
+        bool OwnTunic(int i) { return i == 0 || (i == 1 && evoStage >= 3) || (i == 2 && kingGear) || (i >= 3 && i - 3 < SetsOwned); }
+
+        // ================= 5 CONJUNTOS DE ROUPA (liberados pelo total de monstros derrotados no automatico) =================
+        // Cada conjunto = gorro + blusa + calca + sapatos de uma cor. Liberam sozinhos quando evoKills chega ao limite (ver SetThr). Aparecem em Roupas > Gorros / Roupas.
+        class OutSet { public string Name; public Color Hat, Tunic, Pants, Shoes; public OutSet(string n, Color h, Color t, Color p, Color s) { Name = n; Hat = h; Tunic = t; Pants = p; Shoes = s; } }
+        static readonly OutSet[] Sets = {
+            new OutSet("areia", Color.FromArgb(226, 186, 96), Color.FromArgb(205, 118, 52), Color.FromArgb(150, 100, 55), Color.FromArgb(96, 58, 30)),
+            new OutSet("gelo", Color.FromArgb(205, 236, 255), Color.FromArgb(120, 190, 235), Color.FromArgb(80, 125, 190), Color.FromArgb(235, 245, 255)),
+            new OutSet("fogo", Color.FromArgb(225, 72, 30), Color.FromArgb(185, 38, 28), Color.FromArgb(70, 38, 36), Color.FromArgb(250, 175, 45)),
+            new OutSet("noite", Color.FromArgb(82, 66, 180), Color.FromArgb(58, 50, 140), Color.FromArgb(34, 30, 80), Color.FromArgb(205, 175, 70)),
+            new OutSet("mar", Color.FromArgb(30, 160, 170), Color.FromArgb(28, 125, 150), Color.FromArgb(20, 80, 110), Color.FromArgb(240, 230, 200)) };
+        static readonly int[] SetThr = { 4500, 6000, 8000, 10500, 14000 };      // total de monstros derrotados (evoKills) para liberar cada conjunto
+        bool setsTest; int setsKnown;
+        int SetsOwned { get { if (setsTest) return 5; int n = 0; while (n < 5 && evoKills >= SetThr[n]) n++; return n; } }
+        static Color Shade(Color c, float t) { return t >= 0 ? Color.FromArgb((int)(c.R + (255 - c.R) * t), (int)(c.G + (255 - c.G) * t), (int)(c.B + (255 - c.B) * t)) : Color.FromArgb((int)(c.R * (1 + t)), (int)(c.G * (1 + t)), (int)(c.B * (1 + t))); }
+        void UnlockSet(int i)      // conjunto novo: ja vem vestido, com aviso
+        {
+            eqHat = 3 + i; eqTunic = 3 + i; ValidateEquip(); SaveEquip(); BuildSprites(); newItemUntil = time + 5f;
+            Say("Conjunto novo: " + Sets[i].Name + "!");
+            for (int k = 0; k < 10; k++) puffs.Add(new Puff { Kind = k % 2, X = hx + ((float)rnd.NextDouble() - 0.5f) * 20 * S, Y = hy - (float)rnd.NextDouble() * 18 * S });
+        }
         void BestEquip()
         {
             eqBow = evoStage >= 1 ? 1 : 0; eqSword = evoStage >= 4 ? 1 : 0;
@@ -1347,14 +1368,16 @@ namespace HeroiPet
             {
                 if (id == 0) DrawItemSpr(g, menuSpr[0], cx, cy, u * 0.85f);
                 else if (id == 1) DrawEvoItem(g, 2, cx, cy, u * 0.85f);
-                else DrawCrownItem(g, cx, cy, u * 0.9f);
+                else if (id == 2) DrawCrownItem(g, cx, cy, u * 0.9f);
+                else DrawItemSpr(g, setCap[id - 3], cx, cy, u * 0.85f);
             }
             else if (cat == 5) DrawFairyShape(g, cx, cy, u * 2.4f, id, false, true);
             else
             {
                 if (id == 0) DrawItemSpr(g, menuSpr[1], cx, cy, u * 0.85f);
                 else if (id == 1) DrawEvoItem(g, 3, cx, cy, u * 0.85f);
-                else DrawItemSpr(g, menuSpr[2], cx, cy, u * 0.85f);
+                else if (id == 2) DrawItemSpr(g, menuSpr[2], cx, cy, u * 0.85f);
+                else DrawItemSpr(g, setShirt[id - 3], cx, cy, u * 0.85f);
             }
         }
         void DrawItemSpr(Graphics g, Sprite sp, float cx, float cy, float u)
@@ -1433,13 +1456,14 @@ namespace HeroiPet
             struct Hit { public Rectangle R; public int Kind, A, B; }      // Kind 0 aba | 1 item | 2 fechar
             static readonly string[][] Names = {
                 new string[] { "Arco de madeira", "Arco de metal" }, new string[] { "Espada comum", "Espada Mestre" }, new string[] { "Escudo azul", "Escudo vermelho", "Escudo do rei" },
-                new string[] { "Gorro verde", "Gorro roxo", "Coroa de ouro" }, new string[] { "Túnica verde", "Blusa azul", "Roupa de rei" }, new string[] { "Fadinha", "Fadinha rosa" } };
+                new string[] { "Gorro verde", "Gorro roxo", "Coroa de ouro", "Gorro areia", "Gorro gelo", "Gorro fogo", "Gorro noite", "Gorro mar" }, new string[] { "Túnica verde", "Blusa azul", "Roupa de rei", "Blusa areia", "Blusa gelo", "Blusa fogo", "Blusa noite", "Blusa mar" }, new string[] { "Fadinha", "Fadinha rosa" } };
             static readonly string[][] Descs = {
                 new string[] { "O arco de sempre.", "Flechas com o dobro de dano." }, new string[] { "A espada de sempre.", "Dobro de dano." }, new string[] { "Escudo comum.", "Escudo vermelho do herói.", "Escudo circular do tesouro do rei." },
-                new string[] { "O gorro de sempre.", "Gorro roxo da evolução.", "Coroa de ouro do tesouro do rei." }, new string[] { "A túnica de sempre.", "Blusa azul da evolução.", "Manto vermelho, calça marrom e sapatos roxos." }, new string[] { "A fadinha ajudante.", "Corpo rosa e asas azul escuro (500 monstros depois da fadinha)." } };
+                new string[] { "O gorro de sempre.", "Gorro roxo da evolução.", "Coroa de ouro do tesouro do rei.", "Conjunto areia (4500 monstros).", "Conjunto gelo (6000 monstros).", "Conjunto fogo (8000 monstros).", "Conjunto noite (10500 monstros).", "Conjunto mar (14000 monstros)." }, new string[] { "A túnica de sempre.", "Blusa azul da evolução.", "Manto vermelho, calça marrom e sapatos roxos.", "Blusa, calça e sapatos do conjunto areia.", "Blusa, calça e sapatos do conjunto gelo.", "Blusa, calça e sapatos do conjunto fogo.", "Blusa, calça e sapatos do conjunto noite.", "Blusa, calça e sapatos do conjunto mar." }, new string[] { "A fadinha ajudante.", "Corpo rosa e asas azul escuro (500 monstros depois da fadinha)." } };
             static readonly string[] TabNames = { "Armas", "Roupas", "Comida" };
             PetForm p; float sc; int tab = -1, hover = -1; bool showBow;      // showBow: o heroi do exemplo segura o arco (ao clicar num arco) ou espada e escudo (ao clicar neles)
             List<Hit> hits = new List<Hit>(); string msg;
+            int scrollY, contentH; Rectangle clipArea;      // rolagem (roda do mouse) quando ha muitos itens
             System.Windows.Forms.Timer eatTimer;
 
             protected override CreateParams CreateParams { get { CreateParams cp = base.CreateParams; cp.ExStyle |= 0x80; return cp; } }      // TOOLWINDOW; fica por cima (e ativa) para receber os cliques
@@ -1468,6 +1492,11 @@ namespace HeroiPet
                 if (hv != hover) { hover = hv; Cursor = hv >= 0 ? Cursors.Hand : Cursors.Default; Invalidate(); }
                 base.OnMouseMove(e);
             }
+            protected override void OnMouseWheel(MouseEventArgs e)
+            {
+                scrollY = Math.Max(0, Math.Min(Math.Max(0, contentH - clipArea.Height), scrollY - e.Delta / 2)); Invalidate();
+                base.OnMouseWheel(e);
+            }
             protected override void OnMouseLeave(EventArgs e) { hover = -1; Invalidate(); base.OnMouseLeave(e); }
             protected override void OnMouseClick(MouseEventArgs e)
             {
@@ -1476,7 +1505,7 @@ namespace HeroiPet
                         if (hits[i].R.Contains(e.Location))
                         {
                             Hit h = hits[i];
-                            if (h.Kind == 0) { tab = (tab == h.A) ? -1 : h.A; msg = null; }
+                            if (h.Kind == 0) { tab = (tab == h.A) ? -1 : h.A; msg = null; scrollY = 0; }
                             else if (h.Kind == 1) { p.EquipItem(h.A, h.B); if (h.A == 0) showBow = true; else if (h.A == 1 || h.A == 2) showBow = false; }
                             else if (h.Kind == 2) { p.CloseMenu(); return; }
                             else if (h.Kind == 3) { msg = p.MenuEat(); showBow = false; }
@@ -1501,9 +1530,10 @@ namespace HeroiPet
                 for (int id = 0; id < n; id++)
                 {
                     if (!p.Owns(cat, id)) continue;
+                    if (x + cs > area.Right + 1) { x = area.X; y += cs + (int)(10 * sc); }      // quebra de linha
                     Rectangle r = new Rectangle(x, y, cs, cs);
-                    bool eq = p.Equipped(cat) == id; int idx = hits.Count; bool hv = hover == idx;
-                    hits.Add(new Hit { R = r, Kind = 1, A = cat, B = id });
+                    bool eq = p.Equipped(cat) == id; int idx = hits.Count; bool vis = r.IntersectsWith(clipArea); bool hv = vis && hover == idx;
+                    if (vis) hits.Add(new Hit { R = r, Kind = 1, A = cat, B = id });
                     using (SolidBrush bg = new SolidBrush(hv ? Color.FromArgb(58, 66, 86) : Color.FromArgb(34, 40, 54)))
                     using (Pen pen = new Pen(eq ? Color.FromArgb(247, 190, 70) : Color.FromArgb(80, 90, 112), eq ? 3 * sc : 1.5f * sc))
                         Round(g, r, (int)(10 * sc), bg, pen);
@@ -1555,9 +1585,10 @@ namespace HeroiPet
                         g.DrawString("Escolha uma aba: Armas, Roupas ou Comida.\nClique no que quiser usar; o herói muda ao lado.\nEspaço ou Esc fecham o menu.", sf, Brushes.LightGray, area.X, area.Y + 20 * sc);
                     else
                     {
-                        int y = area.Y;
+                        int y = area.Y - scrollY; clipArea = area; if (tab != 2) g.SetClip(area);
                         if (tab == 0) { Section(g, "ARCOS", 0, ref y, area, hf, nf); Section(g, "ESPADAS", 1, ref y, area, hf, nf); Section(g, "ESCUDOS", 2, ref y, area, hf, nf); }
                         else if (tab == 1) { Section(g, "GORROS", 3, ref y, area, hf, nf); Section(g, "ROUPAS", 4, ref y, area, hf, nf); if (p.Owns(5, 0)) Section(g, "FADINHA", 5, ref y, area, hf, nf); }
+                        if (tab != 2) { contentH = y - (area.Y - scrollY); g.ResetClip(); }
                         else
                         {
                             g.DrawString("COMIDA", hf, Brushes.Gold, area.X, y); y += (int)(26 * sc);
@@ -1592,10 +1623,17 @@ namespace HeroiPet
         void BuildSprites()
         {
             ValidateEquip();
-            Art.Crown = eqHat == 2; Art.Robe = eqTunic == 2;
+            Art.Crown = eqHat == 2; Art.Robe = eqTunic == 2; Art.Legs = eqTunic >= 3;
             Dictionary<char, Color> hov = new Dictionary<char, Color>();
             if (eqHat == 1) hov['H'] = Color.FromArgb(150, 80, 205);       // gorro roxo
             if (eqTunic == 1) hov['Q'] = Color.FromArgb(70, 125, 235);       // blusa azul
+            if (eqHat >= 3) hov['H'] = Sets[eqHat - 3].Hat;                                                  // conjuntos novos: gorro
+            if (eqTunic >= 3) { OutSet os = Sets[eqTunic - 3]; hov['Q'] = os.Tunic; hov['J'] = os.Pants; hov['Z'] = os.Shoes; }      // blusa, calca e sapatos
+            for (int si = 0; si < 5; si++)      // icones do inventario
+            {
+                Dictionary<char, Color> co = Art.Ov('H', Sets[si].Hat); co['h'] = Shade(Sets[si].Hat, 0.4f); co['g'] = Shade(Sets[si].Hat, -0.4f); setCap[si] = Art.Make(Art.CapItem, S, co);
+                Dictionary<char, Color> so2 = Art.Ov('Q', Sets[si].Tunic); so2['h'] = Shade(Sets[si].Tunic, 0.4f); so2['g'] = Shade(Sets[si].Tunic, -0.4f); setShirt[si] = Art.Make(Art.ShirtItem, S, so2);
+            }
             if (eqTunic == 2) { hov['Q'] = Color.FromArgb(190, 35, 60); hov['J'] = Color.FromArgb(150, 100, 55); hov['Z'] = Color.FromArgb(130, 60, 190); }      // bau: manto vermelho, calca marrom, sapatos roxos
             heroWalk[0] = Art.Make(Art.HeroRecolor(Art.HeroA), S, hov);
             heroWalk[1] = Art.Make(Art.HeroRecolor(Art.HeroB), S, hov);
@@ -1877,7 +1915,7 @@ namespace HeroiPet
         int evoNext;                         // proximo estagio a anunciar (1 a 4; 5 = acabou)
         Queue<int> evoQueue = new Queue<int>();
         EvoAnim evo;
-        Sprite[] menuSpr = new Sprite[4];      // gorro verde, blusa verde e roupa de rei em pixel art (para o menu)
+        Sprite[] menuSpr = new Sprite[4]; Sprite[] setCap = new Sprite[5], setShirt = new Sprite[5];      // gorro verde, blusa verde e roupa de rei em pixel art (para o menu)
         Sprite[] evoItemSpr = new Sprite[2];      // gorro e blusa em pixel art (iguais ao corpo)
         Font evoFont;
         const float EvoFly = 1.5f;
@@ -1886,7 +1924,7 @@ namespace HeroiPet
         Color BladeColor() { return eqSword == 1 ? Color.FromArgb(205, 232, 255) : Color.FromArgb(225, 235, 245); }
         Color GuardColor() { return eqSword == 1 ? Color.FromArgb(60, 95, 205) : Color.FromArgb(215, 160, 40); }
         Color GripColor() { return eqSword == 1 ? Color.FromArgb(80, 55, 150) : Color.FromArgb(135, 85, 45); }
-        Color TunicColor() { return eqTunic == 2 ? Color.FromArgb(190, 35, 60) : (eqTunic == 1 ? Color.FromArgb(70, 125, 235) : Color.FromArgb(58, 165, 62)); }
+        Color TunicColor() { if (eqTunic >= 3) return Sets[eqTunic - 3].Tunic; return eqTunic == 2 ? Color.FromArgb(190, 35, 60) : (eqTunic == 1 ? Color.FromArgb(70, 125, 235) : Color.FromArgb(58, 165, 62)); }
 
         int LoadKills()
         {
@@ -1905,6 +1943,8 @@ namespace HeroiPet
             evoKills = LoadKills();
             evoStage = 0; while (evoStage < 4 && evoKills >= EvoThreshold[evoStage]) evoStage++;       // ja conquistados em outras sessoes: sem animacao
             evoNext = evoStage + 1;
+            setsKnown = 0; while (setsKnown < 5 && evoKills >= SetThr[setsKnown]) setsKnown++;      // ja liberados antes: sem aviso
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "--conjuntos") >= 0) setsTest = true;      // teste rapido: os 5 conjuntos liberados
         }
 
         // chamado a cada monstro derrotado no modo automatico
@@ -1912,6 +1952,7 @@ namespace HeroiPet
         {
             evoKills++;
             if (evoKills % 5 == 0) SaveKills();
+            { int so = 0; while (so < 5 && evoKills >= SetThr[so]) so++; if (so > setsKnown && !setsTest) { setsKnown = so; UnlockSet(so - 1); SaveKills(); } }      // conjunto de roupa novo
             if (evoNext <= 4 && evoKills >= EvoThreshold[evoNext - 1]) { evoQueue.Enqueue(evoNext); evoNext++; SaveKills(); }
         }
 

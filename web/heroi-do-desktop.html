@@ -231,8 +231,8 @@ const PAL = { K:'#1c1624', G:'#3aa53e', g:'#1e6e2d', Y:'#f0c850', S:'#fad0a5', V
 const ROWS = {
   heroA: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.","KGGGYYYYYYSSK.","KGGYYYYYYYSSSK",".KYYYYYYYSKSSK","..KYYYYYYSSSK.","..KYYYYYSSSK..","..KYYKGGGGKK..","..KGGGGGGGGGK.","..KGGGGGGGGGK.","..KGGGGGGGGSK.","..KBBBBBBBBBK.","...KWWK.KWWK..","...KBBK.KBBK.."],
   heroB: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.","KGGGYYYYYYSSK.","KGGYYYYYYYSSSK",".KYYYYYYYSKSSK","..KYYYYYYSSSK.","..KYYYYYSSSK..","..KYYKGGGGKK..","..KGGGGGGGGGK.","..KGGGGGGGGGK.","..KGGGGGGGGSK.","..KBBBBBBBBBK.","....KWWKWWK...","....KBBKBBK..."],
-  front: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.","KYYYYYYYYYYYYK","KYYYSSSSSSYYYK",".KYYSKSSKSYYK.","..KYSSSSSSYK..","...KSSSSSSK...","...KKGGGGKK...","..KGGGGGGGGK..",".KSGGGGGGGGSK.",".KSGGGGGGGGSK.","..KBBBBBBBBK..","..KWWWKKWWWK..","..KBBBK.KBBBK."],
-  wave: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.","KYYYYYYYYYYYYK","KYYYSSSSSSYYYK",".KYYSKSSKSYYK.","..KYSSSSSSYK..","...KSSSSSSK...","...KKGGGGKK...","..KGGGGGGGGK..",".KSGGGGGGGGGK.",".KSGGGGGGGGGK.","..KBBBBBBBBK..","..KWWWKKWWWK..","..KBBBK.KBBBK."],
+  front: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.","KYYYYYYYYYYYYK","KYYYSSSSSSYYYK",".KSYSKSSKSYSK.","..KYSSSSSSYK..","...KSSSSSSK...","...KKGGGGKK...","..KGGGGGGGGK..",".KSGGGGGGGGSK.",".KSGGGGGGGGSK.","..KBBBBBBBBK..","..KWWWKKWWWK..","..KBBBK.KBBBK."],
+  wave: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.","KYYYYYYYYYYYYK","KYYYSSSSSSYYYK",".KSYSKSSKSYSK.","..KYSSSSSSYK..","...KSSSSSSK...","...KKGGGGKK...","..KGGGGGGGGK..",".KSGGGGGGGGGK.",".KSGGGGGGGGGK.","..KBBBBBBBBK..","..KWWWKKWWWK..","..KBBBK.KBBBK."],
   octoA: ["...KKKKKK...","..KRRRRRRK..",".KRRRRRRRRK.","KRRWWRRWWRRK","KRRWKRRWKRRK","KRRRRRRRRRRK","KRRRKKKKRRRK",".KRRRRRRRRK.","..KKRRRRKK..",".KR.K..K.RK."],
   octoB: ["...KKKKKK...","..KRRRRRRK..",".KRRRRRRRRK.","KRRWWRRWWRRK","KRRWKRRWKRRK","KRRRRRRRRRRK","KRRRKKKKRRRK",".KRRRRRRRRK.","..KKRRRRKK..","..KR.KK.RK.."],
   batUp: ["KK..........KK","KPK...KK...KPK","KPPK.KPPPK.KPK","KPPPKPEPEPKPPK",".KPPPPPPPPPPK.","..KKPPPPPPKK..","....KKPPKK....","......KK......"],
@@ -374,11 +374,24 @@ if (touchMode) {
 }
 
 /* ============================ TELA E SPRITES ============================ */
+/* ---------- 5 CONJUNTOS DE ROUPA (liberados pelo total de monstros derrotados no automatico) ----------
+   Cada conjunto = gorro + blusa + calca + sapatos de uma cor; libera sozinho quando evoKills chega ao limite (SET_THR). Aparece em Roupas > Gorros / Roupas. */
+const OUTSETS = [
+  { name: 'areia', hat: '#e2ba60', tunic: '#cd7634', pants: '#966437', shoes: '#603a1e' },
+  { name: 'gelo', hat: '#cdecff', tunic: '#78beeb', pants: '#507dbe', shoes: '#ebf5ff' },
+  { name: 'fogo', hat: '#e1481e', tunic: '#b9261c', pants: '#462624', shoes: '#faaf2d' },
+  { name: 'noite', hat: '#5242b4', tunic: '#3a328c', pants: '#221e50', shoes: '#cdaf46' },
+  { name: 'mar', hat: '#1ea0aa', tunic: '#1c7d96', pants: '#14506e', shoes: '#f0e6c8' }];
+const SET_THR = [4500, 6000, 8000, 10500, 14000];      // total de monstros derrotados (evoKills) para liberar cada conjunto
+const shadeHex = (hex, t) => { const n = parseInt(hex.slice(1), 16), c = [n >> 16 & 255, n >> 8 & 255, n & 255].map((v) => Math.round(t >= 0 ? v + (255 - v) * t : v * (1 + t))); return '#' + c.map((v) => v.toString(16).padStart(2, '0')).join(''); };
 function buildSprites() {
   const ov = (c, col, extra) => Object.assign({ [c]: col }, extra || {});
   const dS = Math.round(S * 1.7); DK = dS / S;
   const hov = {}; if (eqHat === 1) hov.H = '#9650cd'; if (eqTunic === 1) hov.Q = '#467deb';      // equipado: gorro roxo / blusa azul
   if (eqTunic === 2) { hov.Q = '#be233c'; hov.J = '#966437'; hov.Z = '#823cbe'; }      // bau: manto vermelho, calca marrom, sapatos roxos
+  if (eqHat >= 3) hov.H = OUTSETS[eqHat - 3].hat;      // conjuntos novos: gorro, blusa, calca e sapatos
+  if (eqTunic >= 3) { const o = OUTSETS[eqTunic - 3]; hov.Q = o.tunic; hov.J = o.pants; hov.Z = o.shoes; }
+  const setCap = OUTSETS.map((o) => makeSprite(ROWS.capItem, S, { H: o.hat, h: shadeHex(o.hat, 0.4), g: shadeHex(o.hat, -0.4) })), setShirt = OUTSETS.map((o) => makeSprite(ROWS.shirtItem, S, { Q: o.tunic, h: shadeHex(o.tunic, 0.4), g: shadeHex(o.tunic, -0.4) }));
   SP = {
     heroA: makeSprite(heroRows(ROWS.heroA), S, hov), heroB: makeSprite(heroRows(ROWS.heroB), S, hov), front: makeSprite(heroRows(ROWS.front), S, hov), wave: makeSprite(heroRows(ROWS.wave), S, hov),
     octo: [makeSprite(ROWS.octoA, S), makeSprite(ROWS.octoB, S)], bat: [makeSprite(ROWS.batUp, S), makeSprite(ROWS.batDown, S)],
@@ -386,6 +399,7 @@ function buildSprites() {
     boko: [makeSprite(ROWS.bokoA, S), makeSprite(ROWS.bokoB, S), makeSprite(ROWS.bokoC, S)],
     capItem: makeSprite(ROWS.capItem, S, { H: '#9650cd', h: '#cd96f0', g: '#60328c' }), shirtItem: makeSprite(ROWS.shirtItem, S, { Q: '#467deb', h: '#87b4ff', g: '#2d55be' }),
     crown: makeSprite(ROWS.crownItem, S, { C: '#ffcd28', c: '#d79614', R: '#d7283c', U: '#467deb' }), capGreen: makeSprite(ROWS.capItem, S, { H: '#3aa53e', h: '#82d278', g: '#1e6e2d' }), shirtGreen: makeSprite(ROWS.shirtItem, S, { Q: '#3aa53e', h: '#82d278', g: '#1e6e2d' }), robeItem: makeSprite(ROWS.robeIcon, S, { Q: '#be233c', g: '#821428', C: '#ffcd28' }),
+    setCap, setShirt,
     heroPow: [tintBlue(makeSprite(ROWS.heroA, S)), tintBlue(makeSprite(ROWS.heroB, S))],
     heart: makeSprite(ROWS.heart, S), heartE: makeSprite(ROWS.heart, S, { R: '#46465a', W: '#69697a' }), heartH: (() => { const e = makeSprite(ROWS.heart, S, { R: '#46465a', W: '#69697a' }), f = makeSprite(ROWS.heart, S), mk = (a, b) => { const c = document.createElement('canvas'); c.width = a.width; c.height = a.height; const g = c.getContext('2d'); g.drawImage(a, 0, 0); g.drawImage(b, 0, 0, b.width / 2, b.height, 0, 0, b.width / 2, b.height); return c; }; return { r: mk(e.r, f.r), l: mk(e.l, f.l), w: e.w, h: e.h }; })(),
     rupee: [makeSprite(ROWS.rupee, S), makeSprite(ROWS.rupee, S, { G: '#467deb' }), makeSprite(ROWS.rupee, S, { G: '#e63c3c' }), makeSprite(ROWS.rupee, S, { G: '#f0c83c' }), makeSprite(ROWS.rupee, S, { G: '#9650cd' }), makeSprite(ROWS.rupee, S * 2, { G: '#ffcd28' })],      // [5] = 300 (recompensa do dragao): dourada e grande
@@ -537,20 +551,24 @@ function rupeeStep() { return Math.min(6, Math.floor(hero.rupees / 25)); }
 // 1000 monstros: arco de metal | +500: gorro roxo | +500: blusa azul | +1000: Espada Mestre e escudo vermelho
 const EVO_THR = [1000, 1500, 2000, 3000], EVO_NEED = [1000, 500, 500, 1000], EVO_FLY = 1.5;
 const EVO_TITLE = ['ARCO DE METAL', 'GORRO ROXO', 'BLUSA AZUL', 'ESPADA MESTRE E ESCUDO VERMELHO'];
+let setsTest = false, setsKnown = 0;      // conjuntos de roupa (ver OUTSETS)
 let evoKills = 0, evoStage = 0, evoNext = 1, evo = null; const evoQueue = [];
 try { evoKills = Math.max(0, parseInt(localStorage.getItem('heroi_monstros') || '0', 10) || 0); } catch (_) {}
 while (evoStage < 4 && evoKills >= EVO_THR[evoStage]) evoStage++;
 evoNext = evoStage + 1;
+while (setsKnown < 5 && evoKills >= SET_THR[setsKnown]) setsKnown++;      // ja liberados antes: sem aviso
+if (/[?&]conjuntos\b/.test(location.search)) setsTest = true;      // teste rapido: os 5 conjuntos liberados
 if (/[?&]evolucao\b/.test(location.search)) { evoKills = EVO_THR[0] - 1; evoStage = 0; evoNext = 1; }      // teste rapido: o proximo monstro da a 1a evolucao
 const heroRows = (rows) => {
-  const out = rows.map((r, i) => { let s = r.replace(/Y/g, 'V').replace(/G/g, i < 9 ? (eqHat === 2 ? 'V' : 'H') : 'Q'); if (eqHat === 2 && (i === 4 || i === 5) && s.startsWith('KV')) s = '.K' + s.slice(2); if (eqTunic === 2) { if (i === 9) s = s.replace(/Q/g, 'F'); else if (i === 13) s = s.replace(/B/g, 'C'); else if (i === 14) s = s.replace(/W/g, 'J'); else if (i === 15) s = s.replace(/B/g, 'Z'); } return s; });
+  const out = rows.map((r, i) => { let s = r.replace(/Y/g, 'V').replace(/G/g, i < 9 ? (eqHat === 2 ? 'V' : 'H') : 'Q'); if (eqHat === 2 && (i === 4 || i === 5) && s.startsWith('KV')) s = '.K' + s.slice(2); if (eqTunic === 2) { if (i === 9) s = s.replace(/Q/g, 'F'); else if (i === 13) s = s.replace(/B/g, 'C'); else if (i === 14) s = s.replace(/W/g, 'J'); else if (i === 15) s = s.replace(/B/g, 'Z'); } else if (eqTunic >= 3) { if (i === 14) s = s.replace(/W/g, 'J'); else if (i === 15) s = s.replace(/B/g, 'Z'); } return s; });
   return eqHat === 2 ? ['....C.CC.C....', '....CCCCCC....', '....CRCCRC....', ...out] : out;      // coroa sobre o gorro
 };
-const tunicColor = () => (eqTunic === 2 ? '#be233c' : (eqTunic === 1 ? '#467deb' : '#3aa53e'));
+const tunicColor = () => (eqTunic >= 3 ? OUTSETS[eqTunic - 3].tunic : eqTunic === 2 ? '#be233c' : (eqTunic === 1 ? '#467deb' : '#3aa53e'));
 function syncTouchIcons() { const t = document.getElementById('touch'); if (t) { t.dataset.bow = String(eqBow); t.dataset.sword = String(eqSword); } }
 function saveKills() { try { localStorage.setItem('heroi_monstros', String(evoKills)); } catch (_) {} }
 function countKill() {
   evoKills++; if (evoKills % 5 === 0) saveKills();
+  { let so = 0; while (so < 5 && evoKills >= SET_THR[so]) so++; if (so > setsKnown && !setsTest) { setsKnown = so; unlockSet(so - 1); saveKills(); } }      // conjunto de roupa novo
   if (evoNext <= 4 && evoKills >= EVO_THR[evoNext - 1]) { evoQueue.push(evoNext); evoNext++; saveKills(); }
 }
 const evoWaiting = () => evo !== null && evo.wait;
@@ -642,8 +660,13 @@ let eqBow = 0, eqSword = 0, eqShield = 0, eqHat = 0, eqTunic = 0;
 function ownBow(i) { return i === 0 || (i === 1 && evoStage >= 1); }
 function ownSword(i) { return i === 0 || (i === 1 && evoStage >= 4); }
 function ownShield(i) { return i === 0 || (i === 1 && evoStage >= 4) || (i === 2 && kingGear); }
-function ownHat(i) { return i === 0 || (i === 1 && evoStage >= 2) || (i === 2 && kingGear); }
-function ownTunic(i) { return i === 0 || (i === 1 && evoStage >= 3) || (i === 2 && kingGear); }
+const setsOwned = () => { if (setsTest) return 5; let n = 0; while (n < 5 && evoKills >= SET_THR[n]) n++; return n; };
+function ownHat(i) { return i === 0 || (i === 1 && evoStage >= 2) || (i === 2 && kingGear) || (i >= 3 && i - 3 < setsOwned()); }
+function ownTunic(i) { return i === 0 || (i === 1 && evoStage >= 3) || (i === 2 && kingGear) || (i >= 3 && i - 3 < setsOwned()); }
+function unlockSet(i) {      // conjunto novo: ja vem vestido, com aviso
+  eqHat = 3 + i; eqTunic = 3 + i; validateEquip(); saveEquip(); buildSprites(); buildProps(); showNewItem(); say('Conjunto novo: ' + OUTSETS[i].name + '!');
+  for (let k = 0; k < 10; k++) puffs.push({ kind: k % 2, x: hero.x + (rnd() - 0.5) * 20 * S, y: hero.y - rnd() * 18 * S, t: 0 });
+}
 const ownFairy = (i) => (i === 0 && fairyState === 1) || (i === 1 && fairySkin === 1);
 function owns(cat, id) { return [ownBow, ownSword, ownShield, ownHat, ownTunic, ownFairy][cat](id); }
 function getEq(cat) { return [eqBow, eqSword, eqShield, eqHat, eqTunic, eqFairy][cat]; }
@@ -1637,8 +1660,8 @@ $('goPlay').addEventListener('click', () => { $('intro').hidden = true; goFullsc
 $('goAuto').addEventListener('click', () => { $('intro').hidden = true; goFullscreen(); });
 /* ---------- MENU DE PAUSA (sem atalhos de teste nem "dar 5 macas"; Espaco; clicar na maca = comer; Roupas: heroi sem armas): abas Armas / Roupas / Comida e o heroi ampliado ---------- */
 let invOn = false, invTab = -1, invBow = false, invEatT = 0, previewBare = false, invMsg = '', eatRaw = false, autoEatPh = 0, autoEatTree = null;      // invBow: o heroi do exemplo segura o arco (clicou num arco) ou espada e escudo (clicou neles)
-const INV_NAMES = [['Arco de madeira', 'Arco de metal'], ['Espada comum', 'Espada Mestre'], ['Escudo azul', 'Escudo vermelho', 'Escudo do rei'], ['Gorro verde', 'Gorro roxo', 'Coroa de ouro'], ['Túnica verde', 'Blusa azul', 'Roupa de rei'], ['Fadinha', 'Fadinha rosa']];
-const INV_DESC = [['O arco de sempre.', 'Flechas com o dobro de dano.'], ['A espada de sempre.', 'Dobro de dano.'], ['Escudo comum.', 'Escudo vermelho do herói.', 'Escudo circular do tesouro do rei.'], ['O gorro de sempre.', 'Gorro roxo da evolução.', 'Coroa de ouro do tesouro do rei.'], ['A túnica de sempre.', 'Blusa azul da evolução.', 'Manto vermelho, calça marrom e sapatos roxos.'], ['A fadinha ajudante.', 'Corpo rosa e asas azul escuro (500 monstros depois da fadinha).']];
+const INV_NAMES = [['Arco de madeira', 'Arco de metal'], ['Espada comum', 'Espada Mestre'], ['Escudo azul', 'Escudo vermelho', 'Escudo do rei'], ['Gorro verde', 'Gorro roxo', 'Coroa de ouro', 'Gorro areia', 'Gorro gelo', 'Gorro fogo', 'Gorro noite', 'Gorro mar'], ['Túnica verde', 'Blusa azul', 'Roupa de rei', 'Blusa areia', 'Blusa gelo', 'Blusa fogo', 'Blusa noite', 'Blusa mar'], ['Fadinha', 'Fadinha rosa']];
+const INV_DESC = [['O arco de sempre.', 'Flechas com o dobro de dano.'], ['A espada de sempre.', 'Dobro de dano.'], ['Escudo comum.', 'Escudo vermelho do herói.', 'Escudo circular do tesouro do rei.'], ['O gorro de sempre.', 'Gorro roxo da evolução.', 'Coroa de ouro do tesouro do rei.', 'Conjunto areia (4500 monstros).', 'Conjunto gelo (6000 monstros).', 'Conjunto fogo (8000 monstros).', 'Conjunto noite (10500 monstros).', 'Conjunto mar (14000 monstros).'], ['A túnica de sempre.', 'Blusa azul da evolução.', 'Manto vermelho, calça marrom e sapatos roxos.', 'Blusa, calça e sapatos do conjunto areia.', 'Blusa, calça e sapatos do conjunto gelo.', 'Blusa, calça e sapatos do conjunto fogo.', 'Blusa, calça e sapatos do conjunto noite.', 'Blusa, calça e sapatos do conjunto mar.'], ['A fadinha ajudante.', 'Corpo rosa e asas azul escuro (500 monstros depois da fadinha).']];
 const withCtx = (c, fn) => { const old = ctx; ctx = c; try { fn(); } finally { ctx = old; } };
 function iconShape(g, pts, fill, u) { g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.closePath(); g.fillStyle = fill; g.fill(); g.lineWidth = Math.max(1, u * 0.7); g.strokeStyle = '#1c1624'; g.lineJoin = 'round'; g.stroke(); }
 function drawIcon(cat, id, cx, cy, u) {      // desenha o icone no 'ctx' atual
@@ -1659,11 +1682,13 @@ function drawIcon(cat, id, cx, cy, u) {      // desenha o icone no 'ctx' atual
     rect('#1c1624', x - k, y - k, 8 * k, 10 * k); rect(id === 1 ? '#cd3232' : '#375fcd', x, y, 6 * k, 8 * k); rect('#f5cd46', x + 2 * k, y + 2 * k, 2 * k, 3 * k);
   } else if (cat === 3) {
     if (id === 2) { drawCrownItem(cx, cy, u * 0.9); return; }
+    if (id >= 3) { itemSpr(SP.setCap[id - 3], cx, cy, u * 0.85); return; }
     if (id === 1) { drawEvoItem(2, cx, cy, u * 0.85); return; }
     itemSpr(SP.capGreen, cx, cy, u * 0.85);
   } else if (cat === 5) { drawFairyShape(cx, cy, u * 2.4, id, false, true);
   } else {
     if (id === 2) { itemSpr(SP.robeItem, cx, cy, u * 0.85); return; }
+    if (id >= 3) { itemSpr(SP.setShirt[id - 3], cx, cy, u * 0.85); return; }
     if (id === 1) { drawEvoItem(3, cx, cy, u * 0.85); return; }
     itemSpr(SP.shirtGreen, cx, cy, u * 0.85);
   }
@@ -1765,6 +1790,7 @@ function boot() {
 window.__jogo = { hero, enemies, rocks, arrows, items, trees, step, render, setPlayMode, spawn, get S() { return S; }, get W() { return W; }, get H() { return H; },
   get st() { return { playMode, calmState, cookState, bossPhase, killsAtMax, deathWait, fireK, onFire: onFire.slice(), bakeTs: bakeTs.slice(), phase, boss }; },
   set(o) { if ('mx' in o) mx = o.mx; if ('my' in o) my = o.my; if ('mouse' in o) mouseDown = o.mouse; if ('k' in o) Object.assign(touchKeys, o.k); if ('killsAtMax' in o) killsAtMax = o.killsAtMax; if ('nextCalm' in o) nextCalm = o.nextCalm; if ('forceLong' in o) forceLong = o.forceLong; },
+  setsTest: { all() { setsTest = true; buildSprites(); buildProps(); }, setKills(n) { evoKills = n; evoStage = 4; evoNext = 5; setsKnown = 0; while (setsKnown < 5 && evoKills >= SET_THR[setsKnown]) setsKnown++; }, equip(i) { eqHat = 3 + i; eqTunic = 3 + i; buildSprites(); buildProps(); }, get info() { return { evoKills, setsKnown, eqHat, eqTunic, owned: setsOwned() }; } },
   fairyTest: { give() { kingGear = true; fairyState = 1; }, giveSkin() { kingGear = true; fairyState = 1; fairySkin = 1; eqFairy = 1; }, get look() { return eqFairy; }, setKills(n) { kingGear = true; fairyState = 0; fairyKills = n; }, get info() { return { fairyState, fairyKills, ph: fairy.ph, x: fairy.x, y: fairy.y }; } },
   inv: { open() { openInv(); }, tab(n) { invTab = n; renderInv(); }, eat: invEat, get msg() { return invMsg; } },
   doRetry, fireInteract, damageEnemy, startFinalPhase, startPower, get power() { return { powerT, record, nextPower }; }, setRupees(n) { hero.rupees = n; }, setSlimes(n) { slimeKills = n; }, countKill, get evoInfo() { return { evoKills, evoStage, evoNext, waiting: evoWaiting(), stage: evo && evo.stage }; }, forcePower() { powerPending = true; }, get chestInfo() { return { chestKills, chestState, kingGear, chestGo, chestOpenT }; }, setChestKills(n) { chestKills = n; }, get shocks() { return shocks; }, testBoss() { fireX = W / 2; fireY = H / 2; bossPhase = 4; spawnDragon(); return boss; }, get bossInfo() { return { phase: bossPhase, bossT, rewardSpawned, msgT, endStarted, reward: items.filter((i) => i.reward).reduce((s, i) => s + rupeeValue(i.kind), 0), nItems: items.filter((i) => i.reward).length }; } };
