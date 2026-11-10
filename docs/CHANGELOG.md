@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 09/11/2026 — Atalhos de teste removidos
+- Removidos os atalhos para o nível 6 e 7 e o teste da luta do dragão (menu, `--nivel`, `--dragao`, `?nivel`, `?dragao`).
+
 ## 09/11/2026 — Fadinha ajudante
 - Depois de conseguir a **roupa de rei**, começa a contagem de **mais 50 monstros** (modo automático). Ao zerar, o herói ganha uma **fadinha**.
 - A fadinha voa perto da cabeça do herói e **derrota 20% dos monstros que aparecem** (sorteio no nascimento): voa rápido até o monstro, **gira rapidamente em volta da cabeça dele (um pouco acima)** e ele cai (solta itens como qualquer morte). Vale nos modos automático e jogável; não ataca o dragão nem os monstros da onda final. Fica salva. Teste: `--fada` (desktop) ou `?fada` (web).

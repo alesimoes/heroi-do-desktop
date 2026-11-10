@@ -136,9 +136,6 @@ html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout
     <button id="mNap">Soneca agora</button>
     <button id="mHarvest">Colher maçãs e dormir (2 min)</button>
     <button id="mApples">Dar 5 maçãs (lanche)</button>
-    <button id="mLv6">Atalho: ir para o nível 6</button>
-    <button id="mLv7">Atalho: ir para o nível 7 (cavaleiros)</button>
-    <button id="mDragon">Teste: ir para a luta do dragão</button>
     <button id="mPause" aria-pressed="false">Pausar</button>
     <button id="mInv">Inventário (Espaço)</button>
     <button id="mFull" aria-pressed="false">Tela cheia</button>
@@ -724,7 +721,7 @@ function updateFairy(dt) {
     }
   }
   F.x = Math.max(3 * S, Math.min(W - 3 * S, F.x)); F.y = Math.max(3 * S, Math.min(H - 3 * S, F.y));
-  F.trail -= dt; if (F.trail <= 0 && Math.abs(F.x - ox) + Math.abs(F.y - oy) > 1.5 * S) { F.trail = F.cool <= 0 ? 0.04 : 0.07; fairySparks.push({ x: F.x + (rnd() - 0.5) * 3 * S, y: F.y + S + rnd() * 2 * S, a: 0 }); }      // brilhinhos pequenos e meio transparentes (rosa na fantasia rosa; somem em 0,55 s)
+  F.trail -= dt; if (F.trail <= 0 && Math.abs(F.x - ox) + Math.abs(F.y - oy) > 1.5 * S) { F.trail = F.cool <= 0 ? 0.04 : 0.07; fairySparks.push({ x: F.x + (rnd() - 0.5) * 3 * S, y: F.y + S + rnd() * 2 * S, a: 0 }); }      // brilhinhos azuis, pequenos e meio transparentes (mais quando pronta; somem em 0,55 s)
   for (let i = fairySparks.length - 1; i >= 0; i--) { fairySparks[i].a += dt; if (fairySparks[i].a > 0.55) fairySparks.splice(i, 1); }
 }
 const fairySparks = [];
@@ -1618,24 +1615,6 @@ $('mHeal').addEventListener('click', () => { hero.hp = hero.maxHp; closeMenu(); 
 $('mNap').addEventListener('click', () => { if (!playMode && calmState === 0) nextCalm = 0; closeMenu(); });
 $('mHarvest').addEventListener('click', () => { if (!playMode && calmState === 0) { forceLong = true; nextCalm = 0; } closeMenu(); });
 $('mApples').addEventListener('click', () => { hero.apples = Math.max(hero.apples, 5); closeMenu(); });
-// PERIODO DE TESTE: coloca o jogador logo antes da luta com o dragao (modo jogo, nivel maximo, vida cheia, fogueira ja explodindo)
-function startLevelTest(nv) {      // ATALHO (NV 6 e 7): modo jogo direto no nivel nv (NV 1..7)
-  nv = Math.max(1, Math.min(7, nv)); if (!playMode) setPlayMode(true); else resetBoss();
-  enemies.length = 0; rocks.length = 0; arrows.length = 0; items.length = 0; puffs.length = 0;
-  hero.rupees = (nv - 1) * 25; lastStep = rupeeStep(); setMaxHp(5 + Math.max(0, Math.min(3, lastStep - 3))); hero.hp = hero.maxHp; hero.dead = false; deathWait = false; closeDeath(); hero.inv = 2; hero.apples = 0; powerT = 0; hero.x = W / 2; hero.y = H / 2; spawnTimer = 1.5; say('Nível ' + nv);
-}
-function startDragonTest() {
-  if (!playMode) setPlayMode(true); else resetBoss();      // teste: nivel maximo (NV 7)
-  enemies.length = 0; rocks.length = 0; arrows.length = 0; items.length = 0; puffs.length = 0;
-  hero.rupees = 150; lastStep = rupeeStep(); setMaxHp(8); hero.hp = hero.maxHp; hero.dead = false; deathWait = false; closeDeath(); hero.inv = 2; hero.apples = 0; powerT = 0; hero.face = 1;
-  fireX = W / 2; fireY = H / 2; hero.x = W * 0.15; hero.y = H * 0.6;
-  bossPhase = 3; bossT = 0; bossSpawned = false; fireExplode(); say('Hora da luta!');      // o dragao nasce em ~1 s, saindo da fumaca da fogueira
-}
-$('mLv6').addEventListener('click', () => { $('intro').hidden = true; startLevelTest(6); closeMenu(); });
-$('mLv7').addEventListener('click', () => { $('intro').hidden = true; startLevelTest(7); closeMenu(); });
-$('mDragon').addEventListener('click', () => { startDragonTest(); closeMenu(); });
-if (/[?&]dragao\b/.test(location.search)) setTimeout(() => { $('intro').hidden = true; startDragonTest(); }, 400);
-if (/[?&]nivel=(\d)/.test(location.search)) setTimeout(() => { $('intro').hidden = true; startLevelTest(+RegExp.$1); }, 400);
 $('mPause').addEventListener('click', () => { setPaused(!paused); closeMenu(); });
 $('evoBtn').addEventListener('click', useEvoItem);
 function setSizeMode(m) {

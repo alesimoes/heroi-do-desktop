@@ -1,4 +1,4 @@
-﻿# Regras e números do jogo
+# Regras e números do jogo
 
 Unidades: distâncias em "unidades de sprite" (múltiplos de `S`). Tempos em segundos.
 
@@ -132,8 +132,6 @@ limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão 
 - Modo jogo, nível máximo (NV 7): sequência de 7 inimigos (cavaleiro, gelatina, cavaleiro, cavaleiro, gelatina, cavaleiro, cavaleiro), 1 a cada 4-7 s, máximo 3 vivos. O dragão começa quando os 7 morreram e já houve 5 mortes no nível.
 - Cavaleiro: 3 de vida, velocidade 95% da do herói (53 S/s), aproxima até ~62-76 S e orbita em elipse atirando a cada 1,7-3 s. Flecha: 90 S/s, mira no herói com erro sorteado (±14 S/distância => ~50% erram); trajetória fixa.
 
-## Atalhos de teste de nível
-- Desktop: menu da bandeja > **Atalho: ir para o nível 6 / 7**, ou `HeroiPet.exe --nivel6` / `--nivel7` (liga o modo jogo direto no nível, com rupias, corações e vida cheia). Web: botões no menu ou `?nivel=6`. O NV 7 é onde aparece a onda dos bokoblins a cavalo.
 
 ## Fadinha
 - Contagem de 50 monstros começa ao obter a roupa de rei (só no automático; salva no registro/localStorage). Ao zerar: fadinha permanente. Cada monstro que nasce tem 20% de chance de ser marcado; a fada o alcança (190 S/s), gira 0,7 s em volta da cabeça dele e o derrota. Ignora dragão e a onda final.
