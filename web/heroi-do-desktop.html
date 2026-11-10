@@ -1530,7 +1530,7 @@ function drawShieldBody(sx, sy) {
     circ(3.6 * S, '#1c1624'); circ(2.8 * S, '#461e6e'); rect('#1c1624', cx - 1.7 * S, cy - 1.7 * S, 3.4 * S, 3.4 * S); rect('#467deb', cx - 1.3 * S, cy - 1.3 * S, 2.6 * S, 2.6 * S); return;
   }
   rect('#1c1624', sx - S, sy - S, 8 * S, 10 * S); rect(eqShield === 1 ? '#cd3232' : '#375fcd', sx, sy, 6 * S, 8 * S); rect('#f5cd46', sx + 2 * S, sy + 2 * S, 2 * S, 3 * S); }
-// ARCO em pixel art, igual no jogo, no menu, no inventario e no item grande: curva de quadradinhos (miolo de 1 unidade, contorno escuro de 1 unidade).
+// ARCO em pixel art (os tres arcos), igual no jogo, no menu, no inventario e no item grande: curva de quadradinhos (miolo de 1 unidade, contorno escuro de 1 unidade).
 // dx,dy = para onde aponta (a barriga vai para la); half = meia altura; bend = quanto a barriga avanca; eq: 0 madeira | 1 metal | 2 cristal
 function pixelBow(cx, cy, dx, dy, half, bend, unit, eq) {
   const main = eq === 2 ? '#3cc8d2' : (eq === 1 ? '#b9c0cd' : '#87552d'), hi = eq === 2 ? '#d7ffff' : (eq === 1 ? '#f0f5ff' : '#b97d46'), px = -dy, py = dx, n = Math.max(10, Math.floor(half * 2 / unit * 1.6)), pts = [];
@@ -1782,7 +1782,7 @@ function renderInv() {
       if (!owns(cat, id)) return;
       const b = document.createElement('button'); b.className = 'card'; const eq = getEq(cat) === id; b.setAttribute('aria-pressed', String(eq));
       b.appendChild(iconCanvas(cat, id)); const s = document.createElement('span'); s.textContent = eq ? 'EQUIPADO' : name; b.appendChild(s);
-      b.addEventListener('click', () => { if (cat === 0) invBow = true; else if (cat === 1 || cat === 2) invBow = false; equipItem(cat, id); }); const show = () => { info.textContent = name + ' — ' + INV_DESC[cat][id]; }; b.addEventListener('mouseenter', show); b.addEventListener('focus', show);
+      b.addEventListener('click', () => { if (cat === 0) invBow = true; else if (cat === 1 || cat === 2) invBow = false; equipItem(cat, id); }); const show = () => { info.innerHTML = '<b>' + name + '</b><br>' + INV_DESC[cat][id];      // nome e descricao em duas linhas }; b.addEventListener('mouseenter', show); b.addEventListener('focus', show);
       row.appendChild(b);
     });
   };
