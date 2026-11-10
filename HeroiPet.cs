@@ -727,7 +727,12 @@ namespace HeroiPet
             gfx.Clear(Color.Transparent);
             foreach (float[] r in list)
             {
-                if (r.Length > 4)      // onda de choque do dragao: anel amarelo transparente
+                if (r.Length == 6)      // brilhinho da fadinha: quadradinho pequeno e meio transparente (r[3] = opacidade, r[4] = 1 se a fadinha e rosa)
+                {
+                    Color sc = r[4] > 0 ? Color.FromArgb((int)r[3], 245, 130, 195) : Color.FromArgb((int)r[3], 255, 245, 160);
+                    using (SolidBrush sb = new SolidBrush(sc)) gfx.FillRectangle(sb, r[0], r[1], r[2], r[2]);
+                }
+                else if (r.Length > 4)      // onda de choque do dragao: anel amarelo transparente
                 {
                     using (Pen o = new Pen(Color.FromArgb(95, 255, 215, 50), 8 * r[4])) gfx.DrawEllipse(o, r[0], r[1], r[2], r[3]);
                     using (Pen m = new Pen(Color.FromArgb(110, 255, 240, 130), 3 * r[4])) gfx.DrawEllipse(m, r[0], r[1], r[2], r[3]);
@@ -2146,11 +2151,14 @@ namespace HeroiPet
             }
             fx = Math.Max(3 * S, Math.Min(W - 3 * S, fx)); fy = Math.Max(3 * S, Math.Min(H - 3 * S, fy));
             fairyTrail -= dt;
-            if (fairyTrail <= 0 && (Math.Abs(fx - oldX) + Math.Abs(fy - oldY)) > 1.5f * S) { fairyTrail = 0.09f; puffs.Add(new Puff { Kind = 1, X = fx, Y = fy + 2 * S }); }
+            if (fairyTrail <= 0 && (Math.Abs(fx - oldX) + Math.Abs(fy - oldY)) > 1.5f * S) { fairyTrail = 0.07f; fairySparks.Add(new float[] { fx + ((float)rnd.NextDouble() - 0.5f) * 3 * S, fy + 1 * S + (float)rnd.NextDouble() * 2 * S, 0f }); }      // brilhinhos pequenos que somem
+            for (int si = fairySparks.Count - 1; si >= 0; si--) { fairySparks[si][2] += dt; if (fairySparks[si][2] > 0.55f) fairySparks.RemoveAt(si); }
         }
+        List<float[]> fairySparks = new List<float[]>();      // brilhinhos da fadinha: x, y, idade
         void DrawFairy(Graphics g)
         {
             if (fairyState != 1) return;
+            foreach (float[] sp in fairySparks) { float q = 1f - sp[2] / 0.55f; shadowList.Add(new float[] { sp[0], sp[1] + sp[2] * 6 * S, S * 1f, 150f * q, fairySkin == 1 ? 1f : 0f, 0f }); }      // camada com transparencia real, abaixo do heroi
             int wf = ((int)(time * 16)) % 2;      // asas batendo
             bool hot = FairyReady && ((int)(time * 7)) % 2 == 0;      // pronta: pisca e fica mais amarela
             using (SolidBrush glow = new SolidBrush(hot ? Color.FromArgb(255, 205, 20) : (fairySkin == 1 ? Color.FromArgb(245, 130, 195) : Color.FromArgb(255, 245, 160))))      // aparencia nova: corpo rosa

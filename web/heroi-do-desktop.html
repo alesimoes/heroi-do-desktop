@@ -689,7 +689,7 @@ function countFairyKill() {
   fairyKills++; if (fairyKills % 10 === 0) saveFairy();
   if (fairyKills >= FAIRY_NEEDED) { fairyState = 1; fairy.cool = 30; saveFairy(); showNewItem(); fairy.x = hero.x; fairy.y = hero.y - 26 * S; say('Uma fadinha!'); for (let k = 0; k < 10; k++) puffs.push({ kind: 1, x: fairy.x + (rnd() - 0.5) * 24 * S, y: fairy.y + (rnd() - 0.5) * 16 * S, t: 0 }); }
 }
-function fairyCommand(silent) {      // comanda a fadinha a derrotar o monstro mais perto do heroi (so quando ela esta pronta; nao ataca o dragao)
+function fairyCommand(silent) {      // silent = chamada automatica (modo automatico); comanda a fadinha a derrotar o monstro mais perto do heroi (so quando ela esta pronta; nao ataca o dragao)
   const F = fairy; if (fairyState !== 1 || F.cool > 0 || F.target || bossPhase !== 0 || hero.dead) return;
   let best = null, bd = 1e18; for (const e of enemies) { if (e.type === 3) continue; const d = (e.x - hero.x) ** 2 + (e.y - hero.y) ** 2; if (d < bd) { bd = d; best = e; } }
   if (best) { F.target = best; F.ph = 1; F.orbit = 0; F.cool = 30; } else if (!silent) say('Sem alvo');
@@ -721,10 +721,13 @@ function updateFairy(dt) {
     }
   }
   F.x = Math.max(3 * S, Math.min(W - 3 * S, F.x)); F.y = Math.max(3 * S, Math.min(H - 3 * S, F.y));
-  F.trail -= dt; if (F.trail <= 0 && Math.abs(F.x - ox) + Math.abs(F.y - oy) > 1.5 * S) { F.trail = 0.09; puffs.push({ kind: 1, x: F.x, y: F.y + 2 * S, t: 0 }); }
+  F.trail -= dt; if (F.trail <= 0 && Math.abs(F.x - ox) + Math.abs(F.y - oy) > 1.5 * S) { F.trail = 0.07; fairySparks.push({ x: F.x + (rnd() - 0.5) * 3 * S, y: F.y + S + rnd() * 2 * S, a: 0 }); }      // brilhinhos pequenos e meio transparentes
+  for (let i = fairySparks.length - 1; i >= 0; i--) { fairySparks[i].a += dt; if (fairySparks[i].a > 0.55) fairySparks.splice(i, 1); }
 }
+const fairySparks = [];
 function drawFairy() {
   if (fairyState !== 1) return;
+  for (const sp of fairySparks) { const q = 1 - sp.a / 0.55; ctx.globalAlpha = 0.6 * q; rect(fairySkin === 1 ? '#f582c3' : '#fff5a0', sp.x, sp.y + sp.a * 6 * S, S, S); } ctx.globalAlpha = 1;
   const x = fairy.x, y = fairy.y, u = S, wy = Math.floor(time * 16) % 2 === 0 ? -3 * u : -u, hot = fairy.cool <= 0 && Math.floor(time * 7) % 2 === 0, gc = hot ? '#ffcd14' : (fairySkin === 1 ? '#f582c3' : '#fff5a0');      // pronta: pisca e fica mais amarela
   rect(gc, x - 2 * u, y - u, 4 * u, 2 * u); rect(gc, x - u, y - 2 * u, 2 * u, 4 * u); rect(hot ? '#ffff6e' : (fairySkin === 1 ? '#ffe1f0' : '#fff'), x - u, y - u, 2 * u, 2 * u);
   const wc = fairySkin === 1 ? '#283296' : '#bee1ff', wc2 = fairySkin === 1 ? '#4655be' : '#ebf5ff';      // aparencia nova: corpo rosa e asas azul escuro
