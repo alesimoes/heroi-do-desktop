@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 10/11/2026 — Mais duas aparências da fadinha
+- Novas aparências: **folha** (corpo verde, asas douradas; +1000 monstros depois da fadinha) e **estrela** (corpo violeta, asas turquesa; +1500). A rosa continua em +500. Aparecem em Roupas > Fadinha. Teste: `--fada4` / `?fada4`.
+
 ## 10/11/2026 — Inventário: corpo mais estreito, escudo e espada corrigidos
 - O herói de frente no inventário ficou com o **corpo mais estreito** (mesma cabeça e franja). O **escudo** agora fica encostado no braço esquerdo (antes ficava deslocado) e a **espada** aparece inteira, com **cabo** (faltava um pedaço; sem o quadradinho no fim). Desktop e web.
 
