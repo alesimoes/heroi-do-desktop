@@ -184,7 +184,7 @@ namespace HeroiPet
             "..KGGGGGGGGK..",
             ".KGGGGGGGGGGK.",
             ".KYYYYYYYYYYK.",
-            ".KYSSSSSSSSYK.",
+            ".KYYYYYSSSSYK.",
             ".KYSKKSSKKSYK.",
             "..KYSSSSSSYK..",
             "...KSSSSSSK...",
@@ -194,7 +194,7 @@ namespace HeroiPet
             ".KGGGGSSGGGGK.",
             "..KBBBBBBBBK..",
             "..KWWWKKWWWK..",
-            "..KBBBK.KBBBK."
+            "..KBBBKKBBBK.."
         };
 
         // ---------- Macieira (gerada por codigo) ----------
@@ -358,8 +358,8 @@ namespace HeroiPet
             "..KGGGGGGGGK..",
             ".KGGGGGGGGGGK.",
             ".KYYYYYYYYYYK.",
-            ".KYSSSSSSSSYK.",
-            ".KYSSKSSKSSYK.",
+            ".KYYYYYSSSSYK.",
+            ".KYYYYSSKSSYK.",
             "..KYSSSSSSYK..",
             "...KSSSSSSK...",
             "...KKGGGGKK...",
@@ -368,7 +368,7 @@ namespace HeroiPet
             ".KSGGGGGGGGSK.",
             "..KBBBBBBBBK..",
             "..KWWWKKWWWK..",
-            "..KBBBK.KBBBK."
+            "..KBBBKKBBBK.."
         };
         // igual, mas sem a mao esquerda (o braco levantado e desenhado a parte)
         public static string[] HeroFrontWave = {
@@ -377,8 +377,8 @@ namespace HeroiPet
             "..KGGGGGGGGK..",
             ".KGGGGGGGGGGK.",
             ".KYYYYYYYYYYK.",
-            ".KYSSSSSSSSYK.",
-            ".KYSSKSSKSSYK.",
+            ".KYYYYYSSSSYK.",
+            ".KYYYYSSKSSYK.",
             "..KYSSSSSSYK..",
             "...KSSSSSSK...",
             "...KKGGGGKK...",
@@ -387,7 +387,7 @@ namespace HeroiPet
             ".KSGGGGGGGGGK.",
             "..KBBBBBBBBK..",
             "..KWWWKKWWWK..",
-            "..KBBBK.KBBBK."
+            "..KBBBKKBBBK.."
         };
 
         // ---------- Inimigos ----------

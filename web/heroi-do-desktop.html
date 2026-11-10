@@ -231,8 +231,8 @@ const PAL = { K:'#1c1624', G:'#3aa53e', g:'#1e6e2d', Y:'#f0c850', S:'#fad0a5', V
 const ROWS = {
   heroA: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.","KGGGYYYYYYSSK.","KGGYYYYYYYSSSK",".KYYYYYYYSKSSK","..KYYYYYYSSSK.","..KYYYYYSSSK..","..KYYKGGGGKK..","..KGGGGGGGGGK.","..KGGGGGGGGGK.","..KGGGGGGGGSK.","..KBBBBBBBBBK.","...KWWK.KWWK..","...KBBK.KBBK.."],
   heroB: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.","KGGGYYYYYYSSK.","KGGYYYYYYYSSSK",".KYYYYYYYSKSSK","..KYYYYYYSSSK.","..KYYYYYSSSK..","..KYYKGGGGKK..","..KGGGGGGGGGK.","..KGGGGGGGGGK.","..KGGGGGGGGSK.","..KBBBBBBBBBK.","....KWWKWWK...","....KBBKBBK..."],
-  front: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.",".KYYYYYYYYYYK.",".KYSSSSSSSSYK.",".KYSSKSSKSSYK.","..KYSSSSSSYK..","...KSSSSSSK...","...KKGGGGKK...","..KGGGGGGGGK..",".KSGGGGGGGGSK.",".KSGGGGGGGGSK.","..KBBBBBBBBK..","..KWWWKKWWWK..","..KBBBK.KBBBK."],
-  wave: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.",".KYYYYYYYYYYK.",".KYSSSSSSSSYK.",".KYSSKSSKSSYK.","..KYSSSSSSYK..","...KSSSSSSK...","...KKGGGGKK...","..KGGGGGGGGK..",".KSGGGGGGGGGK.",".KSGGGGGGGGGK.","..KBBBBBBBBK..","..KWWWKKWWWK..","..KBBBK.KBBBK."],
+  front: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.",".KYYYYYYYYYYK.",".KYYYYYSSSSYK.",".KYYYYSSKSSYK.","..KYSSSSSSYK..","...KSSSSSSK...","...KKGGGGKK...","..KGGGGGGGGK..",".KSGGGGGGGGSK.",".KSGGGGGGGGSK.","..KBBBBBBBBK..","..KWWWKKWWWK..","..KBBBKKBBBK.."],
+  wave: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.",".KYYYYYYYYYYK.",".KYYYYYSSSSYK.",".KYYYYSSKSSYK.","..KYSSSSSSYK..","...KSSSSSSK...","...KKGGGGKK...","..KGGGGGGGGK..",".KSGGGGGGGGGK.",".KSGGGGGGGGGK.","..KBBBBBBBBK..","..KWWWKKWWWK..","..KBBBKKBBBK.."],
   octoA: ["...KKKKKK...","..KRRRRRRK..",".KRRRRRRRRK.","KRRWWRRWWRRK","KRRWKRRWKRRK","KRRRRRRRRRRK","KRRRKKKKRRRK",".KRRRRRRRRK.","..KKRRRRKK..",".KR.K..K.RK."],
   octoB: ["...KKKKKK...","..KRRRRRRK..",".KRRRRRRRRK.","KRRWWRRWWRRK","KRRWKRRWKRRK","KRRRRRRRRRRK","KRRRKKKKRRRK",".KRRRRRRRRK.","..KKRRRRKK..","..KR.KK.RK.."],
   batUp: ["KK..........KK","KPK...KK...KPK","KPPK.KPPPK.KPK","KPPPKPEPEPKPPK",".KPPPPPPPPPPK.","..KKPPPPPPKK..","....KKPPKK....","......KK......"],
@@ -374,7 +374,7 @@ if (touchMode) {
 }
 
 /* ============================ TELA E SPRITES ============================ */
-/* ---------- 5 CONJUNTOS DE ROUPA (areia, gelo, fogo, noite, mar; liberados pelo total de monstros derrotados no automatico) ----------
+/* ---------- 5 CONJUNTOS DE ROUPA (areia, gelo, fogo, noite, mar; liberados por um contador proprio que comeca em zero) ----------
    Cada conjunto = gorro + blusa + calca + sapatos de uma cor; libera sozinho quando evoKills chega ao limite (SET_THR). Aparece em Roupas > Gorros / Roupas. */
 const OUTSETS = [
   { name: 'areia', hat: '#e2ba60', tunic: '#cd7634', pants: '#966437', shoes: '#603a1e' },
