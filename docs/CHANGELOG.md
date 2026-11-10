@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 10/11/2026 — Herói de frente no inventário
+- No inventário o herói aparece **totalmente de frente** (sprite simétrico, dois olhos), com o escudo baixado ao lado e espada ou arco na mão direita (sem armas na aba Roupas). Desktop e web.
+
 ## 10/11/2026 — Franja maior
 - A franja do herói ficou **um pouco maior**: o cabelo cobre mais a testa e desce um pouco sobre o olho (de perfil) e um pixel a mais na testa (de frente e dormindo).
 

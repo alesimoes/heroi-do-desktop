@@ -351,6 +351,25 @@ namespace HeroiPet
             ".KK."
         };
 
+        // heroi totalmente de frente (simetrico, dois olhos) para o inventario
+        public static string[] HeroFrontView = {
+            "....KKKKKK....",
+            "...KGGGGGGK...",
+            "..KGGGGGGGGK..",
+            ".KGGGGGGGGGGK.",
+            "KYYYYYYYYYYYYK",
+            "KYYYYSSSSYYYYK",
+            ".KYYSKSSKSYYK.",
+            "..KYSSSSSSYK..",
+            "...KSSSSSSK...",
+            "...KKGGGGKK...",
+            "..KGGGGGGGGK..",
+            ".KSGGGGGGGGSK.",
+            ".KSGGGGGGGGSK.",
+            "..KBBBBBBBBK..",
+            "..KWWWKKWWWK..",
+            "..KBBBKKBBBK.."
+        };
         // ---------- Heroi de frente ----------
         public static string[] HeroFront = {
             "....KKKKKK....",
@@ -1053,7 +1072,7 @@ namespace HeroiPet
         string speech = "";
         int calmState;                    // 0 normal, 1 aguardando limpar a tela, 2 descansando
         float calmT, nextCalm = 120f + 180f * (float)new Random().NextDouble();
-        Sprite heroFront, heroFrontWave, heroSleepSpr, treeSpr, appleSpr, appleHud;
+        Sprite heroFrontView, heroFront, heroFrontWave, heroSleepSpr, treeSpr, appleSpr, appleHud;
         List<Tree> trees = new List<Tree>();
         List<Arrow> arrows = new List<Arrow>();
         List<FlyApple> flyApples = new List<FlyApple>();
@@ -1355,11 +1374,56 @@ namespace HeroiPet
                 GraphicsState st = g.Save();
                 g.TranslateTransform(cx, groundY); g.ScaleTransform(k, k);
                 g.InterpolationMode = InterpolationMode.NearestNeighbor; g.PixelOffsetMode = PixelOffsetMode.Half; g.SmoothingMode = SmoothingMode.None;
-                DrawHero(g);
+                DrawHeroFrontPreview(g, bow, bare);      // no inventario o heroi fica DE FRENTE
                 if (fairyState == 1) DrawFairyShape(g, 9 * S, -25 * S, S, eqFairy, false, ((int)(time * 16)) % 2 == 0);      // a fadinha aparece ao lado da cabeca, com a aparencia escolhida
                 g.Restore(st);
             }
             finally { pickT = spt; aimX = sax; aimY = say; bowT = sbt; hx = shx; hy = shy; hface = shf; walking = sw; attacking = sa; bowing = sb; dead = sd; powerT = sp; inv = si; playPickT = spk; playEatT = sed; eatRaw = ser; calmState = sc; cookState = sck; previewMode = false; previewBare = false; }
+        }
+
+        // heroi de frente para o inventario: sprite frontal (com as maos dos dois lados), escudo no peito e espada ou arco na mao direita (sem armas na aba Roupas)
+        void DrawHeroFrontPreview(Graphics g, bool bow, bool bare)
+        {
+            Spr(g, heroFrontView, hx, hy, true);
+            if (!bare)
+            {
+                DrawShieldBody(g, hx - 12 * S, hy - 6 * S);      // escudo baixado ao lado (como na pausa), sem cobrir o rosto
+                if (bow) DrawFrontBow(g, hx + 8 * S, hy - 7 * S); else DrawSwordAt(g, hx + 6 * S, hy - 5 * S, -80f);
+            }
+            if (menuEatT > 0)      // comendo a maca crua, de frente
+            {
+                float sc2 = 2.3f - 1.7f * Math.Min(1f, menuEatT / 0.9f); int w = (int)(appleSpr.W * sc2 * 0.8f), h = (int)(appleSpr.H * sc2 * 0.8f);
+                g.DrawImage(appleSpr.R, (int)(hx - w / 2f), (int)(hy - 8 * S - h / 2f), w, h);
+            }
+        }
+        void DrawSwordAt(Graphics g, float handX, float handY, float deg)
+        {
+            double rad = deg * Math.PI / 180.0;
+            float dx = (float)Math.Cos(rad), dy = (float)Math.Sin(rad), px = -dy, py = dx, len = 12 * S, w = 1.2f * S;
+            PointF[] blade = {
+                new PointF(handX + px * w, handY + py * w), new PointF(handX - px * w, handY - py * w),
+                new PointF(handX + dx * len - px * w, handY + dy * len - py * w),
+                new PointF(handX + dx * (len + 3 * S), handY + dy * (len + 3 * S)),
+                new PointF(handX + dx * len + px * w, handY + dy * len + py * w) };
+            using (SolidBrush bl = new SolidBrush(BladeColor()))
+            using (Pen ol = new Pen(Color.FromArgb(28, 22, 36), Math.Max(1f, S)))
+            using (Pen gd = new Pen(GuardColor(), 2 * S))
+            {
+                g.FillPolygon(bl, blade); g.DrawPolygon(ol, blade);
+                g.DrawLine(gd, handX + px * 3 * S, handY + py * 3 * S, handX - px * 3 * S, handY - py * 3 * S);
+            }
+        }
+        void DrawFrontBow(Graphics g, float x, float y)      // arco vertical na mao direita (de frente)
+        {
+            SmoothingMode sm = g.SmoothingMode; g.SmoothingMode = SmoothingMode.None;
+            Color wood = eqBow == 1 ? Color.FromArgb(200, 205, 215) : Color.FromArgb(135, 85, 45);
+            using (Pen ol = new Pen(Color.FromArgb(28, 22, 36), 4 * S)) using (Pen wp = new Pen(wood, 2 * S)) using (Pen st = new Pen(Color.FromArgb(235, 235, 235), Math.Max(1f, S * 0.6f)))
+            {
+                RectangleF r = new RectangleF(x - 3 * S, y - 7 * S, 6 * S, 14 * S);
+                g.DrawArc(ol, r, -90f, 180f); g.DrawArc(wp, r, -90f, 180f);
+                g.DrawLine(st, x, y - 7 * S, x, y + 7 * S);
+            }
+            g.SmoothingMode = sm;
         }
 
         // icones dos itens (formas desenhadas por codigo)
@@ -1673,6 +1737,7 @@ namespace HeroiPet
             Color[] bk = { Color.FromArgb(215, 55, 55), Color.FromArgb(205, 92, 48), Color.FromArgb(176, 86, 42), Color.FromArgb(142, 74, 36) };
             for (int i = 0; i < 4; i++) { Dictionary<char, Color> ob = Art.Ov('R', bk[i]); ob['G'] = i == 0 ? Color.FromArgb(58, 165, 62) : Color.FromArgb(104, 110, 40); appleBake[i] = Art.Make(Art.AppleSm, S, ob); }
             heroFront = Art.Make(Art.HeroRecolor(Art.HeroFront), S, hov);
+            heroFrontView = Art.Make(Art.HeroRecolor(Art.HeroFrontView), S, hov);
             Dictionary<char, Color> capOv = Art.Ov('H', Color.FromArgb(150, 80, 205)); capOv['h'] = Color.FromArgb(205, 150, 240); capOv['g'] = Color.FromArgb(96, 50, 140);
             Dictionary<char, Color> shOv = Art.Ov('Q', Color.FromArgb(70, 125, 235)); shOv['h'] = Color.FromArgb(135, 180, 255); shOv['g'] = Color.FromArgb(45, 85, 190);
             evoItemSpr[0] = Art.Make(Art.CapItem, S, capOv); evoItemSpr[1] = Art.Make(Art.ShirtItem, S, shOv);
