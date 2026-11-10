@@ -1474,13 +1474,9 @@ namespace HeroiPet
                     Rectangle pv = new Rectangle(pad, (int)(80 * sc), (int)(360 * sc), (int)(H - 80 * sc - pad));
                     using (LinearGradientBrush lg = new LinearGradientBrush(pv, Color.FromArgb(46, 56, 78), Color.FromArgb(22, 28, 40), 90f))
                     using (Pen pp = new Pen(Color.FromArgb(80, 90, 112), 1.5f * sc)) Round(g, pv, (int)(12 * sc), lg, pp);
-                    float k = Math.Max(2f, (float)Math.Floor((pv.Height - 150 * sc) / (30f * p.S)));
-                    p.DrawHeroPreview(g, pv.X + pv.Width / 2f, pv.Y + pv.Height * 0.62f, k, showBow, tab == 1);
+                    float k = Math.Max(2f, (float)Math.Floor(pv.Height * 0.8f / (30f * p.S)));      // sem legenda: o heroi (com a fadinha) fica grande e centralizado no quadro
+                    p.DrawHeroPreview(g, pv.X + pv.Width / 2f, pv.Y + pv.Height / 2f + 13.5f * p.S * k, k, showBow, tab == 1);      // pes abaixo do centro: o conjunto (fadinha ate os pes, ~27 S) fica no meio
                     g.SmoothingMode = SmoothingMode.AntiAlias; g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-                    int nc = p.Owns(5, 0) ? 6 : 5;      // a linha da fadinha so aparece depois de ganhar a fadinha
-                    float ty = pv.Bottom - (nc * 21 + 13) * sc;
-                    string[] cats = { "Arco", "Espada", "Escudo", "Gorro", "Roupa", "Fadinha" };
-                    for (int i = 0; i < nc; i++) { g.DrawString(cats[i] + ": " + Names[i][p.Equipped(i)], sf, Brushes.White, pv.X + 16 * sc, ty); ty += 21 * sc; }
                     // abas (fechadas ate serem escolhidas)
                     int x0 = (int)(420 * sc), th = (int)(50 * sc), gapT = (int)(10 * sc), tw = (int)((W - x0 - pad - 60 * sc - 2 * gapT) / 3);
                     for (int i = 0; i < 3; i++)

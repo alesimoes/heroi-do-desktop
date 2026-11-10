@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 09/11/2026 — Inventário sem legenda
+- Tirada a legenda (Arco/Espada/Escudo/Gorro/Roupa/Fadinha) debaixo do personagem no menu; o herói ficou **centralizado** no quadro.
+
 ## 09/11/2026 — Aceno antes de dormir
 - O herói agora diz **Oi! uma vez só** e o aceno dura 2,2 s (antes 3,5 s com dois Oi). O **braço levantado ficou curto e proporcional** (6 S, antes 10 S).
 

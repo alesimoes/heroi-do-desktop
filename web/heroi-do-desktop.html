@@ -150,7 +150,7 @@ html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout
   <div id="inv" hidden>
     <div class="invbox" role="dialog" aria-label="Inventário">
       <button id="invClose" aria-label="Fechar o menu">✕</button>
-      <div class="invprev"><div class="invtitle">HERÓI</div><canvas id="invPrev" width="300" height="320"></canvas><ul id="invEq"></ul></div>
+      <div class="invprev"><div class="invtitle">HERÓI</div><canvas id="invPrev" width="300" height="320"></canvas></div>
       <div class="invright">
         <div class="invtabs"><button data-tab="0">Armas</button><button data-tab="1">Roupas</button><button data-tab="2">Comida</button></div>
         <div id="invBody"></div>
@@ -1515,7 +1515,7 @@ function drawCalm() {
   let q = phase === 2 ? Math.min(1, phaseT / 1.5) : 1; q = q * q * (3 - 2 * q);
   drawShieldBody(hero.x - 7 * S + (-5 * S) * q, hero.y - 12 * S + 6 * S * q);
   if (!waving) drawSword(hero.x + 6 * S, hero.y - 5 * S, -80 + 175 * q, 1);
-  else { const sw = Math.sin(time * 10) * S, bx = hero.x + 4 * S, by = hero.y;      // braco levantado, curto e proporcional (6 S), a mao balanca de lado a lado
+  else { const sw = Math.sin(time * 10) * S, bx = hero.x + 4 * S, by = hero.y;      // braco levantado, curto e proporcional (6 S); a mao balanca de lado a lado
     rect('#1c1624', bx, by - 10 * S, 4 * S, 4 * S); rect(tunicColor(), bx + S, by - 9 * S, 2 * S, 3 * S); rect('#1c1624', bx + sw, by - 12 * S, 4 * S, 3 * S); rect('#fad0a5', bx + S + sw, by - 11 * S, 2 * S, 2 * S); }
 }
 // bokoblin montado num cavalo simples e pequeno, com arco (retangulos; x vai para frente, y para cima, em unidades de S)
@@ -1682,12 +1682,11 @@ function drawHeroPreview() {      // heroi equipado, ampliado (muda na hora ao t
   const sv = { pt: pickT, ax: hero.aimX, ay: hero.aimY, bt: hero.bowT, x: hero.x, y: hero.y, f: hero.face, w: hero.walking, a: hero.attacking, b: hero.bowing, d: hero.dead, i: hero.inv, p: powerT, c: calmState, k: cookState, pp: playPickT, pe: playEatT, er: eatRaw };
   try {
     hero.x = 0; hero.y = 0; hero.face = 1; hero.walking = false; hero.attacking = false; hero.bowing = invBow; hero.aimX = 1; hero.aimY = 0; hero.bowT = 0.4; hero.dead = false; hero.inv = 0; powerT = 0; calmState = 0; cookState = 0; playPickT = invPickT; pickT = invPickT; playEatT = invEatT; eatRaw = invEatT > 0; previewBare = invTab === 1;
-    const k = Math.max(1, (pc.height * 0.62) / (30 * S)); g.setTransform(k, 0, 0, k, pc.width / 2, pc.height * 0.72); withCtx(g, () => { drawHero(); if (fairyState === 1) drawFairyShape(9 * S, -25 * S, S, eqFairy, false, Math.floor(time * 16) % 2 === 0); });
+    const k = Math.max(1, (pc.height * 0.8) / (30 * S)); g.setTransform(k, 0, 0, k, pc.width / 2, pc.height / 2 + 13.5 * S * k); /* sem legenda: centralizado */ withCtx(g, () => { drawHero(); if (fairyState === 1) drawFairyShape(9 * S, -25 * S, S, eqFairy, false, Math.floor(time * 16) % 2 === 0); });
   } finally { pickT = sv.pt; hero.aimX = sv.ax; hero.aimY = sv.ay; hero.bowT = sv.bt; hero.x = sv.x; hero.y = sv.y; hero.face = sv.f; hero.walking = sv.w; hero.attacking = sv.a; hero.bowing = sv.b; hero.dead = sv.d; hero.inv = sv.i; powerT = sv.p; calmState = sv.c; cookState = sv.k; playPickT = sv.pp; playEatT = sv.pe; eatRaw = sv.er; previewBare = false; g.setTransform(1, 0, 0, 1, 0, 0); }
 }
 function renderInv() {
   drawHeroPreview();
-  const cats = ['Arco', 'Espada', 'Escudo', 'Gorro', 'Roupa', 'Fadinha'].slice(0, owns(5, 0) ? 6 : 5); $('invEq').innerHTML = cats.map((c, i) => '<li>' + c + ': ' + INV_NAMES[i][getEq(i)] + '</li>').join('');
   document.querySelectorAll('#inv .invtabs button').forEach((b) => b.setAttribute('aria-selected', String(+b.dataset.tab === invTab)));
   const body = $('invBody'); body.innerHTML = ''; const info = $('invInfo'); info.textContent = '';
   const section = (title, cat) => {
