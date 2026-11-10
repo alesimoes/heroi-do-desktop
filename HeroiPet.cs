@@ -1790,7 +1790,7 @@ namespace HeroiPet
                     Enemy en = enemies[k];
                     float dx = en.X - a.X, dy = (en.Y - (en.Type == 1 ? 9 * S : (en.Type == 5 ? 9 * S : (en.Type == 3 ? 12 * S * DK * en.Scale : 4 * S)))) - a.Y;
                     float hitR = en.Type == 3 ? 14 * S * DK * en.Scale : (en.Type == 5 ? 9 * S : 7 * S);
-                    if (dx * dx + dy * dy < hitR * hitR) { DamageEnemy(en, 50 * ((!a.Power && eqBow == 1) ? 2 : 1)); gone = true; }      // arco prateado (evolucao 1): o dobro de dano (flecha de poder nao muda)
+                    if (dx * dx + dy * dy < hitR * hitR) { DamageEnemy(en, a.Power ? 9999999 : 50 * (eqBow == 1 ? 2 : 1)); gone = true; }      // arco prateado (evolucao 1): o dobro de dano (flecha de poder nao muda)
                 }
                 if (gone) arrows.RemoveAt(i);
             }

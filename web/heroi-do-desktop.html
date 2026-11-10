@@ -1084,7 +1084,7 @@ function updateArrows(dt) {
     let gone = a.x < -30 || a.y < -30 || a.x > W + 30 || a.y > H + 30;
     for (let k = enemies.length - 1; k >= 0 && !gone; k--) {
       const en = enemies[k], dx = en.x - a.x, dy = (en.y - (en.type === 1 ? 9 * S : (en.type === 5 ? 9 * S : (en.type === 3 ? 12 * S * DK * (en.scale || 1) : 4 * S)))) - a.y, hitR = en.type === 3 ? 14 * S * DK * (en.scale || 1) : (en.type === 5 ? 9 * S : 7 * S);
-      if (dx * dx + dy * dy < hitR * hitR) { damageEnemy(en, 50 * ((!a.power && eqBow === 1) ? 2 : 1)); gone = true; }      // arco prateado (evolucao 1): o dobro de dano (flecha de poder nao muda)
+      if (dx * dx + dy * dy < hitR * hitR) { damageEnemy(en, a.power ? 9999999 : 50 * (eqBow === 1 ? 2 : 1)); gone = true; }      // dano do arco igual ao do dragao (50); arco prateado (evolucao 1): o dobro de dano (flecha de poder nao muda)
     }
     if (gone) arrows.splice(i, 1);
   }

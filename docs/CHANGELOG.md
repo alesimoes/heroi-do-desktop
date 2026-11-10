@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 09/11/2026 — Flechas do poder azul
+- As flechas azuis do poder agora dão **9999999** de dano (matam qualquer monstro na hora, como a fadinha).
+
 ## 09/11/2026 — Vida dos monstros e dano das armas
 - Vida: bokoblin a cavalo **250**, octorok **200**, bokoblin normal **100**, gelatina **50**, morcego **50**. A fadinha continua matando na hora.
 - Dano das armas igual ao do dragão em todos os monstros: arco **50** (arco de metal **100**), espada **150** (Espada Mestre **300**).
