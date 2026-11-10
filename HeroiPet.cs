@@ -3591,9 +3591,8 @@ namespace HeroiPet
                 else if (phase == 2 && phaseT >= 1.5f) { phase = harvest ? 4 : 3; phaseT = 0; }       // abaixa espada e escudo
                 else if (phase == 3)                  // cumprimenta (so nas pausas curtas)
                 {
-                    if (phaseT > 0.1f && phaseT < 0.2f && speechT <= 0) Say("Oi!");
-                    if (phaseT > 1.9f && phaseT < 2.0f && speechT <= 0) Say("Oi!");
-                    if (phaseT >= 3.5f) { phase = 4; phaseT = 0; }
+                    if (phaseT > 0.1f && phaseT < 0.2f && speechT <= 0) Say("Oi!");      // diz oi uma vez so, enquanto acena
+                    if (phaseT >= 2.2f) { phase = 4; phaseT = 0; }
                 }
                 else if (phase == 4 && phaseT >= 1.2f) { phase = 5; phaseT = 0; }                   // deita no chao
                 hx = Math.Max(6 * S, Math.Min(W - 6 * S, hx));
@@ -4383,7 +4382,7 @@ namespace HeroiPet
             else
             {
                 // espada guardada nas costas (so o cabo aparece sobre o ombro) e a mao direita acena
-                float sw = (float)Math.Sin(time * 9) * S;
+                float sw = (float)Math.Sin(time * 10) * S;      // a mao balanca de um lado para o outro
                 using (SolidBrush kb = new SolidBrush(Color.FromArgb(28, 22, 36)))
                 using (SolidBrush gb = new SolidBrush(TunicColor()))
                 using (SolidBrush sb = new SolidBrush(Color.FromArgb(250, 208, 165)))
@@ -4392,10 +4391,11 @@ namespace HeroiPet
                 {
                     g.FillRectangle(br, hx - 7 * S, hy - 11 * S, 2 * S, 3 * S);
                     g.FillRectangle(gold, hx - 8 * S, hy - 9 * S, 4 * S, S);
-                    g.FillRectangle(kb, hx + 4 * S, hy - 12 * S, 4 * S, 6 * S);       // manga, saindo do ombro
-                    g.FillRectangle(gb, hx + 5 * S, hy - 11 * S, 2 * S, 4 * S);
-                    g.FillRectangle(kb, hx + 4 * S + sw, hy - 16 * S, 4 * S, 5 * S);  // mao
-                    g.FillRectangle(sb, hx + 5 * S + sw, hy - 15 * S, 2 * S, 3 * S);
+                    // braco levantado, curto e proporcional (6 S de ponta a ponta, perto do tamanho do braco abaixado)
+                    g.FillRectangle(kb, hx + 4 * S, hy - 10 * S, 4 * S, 4 * S);       // manga, saindo do ombro
+                    g.FillRectangle(gb, hx + 5 * S, hy - 9 * S, 2 * S, 3 * S);
+                    g.FillRectangle(kb, hx + 4 * S + sw, hy - 12 * S, 4 * S, 3 * S);  // mao
+                    g.FillRectangle(sb, hx + 5 * S + sw, hy - 11 * S, 2 * S, 2 * S);
                 }
             }
         }

@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 09/11/2026 — Aceno antes de dormir
+- O herói agora diz **Oi! uma vez só** e o aceno dura 2,2 s (antes 3,5 s com dois Oi). O **braço levantado ficou curto e proporcional** (6 S, antes 10 S).
+
 ## 09/11/2026 — Atalhos de teste removidos
 - Removidos os atalhos para o nível 6 e 7 e o teste da luta do dragão (menu, `--nivel`, `--dragao`, `?nivel`, `?dragao`).
 

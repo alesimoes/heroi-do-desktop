@@ -1215,7 +1215,7 @@ function updateCalmHero(dt) {
     if (pickT >= 1.5) { pickT = 0; const idx = firstApple(curTree); if (idx >= 0 && picksLeft > 0) { curTree.has[idx] = false; curTree.regrow[idx] = 60 + rnd() * 40; flyApples.push({ x0: appleX(curTree, idx), y0: appleY(curTree, idx), t: 0 }); picksLeft--; } else picksLeft = 0; }
     if (picksLeft <= 0 && pickT >= 0.9) { phase = 2; phaseT = 0; }
   } else if (phase === 2 && phaseT >= 1.5) { phase = harvest ? 4 : 3; phaseT = 0; }
-  else if (phase === 3) { if (phaseT > 0.1 && phaseT < 0.2 && hero.speechT <= 0) say('Oi!'); if (phaseT > 1.9 && phaseT < 2.0 && hero.speechT <= 0) say('Oi!'); if (phaseT >= 3.5) { phase = 4; phaseT = 0; } }
+  else if (phase === 3) { if (phaseT > 0.1 && phaseT < 0.2 && hero.speechT <= 0) say('Oi!'); if (phaseT >= 2.2) { phase = 4; phaseT = 0; } }
   else if (phase === 4 && phaseT >= 1.2) { phase = 5; phaseT = 0; }
   clampHero();
 }
@@ -1515,7 +1515,8 @@ function drawCalm() {
   let q = phase === 2 ? Math.min(1, phaseT / 1.5) : 1; q = q * q * (3 - 2 * q);
   drawShieldBody(hero.x - 7 * S + (-5 * S) * q, hero.y - 12 * S + 6 * S * q);
   if (!waving) drawSword(hero.x + 6 * S, hero.y - 5 * S, -80 + 175 * q, 1);
-  else { const sw = Math.sin(time * 9) * 2 * S, ax = hero.x - 6 * S, ay = hero.y - 10 * S; rect('#1c1624', ax - 3 * S + sw * 0.5 - S, ay - 7 * S, 4 * S, 8 * S); rect(tunicColor(), ax - 3 * S + sw * 0.5, ay - 6 * S, 2 * S, 6 * S); rect('#1c1624', ax - 5 * S + sw - S, ay - 11 * S, 5 * S, 5 * S); rect('#fad0a5', ax - 5 * S + sw, ay - 10 * S, 3 * S, 3 * S); }
+  else { const sw = Math.sin(time * 10) * S, bx = hero.x + 4 * S, by = hero.y;      // braco levantado, curto e proporcional (6 S), a mao balanca de lado a lado
+    rect('#1c1624', bx, by - 10 * S, 4 * S, 4 * S); rect(tunicColor(), bx + S, by - 9 * S, 2 * S, 3 * S); rect('#1c1624', bx + sw, by - 12 * S, 4 * S, 3 * S); rect('#fad0a5', bx + S + sw, by - 11 * S, 2 * S, 2 * S); }
 }
 // bokoblin montado num cavalo simples e pequeno, com arco (retangulos; x vai para frente, y para cima, em unidades de S)
 function hRect(e, f, c, x, y, w, h) { rect(c, f > 0 ? e.x + x * S : e.x - (x + w) * S, e.y - (y + h) * S, w * S, h * S); }
@@ -1640,7 +1641,7 @@ document.addEventListener('fullscreenchange', () => { $('mFull').setAttribute('a
 $('mFull').addEventListener('click', () => { toggleFullscreen(); closeMenu(); });
 $('goPlay').addEventListener('click', () => { $('intro').hidden = true; goFullscreen(); setPlayMode(true); });
 $('goAuto').addEventListener('click', () => { $('intro').hidden = true; goFullscreen(); });
-/* ---------- MENU DE PAUSA (Espaco; clicar na maca = comer; Roupas: heroi sem armas): abas Armas / Roupas / Comida e o heroi ampliado ---------- */
+/* ---------- MENU DE PAUSA (sem atalhos de teste; Espaco; clicar na maca = comer; Roupas: heroi sem armas): abas Armas / Roupas / Comida e o heroi ampliado ---------- */
 let invOn = false, invTab = -1, invBow = false, invEatT = 0, previewBare = false, invMsg = '', eatRaw = false, autoEatPh = 0, autoEatTree = null;      // invBow: o heroi do exemplo segura o arco (clicou num arco) ou espada e escudo (clicou neles)
 const INV_NAMES = [['Arco de madeira', 'Arco de metal'], ['Espada comum', 'Espada Mestre'], ['Escudo azul', 'Escudo vermelho', 'Escudo do rei'], ['Gorro verde', 'Gorro roxo', 'Coroa de ouro'], ['Túnica verde', 'Blusa azul', 'Roupa de rei'], ['Fadinha', 'Fadinha rosa']];
 const INV_DESC = [['O arco de sempre.', 'Flechas com o dobro de dano.'], ['A espada de sempre.', 'Dobro de dano.'], ['Escudo comum.', 'Escudo vermelho do herói.', 'Escudo circular do tesouro do rei.'], ['O gorro de sempre.', 'Gorro roxo da evolução.', 'Coroa de ouro do tesouro do rei.'], ['A túnica de sempre.', 'Blusa azul da evolução.', 'Manto vermelho, calça marrom e sapatos roxos.'], ['A fadinha ajudante.', 'Corpo rosa e asas azul escuro (500 monstros depois da fadinha).']];
