@@ -183,8 +183,8 @@ namespace HeroiPet
             "...KGGGGGGK...",
             "..KGGGGGGGGK..",
             ".KGGGGGGGGGGK.",
-            "KYYYYYYYYYYYYK",
-            "KYYYSSSSSSYYYK",
+            ".KYYYYYYYYYYK.",
+            ".KYSSSSSSSSYK.",
             ".KYSKKSSKKSYK.",
             "..KYSSSSSSYK..",
             "...KSSSSSSK...",
@@ -357,9 +357,9 @@ namespace HeroiPet
             "...KGGGGGGK...",
             "..KGGGGGGGGK..",
             ".KGGGGGGGGGGK.",
-            "KYYYYYYYYYYYYK",
-            "KYYYSSSSSSYYYK",
-            ".KSYSKSSKSYSK.",
+            ".KYYYYYYYYYYK.",
+            ".KYSSSSSSSSYK.",
+            ".KYSSKSSKSSYK.",
             "..KYSSSSSSYK..",
             "...KSSSSSSK...",
             "...KKGGGGKK...",
@@ -376,9 +376,9 @@ namespace HeroiPet
             "...KGGGGGGK...",
             "..KGGGGGGGGK..",
             ".KGGGGGGGGGGK.",
-            "KYYYYYYYYYYYYK",
-            "KYYYSSSSSSYYYK",
-            ".KSYSKSSKSYSK.",
+            ".KYYYYYYYYYYK.",
+            ".KYSSSSSSSSYK.",
+            ".KYSSKSSKSSYK.",
             "..KYSSSSSSYK..",
             "...KSSSSSSK...",
             "...KKGGGGKK...",
@@ -1173,9 +1173,22 @@ namespace HeroiPet
             new OutSet("fogo", Color.FromArgb(225, 72, 30), Color.FromArgb(185, 38, 28), Color.FromArgb(70, 38, 36), Color.FromArgb(250, 175, 45)),
             new OutSet("noite", Color.FromArgb(82, 66, 180), Color.FromArgb(58, 50, 140), Color.FromArgb(34, 30, 80), Color.FromArgb(205, 175, 70)),
             new OutSet("mar", Color.FromArgb(30, 160, 170), Color.FromArgb(28, 125, 150), Color.FromArgb(20, 80, 110), Color.FromArgb(240, 230, 200)) };
-        static readonly int[] SetThr = { 4500, 6000, 8000, 10500, 14000 };      // total de monstros derrotados (evoKills) para liberar cada conjunto
+        static readonly int[] SetThr = { 4500, 6000, 8000, 10500, 14000 };      // monstros derrotados depois de instalar esta versao (setKills) para liberar cada conjunto
         bool setsTest; int setsKnown;
-        int SetsOwned { get { if (setsTest) return 5; int n = 0; while (n < 5 && evoKills >= SetThr[n]) n++; return n; } }
+        int setKills;      // monstros derrotados DEPOIS de instalar esta versao (contador proprio: nao herda os monstros que ja foram mortos em versoes antigas)
+        int LoadSetKills()
+        {
+            if (Environment.GetEnvironmentVariable("HEROI_TESTE") != null) return 0;
+            try { using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"Software\HeroiDoDesktop")) { if (k != null) { object v = k.GetValue("MonstrosConjuntos"); if (v != null) return Math.Max(0, Convert.ToInt32(v)); } } } catch { }
+            SaveSetKills(0);      // primeira vez com esta versao: a contagem dos conjuntos comeca agora (zero)
+            return 0;
+        }
+        void SaveSetKills(int v)
+        {
+            if (Environment.GetEnvironmentVariable("HEROI_TESTE") != null) return;
+            try { using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"Software\HeroiDoDesktop")) k.SetValue("MonstrosConjuntos", v); } catch { }
+        }
+        int SetsOwned { get { if (setsTest) return 5; int n = 0; while (n < 5 && setKills >= SetThr[n]) n++; return n; } }
         static Color Shade(Color c, float t) { return t >= 0 ? Color.FromArgb((int)(c.R + (255 - c.R) * t), (int)(c.G + (255 - c.G) * t), (int)(c.B + (255 - c.B) * t)) : Color.FromArgb((int)(c.R * (1 + t)), (int)(c.G * (1 + t)), (int)(c.B * (1 + t))); }
         void UnlockSet(int i)      // conjunto novo: ja vem vestido, com aviso
         {
@@ -1765,7 +1778,7 @@ namespace HeroiPet
         {
             tray.Visible = false;
             SaveRecord();
-            SaveKills(); SaveChest(); SaveFairy();
+            SaveKills(); SaveChest(); SaveFairy(); SaveSetKills(setKills);
             if (evoForm != null) { try { evoForm.Close(); } catch { } evoForm = null; }
             CloseMenu();
             if (shadowLayer != null) { shadowLayer.Close(); shadowLayer = null; }
@@ -1943,7 +1956,7 @@ namespace HeroiPet
             evoKills = LoadKills();
             evoStage = 0; while (evoStage < 4 && evoKills >= EvoThreshold[evoStage]) evoStage++;       // ja conquistados em outras sessoes: sem animacao
             evoNext = evoStage + 1;
-            setsKnown = 0; while (setsKnown < 5 && evoKills >= SetThr[setsKnown]) setsKnown++;      // ja liberados antes: sem aviso
+            setKills = LoadSetKills(); setsKnown = 0; while (setsKnown < 5 && setKills >= SetThr[setsKnown]) setsKnown++;      // ja liberados antes: sem aviso
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--conjuntos") >= 0) setsTest = true;      // teste rapido: os 5 conjuntos liberados
         }
 
@@ -1952,7 +1965,8 @@ namespace HeroiPet
         {
             evoKills++;
             if (evoKills % 5 == 0) SaveKills();
-            { int so = 0; while (so < 5 && evoKills >= SetThr[so]) so++; if (so > setsKnown && !setsTest) { setsKnown = so; UnlockSet(so - 1); SaveKills(); } }      // conjunto de roupa novo
+            setKills++; if (setKills % 5 == 0) SaveSetKills(setKills);
+            { int so = 0; while (so < 5 && setKills >= SetThr[so]) so++; if (so > setsKnown && !setsTest) { setsKnown = so; UnlockSet(so - 1); SaveSetKills(setKills); } }      // conjunto de roupa novo
             if (evoNext <= 4 && evoKills >= EvoThreshold[evoNext - 1]) { evoQueue.Enqueue(evoNext); evoNext++; SaveKills(); }
         }
 

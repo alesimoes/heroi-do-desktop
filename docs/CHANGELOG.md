@@ -1,7 +1,7 @@
 # Changelog (resumo)
 
 ## 10/11/2026 — 5 conjuntos de roupa por monstros derrotados
-- Cinco conjuntos (gorro + blusa + calça + sapatos): **areia** (4500 monstros), **gelo** (6000), **fogo** (8000), **noite** (10500) e **mar** (14000), contando o total de monstros derrotados no automático (o mesmo contador das evoluções). Ao liberar, o conjunto já vem vestido, com o aviso NOVO ITEM. Aparecem em Roupas (Gorros e Roupas); o inventário passou a **rolar com a roda do mouse** quando há muitos itens. Teste: `--conjuntos` / `?conjuntos`. Cores e limites são provisórios (para o usuário refinar).
+- Cinco conjuntos (gorro + blusa + calça + sapatos): **areia** (4500 monstros), **gelo** (6000), **fogo** (8000), **noite** (10500) e **mar** (14000), contados por um **contador próprio, que começa em zero quando esta versão é instalada** (não herda os monstros já derrotados em versões antigas; os itens que já tinha — arco prateado, gorro roxo etc. — continuam). Ao liberar, o conjunto já vem vestido, com o aviso NOVO ITEM. Aparecem em Roupas (Gorros e Roupas); o inventário passou a **rolar com a roda do mouse** quando há muitos itens. Teste: `--conjuntos` / `?conjuntos`. Cores e limites são provisórios (para o usuário refinar).
 
 ## 10/11/2026 — Itens de menu removidos
 - Removidas as opções **Colher maçãs e dormir (2 min)** e **Dar 5 maçãs (lanche)** (menu da bandeja no desktop e menu da página na web).

@@ -231,8 +231,8 @@ const PAL = { K:'#1c1624', G:'#3aa53e', g:'#1e6e2d', Y:'#f0c850', S:'#fad0a5', V
 const ROWS = {
   heroA: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.","KGGGYYYYYYSSK.","KGGYYYYYYYSSSK",".KYYYYYYYSKSSK","..KYYYYYYSSSK.","..KYYYYYSSSK..","..KYYKGGGGKK..","..KGGGGGGGGGK.","..KGGGGGGGGGK.","..KGGGGGGGGSK.","..KBBBBBBBBBK.","...KWWK.KWWK..","...KBBK.KBBK.."],
   heroB: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.","KGGGYYYYYYSSK.","KGGYYYYYYYSSSK",".KYYYYYYYSKSSK","..KYYYYYYSSSK.","..KYYYYYSSSK..","..KYYKGGGGKK..","..KGGGGGGGGGK.","..KGGGGGGGGGK.","..KGGGGGGGGSK.","..KBBBBBBBBBK.","....KWWKWWK...","....KBBKBBK..."],
-  front: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.","KYYYYYYYYYYYYK","KYYYSSSSSSYYYK",".KSYSKSSKSYSK.","..KYSSSSSSYK..","...KSSSSSSK...","...KKGGGGKK...","..KGGGGGGGGK..",".KSGGGGGGGGSK.",".KSGGGGGGGGSK.","..KBBBBBBBBK..","..KWWWKKWWWK..","..KBBBK.KBBBK."],
-  wave: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.","KYYYYYYYYYYYYK","KYYYSSSSSSYYYK",".KSYSKSSKSYSK.","..KYSSSSSSYK..","...KSSSSSSK...","...KKGGGGKK...","..KGGGGGGGGK..",".KSGGGGGGGGGK.",".KSGGGGGGGGGK.","..KBBBBBBBBK..","..KWWWKKWWWK..","..KBBBK.KBBBK."],
+  front: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.",".KYYYYYYYYYYK.",".KYSSSSSSSSYK.",".KYSSKSSKSSYK.","..KYSSSSSSYK..","...KSSSSSSK...","...KKGGGGKK...","..KGGGGGGGGK..",".KSGGGGGGGGSK.",".KSGGGGGGGGSK.","..KBBBBBBBBK..","..KWWWKKWWWK..","..KBBBK.KBBBK."],
+  wave: ["....KKKKKK....","...KGGGGGGK...","..KGGGGGGGGK..",".KGGGGGGGGGGK.",".KYYYYYYYYYYK.",".KYSSSSSSSSYK.",".KYSSKSSKSSYK.","..KYSSSSSSYK..","...KSSSSSSK...","...KKGGGGKK...","..KGGGGGGGGK..",".KSGGGGGGGGGK.",".KSGGGGGGGGGK.","..KBBBBBBBBK..","..KWWWKKWWWK..","..KBBBK.KBBBK."],
   octoA: ["...KKKKKK...","..KRRRRRRK..",".KRRRRRRRRK.","KRRWWRRWWRRK","KRRWKRRWKRRK","KRRRRRRRRRRK","KRRRKKKKRRRK",".KRRRRRRRRK.","..KKRRRRKK..",".KR.K..K.RK."],
   octoB: ["...KKKKKK...","..KRRRRRRK..",".KRRRRRRRRK.","KRRWWRRWWRRK","KRRWKRRWKRRK","KRRRRRRRRRRK","KRRRKKKKRRRK",".KRRRRRRRRK.","..KKRRRRKK..","..KR.KK.RK.."],
   batUp: ["KK..........KK","KPK...KK...KPK","KPPK.KPPPK.KPK","KPPPKPEPEPKPPK",".KPPPPPPPPPPK.","..KKPPPPPPKK..","....KKPPKK....","......KK......"],
@@ -374,7 +374,7 @@ if (touchMode) {
 }
 
 /* ============================ TELA E SPRITES ============================ */
-/* ---------- 5 CONJUNTOS DE ROUPA (liberados pelo total de monstros derrotados no automatico) ----------
+/* ---------- 5 CONJUNTOS DE ROUPA (areia, gelo, fogo, noite, mar; liberados pelo total de monstros derrotados no automatico) ----------
    Cada conjunto = gorro + blusa + calca + sapatos de uma cor; libera sozinho quando evoKills chega ao limite (SET_THR). Aparece em Roupas > Gorros / Roupas. */
 const OUTSETS = [
   { name: 'areia', hat: '#e2ba60', tunic: '#cd7634', pants: '#966437', shoes: '#603a1e' },
@@ -551,12 +551,14 @@ function rupeeStep() { return Math.min(6, Math.floor(hero.rupees / 25)); }
 // 1000 monstros: arco de metal | +500: gorro roxo | +500: blusa azul | +1000: Espada Mestre e escudo vermelho
 const EVO_THR = [1000, 1500, 2000, 3000], EVO_NEED = [1000, 500, 500, 1000], EVO_FLY = 1.5;
 const EVO_TITLE = ['ARCO DE METAL', 'GORRO ROXO', 'BLUSA AZUL', 'ESPADA MESTRE E ESCUDO VERMELHO'];
-let setsTest = false, setsKnown = 0;      // conjuntos de roupa (ver OUTSETS)
+let setsTest = false, setsKnown = 0, setKills = 0;      // conjuntos de roupa (ver OUTSETS); setKills = monstros derrotados DEPOIS de comecar a usar esta versao (nao herda o que ja foi morto antes)
+try { const v = localStorage.getItem('heroi_monstros_conjuntos'); if (v === null) localStorage.setItem('heroi_monstros_conjuntos', '0'); else setKills = Math.max(0, parseInt(v, 10) || 0); } catch (_) {}
+const saveSetKills = () => { try { localStorage.setItem('heroi_monstros_conjuntos', String(setKills)); } catch (_) {} };
 let evoKills = 0, evoStage = 0, evoNext = 1, evo = null; const evoQueue = [];
 try { evoKills = Math.max(0, parseInt(localStorage.getItem('heroi_monstros') || '0', 10) || 0); } catch (_) {}
 while (evoStage < 4 && evoKills >= EVO_THR[evoStage]) evoStage++;
 evoNext = evoStage + 1;
-while (setsKnown < 5 && evoKills >= SET_THR[setsKnown]) setsKnown++;      // ja liberados antes: sem aviso
+while (setsKnown < 5 && setKills >= SET_THR[setsKnown]) setsKnown++;      // ja liberados antes: sem aviso
 if (/[?&]conjuntos\b/.test(location.search)) setsTest = true;      // teste rapido: os 5 conjuntos liberados
 if (/[?&]evolucao\b/.test(location.search)) { evoKills = EVO_THR[0] - 1; evoStage = 0; evoNext = 1; }      // teste rapido: o proximo monstro da a 1a evolucao
 const heroRows = (rows) => {
@@ -568,7 +570,8 @@ function syncTouchIcons() { const t = document.getElementById('touch'); if (t) {
 function saveKills() { try { localStorage.setItem('heroi_monstros', String(evoKills)); } catch (_) {} }
 function countKill() {
   evoKills++; if (evoKills % 5 === 0) saveKills();
-  { let so = 0; while (so < 5 && evoKills >= SET_THR[so]) so++; if (so > setsKnown && !setsTest) { setsKnown = so; unlockSet(so - 1); saveKills(); } }      // conjunto de roupa novo
+  setKills++; if (setKills % 5 === 0) saveSetKills();
+  { let so = 0; while (so < 5 && setKills >= SET_THR[so]) so++; if (so > setsKnown && !setsTest) { setsKnown = so; unlockSet(so - 1); saveSetKills(); } }      // conjunto de roupa novo
   if (evoNext <= 4 && evoKills >= EVO_THR[evoNext - 1]) { evoQueue.push(evoNext); evoNext++; saveKills(); }
 }
 const evoWaiting = () => evo !== null && evo.wait;
@@ -660,7 +663,7 @@ let eqBow = 0, eqSword = 0, eqShield = 0, eqHat = 0, eqTunic = 0;
 function ownBow(i) { return i === 0 || (i === 1 && evoStage >= 1); }
 function ownSword(i) { return i === 0 || (i === 1 && evoStage >= 4); }
 function ownShield(i) { return i === 0 || (i === 1 && evoStage >= 4) || (i === 2 && kingGear); }
-const setsOwned = () => { if (setsTest) return 5; let n = 0; while (n < 5 && evoKills >= SET_THR[n]) n++; return n; };
+const setsOwned = () => { if (setsTest) return 5; let n = 0; while (n < 5 && setKills >= SET_THR[n]) n++; return n; };
 function ownHat(i) { return i === 0 || (i === 1 && evoStage >= 2) || (i === 2 && kingGear) || (i >= 3 && i - 3 < setsOwned()); }
 function ownTunic(i) { return i === 0 || (i === 1 && evoStage >= 3) || (i === 2 && kingGear) || (i >= 3 && i - 3 < setsOwned()); }
 function unlockSet(i) {      // conjunto novo: ja vem vestido, com aviso
@@ -1790,7 +1793,7 @@ function boot() {
 window.__jogo = { hero, enemies, rocks, arrows, items, trees, step, render, setPlayMode, spawn, get S() { return S; }, get W() { return W; }, get H() { return H; },
   get st() { return { playMode, calmState, cookState, bossPhase, killsAtMax, deathWait, fireK, onFire: onFire.slice(), bakeTs: bakeTs.slice(), phase, boss }; },
   set(o) { if ('mx' in o) mx = o.mx; if ('my' in o) my = o.my; if ('mouse' in o) mouseDown = o.mouse; if ('k' in o) Object.assign(touchKeys, o.k); if ('killsAtMax' in o) killsAtMax = o.killsAtMax; if ('nextCalm' in o) nextCalm = o.nextCalm; if ('forceLong' in o) forceLong = o.forceLong; },
-  setsTest: { all() { setsTest = true; buildSprites(); buildProps(); }, setKills(n) { evoKills = n; evoStage = 4; evoNext = 5; setsKnown = 0; while (setsKnown < 5 && evoKills >= SET_THR[setsKnown]) setsKnown++; }, equip(i) { eqHat = 3 + i; eqTunic = 3 + i; buildSprites(); buildProps(); }, get info() { return { evoKills, setsKnown, eqHat, eqTunic, owned: setsOwned() }; } },
+  setsTest: { all() { setsTest = true; buildSprites(); buildProps(); }, setKills(n) { setKills = n; setsKnown = 0; while (setsKnown < 5 && setKills >= SET_THR[setsKnown]) setsKnown++; }, equip(i) { eqHat = 3 + i; eqTunic = 3 + i; buildSprites(); buildProps(); }, get info() { return { evoKills, setKills, setsKnown, eqHat, eqTunic, owned: setsOwned() }; } },
   fairyTest: { give() { kingGear = true; fairyState = 1; }, giveSkin() { kingGear = true; fairyState = 1; fairySkin = 1; eqFairy = 1; }, get look() { return eqFairy; }, setKills(n) { kingGear = true; fairyState = 0; fairyKills = n; }, get info() { return { fairyState, fairyKills, ph: fairy.ph, x: fairy.x, y: fairy.y }; } },
   inv: { open() { openInv(); }, tab(n) { invTab = n; renderInv(); }, eat: invEat, get msg() { return invMsg; } },
   doRetry, fireInteract, damageEnemy, startFinalPhase, startPower, get power() { return { powerT, record, nextPower }; }, setRupees(n) { hero.rupees = n; }, setSlimes(n) { slimeKills = n; }, countKill, get evoInfo() { return { evoKills, evoStage, evoNext, waiting: evoWaiting(), stage: evo && evo.stage }; }, forcePower() { powerPending = true; }, get chestInfo() { return { chestKills, chestState, kingGear, chestGo, chestOpenT }; }, setChestKills(n) { chestKills = n; }, get shocks() { return shocks; }, testBoss() { fireX = W / 2; fireY = H / 2; bossPhase = 4; spawnDragon(); return boss; }, get bossInfo() { return { phase: bossPhase, bossT, rewardSpawned, msgT, endStarted, reward: items.filter((i) => i.reward).reduce((s, i) => s + rupeeValue(i.kind), 0), nItems: items.filter((i) => i.reward).length }; } };
