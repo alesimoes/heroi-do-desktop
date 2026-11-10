@@ -2136,9 +2136,8 @@ namespace HeroiPet
             using (SolidBrush core = new SolidBrush(Color.White))
             {
                 float u = S;
-                g.FillRectangle(glow, fx - 2 * u, fy - 2 * u, 4 * u, 4 * u);
-                g.FillRectangle(glow, fx - 3 * u, fy - u, 6 * u, 2 * u);
-                g.FillRectangle(glow, fx - u, fy - 3 * u, 2 * u, 6 * u);
+                g.FillRectangle(glow, fx - 2 * u, fy - u, 4 * u, 2 * u);      // bolinha menor que as asas
+                g.FillRectangle(glow, fx - u, fy - 2 * u, 2 * u, 4 * u);
                 g.FillRectangle(core, fx - u, fy - u, 2 * u, 2 * u);
                 float wy = wf == 0 ? -3 * u : -1 * u;
                 g.FillRectangle(wing, fx - 6 * u, fy + wy - u, 3 * u, 2 * u); g.FillRectangle(wing2, fx - 5 * u, fy + wy, 2 * u, u);
@@ -3993,6 +3992,18 @@ namespace HeroiPet
                             puffs.Add(new Puff { Kind = k % 2, X = r.X + ((float)rnd.NextDouble() - 0.5f) * 14 * S, Y = r.Y + ((float)rnd.NextDouble() - 0.5f) * 14 * S });
                         float ex = hx - r.X, ey = (hy - 6 * S) - r.Y;
                         if (!dead && ex * ex + ey * ey < (16 * S) * (16 * S)) HurtHero(r.X, r.Y, 1f, true);
+                        rocks.RemoveAt(i); continue;
+                    }
+                }
+                if (!r.Fire && !r.Arrow && !r.Homing)      // pedra de octorok: explode depois de 3 s (area de 14 S; o escudo nao protege da explosao)
+                {
+                    r.Life += dt;
+                    if (r.Life >= 3f)
+                    {
+                        for (int k = 0; k < 7; k++)
+                            puffs.Add(new Puff { Kind = k % 2, X = r.X + ((float)rnd.NextDouble() - 0.5f) * 12 * S, Y = r.Y + ((float)rnd.NextDouble() - 0.5f) * 12 * S });
+                        float ex = hx - r.X, ey = (hy - 6 * S) - r.Y;
+                        if (!dead && ex * ex + ey * ey < (14 * S) * (14 * S)) HurtHero(r.X, r.Y, 1f);
                         rocks.RemoveAt(i); continue;
                     }
                 }

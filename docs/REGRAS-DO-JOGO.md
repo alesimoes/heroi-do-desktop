@@ -140,3 +140,5 @@ limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão 
 
 ## Menu de pausa e outros aplicativos
 - O menu (Espaço) fica na mesma camada do herói (no fundo, abaixo dos aplicativos), por cima do herói e dos inimigos. Aplicativos abertos cobrem o menu; com Win+D (área de trabalho) ele sobe junto com o herói.
+
+- Pedras dos octoroks explodem 3 s depois de lançadas (raio 14 S, 1 coração; escudo não protege da explosão).

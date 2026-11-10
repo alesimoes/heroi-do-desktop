@@ -709,7 +709,7 @@ function updateFairy(dt) {
 function drawFairy() {
   if (fairyState !== 1) return;
   const x = fairy.x, y = fairy.y, u = S, wy = Math.floor(time * 16) % 2 === 0 ? -3 * u : -u;
-  rect('#fff5a0', x - 2 * u, y - 2 * u, 4 * u, 4 * u); rect('#fff5a0', x - 3 * u, y - u, 6 * u, 2 * u); rect('#fff5a0', x - u, y - 3 * u, 2 * u, 6 * u); rect('#fff', x - u, y - u, 2 * u, 2 * u);
+  rect('#fff5a0', x - 2 * u, y - u, 4 * u, 2 * u); rect('#fff5a0', x - u, y - 2 * u, 2 * u, 4 * u); rect('#fff', x - u, y - u, 2 * u, 2 * u);
   rect('#bee1ff', x - 6 * u, y + wy - u, 3 * u, 2 * u); rect('#ebf5ff', x - 5 * u, y + wy, 2 * u, u); rect('#bee1ff', x + 3 * u, y + wy - u, 3 * u, 2 * u); rect('#ebf5ff', x + 3 * u, y + wy, 2 * u, u);
 }function updateChest(dt) {
   if (hero.dead || bossPhase !== 0) chestGo = false;      // o bau vale nos dois modos; fica parado durante a luta com o dragao
@@ -1035,6 +1035,14 @@ function drawShocks() {
       if (r.life >= 3) {
         for (let k = 0; k < 7; k++) puffs.push({ kind: k % 2, x: r.x + (rnd() - 0.5) * 14 * S, y: r.y + (rnd() - 0.5) * 14 * S, t: 0 });
         const ex = hero.x - r.x, ey = hero.y - 6 * S - r.y; if (!hero.dead && ex * ex + ey * ey < (16 * S) ** 2) hurtHero(r.x, r.y, 1, true);
+        rocks.splice(i, 1); continue;
+      }
+    }
+    if (!r.fire && !r.arrow && !r.homing) {      // pedra de octorok: explode depois de 3 s (area de 14 S; o escudo nao protege da explosao)
+      r.life = (r.life || 0) + dt;
+      if (r.life >= 3) {
+        for (let k = 0; k < 7; k++) puffs.push({ kind: k % 2, x: r.x + (rnd() - 0.5) * 12 * S, y: r.y + (rnd() - 0.5) * 12 * S, t: 0 });
+        const ex = hero.x - r.x, ey = hero.y - 6 * S - r.y; if (!hero.dead && ex * ex + ey * ey < (14 * S) ** 2) hurtHero(r.x, r.y, 1, false);
         rocks.splice(i, 1); continue;
       }
     }
