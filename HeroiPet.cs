@@ -487,6 +487,22 @@ namespace HeroiPet
             "....KBBBBBBK....",
             "....KKKKKKKK...."
 };
+        // roupa de rei em pixel art: manto vermelho (Q/g) com faixa dourada (C) no pescoco, cinto e barra
+        public static string[] RobeItem = {
+            "...KKKKKKKKKK...",
+            "..KQQCCCCCCQQK..",
+            ".KQQQQCCCCQQQQK.",
+            ".KQQQQQCCQQQQQK.",
+            ".KgQKQQQQQQKQgK.",
+            ".KKKKQQQQQQKKKK.",
+            "....KQQQQQQK....",
+            "....KCCCCCCK....",
+            "....KQQQQQQK....",
+            "...KQQQQQQQQK...",
+            "..KgQQQQQQQQgK..",
+            "..KCCCCCCCCCCK..",
+            "..KKKKKKKKKKKK.."
+        };
         // coroa de ouro em pixel art (C ouro, c ouro escuro, R rubi, U safira)
         public static string[] CrownItem = {
             "......KKKK......",
@@ -1586,7 +1602,8 @@ namespace HeroiPet
             Dictionary<char, Color> gcOv = Art.Ov('H', Color.FromArgb(58, 165, 62)); gcOv['h'] = Color.FromArgb(130, 210, 120); gcOv['g'] = Color.FromArgb(30, 110, 45);
             Dictionary<char, Color> gsOv = Art.Ov('Q', Color.FromArgb(58, 165, 62)); gsOv['h'] = Color.FromArgb(130, 210, 120); gsOv['g'] = Color.FromArgb(30, 110, 45);
             Dictionary<char, Color> rbOv = Art.Ov('Q', Color.FromArgb(190, 35, 60)); rbOv['h'] = Color.FromArgb(235, 100, 120); rbOv['g'] = Color.FromArgb(130, 20, 40);
-            menuSpr[0] = Art.Make(Art.CapItem, S, gcOv); menuSpr[1] = Art.Make(Art.ShirtItem, S, gsOv); menuSpr[2] = Art.Make(Art.ShirtItem, S, rbOv);
+            menuSpr[0] = Art.Make(Art.CapItem, S, gcOv); menuSpr[1] = Art.Make(Art.ShirtItem, S, gsOv); Dictionary<char, Color> rrOv = Art.Ov('Q', Color.FromArgb(190, 35, 60)); rrOv['g'] = Color.FromArgb(130, 20, 40); rrOv['C'] = Color.FromArgb(255, 205, 40);
+            menuSpr[2] = Art.Make(Art.RobeItem, S, rrOv);
             Dictionary<char, Color> crOv = Art.Ov('C', Color.FromArgb(255, 205, 40)); crOv['c'] = Color.FromArgb(215, 150, 20); crOv['R'] = Color.FromArgb(215, 40, 60); crOv['U'] = Color.FromArgb(70, 125, 235);
             menuSpr[3] = Art.Make(Art.CrownItem, S, crOv);
             heroFrontWave = Art.Make(Art.HeroRecolor(Art.HeroFrontWave), S, hov);
