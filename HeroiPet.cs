@@ -2097,12 +2097,12 @@ namespace HeroiPet
             if (fairyCool > 0) { fairyCool -= dt; if (fairyCool <= 0) { fairyCool = 0; fairyReadySaid = false; } }
             if (FairyReady && !fairyReadySaid && !dead) { fairyReadySaid = true; Say("Fadinha pronta: 4"); }
             bool k4 = IsDown(0x34) || IsDown(0x64);      // tecla 4: comanda a fadinha a atacar (so quando ela esta piscando em amarelo)
-            if (k4 && !prevF4 && FairyReady && fairyTarget == null && bossPhase == 0 && !dead)
+            if (((k4 && !prevF4) || !playMode) && FairyReady && fairyTarget == null && bossPhase == 0 && !dead)      // no modo automatico ela ataca sozinha assim que fica pronta; no jogo so com a tecla 4
             {
                 Enemy best = null; float bd2 = float.MaxValue;      // o monstro mais perto do heroi (menos o dragao)
                 foreach (Enemy e in enemies) { if (e.Type == 3) continue; float d = (e.X - hx) * (e.X - hx) + (e.Y - hy) * (e.Y - hy); if (d < bd2) { bd2 = d; best = e; } }
                 if (best != null) { fairyTarget = best; fairyPh = 1; fairyOrbit = 0; fairyCool = 30f; }
-                else Say("Sem alvo");
+                else if (playMode) Say("Sem alvo");
             }
             prevF4 = k4;
             if (fairyTarget != null && !enemies.Contains(fairyTarget)) { fairyTarget = null; fairyPh = 0; }
