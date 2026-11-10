@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 10/11/2026 — Arco de cristal e inventário
+- **Arco de cristal:** as duas flechas saem **uma seguida da outra** (0,09 s), no mesmo rumo da mira (antes saíam em V). Nome e descrição do item no inventário agora ficam em **duas linhas**.
+
 ## 10/11/2026 — Fadinha de estrela ataca o dobro
 - Com a **fadinha de estrela** equipada ela ataca **o dobro de vezes**: **40%** dos monstros que nascem (as outras: 20%) e fica **pronta a cada 15 s** (as outras: 30 s), então também ataca mais no automático e pela tecla 4.
 

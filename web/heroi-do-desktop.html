@@ -708,7 +708,7 @@ function unlockSet(i) {      // conjunto novo: ja vem vestido, com aviso
 }
 const ownFairy = (i) => (i === 0 && fairyState === 1) || (i >= 1 && fairySkin >= i);
 function owns(cat, id) { return [ownBow, ownSword, ownShield, ownHat, ownTunic, ownFairy][cat](id); }
-const fairyRate = () => (eqFairy === 3 ? 2 : 1);      // a fadinha de ESTRELA ataca o DOBRO de vezes: 40% dos monstros marcados e pronta a cada 15 s (as outras: 20% e 30 s)
+const fairyRate = () => (eqFairy === 3 ? 2 : 1);      // a fadinha de ESTRELA (3) ataca o DOBRO de vezes: 40% dos monstros marcados e pronta a cada 15 s (as outras: 20% e 30 s)
 function getEq(cat) { return [eqBow, eqSword, eqShield, eqHat, eqTunic, eqFairy][cat]; }
 function bestEquip() { eqBow = evoStage >= 1 ? 1 : 0; eqSword = evoStage >= 4 ? 1 : 0; eqShield = kingGear ? 2 : (evoStage >= 4 ? 1 : 0); eqHat = kingGear ? 2 : (evoStage >= 2 ? 1 : 0); eqTunic = kingGear ? 2 : (evoStage >= 3 ? 1 : 0); }
 function validateEquip() { if (!ownBow(eqBow)) eqBow = 0; if (!ownSword(eqSword)) eqSword = 0; if (!ownShield(eqShield)) eqShield = 0; if (!ownHat(eqHat)) eqHat = 0; if (!ownTunic(eqTunic)) eqTunic = 0; }
