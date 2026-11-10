@@ -690,7 +690,7 @@ function unlockWeapon(i) {      // arma nova: ja vem equipada, com aviso
   validateEquip(); saveEquip(); showNewItem(); say('Arma nova: ' + WPN_NAME[i] + '!');
   for (let k = 0; k < 10; k++) puffs.push({ kind: k % 2, x: hero.x + (rnd() - 0.5) * 20 * S, y: hero.y - rnd() * 18 * S, t: 0 });
 }
-let crystalQ = -1;      // arco de cristal: a 2a flecha sai logo depois da 1a, no mesmo rumo
+let crystalQ = -1;      // arco de cristal: a 2a flecha sai 0,09 s depois da 1a, no mesmo rumo
 function fireArrows(sx, sy) {
   if (eqBow === 2) { arrows.push({ x: sx, y: sy, vx: hero.aimX * 210 * S, vy: hero.aimY * 210 * S, crystal: true }); crystalQ = 0.09; }
   else arrows.push({ x: sx, y: sy, vx: hero.aimX * 210 * S, vy: hero.aimY * 210 * S });

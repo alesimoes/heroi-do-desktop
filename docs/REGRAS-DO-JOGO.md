@@ -187,3 +187,7 @@ limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão 
 - **Espada de chamas:** lâmina laranja ondulada com miolo amarelo e guarda vermelha; acerta aos 0,07 s, dura 0,20 s, recarga 0,08 s; **450** de dano.
 - **Arco de cristal:** turquesa com joia laranja; **2 flechas** em leque (±0,11 rad), **100** de dano cada, ponta de cristal.
 - Dano das armas: espada 150 · Espada Mestre 300 · marreta 600 · espada de chamas 450 · flecha 50 (×2 prateado/cristal). Teste: `--armas` / `?armas`.
+
+## Fase 2 (depois do Dragão)
+- Começa sozinha depois dos créditos do Dragão (ou pelo atalho `--fase2` / `?fase2` / item de menu). 7 níveis a cada **40 rupias** (HUD `F2 NV n`); monstros em tons sombrios com **2× vida** (octorok 400, morcego/gelatina 100, bokoblin 200, cavaleiro 500) e limite de monstros ×1,3; a onda final do NV 7 (2 gelatinas + 5 cavaleiros) e a fogueira de cura acontecem como na fase 1.
+- **Vilão: Feiticeiro Sombrio** (8000 de vida, tipo 7). Flutua a ~75-115 S do herói (velocidade 22 S/s; 30 na fúria) e a cada 2,1-2,7 s (1,3-1,9 na fúria) sorteia: **anel de 12 esferas** (16 na fúria) · **tiro mirado de 3 esferas** (5 na fúria) · **teleporte** (some 0,5 s e reaparece perto do herói) · **invoca 2 gelatinas** (máx. 4 vivas). Esferas: 1 coração, o escudo bloqueia, a espada corta. Fúria com metade da vida. Ao morrer: 1000 rupias, mensagem **VOCÊ VENCEU A FASE 2!**, créditos e volta ao automático (a fase 2 termina).

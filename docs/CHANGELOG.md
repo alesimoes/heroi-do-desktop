@@ -1,5 +1,10 @@
 # Changelog (resumo)
 
+## 10/11/2026 — FASE 2 com vilão no fim
+- Depois de vencer o **Dragão** (e os créditos) o jogo agora **continua na Fase 2** (antes voltava ao automático): mais **7 níveis** (agora a cada **40 rupias**), monstros **sombrios** (tons roxos) com o **dobro de vida** e um pouco mais numerosos, e no fim o **vilão: Feiticeiro Sombrio** (8000 de vida). Ele flutua em volta do herói, lança **anéis de esferas**, **tiros mirados em leque**, **teleporta** e **invoca gelatinas**; com metade da vida entra em **fúria** (mais rápido, mais esferas). Ao vencê-lo: 1000 rupias, "VOCÊ VENCEU A FASE 2!", créditos e volta ao automático.
+- **Atalho:** `Atalho: ir para a Fase 2` no menu da bandeja / botão no menu da página, `--fase2` (desktop), `?fase2` (web): começa a Fase 2 direto no nível 1 (HUD mostra "F2 NV n").
+- Correção na web: um comentário `//` na linha do inventário (descrição em duas linhas) estava engolindo o resto da linha e quebrava o script; foi arrumado.
+
 ## 10/11/2026 — Arcos refeitos em pixel art
 - Todos os arcos (madeira, metal, cristal) foram redesenhados em **pixel art**, iguais no jogo, no menu de pausa, no inventário e no item grande: curva de quadradinhos com contorno escuro, mão no meio do arco e **corda que não entra mais no rosto**. Barriga do arco sempre para o lado do alvo.
 
