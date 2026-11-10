@@ -729,7 +729,7 @@ namespace HeroiPet
             {
                 if (r.Length == 6)      // brilhinho da fadinha: quadradinho pequeno e meio transparente (r[3] = opacidade, r[4] = 1 se a fadinha e rosa)
                 {
-                    Color sc = r[4] > 0 ? Color.FromArgb((int)r[3], 245, 130, 195) : Color.FromArgb((int)r[3], 255, 245, 160);
+                    Color sc = Color.FromArgb((int)r[3], 90, 175, 255);      // brilhinhos azuis
                     using (SolidBrush sb = new SolidBrush(sc)) gfx.FillRectangle(sb, r[0], r[1], r[2], r[2]);
                 }
                 else if (r.Length > 4)      // onda de choque do dragao: anel amarelo transparente
@@ -1192,6 +1192,7 @@ namespace HeroiPet
         }
         public void EquipItem(int cat, int id)      // cat: 0 arco, 1 espada, 2 escudo, 3 gorro, 4 roupa
         {
+            if (cat == 5) { if (Owns(5, id)) { eqFairy = id; SaveFairy(); } return; }      // fadinha: so troca a aparencia
             if (cat == 0 && OwnBow(id)) eqBow = id; else if (cat == 1 && OwnSword(id)) eqSword = id; else if (cat == 2 && OwnShield(id)) eqShield = id;
             else if (cat == 3 && OwnHat(id)) eqHat = id; else if (cat == 4 && OwnTunic(id)) eqTunic = id; else return;
             SaveEquip(); BuildSprites();
@@ -1210,11 +1211,11 @@ namespace HeroiPet
         void CloseMenu() { if (MenuOpen) { try { menuForm.Close(); } catch { } } menuForm = null; }
         public bool Owns(int cat, int id)
         {
-            switch (cat) { case 0: return OwnBow(id); case 1: return OwnSword(id); case 2: return OwnShield(id); case 3: return OwnHat(id); default: return OwnTunic(id); }
+            switch (cat) { case 0: return OwnBow(id); case 1: return OwnSword(id); case 2: return OwnShield(id); case 3: return OwnHat(id); case 4: return OwnTunic(id); default: return (id == 0 && fairyState == 1) || (id == 1 && fairySkin == 1); }
         }
         public int Equipped(int cat)
         {
-            switch (cat) { case 0: return eqBow; case 1: return eqSword; case 2: return eqShield; case 3: return eqHat; default: return eqTunic; }
+            switch (cat) { case 0: return eqBow; case 1: return eqSword; case 2: return eqShield; case 3: return eqHat; case 4: return eqTunic; default: return eqFairy; }
         }
         public int AppleCount { get { return apples; } }
         public float HeartsNow { get { return hp; } }
@@ -1270,6 +1271,7 @@ namespace HeroiPet
                 g.TranslateTransform(cx, groundY); g.ScaleTransform(k, k);
                 g.InterpolationMode = InterpolationMode.NearestNeighbor; g.PixelOffsetMode = PixelOffsetMode.Half; g.SmoothingMode = SmoothingMode.None;
                 DrawHero(g);
+                if (fairyState == 1) DrawFairyShape(g, 9 * S, -25 * S, S, eqFairy, false, ((int)(time * 16)) % 2 == 0);      // a fadinha aparece ao lado da cabeca, com a aparencia escolhida
                 g.Restore(st);
             }
             finally { pickT = spt; aimX = sax; aimY = say; bowT = sbt; hx = shx; hy = shy; hface = shf; walking = sw; attacking = sa; bowing = sb; dead = sd; powerT = sp; inv = si; playPickT = spk; playEatT = sed; eatRaw = ser; calmState = sc; cookState = sck; previewMode = false; previewBare = false; }
@@ -1296,6 +1298,7 @@ namespace HeroiPet
                 else if (id == 1) DrawEvoItem(g, 2, cx, cy, u * 0.85f);
                 else DrawCrownItem(g, cx, cy, u * 0.9f);
             }
+            else if (cat == 5) DrawFairyShape(g, cx, cy, u * 2.4f, id, false, true);
             else
             {
                 if (id == 0) DrawItemSpr(g, menuSpr[1], cx, cy, u * 0.85f);
@@ -1375,10 +1378,10 @@ namespace HeroiPet
             struct Hit { public Rectangle R; public int Kind, A, B; }      // Kind 0 aba | 1 item | 2 fechar
             static readonly string[][] Names = {
                 new string[] { "Arco de madeira", "Arco de metal" }, new string[] { "Espada comum", "Espada Mestre" }, new string[] { "Escudo azul", "Escudo vermelho", "Escudo do rei" },
-                new string[] { "Gorro verde", "Gorro roxo", "Coroa de ouro" }, new string[] { "Túnica verde", "Blusa azul", "Roupa de rei" } };
+                new string[] { "Gorro verde", "Gorro roxo", "Coroa de ouro" }, new string[] { "Túnica verde", "Blusa azul", "Roupa de rei" }, new string[] { "Fadinha", "Fadinha rosa" } };
             static readonly string[][] Descs = {
                 new string[] { "O arco de sempre.", "Flechas com o dobro de dano." }, new string[] { "A espada de sempre.", "Dobro de dano." }, new string[] { "Escudo comum.", "Escudo vermelho do herói.", "Escudo circular do tesouro do rei." },
-                new string[] { "O gorro de sempre.", "Gorro roxo da evolução.", "Coroa de ouro do tesouro do rei." }, new string[] { "A túnica de sempre.", "Blusa azul da evolução.", "Manto vermelho, calça marrom e sapatos roxos." } };
+                new string[] { "O gorro de sempre.", "Gorro roxo da evolução.", "Coroa de ouro do tesouro do rei." }, new string[] { "A túnica de sempre.", "Blusa azul da evolução.", "Manto vermelho, calça marrom e sapatos roxos." }, new string[] { "A fadinha ajudante.", "Corpo rosa e asas azul escuro (500 monstros depois da fadinha)." } };
             static readonly string[] TabNames = { "Armas", "Roupas", "Comida" };
             PetForm p; float sc; int tab = -1, hover = -1; bool showBow;      // showBow: o heroi do exemplo segura o arco (ao clicar num arco) ou espada e escudo (ao clicar neles)
             List<Hit> hits = new List<Hit>(); string msg;
@@ -1476,9 +1479,10 @@ namespace HeroiPet
                     float k = Math.Max(2f, (float)Math.Floor((pv.Height - 150 * sc) / (30f * p.S)));
                     p.DrawHeroPreview(g, pv.X + pv.Width / 2f, pv.Y + pv.Height * 0.62f, k, showBow, tab == 1);
                     g.SmoothingMode = SmoothingMode.AntiAlias; g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-                    float ty = pv.Bottom - 118 * sc;
-                    string[] cats = { "Arco", "Espada", "Escudo", "Gorro", "Roupa" };
-                    for (int i = 0; i < 5; i++) { g.DrawString(cats[i] + ": " + Names[i][p.Equipped(i)], sf, Brushes.White, pv.X + 16 * sc, ty); ty += 21 * sc; }
+                    int nc = p.Owns(5, 0) ? 6 : 5;      // a linha da fadinha so aparece depois de ganhar a fadinha
+                    float ty = pv.Bottom - (nc * 21 + 13) * sc;
+                    string[] cats = { "Arco", "Espada", "Escudo", "Gorro", "Roupa", "Fadinha" };
+                    for (int i = 0; i < nc; i++) { g.DrawString(cats[i] + ": " + Names[i][p.Equipped(i)], sf, Brushes.White, pv.X + 16 * sc, ty); ty += 21 * sc; }
                     // abas (fechadas ate serem escolhidas)
                     int x0 = (int)(420 * sc), th = (int)(50 * sc), gapT = (int)(10 * sc), tw = (int)((W - x0 - pad - 60 * sc - 2 * gapT) / 3);
                     for (int i = 0; i < 3; i++)
@@ -1502,7 +1506,7 @@ namespace HeroiPet
                     {
                         int y = area.Y;
                         if (tab == 0) { Section(g, "ARCOS", 0, ref y, area, hf, nf); Section(g, "ESPADAS", 1, ref y, area, hf, nf); Section(g, "ESCUDOS", 2, ref y, area, hf, nf); }
-                        else if (tab == 1) { Section(g, "GORROS", 3, ref y, area, hf, nf); Section(g, "ROUPAS", 4, ref y, area, hf, nf); }
+                        else if (tab == 1) { Section(g, "GORROS", 3, ref y, area, hf, nf); Section(g, "ROUPAS", 4, ref y, area, hf, nf); if (p.Owns(5, 0)) Section(g, "FADINHA", 5, ref y, area, hf, nf); }
                         else
                         {
                             g.DrawString("COMIDA", hf, Brushes.Gold, area.X, y); y += (int)(26 * sc);
@@ -2058,7 +2062,7 @@ namespace HeroiPet
         // monstros que aparecem: voa ate o monstro, gira rapido em volta da cabeca dele (um pouco acima) e ele cai. Vale nos dois modos.
         const int FairyKillsNeeded = 50;
         const int FairySkinKillsNeeded = 500;      // 500 monstros depois da fadinha: asas azul escuro com rosa
-        int fairyKills2, fairySkin;
+        int fairyKills2, fairySkin, eqFairy;      // eqFairy: aparencia escolhida no inventario (0 normal | 1 rosa)
         int fairyKills, fairyState, fairyPh;      // fairyState: 0 contando | 1 tem a fadinha;  fairyPh: 0 segue o heroi | 1 voa ate o alvo | 2 gira em volta
         float fx, fy, fairyT, fairyOrbit, fairyTrail, fairyCool = 30f; Enemy fairyTarget; bool prevF4, fairyReadySaid;      // fairyCool: a cada 30 s a fadinha fica pronta (pisca amarela) e ataca por comando (tecla 4)
         bool FairyReady { get { return fairyState == 1 && fairyCool <= 0; } }
@@ -2070,12 +2074,15 @@ namespace HeroiPet
             if (fairyState == 0 && !kingGear) fairyKills = 0;
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--fada") >= 0) { kingGear = true; fairyState = 1; }
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--fada2") >= 0) { kingGear = true; fairyState = 1; fairySkin = 1; }      // teste rapido: fadinha com as asas azul escuro e rosa      // teste rapido: ja com a fadinha
+            eqFairy = fairySkin;
+            if (Environment.GetEnvironmentVariable("HEROI_TESTE") == null) try { using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"Software\HeroiDoDesktop")) { object v = k == null ? null : k.GetValue("FadaLook"); if (v != null) eqFairy = Math.Max(0, Math.Min(1, Convert.ToInt32(v))); } } catch { }
+            if (eqFairy == 1 && fairySkin == 0) eqFairy = 0;
             fx = W / 2f; fy = H / 2f;
         }
         void SaveFairy()
         {
             if (Environment.GetEnvironmentVariable("HEROI_TESTE") != null) return;
-            try { using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"Software\HeroiDoDesktop")) { k.SetValue("MonstrosFada", fairyKills); k.SetValue("Fada", fairyState); k.SetValue("MonstrosFada2", fairyKills2); k.SetValue("FadaSkin", fairySkin); } } catch { }
+            try { using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"Software\HeroiDoDesktop")) { k.SetValue("MonstrosFada", fairyKills); k.SetValue("Fada", fairyState); k.SetValue("MonstrosFada2", fairyKills2); k.SetValue("FadaSkin", fairySkin); k.SetValue("FadaLook", eqFairy); } } catch { }
         }
         void CountFairyKill()
         {
@@ -2083,7 +2090,7 @@ namespace HeroiPet
             {
                 fairyKills2++;
                 if (fairyKills2 % 25 == 0) SaveFairy();
-                if (fairyKills2 >= FairySkinKillsNeeded) { fairySkin = 1; SaveFairy(); Say("Fadinha nova!"); for (int k = 0; k < 10; k++) puffs.Add(new Puff { Kind = 1, X = fx + ((float)rnd.NextDouble() - 0.5f) * 24 * S, Y = fy + ((float)rnd.NextDouble() - 0.5f) * 16 * S }); }
+                if (fairyKills2 >= FairySkinKillsNeeded) { fairySkin = 1; eqFairy = 1; SaveFairy(); Say("Fadinha nova!"); for (int k = 0; k < 10; k++) puffs.Add(new Puff { Kind = 1, X = fx + ((float)rnd.NextDouble() - 0.5f) * 24 * S, Y = fy + ((float)rnd.NextDouble() - 0.5f) * 16 * S }); }
                 return;
             }
             if (fairyState != 0 || !kingGear) return;      // a contagem so comeca depois da roupa de rei
@@ -2151,31 +2158,34 @@ namespace HeroiPet
             }
             fx = Math.Max(3 * S, Math.Min(W - 3 * S, fx)); fy = Math.Max(3 * S, Math.Min(H - 3 * S, fy));
             fairyTrail -= dt;
-            if (fairyTrail <= 0 && (Math.Abs(fx - oldX) + Math.Abs(fy - oldY)) > 1.5f * S) { fairyTrail = 0.07f; fairySparks.Add(new float[] { fx + ((float)rnd.NextDouble() - 0.5f) * 3 * S, fy + 1 * S + (float)rnd.NextDouble() * 2 * S, 0f }); }      // brilhinhos pequenos que somem
+            if (fairyTrail <= 0 && (Math.Abs(fx - oldX) + Math.Abs(fy - oldY)) > 1.5f * S) { fairyTrail = FairyReady ? 0.04f : 0.07f; fairySparks.Add(new float[] { fx + ((float)rnd.NextDouble() - 0.5f) * 3 * S, fy + 1 * S + (float)rnd.NextDouble() * 2 * S, 0f }); }      // pronta: mais brilhinhos      // brilhinhos pequenos que somem
             for (int si = fairySparks.Count - 1; si >= 0; si--) { fairySparks[si][2] += dt; if (fairySparks[si][2] > 0.55f) fairySparks.RemoveAt(si); }
         }
         List<float[]> fairySparks = new List<float[]>();      // brilhinhos da fadinha: x, y, idade
         void DrawFairy(Graphics g)
         {
             if (fairyState != 1) return;
-            foreach (float[] sp in fairySparks) { float q = 1f - sp[2] / 0.55f; shadowList.Add(new float[] { sp[0], sp[1] + sp[2] * 6 * S, S * 1f, 150f * q, fairySkin == 1 ? 1f : 0f, 0f }); }      // camada com transparencia real, abaixo do heroi
-            int wf = ((int)(time * 16)) % 2;      // asas batendo
+            foreach (float[] sp in fairySparks) { float q = 1f - sp[2] / 0.55f; shadowList.Add(new float[] { sp[0], sp[1] + sp[2] * 6 * S, S * 1f, 150f * q, eqFairy == 1 ? 1f : 0f, 0f }); }      // camada com transparencia real, abaixo do heroi
             bool hot = FairyReady && ((int)(time * 7)) % 2 == 0;      // pronta: pisca e fica mais amarela
-            using (SolidBrush glow = new SolidBrush(hot ? Color.FromArgb(255, 205, 20) : (fairySkin == 1 ? Color.FromArgb(245, 130, 195) : Color.FromArgb(255, 245, 160))))      // aparencia nova: corpo rosa
-            using (SolidBrush wing = new SolidBrush(fairySkin == 1 ? Color.FromArgb(40, 50, 150) : Color.FromArgb(190, 225, 255)))      // aparencia nova: azul escuro
-            using (SolidBrush wing2 = new SolidBrush(fairySkin == 1 ? Color.FromArgb(70, 85, 190) : Color.FromArgb(235, 245, 255)))      // ... asas azul escuro (meio um tom mais claro)
-            using (SolidBrush core = new SolidBrush(hot ? Color.FromArgb(255, 255, 110) : (fairySkin == 1 ? Color.FromArgb(255, 225, 240) : Color.White)))
+            DrawFairyShape(g, fx, fy, S, eqFairy, hot, ((int)(time * 16)) % 2 == 0);
+        }
+        // desenho da fadinha (look 0 normal | 1 rosa com asas azul escuro); usado no jogo, no inventario e nos icones
+        void DrawFairyShape(Graphics g, float x, float y, float u, int look, bool hot, bool flap)
+        {
+            bool pk = look == 1;
+            using (SolidBrush glow = new SolidBrush(hot ? Color.FromArgb(255, 205, 20) : (pk ? Color.FromArgb(245, 130, 195) : Color.FromArgb(255, 245, 160))))
+            using (SolidBrush wing = new SolidBrush(pk ? Color.FromArgb(40, 50, 150) : Color.FromArgb(190, 225, 255)))
+            using (SolidBrush wing2 = new SolidBrush(pk ? Color.FromArgb(70, 85, 190) : Color.FromArgb(235, 245, 255)))
+            using (SolidBrush core = new SolidBrush(hot ? Color.FromArgb(255, 255, 110) : (pk ? Color.FromArgb(255, 225, 240) : Color.White)))
             {
-                float u = S;
-                g.FillRectangle(glow, fx - 2 * u, fy - u, 4 * u, 2 * u);      // bolinha menor que as asas
-                g.FillRectangle(glow, fx - u, fy - 2 * u, 2 * u, 4 * u);
-                g.FillRectangle(core, fx - u, fy - u, 2 * u, 2 * u);
-                float wy = wf == 0 ? -3 * u : -1 * u;
-                g.FillRectangle(wing, fx - 6 * u, fy + wy - u, 3 * u, 2 * u); g.FillRectangle(wing2, fx - 5 * u, fy + wy, 2 * u, u);
-                g.FillRectangle(wing, fx + 3 * u, fy + wy - u, 3 * u, 2 * u); g.FillRectangle(wing2, fx + 3 * u, fy + wy, 2 * u, u);
+                g.FillRectangle(glow, x - 2 * u, y - u, 4 * u, 2 * u);      // bolinha menor que as asas
+                g.FillRectangle(glow, x - u, y - 2 * u, 2 * u, 4 * u);
+                g.FillRectangle(core, x - u, y - u, 2 * u, 2 * u);
+                float wy = flap ? -3 * u : -1 * u;
+                g.FillRectangle(wing, x - 6 * u, y + wy - u, 3 * u, 2 * u); g.FillRectangle(wing2, x - 5 * u, y + wy, 2 * u, u);
+                g.FillRectangle(wing, x + 3 * u, y + wy - u, 3 * u, 2 * u); g.FillRectangle(wing2, x + 3 * u, y + wy, 2 * u, u);
             }
         }
-
         void UpdateChest(float dt)
         {
             if (dead || bossPhase != 0) chestGo = false;      // o bau vale nos dois modos; fica parado durante a luta com o dragao

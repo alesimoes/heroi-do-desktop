@@ -646,8 +646,9 @@ function ownSword(i) { return i === 0 || (i === 1 && evoStage >= 4); }
 function ownShield(i) { return i === 0 || (i === 1 && evoStage >= 4) || (i === 2 && kingGear); }
 function ownHat(i) { return i === 0 || (i === 1 && evoStage >= 2) || (i === 2 && kingGear); }
 function ownTunic(i) { return i === 0 || (i === 1 && evoStage >= 3) || (i === 2 && kingGear); }
-function owns(cat, id) { return [ownBow, ownSword, ownShield, ownHat, ownTunic][cat](id); }
-function getEq(cat) { return [eqBow, eqSword, eqShield, eqHat, eqTunic][cat]; }
+const ownFairy = (i) => (i === 0 && fairyState === 1) || (i === 1 && fairySkin === 1);
+function owns(cat, id) { return [ownBow, ownSword, ownShield, ownHat, ownTunic, ownFairy][cat](id); }
+function getEq(cat) { return [eqBow, eqSword, eqShield, eqHat, eqTunic, eqFairy][cat]; }
 function bestEquip() { eqBow = evoStage >= 1 ? 1 : 0; eqSword = evoStage >= 4 ? 1 : 0; eqShield = kingGear ? 2 : (evoStage >= 4 ? 1 : 0); eqHat = kingGear ? 2 : (evoStage >= 2 ? 1 : 0); eqTunic = kingGear ? 2 : (evoStage >= 3 ? 1 : 0); }
 function validateEquip() { if (!ownBow(eqBow)) eqBow = 0; if (!ownSword(eqSword)) eqSword = 0; if (!ownShield(eqShield)) eqShield = 0; if (!ownHat(eqHat)) eqHat = 0; if (!ownTunic(eqTunic)) eqTunic = 0; }
 function saveEquip() { try { localStorage.setItem('heroi_equip', [eqBow, eqSword, eqShield, eqHat, eqTunic].join(',')); } catch (_) {} }
@@ -673,16 +674,18 @@ function chestTap() { if (fairyState === 1 && fairy.cool <= 0 && Math.hypot(mx -
    que aparecem: voa ate o monstro, gira rapido em volta da cabeca dele (um pouco acima) e ele cai. Vale nos dois modos. */
 const FAIRY_NEEDED = 50;
 const FAIRY_SKIN_NEEDED = 500;      // 500 monstros depois da fadinha: asas azul escuro com rosa
-let fairyKills2 = 0, fairySkin = 0, fairyKills = 0, fairyState = 0; const fairy = { x: 0, y: 0, t: 0, orbit: 0, trail: 0, ph: 0, target: null, cool: 30, said: false, prev4: false };      // fairyState: 0 contando | 1 tem a fadinha;  ph: 0 segue | 1 voa ate o alvo | 2 gira em volta
+let eqFairy = 0, fairyKills2 = 0, fairySkin = 0, fairyKills = 0, fairyState = 0; const fairy = { x: 0, y: 0, t: 0, orbit: 0, trail: 0, ph: 0, target: null, cool: 30, said: false, prev4: false };      // fairyState: 0 contando | 1 tem a fadinha;  ph: 0 segue | 1 voa ate o alvo | 2 gira em volta
 try { fairyKills = Math.max(0, parseInt(localStorage.getItem('heroi_monstros_fada') || '0', 10) || 0); fairyState = Math.max(0, Math.min(1, parseInt(localStorage.getItem('heroi_fada') || '0', 10) || 0)); fairyKills2 = Math.max(0, parseInt(localStorage.getItem('heroi_monstros_fada2') || '0', 10) || 0); fairySkin = Math.max(0, Math.min(1, parseInt(localStorage.getItem('heroi_fada_skin') || '0', 10) || 0)); } catch (_) {}
 if (fairyState === 0 && !kingGear) fairyKills = 0;
 if (/[?&]fada\b/.test(location.search)) { kingGear = true; fairyState = 1; }
-if (/[?&]fada2\b/.test(location.search)) { kingGear = true; fairyState = 1; fairySkin = 1; }      // teste rapido: ja com a fadinha
-function saveFairy() { try { localStorage.setItem('heroi_monstros_fada', String(fairyKills)); localStorage.setItem('heroi_fada', String(fairyState)); localStorage.setItem('heroi_monstros_fada2', String(fairyKills2)); localStorage.setItem('heroi_fada_skin', String(fairySkin)); } catch (_) {} }
+if (/[?&]fada2\b/.test(location.search)) { kingGear = true; fairyState = 1; fairySkin = 1; }
+eqFairy = fairySkin; try { const lk = localStorage.getItem('heroi_fada_look'); if (lk !== null && !/[?&]fada2\b/.test(location.search)) eqFairy = Math.max(0, Math.min(1, parseInt(lk, 10) || 0)); } catch (_) {}
+if (eqFairy === 1 && fairySkin === 0) eqFairy = 0;      // aparencia escolhida no inventario (0 normal | 1 rosa)      // teste rapido: ja com a fadinha
+function saveFairy() { try { localStorage.setItem('heroi_monstros_fada', String(fairyKills)); localStorage.setItem('heroi_fada', String(fairyState)); localStorage.setItem('heroi_monstros_fada2', String(fairyKills2)); localStorage.setItem('heroi_fada_skin', String(fairySkin)); localStorage.setItem('heroi_fada_look', String(eqFairy)); } catch (_) {} }
 function countFairyKill() {
   if (fairyState === 1 && fairySkin === 0) {      // depois da fadinha: mais 500 monstros dao a aparencia nova (asas azul escuro e rosa)
     fairyKills2++; if (fairyKills2 % 25 === 0) saveFairy();
-    if (fairyKills2 >= FAIRY_SKIN_NEEDED) { fairySkin = 1; saveFairy(); say('Fadinha nova!'); for (let k = 0; k < 10; k++) puffs.push({ kind: 1, x: fairy.x + (rnd() - 0.5) * 24 * S, y: fairy.y + (rnd() - 0.5) * 16 * S, t: 0 }); }
+    if (fairyKills2 >= FAIRY_SKIN_NEEDED) { fairySkin = 1; eqFairy = 1; saveFairy(); say('Fadinha nova!'); for (let k = 0; k < 10; k++) puffs.push({ kind: 1, x: fairy.x + (rnd() - 0.5) * 24 * S, y: fairy.y + (rnd() - 0.5) * 16 * S, t: 0 }); }
     return;
   }
   if (fairyState !== 0 || !kingGear) return;      // a contagem so comeca depois da roupa de rei
@@ -721,18 +724,20 @@ function updateFairy(dt) {
     }
   }
   F.x = Math.max(3 * S, Math.min(W - 3 * S, F.x)); F.y = Math.max(3 * S, Math.min(H - 3 * S, F.y));
-  F.trail -= dt; if (F.trail <= 0 && Math.abs(F.x - ox) + Math.abs(F.y - oy) > 1.5 * S) { F.trail = 0.07; fairySparks.push({ x: F.x + (rnd() - 0.5) * 3 * S, y: F.y + S + rnd() * 2 * S, a: 0 }); }      // brilhinhos pequenos e meio transparentes
+  F.trail -= dt; if (F.trail <= 0 && Math.abs(F.x - ox) + Math.abs(F.y - oy) > 1.5 * S) { F.trail = F.cool <= 0 ? 0.04 : 0.07; fairySparks.push({ x: F.x + (rnd() - 0.5) * 3 * S, y: F.y + S + rnd() * 2 * S, a: 0 }); }      // brilhinhos pequenos e meio transparentes (rosa na fantasia rosa; somem em 0,55 s)
   for (let i = fairySparks.length - 1; i >= 0; i--) { fairySparks[i].a += dt; if (fairySparks[i].a > 0.55) fairySparks.splice(i, 1); }
 }
 const fairySparks = [];
+function drawFairyShape(x, y, u, look, hot, flap) {      // look 0 normal | 1 rosa com asas azul escuro; usado no jogo, no inventario e nos icones
+  const pk = look === 1, wy = flap ? -3 * u : -u;
+  rect(hot ? '#ffcd14' : (pk ? '#f582c3' : '#fff5a0'), x - 2 * u, y - u, 4 * u, 2 * u); rect(hot ? '#ffcd14' : (pk ? '#f582c3' : '#fff5a0'), x - u, y - 2 * u, 2 * u, 4 * u); rect(hot ? '#ffff6e' : (pk ? '#ffe1f0' : '#fff'), x - u, y - u, 2 * u, 2 * u);
+  const wc = pk ? '#283296' : '#bee1ff', wc2 = pk ? '#4655be' : '#ebf5ff';
+  rect(wc, x - 6 * u, y + wy - u, 3 * u, 2 * u); rect(wc2, x - 5 * u, y + wy, 2 * u, u); rect(wc, x + 3 * u, y + wy - u, 3 * u, 2 * u); rect(wc2, x + 3 * u, y + wy, 2 * u, u);
+}
 function drawFairy() {
   if (fairyState !== 1) return;
-  for (const sp of fairySparks) { const q = 1 - sp.a / 0.55; ctx.globalAlpha = 0.6 * q; rect(fairySkin === 1 ? '#f582c3' : '#fff5a0', sp.x, sp.y + sp.a * 6 * S, S, S); } ctx.globalAlpha = 1;
-  const x = fairy.x, y = fairy.y, u = S, wy = Math.floor(time * 16) % 2 === 0 ? -3 * u : -u, hot = fairy.cool <= 0 && Math.floor(time * 7) % 2 === 0, gc = hot ? '#ffcd14' : (fairySkin === 1 ? '#f582c3' : '#fff5a0');      // pronta: pisca e fica mais amarela
-  rect(gc, x - 2 * u, y - u, 4 * u, 2 * u); rect(gc, x - u, y - 2 * u, 2 * u, 4 * u); rect(hot ? '#ffff6e' : (fairySkin === 1 ? '#ffe1f0' : '#fff'), x - u, y - u, 2 * u, 2 * u);
-  const wc = fairySkin === 1 ? '#283296' : '#bee1ff', wc2 = fairySkin === 1 ? '#4655be' : '#ebf5ff';      // aparencia nova: corpo rosa e asas azul escuro
-  rect(wc, x - 6 * u, y + wy - u, 3 * u, 2 * u); rect(wc2, x - 5 * u, y + wy, 2 * u, u); rect(wc, x + 3 * u, y + wy - u, 3 * u, 2 * u); rect(wc2, x + 3 * u, y + wy, 2 * u, u);
-}function updateChest(dt) {
+  for (const sp of fairySparks) { const q = 1 - sp.a / 0.55; ctx.globalAlpha = 0.6 * q; rect('#5aafff', sp.x, sp.y + sp.a * 6 * S, S, S); } ctx.globalAlpha = 1;
+  drawFairyShape(fairy.x, fairy.y, S, eqFairy, fairy.cool <= 0 && Math.floor(time * 7) % 2 === 0, Math.floor(time * 16) % 2 === 0);}function updateChest(dt) {
   if (hero.dead || bossPhase !== 0) chestGo = false;      // o bau vale nos dois modos; fica parado durante a luta com o dragao
   if (chestState === 1 && chestOpenT <= 0 && bossPhase === 0) { const k4 = keys.has('Digit4') || keys.has('Numpad4'); if (k4 && !prev4) chestStart(); prev4 = k4; }
   if (chestOpenT > 0) { chestOpenT += dt; if (chestOpenT >= 1.4) { chestOpenT = 0; chestState = 2; chestGo = false; saveChest(); evoQueue.push(5); } }      // o tesouro aparece grande (como as evolucoes)
@@ -1658,8 +1663,8 @@ $('goPlay').addEventListener('click', () => { $('intro').hidden = true; goFullsc
 $('goAuto').addEventListener('click', () => { $('intro').hidden = true; goFullscreen(); });
 /* ---------- MENU DE PAUSA (Espaco; clicar na maca = comer; Roupas: heroi sem armas): abas Armas / Roupas / Comida e o heroi ampliado ---------- */
 let invOn = false, invTab = -1, invBow = false, invEatT = 0, previewBare = false, invMsg = '', eatRaw = false, autoEatPh = 0, autoEatTree = null;      // invBow: o heroi do exemplo segura o arco (clicou num arco) ou espada e escudo (clicou neles)
-const INV_NAMES = [['Arco de madeira', 'Arco de metal'], ['Espada comum', 'Espada Mestre'], ['Escudo azul', 'Escudo vermelho', 'Escudo do rei'], ['Gorro verde', 'Gorro roxo', 'Coroa de ouro'], ['Túnica verde', 'Blusa azul', 'Roupa de rei']];
-const INV_DESC = [['O arco de sempre.', 'Flechas com o dobro de dano.'], ['A espada de sempre.', 'Dobro de dano.'], ['Escudo comum.', 'Escudo vermelho do herói.', 'Escudo circular do tesouro do rei.'], ['O gorro de sempre.', 'Gorro roxo da evolução.', 'Coroa de ouro do tesouro do rei.'], ['A túnica de sempre.', 'Blusa azul da evolução.', 'Manto vermelho, calça marrom e sapatos roxos.']];
+const INV_NAMES = [['Arco de madeira', 'Arco de metal'], ['Espada comum', 'Espada Mestre'], ['Escudo azul', 'Escudo vermelho', 'Escudo do rei'], ['Gorro verde', 'Gorro roxo', 'Coroa de ouro'], ['Túnica verde', 'Blusa azul', 'Roupa de rei'], ['Fadinha', 'Fadinha rosa']];
+const INV_DESC = [['O arco de sempre.', 'Flechas com o dobro de dano.'], ['A espada de sempre.', 'Dobro de dano.'], ['Escudo comum.', 'Escudo vermelho do herói.', 'Escudo circular do tesouro do rei.'], ['O gorro de sempre.', 'Gorro roxo da evolução.', 'Coroa de ouro do tesouro do rei.'], ['A túnica de sempre.', 'Blusa azul da evolução.', 'Manto vermelho, calça marrom e sapatos roxos.'], ['A fadinha ajudante.', 'Corpo rosa e asas azul escuro (500 monstros depois da fadinha).']];
 const withCtx = (c, fn) => { const old = ctx; ctx = c; try { fn(); } finally { ctx = old; } };
 function iconShape(g, pts, fill, u) { g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.closePath(); g.fillStyle = fill; g.fill(); g.lineWidth = Math.max(1, u * 0.7); g.strokeStyle = '#1c1624'; g.lineJoin = 'round'; g.stroke(); }
 function drawIcon(cat, id, cx, cy, u) {      // desenha o icone no 'ctx' atual
@@ -1682,6 +1687,7 @@ function drawIcon(cat, id, cx, cy, u) {      // desenha o icone no 'ctx' atual
     if (id === 2) { drawCrownItem(cx, cy, u * 0.9); return; }
     if (id === 1) { drawEvoItem(2, cx, cy, u * 0.85); return; }
     itemSpr(SP.capGreen, cx, cy, u * 0.85);
+  } else if (cat === 5) { drawFairyShape(cx, cy, u * 2.4, id, false, true);
   } else {
     if (id === 2) { itemSpr(SP.robeItem, cx, cy, u * 0.85); return; }
     if (id === 1) { drawEvoItem(3, cx, cy, u * 0.85); return; }
@@ -1696,12 +1702,12 @@ function drawHeroPreview() {      // heroi equipado, ampliado (muda na hora ao t
   const sv = { pt: pickT, ax: hero.aimX, ay: hero.aimY, bt: hero.bowT, x: hero.x, y: hero.y, f: hero.face, w: hero.walking, a: hero.attacking, b: hero.bowing, d: hero.dead, i: hero.inv, p: powerT, c: calmState, k: cookState, pp: playPickT, pe: playEatT, er: eatRaw };
   try {
     hero.x = 0; hero.y = 0; hero.face = 1; hero.walking = false; hero.attacking = false; hero.bowing = invBow; hero.aimX = 1; hero.aimY = 0; hero.bowT = 0.4; hero.dead = false; hero.inv = 0; powerT = 0; calmState = 0; cookState = 0; playPickT = invPickT; pickT = invPickT; playEatT = invEatT; eatRaw = invEatT > 0; previewBare = invTab === 1;
-    const k = Math.max(1, (pc.height * 0.62) / (30 * S)); g.setTransform(k, 0, 0, k, pc.width / 2, pc.height * 0.72); withCtx(g, () => drawHero());
+    const k = Math.max(1, (pc.height * 0.62) / (30 * S)); g.setTransform(k, 0, 0, k, pc.width / 2, pc.height * 0.72); withCtx(g, () => { drawHero(); if (fairyState === 1) drawFairyShape(9 * S, -25 * S, S, eqFairy, false, Math.floor(time * 16) % 2 === 0); });
   } finally { pickT = sv.pt; hero.aimX = sv.ax; hero.aimY = sv.ay; hero.bowT = sv.bt; hero.x = sv.x; hero.y = sv.y; hero.face = sv.f; hero.walking = sv.w; hero.attacking = sv.a; hero.bowing = sv.b; hero.dead = sv.d; hero.inv = sv.i; powerT = sv.p; calmState = sv.c; cookState = sv.k; playPickT = sv.pp; playEatT = sv.pe; eatRaw = sv.er; previewBare = false; g.setTransform(1, 0, 0, 1, 0, 0); }
 }
 function renderInv() {
   drawHeroPreview();
-  const cats = ['Arco', 'Espada', 'Escudo', 'Gorro', 'Roupa']; $('invEq').innerHTML = cats.map((c, i) => '<li>' + c + ': ' + INV_NAMES[i][getEq(i)] + '</li>').join('');
+  const cats = ['Arco', 'Espada', 'Escudo', 'Gorro', 'Roupa', 'Fadinha'].slice(0, owns(5, 0) ? 6 : 5); $('invEq').innerHTML = cats.map((c, i) => '<li>' + c + ': ' + INV_NAMES[i][getEq(i)] + '</li>').join('');
   document.querySelectorAll('#inv .invtabs button').forEach((b) => b.setAttribute('aria-selected', String(+b.dataset.tab === invTab)));
   const body = $('invBody'); body.innerHTML = ''; const info = $('invInfo'); info.textContent = '';
   const section = (title, cat) => {
@@ -1716,7 +1722,7 @@ function renderInv() {
   };
   if (invTab < 0) { const p = document.createElement('div'); p.className = 'hint'; p.innerHTML = 'Escolha uma aba: Armas, Roupas ou Comida.<br>Clique no que quiser usar; o herói muda ao lado.<br>Espaço ou Esc fecham o menu.'; body.appendChild(p); }
   else if (invTab === 0) { section('ARCOS', 0); section('ESPADAS', 1); section('ESCUDOS', 2); }
-  else if (invTab === 1) { section('GORROS', 3); section('ROUPAS', 4); }
+  else if (invTab === 1) { section('GORROS', 3); section('ROUPAS', 4); if (owns(5, 0)) section('FADINHA', 5); }
   else { const h = document.createElement('div'); h.className = 'sec'; h.textContent = 'COMIDA'; body.appendChild(h); const b = document.createElement('button'); b.className = 'card'; b.appendChild(appleIcon()); const s = document.createElement('span'); s.textContent = 'Maçãs x ' + hero.apples; b.appendChild(s); b.addEventListener('click', invEat); body.appendChild(b); const eb = document.createElement('button'); eb.textContent = 'Comer maçã'; eb.style.cssText = 'display:inline-block;width:112px;margin:6px 10px 0 0;padding:8px 4px;border-radius:8px;border:2px solid #1c1624;background:#f7be46;color:#1c1624;font:700 14px var(--body);cursor:pointer'; eb.addEventListener('click', invEat); body.appendChild(eb);
     const pk = document.createElement('button'); pk.textContent = 'Colher maçã'; pk.style.cssText = eb.style.cssText.replace('#f7be46', '#69c85f'); pk.addEventListener('click', invPick); body.appendChild(pk); const p = document.createElement('div'); p.className = 'hint'; p.innerHTML = 'Maçã crua recupera meio coração.<br>Com 5 ou mais ele faz lanche na fogueira (assadas recuperam mais).'; body.appendChild(p); const hh = document.createElement('div'); hh.className = 'hint'; hh.style.color = '#f7be46'; hh.textContent = 'Corações: ' + (Math.round(hero.hp * 10) / 10) + ' / ' + hero.maxHp; body.appendChild(hh); if (invMsg) { const m = document.createElement('div'); m.className = 'hint'; m.style.color = '#ff6a4a'; m.textContent = invMsg; body.appendChild(m); } }
 }
@@ -1735,7 +1741,8 @@ function invEat() {
   const iv = setInterval(() => { const now = performance.now(), dt = Math.min(0.1, (now - last) / 1000); last = now; invEatT += dt; if (invEatT >= 0.9 || !invOn) { clearInterval(iv); invEatT = 0; if (invOn && hero.apples > 0) { hero.apples--; hero.hp = Math.min(hero.maxHp, hero.hp + 0.5); } renderInv(); return; } drawHeroPreview(); }, 33);
 }
 function equipItem(cat, id) {
-  if (!owns(cat, id)) return; if (cat === 0) eqBow = id; else if (cat === 1) eqSword = id; else if (cat === 2) eqShield = id; else if (cat === 3) eqHat = id; else eqTunic = id;
+  if (!owns(cat, id)) return; if (cat === 5) { eqFairy = id; saveFairy(); renderInv(); return; }      // fadinha: so troca a aparencia
+  if (cat === 0) eqBow = id; else if (cat === 1) eqSword = id; else if (cat === 2) eqShield = id; else if (cat === 3) eqHat = id; else eqTunic = id;
   saveEquip(); buildSprites(); buildProps(); syncTouchIcons(); renderInv();
 }
 function openInv() { if (invOn || evoWaiting() || deathWait || !$('intro').hidden || !$('death').hidden || !$('credits').hidden || !$('about').hidden) return; invOn = true; closeMenu(); $('inv').hidden = false; renderInv(); }
@@ -1769,7 +1776,7 @@ function boot() {
 window.__jogo = { hero, enemies, rocks, arrows, items, trees, step, render, setPlayMode, spawn, get S() { return S; }, get W() { return W; }, get H() { return H; },
   get st() { return { playMode, calmState, cookState, bossPhase, killsAtMax, deathWait, fireK, onFire: onFire.slice(), bakeTs: bakeTs.slice(), phase, boss }; },
   set(o) { if ('mx' in o) mx = o.mx; if ('my' in o) my = o.my; if ('mouse' in o) mouseDown = o.mouse; if ('k' in o) Object.assign(touchKeys, o.k); if ('killsAtMax' in o) killsAtMax = o.killsAtMax; if ('nextCalm' in o) nextCalm = o.nextCalm; if ('forceLong' in o) forceLong = o.forceLong; },
-  fairyTest: { give() { kingGear = true; fairyState = 1; }, setKills(n) { kingGear = true; fairyState = 0; fairyKills = n; }, get info() { return { fairyState, fairyKills, ph: fairy.ph, x: fairy.x, y: fairy.y }; } },
+  fairyTest: { give() { kingGear = true; fairyState = 1; }, giveSkin() { kingGear = true; fairyState = 1; fairySkin = 1; eqFairy = 1; }, get look() { return eqFairy; }, setKills(n) { kingGear = true; fairyState = 0; fairyKills = n; }, get info() { return { fairyState, fairyKills, ph: fairy.ph, x: fairy.x, y: fairy.y }; } },
   inv: { open() { openInv(); }, tab(n) { invTab = n; renderInv(); }, eat: invEat, get msg() { return invMsg; } },
   doRetry, fireInteract, damageEnemy, startFinalPhase, startPower, get power() { return { powerT, record, nextPower }; }, setRupees(n) { hero.rupees = n; }, setSlimes(n) { slimeKills = n; }, countKill, get evoInfo() { return { evoKills, evoStage, evoNext, waiting: evoWaiting(), stage: evo && evo.stage }; }, forcePower() { powerPending = true; }, get chestInfo() { return { chestKills, chestState, kingGear, chestGo, chestOpenT }; }, setChestKills(n) { chestKills = n; }, get shocks() { return shocks; }, testBoss() { fireX = W / 2; fireY = H / 2; bossPhase = 4; spawnDragon(); return boss; }, get bossInfo() { return { phase: bossPhase, bossT, rewardSpawned, msgT, endStarted, reward: items.filter((i) => i.reward).reduce((s, i) => s + rupeeValue(i.kind), 0), nItems: items.filter((i) => i.reward).length }; } };
 })();
