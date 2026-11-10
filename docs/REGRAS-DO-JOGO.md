@@ -101,7 +101,7 @@ No desktop é uma janela própria com o mouse; na web, uma tela sobre o jogo. Ao
 fica o **herói ampliado** mostrando o que está equipado; ao clicar em um item o herói muda na hora.
 - **Armas:** arcos (madeira / metal), espadas (comum / Espada Mestre) e escudos (azul / vermelho / do rei) que você já tem.
 - **Roupas:** gorros (verde / roxo / coroa de ouro) e roupas (túnica verde / blusa azul / roupa de rei, que inclui calça e sapatos).
-- **Comida:** só maçãs (quantidade).
+- **Comida:** maçãs (quantidade), botão **Comer maçã** e botão **Colher maçã**.
 - Só aparece o que o herói **já ganhou**. Ao ganhar um item (evolução ou baú) ele já vem equipado. A escolha fica salva (registro `Equip` / `localStorage heroi_equip`).
 - Os efeitos dependem do que está **equipado**: arco de metal e Espada Mestre dão o dobro de dano; as cores/escudos seguem as roupas escolhidas.
 
@@ -130,7 +130,7 @@ limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão 
 
 ## Onda final (cavaleiros bokoblin)
 - Modo jogo, nível máximo (NV 7): sequência de 7 inimigos (cavaleiro, gelatina, cavaleiro, cavaleiro, gelatina, cavaleiro, cavaleiro), 1 a cada 4-7 s, máximo 3 vivos. O dragão começa quando os 7 morreram e já houve 5 mortes no nível.
-- Cavaleiro: 3 de vida, velocidade 95% da do herói (53 S/s), aproxima até ~62-76 S e orbita em elipse atirando a cada 1,7-3 s. Flecha: 90 S/s, mira no herói com erro sorteado (±14 S/distância => ~50% erram); trajetória fixa.
+- Cavaleiro: 250 de vida, velocidade 95% da do herói (53 S/s), aproxima até ~62-76 S e orbita em elipse atirando a cada 1,7-3 s. Flecha: 90 S/s, mira no herói com erro sorteado (±14 S/distância => ~50% erram); trajetória fixa.
 
 
 ## Fadinha
@@ -152,3 +152,11 @@ limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão 
 
 - Inventário (aba Roupas): seção **Fadinha** (aparece ao ganhar a fadinha) com a aparência normal e a **rosa** (liberada após 500 monstros); a fadinha também aparece ao lado do herói ampliado. A escolha fica salva (registro `FadaLook` / `heroi_fada_look`).
 - Os brilhinhos que a fadinha solta são **azuis**; quando ela está pronta (piscando) soltam em maior quantidade.
+
+## Vida dos monstros e dano das armas
+- Vida: morcego 50 · gelatina 50 · bokoblin 100 · octorok (vermelho) 200 · bokoblin a cavalo 250 · Dragão 5000.
+- Dano: flecha 50 (arco de metal ×2) · espada 150 (Espada Mestre ×2) · flecha do poder azul 9.999.999. A fadinha derrota qualquer monstro (menos o Dragão).
+
+## Colher maçã pelo inventário
+- Botão **Colher maçã** (aba Comida): o menu **fecha**, o herói vai à macieira mais próxima com maçã e colhe **2** (o braço se estica; a **manga tem a cor da roupa em uso**); as maçãs voam para o inventário.
+- **Enquanto colhe não nascem monstros** (nem a onda final do NV 7). Não vale durante lanche, poder, chefão ou abertura do baú. Vale nos dois modos.

@@ -43,7 +43,7 @@ A janela do herói usa cor-chave (só liga/desliga), então não tem sombra tran
 Ajuste da opacidade: cor do `brush` em `ShadowLayer` (alfa 125).
 
 ### Camadas de janelas (de cima para baixo, tudo atrás dos aplicativos)
-aviso/morte/créditos/evolução → janela do herói (cor-chave) → `ShadowLayer` → `ClickShield` (modo jogo). Só o herói (e a camada
+aviso/morte/créditos/evolução → **menu de pausa (`MenuForm`)** → janela do herói (cor-chave) → `ShadowLayer` → `ClickShield` (modo jogo). `PushLayers()` (chamado no `Tick` e quando o menu é ativado) manda tudo para o fundo nessa ordem. Só o herói (e a camada
 de sombras) sobe a `HWND_TOPMOST`, e apenas quando "Mostrar área de trabalho" (Win+D) deixa a área de trabalho em primeiro plano.
 
 ### Tamanho (Pequeno / Normal / Grande)
@@ -122,3 +122,19 @@ Também na web: controles de toque (`#dpad`, `#touch`), tela cheia (`goFullscree
 ## 4. Publicação web
 
 - **Firebase Hosting** (projeto `heroi-games-2026`, nome "games"): `firebase/public/index.html` é cópia da página.
+
+## 5. Recursos novos (09/11/2026) — onde estão no código
+Nomes iguais no desktop (C#, PascalCase) e na web (JS, camelCase).
+- **Inventário:** `MenuForm` (desktop) / `#inv` + `renderInv` (web); `OpenMenu/CloseMenu`, `DrawHeroPreview` (herói ampliado, `previewMode`/`previewBare`), `DrawIcon` e ícones em pixel art (`Art.ShirtItem`, `Art.RobeItem`, `Art.CrownItem`), `EquipItem`/`SaveEquip` (registro `Equip`).
+- **Comer / colher:** `MenuEat` + `AutoEatApple` (fome do automático) e `MenuPick` → `ErrandControl` (`errandPh` 1 anda, 2 colhe; `UpdateHero` dá prioridade a ele; `Spawn` e `UpdateWave` ficam parados enquanto `errandPh != 0`).
+- **Cavaleiros do NV 7:** `Enemy.Type == 5` (`DrawRider`, `HRect`, `DrawLeg`), `Rock.Arrow` (flecha inimiga, não corrige a mira), `UpdateWave`/`WaveSeq` (o dragão só começa depois de `WaveDone`).
+- **Baú e roupa de rei:** `ChestInit/SaveChest/CountChestKill/UpdateChest/UpdateChestHero/DrawChest`; `Art.HeroRecolor` (`Crown`, `Robe`).
+- **Fadinha:** `FairyInit/SaveFairy/CountFairyKill/UpdateFairy/DrawFairy/DrawFairyShape`; `Enemy.Fairy` marca 20% no `Spawn`; `fairyCool` (30 s) + `FairyReady`; brilhinhos azuis via `fairySparks` (camada `ShadowLayer`).
+- **Aviso NOVO ITEM:** `DrawNewItemNotice` / `showNewItem`.
+- **Dragão:** fúria, `Shock`/`UpdateShocks`, `BossDefeated`, `DrawBossMsg` + créditos (`EndShow`).
+
+### Verificação rápida (checklist depois de mexer em qualquer coisa)
+Como duas sessões já editaram os mesmos arquivos e perderam trechos, depois de cada mudança conferir:
+1. `git diff --stat` e `git log -5` (nada removido por engano).
+2. Âncoras no código: `UpdateFairy, DrawRider, UpdateWave, ErrandControl, AutoEatApple, DrawNewItemNotice, PushLayers, MenuForm` (desktop) e `updateFairy, drawRider, updateWave, errandControl, autoEatApple, showNewItem, openInv` (web).
+3. Harness (reflexão, `HEROI_TESTE=1`): pausa curta chega à fase 5; pausa longa colhe 3 maçãs; lanche chega ao estado 7; `powerPending` liga o poder; `CountChestKill`/`CountFairyKill` nos limites; `MenuPick` colhe 2 sem monstros.

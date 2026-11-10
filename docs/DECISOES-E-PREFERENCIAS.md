@@ -45,10 +45,23 @@ Arte própria inspirada no gênero (não usa sprites/imagens da Nintendo). O usu
   ou a versão web. Repositório **público no GitHub** (`alesimoes/heroi-do-desktop`, MIT). Ver `PROBLEMA-CERTIFICADO.md`.
 - Botões de toque da web com **ícones das armas** (espada, arco, maçã) em vez de texto; acompanham as evoluções.
 
+## Decisões recentes (09/11/2026)
+- **Regra de ouro:** toda mudança vale no **desktop e na web**; depois de cada mudança: testar, recompilar, **reinstalar**, publicar (Firebase + artifact), commit/push e atualizar docs.
+- **Nada sobre outros aplicativos:** inclui o menu de pausa e o aviso NOVO ITEM (ficam na camada do herói, abaixo dos apps).
+- **Baú do Rei** só conta depois das 4 evoluções; **fadinha** só conta depois da roupa de rei; **aparência rosa** depois de mais 500 monstros. O progresso é **por computador** (não vai no instalador).
+- **Fadinha:** derrota 20% dos monstros; pronta a cada 30 s (pisca amarela); automático ataca sozinha, no jogo só com a tecla 4; brilhinhos azuis pequenos e transparentes.
+- **Cavaleiros do NV 7:** 2 gelatinas + 5 bokoblins a cavalo com arco (95% da velocidade do herói, ~50% das flechas erram, não corrigem a mira); cavalo **simples e pequeno**, patas que **inclinam** no quadril, ritmo rápido.
+- **Inventário:** sem legenda sob o herói, herói centralizado; ícones **em pixel art**; blusas com mangas finas; roupa de rei é **blusa** (não vestido) com faixa dourada no pescoço e na barra; coroa em pixel art; braços da aba Roupas pequenos, sem contorno, manga da cor da camisa.
+- **Colher maçã** pelo inventário fecha o menu e colhe 2, sem monstros durante a ação; a manga do braço esticado segue a roupa.
+- **Atalhos de teste** de nível 6/7 e da luta do dragão foram **removidos** a pedido.
+- Cabelo do herói **loiro dourado** (mais escuro que o rosto); aceno antes de dormir com **um Oi só** e braço curto.
+- Sem certificado/assinatura e sem pagar nada (mantido).
+
 ## Lições técnicas
 - Janela transparente com `TransparencyKey` é **clique-através** nos pixels magenta; por isso o modo jogo lê entrada
   globalmente e usa `ClickShield` (janela com opacidade ≥ ~0,4% recebe cliques; 0% não).
 - `HWND_TOP` não passa à frente da área de trabalho em foco; `HWND_TOPMOST` passa (usado só no Win+D).
 - Windows 11 24H2: ancorar no `WorkerW` (atrás dos ícones) foi avaliado e **não** foi necessário.
 - A web usa só mouse/teclado normais; o espaço pausa só no modo jogo e não quando uma tela de aviso está aberta.
-- `Select-String`/PowerShell: preferir ferramentas de edição por âncora única; o repositório não tem git.
+- `Select-String`/PowerShell: preferir ferramentas de edição por âncora única; o repositório **tem git** (publicado no GitHub). No PowerShell 5, nomes como `R`/`Rd` são aliases (`Invoke-History`/`Remove-Item`): **nunca** nomear funções assim (um `Rd` quase apagou os documentos); `Replace` não aceita 3º argumento.
+- Dois agentes editando o mesmo arquivo sobrescrevem um ao outro: reler antes de editar e conferir o diff antes de publicar.

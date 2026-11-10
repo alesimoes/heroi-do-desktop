@@ -2,13 +2,13 @@
 
 Um herói em pixel art que **vive na área de trabalho do Windows**: anda sozinho, luta contra monstros, desvia
 de projéteis, colhe maçãs, assa o próprio lanche, dorme de vez em quando e, no **modo jogo**, o jogador assume o
-controle e enfrenta um **Dragão** no final. Existe também uma **versão web** do mesmo jogo.
+controle e enfrenta cavaleiros e um **Dragão** no final. Ele evolui, ganha **roupa de rei**, uma **fadinha ajudante** e tem um **inventário**. Existe também uma **versão web** do mesmo jogo.
 
 - **Ideia:** Alexandre
 - **Criação:** Bia Krepel
 - **Programação:** Claude (Anthropic)
 
-## O que existe hoje (estado em 08/11/2026)
+## O que existe hoje (estado em 09/11/2026)
 
 | Entrega | Onde | Observação |
 |---|---|---|
@@ -27,7 +27,7 @@ Hollow Knight) e a web em 16 bits (parecida demais com um jogo conhecido). Fica 
 - `assinatura-arquivada/`: arquivos preparados para o SignPath (política, workflow, respostas do formulário). **Arquivado: não vamos assinar.**
 - `COMO-INSTALAR.txt`: instalação e o que fazer quando o Windows bloqueia o instalador.
 - `ARQUITETURA.md`: como o código do desktop e da web é organizado.
-- `REGRAS-DO-JOGO.md`: todas as regras e números do jogo (IA, pausas, lanche, modo jogo, chefão).
+- `REGRAS-DO-JOGO.md`: todas as regras e números do jogo (IA, pausas, lanche, evoluções, baú, fadinha, inventário, modo jogo, cavaleiros, chefão).
 - `COMO-CONSTRUIR-E-PUBLICAR.md`: comandos para compilar, gerar o instalador, publicar e testar.
 - `DECISOES-E-PREFERENCIAS.md`: o que o usuário pediu, escolheu e rejeitou (e o porquê).
 - `PROXIMOS-PASSOS.md`: ideias, pendências e limitações conhecidas.

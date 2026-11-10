@@ -15,13 +15,19 @@ Estado atual em [`STATUS.md`](STATUS.md).
    - **App Android nativo** com o herói passeando **sobre** outros apps (serviço com `SYSTEM_ALERT_WINDOW`): projeto à parte
      (JDK + Android SDK/Gradle). **iPhone não permite.**
 
+## Pendências recentes (09/11/2026)
+- Copiar o instalador novo para o **pendrive** (`D:\HeroiDoDesktop`) quando conectado.
+- Conferir na tela que o **menu de pausa** fica abaixo dos aplicativos (código pronto, não verificado visualmente).
+- Mostrar na tela **quantos monstros faltam** para a próxima evolução / baú / fadinha (hoje só no código).
+- Evitar edição simultânea dos mesmos arquivos por duas sessões (ver `STATUS.md`, pendência 4).
+
 ## Ideias que apareceram
 - Ranking online no **Firestore** (ao vencer o dragão) ou progresso por jogador (login anônimo do Firebase). O projeto
   `heroi-games-2026` já está pronto para isso (só ativar o Firestore).
 - Vários monitores (hoje só a tela principal, `Screen.PrimaryScreen.WorkingArea`); reagir à mudança de resolução/monitor.
 - Desenhar só o que mudou (hoje a tela cheia é redesenhada a cada 30 ms, também nas sombras).
 - Sons e música; mais monstros/chefões; outras fases; mais cenários na web (estações do ano, noite).
-- Atualização automática do programa; mais evoluções além das 4 atuais.
+- Atualização automática do programa; mais evoluções, mais ajudantes além da fadinha, mais inimigos montados.
 - Dividir `PetForm` (arquivo grande) em partes (entrada, IA, desenho, poder, evolução) e criar testes automáticos versionados
   (hoje são scripts de reflexão descritos em `COMO-CONSTRUIR-E-PUBLICAR.md`).
 
