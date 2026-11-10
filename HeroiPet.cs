@@ -4286,7 +4286,7 @@ namespace HeroiPet
             float reach = (float)Math.Sin(Math.Min(1f, pickT / 1.0f) * Math.PI * 0.5);
             float x = hx + f * 4 * S, y0 = hy - bob - 10 * S, y1 = y0 - (5 + 5 * reach) * S;
             using (SolidBrush kb = new SolidBrush(Color.FromArgb(28, 22, 36)))
-            using (SolidBrush gb = new SolidBrush(Color.FromArgb(58, 165, 62)))
+            using (SolidBrush gb = new SolidBrush(TunicColor()))
             using (SolidBrush sb = new SolidBrush(Color.FromArgb(250, 208, 165)))
             {
                 g.FillRectangle(kb, x - 2 * S, y1, 4 * S, y0 - y1);

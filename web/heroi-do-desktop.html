@@ -1704,7 +1704,7 @@ function renderInv() {
     const pk = document.createElement('button'); pk.textContent = 'Colher maçã'; pk.style.cssText = eb.style.cssText.replace('#f7be46', '#69c85f'); pk.addEventListener('click', invPick); body.appendChild(pk); const p = document.createElement('div'); p.className = 'hint'; p.innerHTML = 'Maçã crua recupera meio coração.<br>Com 5 ou mais ele faz lanche na fogueira (assadas recuperam mais).'; body.appendChild(p); const hh = document.createElement('div'); hh.className = 'hint'; hh.style.color = '#f7be46'; hh.textContent = 'Corações: ' + (Math.round(hero.hp * 10) / 10) + ' / ' + hero.maxHp; body.appendChild(hh); if (invMsg) { const m = document.createElement('div'); m.className = 'hint'; m.style.color = '#ff6a4a'; m.textContent = invMsg; body.appendChild(m); } }
 }
 let invPickT = 0;
-// "Colher maçã" no inventario: o menu fecha, o heroi vai ate a macieira mais proxima e colhe DUAS macas; enquanto isso nao nascem monstros.
+// "Colher maçã" no inventario (colhe 2 macas): o menu fecha, o heroi vai ate a macieira mais proxima e colhe DUAS macas; enquanto isso nao nascem monstros.
 let errandPh = 0, errandLeft = 0, errandTree = null;      // errandPh: 0 nada | 1 indo ate a arvore | 2 colhendo
 function errandAbort() { errandPh = 0; errandTree = null; playPickT = 0; }
 function invPick() {
