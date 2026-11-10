@@ -148,3 +148,5 @@ limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão 
 
 ## Fadinha: ataque por comando (tecla 4)
 - A cada **30 s** a fadinha fica **pronta**: pisca e fica **mais amarela** (e o herói diz *Fadinha pronta: 4*). Enquanto está assim, apertar **4** manda ela derrotar o **monstro mais perto do herói** (não ataca o dragão); depois a contagem de 30 s recomeça. Fora desse estado a tecla 4 não faz nada. Os 20% automáticos continuam. Web/celular: tocar na fadinha pronta.
+
+- Fadinha, aparência nova: depois de ganhar a fadinha, mais **500 monstros** (automático) trocam as asas por **azul escuro com rosa**. Teste: `--fada2` / `?fada2`.

@@ -697,7 +697,7 @@ function fairyCommand() {      // comanda a fadinha a derrotar o monstro mais pe
 function updateFairy(dt) {
   if (fairyState !== 1) return;
   const F = fairy; F.t += dt;
-  if (F.cool > 0) { F.cool -= dt; if (F.cool <= 0) { F.cool = 0; F.said = false; } }      // a cada 30 s fica pronta: pisca amarela e ataca por comando (tecla 4 ou toque nela)
+  if (F.cool > 0) { F.cool -= dt; if (F.cool <= 0) { F.cool = 0; F.said = false; } }      // a cada 30 s fica pronta: pisca amarela e ataca por comando (tecla 4 ou toque nela); so entao a tecla 4 funciona
   if (F.cool <= 0 && !F.said && !hero.dead) { F.said = true; say('Fadinha pronta: 4'); }
   const k4 = keys.has('Digit4') || keys.has('Numpad4'); if (k4 && !F.prev4) fairyCommand(); F.prev4 = k4;
   if (F.target && enemies.indexOf(F.target) < 0) { F.target = null; F.ph = 0; }
