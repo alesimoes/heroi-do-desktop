@@ -1875,14 +1875,22 @@ function drawPixelHammer(handX, handY, dx, dy, px, py, sc) {
     if (c) rect(c, handX + ci * sc - 0.3, handY + cj * sc - 0.3, sc + 0.6, sc + 0.6);
   }
 }
+// ESPADA COMUM / MESTRE PIXELADA: o mesmo desenho de antes (lamina com contorno e ponta, guarda em linha, cabo fino), mas em quadradinhos como o resto do jogo
+function drawPixelatedSword(handX, handY, dx, dy, px, py, sc, lenCells) {
+  const outl = '#1c1624', blade = eqSword === 1 ? '#cde8ff' : '#e1ebf5', guard = eqSword === 1 ? '#3c5fcd' : '#d7a028', grip = eqSword === 1 ? '#503796' : '#87552d', tip = lenCells + 3;
+  for (let ci = -16; ci <= 16; ci++) for (let cj = -16; cj <= 16; cj++) {
+    const vx = (ci + 0.5) * sc, vy = (cj + 0.5) * sc, u = (vx * dx + vy * dy) / sc, w = (vx * px + vy * py) / sc, aw = Math.abs(w); let c = null;
+    if (u >= -3 && u < -0.5) { if (aw <= 0.6) c = grip; else if (aw <= 1.6) c = outl; }
+    else if (u >= -0.5 && u < 1 && aw <= 3.9) c = aw <= 2.9 ? guard : outl;
+    else if (u >= 1 && u <= tip) { const hw = u <= lenCells ? 1.05 : 1.05 * (1 - (u - lenCells) / 3); if (aw <= hw) c = blade; else if (aw <= hw + 1) c = outl; }
+    else if (u > tip && u <= tip + 0.9 && aw <= 0.55) c = outl;
+    if (c) rect(c, handX + ci * sc - 0.3, handY + cj * sc - 0.3, sc + 0.6, sc + 0.6);
+  }
+}
 function drawSword(handX, handY, aDeg, f) {
   const a = aDeg * Math.PI / 180, dx = f * Math.cos(a), dy = Math.sin(a), px = -dy, py = dx, len = 11 * S, w = 1.0 * S;      // espada menor em proporcao ao Link (antes 14 e 1,2)
   if (eqSword >= 2) { drawSpecialSword(handX, handY, dx, dy, px, py); return; }      // marreta / espada de chamas
-  ctx.fillStyle = eqSword === 1 ? '#cde8ff' : '#e1ebf5'; ctx.strokeStyle = '#1c1624'; ctx.lineWidth = Math.max(1, S);      // contorno na mesma espessura do resto do jogo
-  ctx.beginPath(); ctx.moveTo(handX + px * w, handY + py * w); ctx.lineTo(handX - px * w, handY - py * w); ctx.lineTo(handX + dx * len - px * w, handY + dy * len - py * w);
-  ctx.lineTo(handX + dx * (len + 3 * S), handY + dy * (len + 3 * S)); ctx.lineTo(handX + dx * len + px * w, handY + dy * len + py * w); ctx.closePath(); ctx.fill(); ctx.stroke();
-  ctx.strokeStyle = eqSword === 1 ? '#3c5fcd' : '#d7a028'; ctx.lineWidth = 2 * S; ctx.beginPath(); ctx.moveTo(handX + px * 3 * S, handY + py * 3 * S); ctx.lineTo(handX - px * 3 * S, handY - py * 3 * S); ctx.stroke();
-  ctx.strokeStyle = eqSword === 1 ? '#503796' : '#87552d'; ctx.lineWidth = S + 1; ctx.beginPath(); ctx.moveTo(handX, handY); ctx.lineTo(handX - dx * 3 * S, handY - dy * 3 * S); ctx.stroke();
+  drawPixelatedSword(handX, handY, dx, dy, px, py, S, 11);      // espada comum / Mestre pixelada (mesmo desenho de antes, em quadradinhos)
 }
 const APPLE_SHIELD = ['...KT.L.', '.KKKTKLK', 'KRRRRRRK', 'KRFFFFRK', 'KRFBBFRK', 'KRFBBFRK', 'KRFFFFRK', '.KRFFRK.', '..KRRK..', '...KK...'];
 const APPLE_COL = { K: '#1c1624', R: '#c8222c', F: '#faecbe', B: '#6e3c1e', T: '#785028', L: '#46a03c' };
