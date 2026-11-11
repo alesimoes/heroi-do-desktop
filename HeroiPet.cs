@@ -1474,9 +1474,13 @@ namespace HeroiPet
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--lanche") >= 0) apples = 5;
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--jogar") >= 0) SetPlayMode(true);
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--fase2") >= 0) StartPhase2Test();      // atalho: direto na fase 2
+#if ATALHOS
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--cena2") >= 0) StartScene2Test();      // atalho: 2a conversa do Feiticeiro
+#endif
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--fase3") >= 0) StartPhase3Test();      // atalho: direto na fase 3
+#if ATALHOS
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--cena") >= 0) StartSceneTest();      // atalho: cena do Feiticeiro e depois a fase 2
+#endif
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--chefao") >= 0) StartBossTest();   // teste rapido do lanche
             timer = new System.Windows.Forms.Timer();
             timer.Interval = 30;
@@ -2408,8 +2412,10 @@ namespace HeroiPet
             mAutoItem.Click += delegate { SetPlayMode(false); };
             mPlayItem.Click += delegate { SetPlayMode(true); };
             menu.Items.Add(mAutoItem); menu.Items.Add(mPlayItem); menu.Items.Add(new ToolStripSeparator());
+#if ATALHOS      // atalhos de teste das conversas do Feiticeiro: so existem se compilar com /define:ATALHOS (a versao entregue nao tem)
             menu.Items.Add("Atalho: 1a conversa do Feiticeiro (Ctrl+Shift+F1)", null, delegate { StartSceneTest(); });
             menu.Items.Add("Atalho: 2a conversa do Feiticeiro (Ctrl+Shift+F2)", null, delegate { StartScene2Test(); });
+#endif
             menu.Items.Add("Invocar inimigo", null, delegate { Spawn(rnd.Next(3)); });
             menu.Items.Add("Curar heroi", null, delegate { hp = MaxHP; });
             menu.Items.Add("Soneca agora", null, delegate { if (calmState == 0) nextCalm = 0; });
@@ -2505,7 +2511,10 @@ namespace HeroiPet
             double now = clock.Elapsed.TotalSeconds;
             float dt = (float)Math.Min(0.05, now - lastT);
             lastT = now;
-            CheckSpacePause(); CheckSceneHotkeys();
+            CheckSpacePause();
+#if ATALHOS
+            CheckSceneHotkeys();
+#endif
             if (!paused && !EvoWaiting && !MenuOpen) Step(dt);      // com o menu aberto o jogo fica pausado          // com o item grande na tela o jogo fica pausado ate apertar "USAR ITEM"
             Invalidate();
         }

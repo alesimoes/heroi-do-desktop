@@ -1,6 +1,7 @@
 # Changelog (resumo)
 
 ## 11/11/2026 — Atalhos para as conversas do Feiticeiro
+- **Versão entregue sem os atalhos:** os atalhos (Ctrl+Shift+F1/F2, itens da bandeja, `--cena` e `--cena2`) agora só existem se o jogo for compilado com `/define:ATALHOS`. O `build.bat` e o instalador **normais não os incluem**; o instalador salvo no pendrive foi compilado assim.
 - **Ctrl+Shift+F1** toca a **1ª conversa** do Feiticeiro e **Ctrl+Shift+F2** a **2ª conversa**, em qualquer momento do jogo (liga o modo jogo se estiver no automático). Também há dois itens no menu da bandeja (**Atalho: 1a / 2a conversa do Feiticeiro**) e os parâmetros `--cena` e `--cena2` ao abrir o jogo.
 - Os atalhos tocam **só a conversa** (zoom, falas, ameaça, saída do Feiticeiro) e **voltam ao jogo normal**, sem seguir para a fase intermediária nem para a Fase 3. Só no desktop.
 
