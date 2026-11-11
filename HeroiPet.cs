@@ -3402,7 +3402,7 @@ namespace HeroiPet
             return r < 40 ? 2 : (r < 70 ? 4 : (r < 90 ? 3 : 5));       // 40% de 5, 30% de 10, 20% de 20, 10% de 50
         }
         int RupeeStep() { return Math.Min(6, rupees / 20); }       // indice do nivel dentro da fase (0..6): cada 20 rupias sobe um nivel (fases 1 e 2)
-        float DiffStep() { if (phase3) return 5f + 0.5f * RupeeStep(); return RupeeStep() + (phase2 ? 3 : 0) +      // FASE 3: comeca na dificuldade do 3o nivel da fase 2 (passo 5) e sobe +5% por nivel (meio passo)
+        float DiffStep() { if (phase3) return 5f + 1.5f * RupeeStep(); return RupeeStep() + (phase2 ? 3 : 0) +      // FASE 3: comeca na dificuldade do 3o nivel da fase 2 (passo 5) e sobe o que ja subia (+10%) MAIS 5% por nivel = +15% (1,5 passo)
              ((!phase2 && RupeeStep() == 1) ? 0.5f : 0f); }      // NIVEL 2 da fase 1: um pouco mais dificil (+5% de monstros e de ritmo)
         //      // dificuldade: cada nivel = +10% de monstros. A fase 2 comeca no NIVEL 8 com a dificuldade do nivel 4 (passo 3) e sobe 1 por nivel ate o 14
 
