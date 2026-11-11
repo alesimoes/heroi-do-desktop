@@ -3690,8 +3690,8 @@ namespace HeroiPet
             new string[] { "Link", "NÃO!" },
             new string[] { "*", "" },
             new string[] { "Feiticeiro", "Meu amigo, eu nunca o machucaria." } };
-        static readonly float[] DlgTime2 = { 6.2f, 2.4f, 3.4f, 2.4f, 3.8f, 4.4f };
-        int sceneKind = 1; float wizPoint;      // sceneKind: 1 primeira conversa (vai para a fase intermediaria) | 2 segunda (vai para a Fase 3); wizPoint 0..1: o Feiticeiro aponta o cajado
+        static readonly float[] DlgTime2 = { 6.2f, 2.4f, 3.4f, 2.4f, 8f, 4.4f };      // a ameaca com o cajado (acao) dura 8 s
+        int sceneKind = 1; float wizPoint, wizGlow;      // wizGlow 0..1: a ponta do cajado brilha como se fosse atirar      // sceneKind: 1 primeira conversa (vai para a fase intermediaria) | 2 segunda (vai para a Fase 3); wizPoint 0..1: o Feiticeiro aponta o cajado
         string[][] CurDlg { get { return sceneKind == 2 ? Dlg2 : Dlg; } }
         float[] CurDlgTime { get { return sceneKind == 2 ? DlgTime2 : DlgTime; } }
         static readonly float[] DlgTime = { 6.6f, 4.6f, 2.8f, 5.8f };      // cada fala fica 2 s a mais na tela; "Seu poder..." fica a metade do tempo das outras
@@ -3726,15 +3726,16 @@ namespace HeroiPet
                     break;
                 case 2:
                     {
-                        float tx = hx + 26 * S; ax -= 62 * S * dt; ay = hy; aface = -1;
+                        float tx = hx + (sceneKind == 2 ? 44 : 26) * S; ax -= 62 * S * dt; ay = hy; aface = -1;      // na 2a conversa os dois ficam mais distantes
                         if (ax <= tx) { ax = tx; scene = 3; sceneT = 0; dlgIdx = 0; }
                         break;
                     }
                 case 3:
                     {
                         bool act = CurDlg[dlgIdx][0] == "*"; float dur = CurDlgTime[dlgIdx];
-                        wizPoint = act ? Math.Min(Ease(sceneT / 0.6f), Ease((dur - sceneT) / 0.6f)) : 0f;      // levanta o cajado, aponta para o Link e abaixa
-                        if (sceneT >= dur) { dlgIdx++; sceneT = 0; wizPoint = 0f; if (dlgIdx >= CurDlg.Length) { scene = sceneKind == 2 ? 8 : 4; sceneT = 0; } }
+                        wizPoint = act ? Math.Min(Ease(sceneT / 0.6f), Ease((dur - sceneT) / 1.4f)) : 0f;      // levanta o cajado (0,6 s), aponta para o Link e abaixa mais devagar (1,4 s)
+                        wizGlow = act ? (sceneT < 5f ? 0f : (sceneT < 5.6f ? Ease((sceneT - 5f) / 0.6f) : (sceneT < 7f ? 1f : Ease((dur - sceneT) / (dur - 7f))))) : 0f;      // depois de 5 s a ponta brilha (como se fosse atirar); 2 s depois para de brilhar aos poucos
+                        if (sceneT >= dur) { dlgIdx++; sceneT = 0; wizPoint = 0f; wizGlow = 0f; if (dlgIdx >= CurDlg.Length) { scene = sceneKind == 2 ? 8 : 4; sceneT = 0; } }
                         break;
                     }
                 case 8:      // 2a cena: o Feiticeiro vai embora (anda para a direita ate sair da tela)
@@ -3783,21 +3784,25 @@ namespace HeroiPet
             float bob = (float)Math.Sin(time * 3f) * 1.2f * S;
             Shadow(g, ax, ay, 11);
             Spr(g, wizSpr, ax, ay - bob, aface > 0);
-            if (wizPoint > 0f && staffSpr != null) DrawPointingStaff(g, ax, ay - bob); else DrawHeldStaff(g, ax, ay - bob, 0.7f, aface);
+            if (wizPoint > 0f && staffSpr != null) DrawPointingStaff(g, ax, ay - bob); else DrawHeldStaff(g, ax, ay - bob, 0.58f, aface);      // cajado um pouco menor
         }
         void DrawPointingStaff(Graphics g, float x, float feetY)      // cajado levantado e apontado para frente (para o Link), com a esfera brilhando
         {
-            float k = 0.7f; int w = (int)(staffSpr.W * k), h = (int)(staffSpr.H * k);
+            float k = 0.58f; int w = (int)(staffSpr.W * k), h = (int)(staffSpr.H * k);
             float px = x + aface * 7 * S, py = feetY - 7 * S, ang = (aface > 0 ? 90f : -90f) * Ease(wizPoint);
             GraphicsState st = g.Save(); g.TranslateTransform(px, py); g.RotateTransform(ang);
             g.DrawImage(staffSpr.R, (int)(-w / 2f), (int)(-h + 2 * S * k), w, h);
             g.Restore(st);
-            if (wizPoint < 0.9f) return;
-            float tipX = px + aface * (h - 4 * S * k), tipY = py, pulse = 1f + 0.4f * (float)Math.Sin(time * 14f);
+            if (wizGlow <= 0.01f) return;      // so brilha na carga (5 s a 7 s)
+            double rad = ang * Math.PI / 180.0; float tl = h - 4 * S * k, tipX = px + (float)Math.Sin(rad) * tl, tipY = py - (float)Math.Cos(rad) * tl, pulse = 1f + 0.4f * (float)Math.Sin(time * (14f + 14f * wizGlow));
             using (SolidBrush b1 = new SolidBrush(Color.FromArgb(190, 120, 255))) using (SolidBrush b2 = new SolidBrush(Color.FromArgb(245, 230, 255)))
             {
-                float r = 4 * S * pulse; g.FillRectangle(b1, tipX - r, tipY - r, 2 * r, 2 * r); g.FillRectangle(b2, tipX - r / 2f, tipY - r / 2f, r, r);
-                for (int q = 1; q <= 4; q++) { float fx = tipX + aface * (q * 5 * S + (float)Math.Sin(time * 9f + q) * S), fy = tipY + (float)Math.Cos(time * 11f + q * 2) * 2 * S; g.FillRectangle(q % 2 == 0 ? b2 : b1, fx - S, fy - S / 2f, 2 * S, S); }
+                float gl = wizGlow, arm = (2.5f + 5.5f * gl) * S * pulse, c = (1f + 1.6f * gl) * S, d = arm * 0.55f;      // brilho de carga: estrela em cruz com nucleo claro e fagulhas girando
+                g.FillRectangle(b1, tipX - arm, tipY - S / 2f, 2 * arm, S); g.FillRectangle(b1, tipX - S / 2f, tipY - arm, S, 2 * arm);
+                for (int sx = -1; sx <= 1; sx += 2) for (int sy = -1; sy <= 1; sy += 2) { g.FillRectangle(b1, tipX + sx * d - S / 2f, tipY + sy * d - S / 2f, S, S); g.FillRectangle(b1, tipX + sx * d * 0.6f - S / 2f, tipY + sy * d * 0.6f - S / 2f, S, S); }
+                g.FillRectangle(b1, tipX - c, tipY - c, 2 * c, 2 * c); g.FillRectangle(b2, tipX - c / 2f, tipY - c / 2f, c, c);
+                for (int q = 0; q < 6; q++) { double an = time * (6 + 8 * gl) + q * Math.PI / 3, rr = (4.5f + 3.5f * gl) * S; g.FillRectangle(b2, tipX + (float)Math.Cos(an) * (float)rr - S / 2f, tipY + (float)Math.Sin(an) * (float)rr - S / 2f, S, S); }
+                for (int q = 1; q <= 4 && wizGlow > 0.4f; q++) { float fx = tipX + aface * (q * 5 * S + (float)Math.Sin(time * 9f + q) * S), fy = tipY + (float)Math.Cos(time * 11f + q * 2) * 2 * S; g.FillRectangle(q % 2 == 0 ? b2 : b1, fx - S, fy - S / 2f, 2 * S, S); }
             }
         }
 

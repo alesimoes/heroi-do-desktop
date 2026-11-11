@@ -1,6 +1,7 @@
 # Changelog (resumo)
 
 ## 11/11/2026 — 2ª conversa do Feiticeiro (entre a Fase 2 e a 3)
+- **Ajustes:** Link e Feiticeiro ficam **mais distantes** na conversa (44 em vez de 26); o **cajado** ficou **um pouco menor** na mão dele; a **ameaça com o cajado dura 8 s**: ele levanta como antes (0,6 s), aponta, e **abaixa mais devagar (1,4 s)**; **depois de 5 s a ponta começa a brilhar** (estrela de carga, como se fosse atirar) e **2 s depois o brilho some aos poucos**.
 - Depois do Octorok Gigante e das rupias, **antes da Fase 3**: os monstros somem, a tela amplia no Link e o Feiticeiro (já com o cajado) chega. *Feiticeiro: "Preciso de ajuda..." (pausa) "Você pode me dar sua..." (pausa) "sua espada?"* / *Link: "Hã?"* / *Feiticeiro: "Preciso de equipamento"* / *Link: "NÃO!"*. Então o Feiticeiro **aponta o cajado para o Link por alguns segundos (sem fala)**, abaixa e diz *"Meu amigo, eu nunca o machucaria."*, e **vai embora**. A tela volta ao normal, escurece e a Fase 3 começa. As letras aparecem uma por uma, com pausa de 0,7 s onde há reticências. Atalhos de teste: item **Atalho: 2a conversa do Feiticeiro** na bandeja e `--cena2`. Só no desktop.
 
 ## 11/11/2026 — Nome da espada do conjunto cogumelo
