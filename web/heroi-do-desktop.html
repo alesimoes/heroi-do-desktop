@@ -257,7 +257,7 @@ const ROWS = {
   shirtItemMush: ["...KKKKKKKKKK...","..KQQQKKKKQQQK..",".KQWQQQhhQQQWQK.",".KQQQWQQQQQQWQK.",".KgQKQQQQQQKQgK.",".KKKKQQQQQQKKKK.","....KQQWQQQK....","....KQQQQWQK....","....KgQQQQgK....","....KBBBBBBK....","....KKKKKKKK...."],
   mushItem: ["....KKKKKKKK....","..KKRRRRRRRRKK..",".KRRRRRWRRRRRRK.","KRRWRRRRRRRWRRRK","KRRRRRWRRRRRRRRK","KRWRRRRRRRWRRRRK","KRRRRRRWRRRRRWRK","KRRRWRRRRRRRRRRK","KKKKKKKKKKKKKKKK",".....KTTTTK.....",".....KTtTTK.....",".....KTTTTK.....",".....KTtTTK.....",".....KTTTTK.....","......KKKK......","................"],
   hammerItem: ["..KKKKKKKKKKKK..",".KhhhhhhhhhhhhK.",".KhGGGGGGGGGGgK.",".KGGGGGccGGGGgK.",".KGGGGcCCcGGGgK.",".KGGGGGccGGGGgK.",".KgGGGGGGGGGggK.",".KKKKKKKKKKKKKK.",".....KBBBBK.....",".....KBbBBK.....",".....KBbBBK.....",".....KBBBBK.....",".....KBbBBK.....",".....KBBBBK.....",".....KBBBBK.....","......KKKK......"],
-  flameItem: [".......KK.......","......KYYK......",".....KOYYOK.....","......KOYOK.....",".....KOYYOK.....","......KOYOK.....",".....KOYYOK.....","......KOYOK.....",".....KOYYOK.....","......KOOK......","...KKKKOOKKKK...","..KRRRRRRRRRRK..","...KKKKKKKKKK...",".....KBBBK......",".....KBbBK......","......KKK......."],  crownItem: ["......KKKK......","..KK..KCCK..KK..",".KCCK.KCCK.KCCK.",".KCCKKCCCCKKCCK.",".KCCCCCCCCCCCCK.",".KCCCCCRRCCCCCK.",".KCUCCCRRCCCUCK.",".KccccccccccccK.",".KKKKKKKKKKKKKK."],
+  flameItem: ['.......KK.......','......KYYK......','.....KOYYOK.....','....KFOYYOFK....','.....KOYYOK.....','....KFOYYOFK....','.....KOYYOK.....','...KFFOYYOFFK...','....KFOYYOFK....','.....KOYYOK.....','......KOOK......','..KKKKKOOKKKKK..','.KRRRRYYYYRRRRK.','.....KBBBBK.....','.....KBbBBK.....','......KKKK......'],  crownItem: ["......KKKK......","..KK..KCCK..KK..",".KCCK.KCCK.KCCK.",".KCCKKCCCCKKCCK.",".KCCCCCCCCCCCCK.",".KCCCCCRRCCCCCK.",".KCUCCCRRCCCUCK.",".KccccccccccccK.",".KKKKKKKKKKKKKK."],
   capItem: ["....KKKKKKKK....","...KHHhhHHHHK...","..KHHhHHHHHHgK..",".KHHHHHHHHHHHgK.","KHHHHHHHHHHHHHgK","KHHHHHHHHHHHHggK","KggggggggggggggK",".KKKKKKKKKKKKKK."],
   shirtItem: ["...KKKKKKKKKK...","..KQQQKKKKQQQK..",".KQQQQQhhQQQQQK.",".KQQQQQQQQQQQQK.",".KgQKQQQQQQKQgK.",".KKKKQQQQQQKKKK.","....KQQQQQQK....","....KQQQQQQK....","....KgQQQQgK....","....KBBBBBBK....","....KKKKKKKK...."],
   slimeTall: ["....KKKK....","..KKUUUUKK..",".KULLUUUUUK.",".KULUUUUUUK.","KUUWKUUWKUUK","KUUUUUUUUUUK","KUUUUUUUUUUK",".KKUUUUUUKK.","...KKKKKK..."],
@@ -438,7 +438,7 @@ function buildSprites() {
     capItem: makeSprite(ROWS.capItem, S, { H: '#9650cd', h: '#cd96f0', g: '#60328c' }), shirtItem: makeSprite(ROWS.shirtItem, S, { Q: '#467deb', h: '#87b4ff', g: '#2d55be' }),
     crown: makeSprite(ROWS.crownItem, S, { C: '#ffcd28', c: '#d79614', R: '#d7283c', U: '#467deb' }), capGreen: makeSprite(ROWS.capItem, S, { H: '#3aa53e', h: '#82d278', g: '#1e6e2d' }), shirtGreen: makeSprite(ROWS.shirtItem, S, { Q: '#3aa53e', h: '#82d278', g: '#1e6e2d' }), robeItem: makeSprite(ROWS.robeIcon, S, { Q: '#be233c', g: '#821428', C: '#ffcd28' }),
     setCap, setShirt,
-    mushIcon: makeSprite(ROWS.mushItem, S, { R: '#d63034', W: '#fafafa', T: '#eee0bc', t: '#c8af82' }), hammerIcon: makeSprite(ROWS.hammerItem, S, { G: '#969bac', g: '#5f6476', h: '#d2d7e6', c: '#5ae1eb', C: '#ebffff' }), flameIcon: makeSprite(ROWS.flameItem, S, { O: '#ff8c28', Y: '#ffe15a', R: '#d73c28', B: '#6e2828', b: '#4b191e' }),    heroPow: [tintBlue(makeSprite(ROWS.heroA, S)), tintBlue(makeSprite(ROWS.heroB, S))],
+    mushIcon: makeSprite(ROWS.mushItem, S, { R: '#d63034', W: '#fafafa', T: '#eee0bc', t: '#c8af82' }), hammerIcon: makeSprite(ROWS.hammerItem, S, { G: '#969bac', g: '#5f6476', h: '#d2d7e6', c: '#5ae1eb', C: '#ebffff' }), flameIcon: makeSprite(ROWS.flameItem, S, { O: '#ff8c28', Y: '#ffe15a', F: '#e84e1e', R: '#aa2828', B: '#6e2828', b: '#4b191e' }),    heroPow: [tintBlue(makeSprite(ROWS.heroA, S)), tintBlue(makeSprite(ROWS.heroB, S))],
     heart: makeSprite(ROWS.heart, S), heartE: makeSprite(ROWS.heart, S, { R: '#46465a', W: '#69697a' }), heartH: (() => { const e = makeSprite(ROWS.heart, S, { R: '#46465a', W: '#69697a' }), f = makeSprite(ROWS.heart, S), mk = (a, b) => { const c = document.createElement('canvas'); c.width = a.width; c.height = a.height; const g = c.getContext('2d'); g.drawImage(a, 0, 0); g.drawImage(b, 0, 0, b.width / 2, b.height, 0, 0, b.width / 2, b.height); return c; }; return { r: mk(e.r, f.r), l: mk(e.l, f.l), w: e.w, h: e.h }; })(),
     rupee: [makeSprite(ROWS.rupee, S), makeSprite(ROWS.rupee, S, { G: '#467deb' }), makeSprite(ROWS.rupee, S, { G: '#e63c3c' }), makeSprite(ROWS.rupee, S, { G: '#f0c83c' }), makeSprite(ROWS.rupee, S, { G: '#9650cd' }), makeSprite(ROWS.rupee, S * 2, { G: '#ffcd28' })],      // [5] = 300 (recompensa do dragao): dourada e grande
     rock: makeSprite(ROWS.rock, S), apple: makeSprite(ROWS.apple, S), appleHud: makeSprite(ROWS.appleBig, S),
@@ -1823,13 +1823,7 @@ function drawSpecialSword(handX, handY, dx, dy, px, py) {      // marreta, cogum
 }
 function drawSpecialSwordRaw(handX, handY, dx, dy, px, py) {
   const dark = '#1c1624', poly = (pts, fill, st) => { ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); if (st) { ctx.strokeStyle = dark; ctx.lineWidth = Math.max(1, S); ctx.stroke(); } };
-  if (eqSword === 2) {
-    ctx.lineCap = 'butt'; ctx.strokeStyle = dark; ctx.lineWidth = 3.6 * S; ctx.beginPath(); ctx.moveTo(handX - dx * 4 * S, handY - dy * 4 * S); ctx.lineTo(handX + dx * 11 * S, handY + dy * 11 * S); ctx.stroke();
-    ctx.strokeStyle = '#87552d'; ctx.lineWidth = 2 * S; ctx.beginPath(); ctx.moveTo(handX - dx * 4 * S, handY - dy * 4 * S); ctx.lineTo(handX + dx * 11 * S, handY + dy * 11 * S); ctx.stroke();
-    const cx = handX + dx * 11.5 * S, cy = handY + dy * 11.5 * S, hw = 5 * S, hd = 3 * S, q = (a, b) => [cx + px * a + dx * b, cy + py * a + dy * b];
-    poly([q(-hw, -hd), q(hw, -hd), q(hw, hd), q(-hw, hd)], '#969bac', true); poly([q(-hw + S, hd - 2.2 * S), q(hw - S, hd - 2.2 * S), q(hw - S, hd - S), q(-hw + S, hd - S)], '#cdd2e4'); rect('#5ae1eb', cx - S, cy - S, 2 * S, 2 * S);
-    return;
-  }
+  if (eqSword === 2) { drawPixelHammer(handX, handY, dx, dy, px, py, S); return; }      // marreta: forma simples
   if (eqSword === 4) {      // Cogumelo-maca em pixels: talo cremoso, chapeu vermelho e bolinhas redondas
     const spots = [[0, 2], [3.2, 1.2], [-3.2, 1.2], [1.7, 3.9], [-1.7, 3.9]];
     for (let ci = -18; ci <= 18; ci++) for (let cj = -18; cj <= 18; cj++) {
@@ -1867,14 +1861,39 @@ function drawFlameSword(handX, handY, dx, dy, px, py, sc) {
     if (c !== null) rect(c, handX + ci * sc - 0.3, handY + cj * sc - 0.3, sc + 0.6, sc + 0.6);
   }
 }
+// ESPADA COMUM / ESPADA MESTRE: formas simples (poucos detalhes, contorno escuro): lamina de 2 tons com ponta afilada, guarda reta e cabo. Comum: aco cinza, guarda cinza, cabo marrom. Mestre: lamina azulada, guarda dourada, cabo roxo.
+function drawPixelSword(handX, handY, dx, dy, px, py, sc, master) {
+  const dark = '#221c34', tipU = master ? 12.4 : 11, halfG = master ? 3.9 : 3.3;
+  const lite = master ? '#e8f6ff' : '#e8ecf6', body = master ? '#a8ccf6' : '#acb6cc', shade = master ? '#6e96d6' : '#7c86a0', guard = master ? '#f0c846' : '#9298ac', grip = master ? '#7448b0' : '#7c502e';
+  for (let ci = -16; ci <= 16; ci++) for (let cj = -16; cj <= 16; cj++) {
+    const vx = (ci + 0.5) * sc, vy = (cj + 0.5) * sc, u = (vx * dx + vy * dy) / sc, w = (vx * px + vy * py) / sc, aw = Math.abs(w); let c = null;
+    if (u >= -3.2 && u < 0) { if (aw <= 0.9) c = grip; else if (aw <= 1.85) c = dark; }
+    else if (u >= 0 && u < 1.4) { if (aw <= halfG) c = guard; else if (aw <= halfG + 0.9) c = dark; }
+    else if (u >= 1.4 && u <= tipU) {
+      const t = (u - 1.4) / (tipU - 1.4); let hw = 1.3 - 0.3 * t; if (u > tipU - 2) hw = 0.25 + (hw - 0.25) * (tipU - u) / 2;
+      if (aw <= hw) c = w > 0.1 ? lite : (aw > hw - 0.5 ? shade : body); else if (aw <= hw + 0.9) c = dark;
+    }
+    if (c) rect(c, handX + ci * sc - 0.3, handY + cj * sc - 0.3, sc + 0.6, sc + 0.6);
+  }
+}
+// MARRETA TROVAO: cabo de madeira reto e cabeca retangular de aco em 2 tons, com um pequeno raio azul no centro
+function drawPixelHammer(handX, handY, dx, dy, px, py, sc) {
+  const dark = '#1e182c';
+  for (let ci = -19; ci <= 19; ci++) for (let cj = -19; cj <= 19; cj++) {
+    const vx = (ci + 0.5) * sc, vy = (cj + 0.5) * sc, u = (vx * dx + vy * dy) / sc, w = (vx * px + vy * py) / sc, aw = Math.abs(w); let c = null;
+    if (u >= -3.2 && u < 8) { if (aw <= 0.95) c = w > 0 ? '#a46c3c' : '#784c2a'; else if (aw <= 1.9) c = dark; }
+    else if (u >= 8 && u <= 14) {
+      const inside = aw <= 5.6 && u >= 8.9 && u <= 13.1;
+      if (inside) c = w > 0 ? '#ccd4e6' : '#8e96ac'; else if (aw <= 6.5 && u <= 14) c = dark;
+      if (inside && Math.abs(u - 11) <= 0.8 && aw <= 1.3) c = '#60e2ee';
+    }
+    if (c) rect(c, handX + ci * sc - 0.3, handY + cj * sc - 0.3, sc + 0.6, sc + 0.6);
+  }
+}
 function drawSword(handX, handY, aDeg, f) {
   const a = aDeg * Math.PI / 180, dx = f * Math.cos(a), dy = Math.sin(a), px = -dy, py = dx, len = 11 * S, w = 1.0 * S;      // espada menor em proporcao ao Link (antes 14 e 1,2)
   if (eqSword >= 2) { drawSpecialSword(handX, handY, dx, dy, px, py); return; }      // marreta / espada de chamas
-  ctx.fillStyle = eqSword === 1 ? '#cde8ff' : '#e1ebf5'; ctx.strokeStyle = '#1c1624'; ctx.lineWidth = Math.max(1, S);      // contorno na mesma espessura do resto do jogo
-  ctx.beginPath(); ctx.moveTo(handX + px * w, handY + py * w); ctx.lineTo(handX - px * w, handY - py * w); ctx.lineTo(handX + dx * len - px * w, handY + dy * len - py * w);
-  ctx.lineTo(handX + dx * (len + 3 * S), handY + dy * (len + 3 * S)); ctx.lineTo(handX + dx * len + px * w, handY + dy * len + py * w); ctx.closePath(); ctx.fill(); ctx.stroke();
-  ctx.strokeStyle = eqSword === 1 ? '#3c5fcd' : '#d7a028'; ctx.lineWidth = 2 * S; ctx.beginPath(); ctx.moveTo(handX + px * 3 * S, handY + py * 3 * S); ctx.lineTo(handX - px * 3 * S, handY - py * 3 * S); ctx.stroke();
-  ctx.strokeStyle = eqSword === 1 ? '#503796' : '#87552d'; ctx.lineWidth = S + 1; ctx.beginPath(); ctx.moveTo(handX, handY); ctx.lineTo(handX - dx * 3 * S, handY - dy * 3 * S); ctx.stroke();
+  drawPixelSword(handX, handY, dx, dy, px, py, S, eqSword === 1);      // espada comum ou Espada Mestre (formas simples e limpas)
 }
 const APPLE_SHIELD = ['...KT.L.', '.KKKTKLK', 'KRRRRRRK', 'KRFFFFRK', 'KRFBBFRK', 'KRFBBFRK', 'KRFFFFRK', '.KRFFRK.', '..KRRK..', '...KK...'];
 const APPLE_COL = { K: '#1c1624', R: '#c8222c', F: '#faecbe', B: '#6e3c1e', T: '#785028', L: '#46a03c' };
@@ -1894,6 +1913,7 @@ function pixelBow(cx, cy, dx, dy, half, bend, unit, eq) {
   for (let i = 0; i <= n; i++) { const u = i / n * 2 - 1, b = bend * (1 - u * u); pts.push([Math.floor((cx + px * u * half + dx * b) / unit) * unit, Math.floor((cy + py * u * half + dy * b) / unit) * unit]); }
   const sq = (p, c, o, w) => { ctx.fillStyle = c; ctx.fillRect(p[0] - o, p[1] - o, w, w); };
   pts.forEach((p) => sq(p, '#1c1624', unit, 3 * unit)); pts.forEach((p) => sq(p, main, 0, unit)); for (let i = 1; i < n; i += 3) sq(pts[i], hi, 0, unit);
+  { const gcol = eq === 2 ? '#ffaa28' : (eq === 1 ? '#deb040' : '#684024'); for (let k = -2; k <= 2; k++) sq(pts[Math.max(0, Math.min(n, (n >> 1) + k * 2))], gcol, 0, unit); }      // empunhadura: 5 quadradinhos no meio numa cor diferente
   if (eq === 2) { const m = pts[n >> 1]; sq([m[0] - unit / 2, m[1] - unit / 2], '#ffaa28', 0, 2 * unit); sq(pts[0], '#78ebf5', 0, unit); sq(pts[n], '#78ebf5', 0, unit); }
 }
 function bowIcon(eq, cx, cy, u) {      // arco para icones e item grande (barriga para a direita, como no jogo)
