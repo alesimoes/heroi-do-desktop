@@ -1904,9 +1904,9 @@ namespace HeroiPet
                 for (int ci = -R; ci <= R; ci++) for (int cj = -R; cj <= R; cj++)
                 {
                     float vx = ci, vy = cj, u = vx * dx + vy * dy, w = vx * px + vy * py, aw = Math.Abs(w); Color? c = null;
-                    if (u >= -9.5f && u < -7.5f) { if (aw <= 0.4f) c = guard; else if (aw <= 1.2f) c = outl; }      // pomo
-                    else if (u >= -7.5f && u < -2.5f) { if (aw <= 0.4f) c = grip; else if (aw <= 1.2f) c = outl; }      // cabo de 1 quadradinho
-                    else if (u >= -2.5f && u <= 1.5f && aw <= 5.2f)
+                    if (u >= -6.5f && u < -5.5f) { if (aw <= 0.4f) c = guard; else if (aw <= 1.2f) c = outl; }      // pomo (1 linha)
+                    else if (u >= -5.5f && u < -1.5f) { if (aw <= 0.4f) c = grip; else if (aw <= 1.2f) c = outl; }      // cabo curto de 1 quadradinho de largura
+                    else if (u >= -1.5f && u <= 1.5f && aw <= 5.2f)
                     {
                         if (aw <= 1.5f && u > 0.5f) c = (aw <= 0.4f) ? lite : blade;      // a lamina nasce da guarda
                         else c = (Math.Abs(u) <= 0.5f && aw <= 4.2f) ? guard : outl;      // guarda: barra de 9 com contorno em cima e embaixo
