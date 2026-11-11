@@ -3734,7 +3734,7 @@ namespace HeroiPet
                     {
                         bool act = CurDlg[dlgIdx][0] == "*"; float dur = CurDlgTime[dlgIdx];
                         wizPoint = act ? Math.Min(Ease(sceneT / 0.6f), Ease((dur - sceneT) / 1.4f)) : 0f;      // levanta o cajado (0,6 s), aponta para o Link e abaixa mais devagar (1,4 s)
-                        wizGlow = act ? (sceneT < 5f ? 0f : (sceneT < 5.6f ? Ease((sceneT - 5f) / 0.6f) : (sceneT < 7f ? 1f : Ease((dur - sceneT) / (dur - 7f))))) : 0f;      // depois de 5 s a ponta brilha (como se fosse atirar); 2 s depois para de brilhar aos poucos
+                        wizGlow = act ? (sceneT < 3f ? 0f : (sceneT < 4f ? Ease(sceneT - 3f) : (sceneT < 7f ? 1f : Ease((dur - sceneT) / (dur - 7f))))) : 0f;      // aos 3 s a ponta comeca a brilhar aos poucos (1 s), brilha 3 s (4 a 7 s) e para aos poucos (7 a 8 s)
                         if (sceneT >= dur) { dlgIdx++; sceneT = 0; wizPoint = 0f; wizGlow = 0f; if (dlgIdx >= CurDlg.Length) { scene = sceneKind == 2 ? 8 : 4; sceneT = 0; } }
                         break;
                     }
@@ -3781,10 +3781,17 @@ namespace HeroiPet
         }
         void DrawAlly(Graphics g)
         {
-            float bob = (float)Math.Sin(time * 3f) * 1.2f * S;
+            float bob = (float)Math.Sin(time * 3f) * 1.2f * S, shx = 0, shy = 0;
+            if (wizPoint > 0.6f)      // enquanto aponta o cajado ele fica parado, tremendo rapidamente (pouco)
+            { shx = (((int)(time * 45f)) % 2 == 0 ? 1 : -1) * 0.5f * S * wizPoint; shy = (((int)(time * 31f)) % 2 == 0 ? 1 : -1) * 0.25f * S * wizPoint; bob = 0; }
             Shadow(g, ax, ay, 11);
-            Spr(g, wizSpr, ax, ay - bob, aface > 0);
-            if (wizPoint > 0f && staffSpr != null) DrawPointingStaff(g, ax, ay - bob); else DrawHeldStaff(g, ax, ay - bob, 0.58f, aface);      // cajado um pouco menor
+            Spr(g, wizSpr, ax + shx, ay - bob + shy, aface > 0);
+            if (wizPoint > 0f && staffSpr != null) DrawPointingStaff(g, ax + shx, ay - bob + shy); else DrawHeldStaff(g, ax, ay - bob, 0.58f, aface);      // cajado um pouco menor
+        }
+        void DitherRect(Graphics g, Brush b, float x, float y, float w, float h)      // retangulo "meio transparente": so metade dos quadradinhos (xadrez), da para ver o fundo
+        {
+            int x0 = (int)Math.Floor(x / S), y0 = (int)Math.Floor(y / S), x1 = (int)Math.Ceiling((x + w) / S), y1 = (int)Math.Ceiling((y + h) / S);
+            for (int iy = y0; iy < y1; iy++) for (int ix = x0; ix < x1; ix++) if (((ix + iy) & 1) == 0) g.FillRectangle(b, ix * S, iy * S, S, S);
         }
         void DrawPointingStaff(Graphics g, float x, float feetY)      // cajado levantado e apontado para frente (para o Link), com a esfera brilhando
         {
@@ -3793,16 +3800,17 @@ namespace HeroiPet
             GraphicsState st = g.Save(); g.TranslateTransform(px, py); g.RotateTransform(ang);
             g.DrawImage(staffSpr.R, (int)(-w / 2f), (int)(-h + 2 * S * k), w, h);
             g.Restore(st);
-            if (wizGlow <= 0.01f) return;      // so brilha na carga (5 s a 7 s)
-            double rad = ang * Math.PI / 180.0; float tl = h - 4 * S * k, tipX = px + (float)Math.Sin(rad) * tl, tipY = py - (float)Math.Cos(rad) * tl, pulse = 1f + 0.4f * (float)Math.Sin(time * (14f + 14f * wizGlow));
+            if (wizGlow <= 0.01f) return;      // so brilha na carga (comeca aos 3 s, brilha 3 s e some aos poucos)
+            double rad = ang * Math.PI / 180.0; float tl = h - 4 * S * k, tipX = px + (float)Math.Sin(rad) * tl, tipY = py - (float)Math.Cos(rad) * tl, gl = wizGlow, pulse = 1f + 0.25f * (float)Math.Sin(time * (14f + 10f * gl));
             using (SolidBrush b1 = new SolidBrush(Color.FromArgb(190, 120, 255))) using (SolidBrush b2 = new SolidBrush(Color.FromArgb(245, 230, 255)))
             {
-                float gl = wizGlow, arm = (2.5f + 5.5f * gl) * S * pulse, c = (1f + 1.6f * gl) * S, d = arm * 0.55f;      // brilho de carga: estrela em cruz com nucleo claro e fagulhas girando
-                g.FillRectangle(b1, tipX - arm, tipY - S / 2f, 2 * arm, S); g.FillRectangle(b1, tipX - S / 2f, tipY - arm, S, 2 * arm);
-                for (int sx = -1; sx <= 1; sx += 2) for (int sy = -1; sy <= 1; sy += 2) { g.FillRectangle(b1, tipX + sx * d - S / 2f, tipY + sy * d - S / 2f, S, S); g.FillRectangle(b1, tipX + sx * d * 0.6f - S / 2f, tipY + sy * d * 0.6f - S / 2f, S, S); }
-                g.FillRectangle(b1, tipX - c, tipY - c, 2 * c, 2 * c); g.FillRectangle(b2, tipX - c / 2f, tipY - c / 2f, c, c);
-                for (int q = 0; q < 6; q++) { double an = time * (6 + 8 * gl) + q * Math.PI / 3, rr = (4.5f + 3.5f * gl) * S; g.FillRectangle(b2, tipX + (float)Math.Cos(an) * (float)rr - S / 2f, tipY + (float)Math.Sin(an) * (float)rr - S / 2f, S, S); }
-                for (int q = 1; q <= 4 && wizGlow > 0.4f; q++) { float fx = tipX + aface * (q * 5 * S + (float)Math.Sin(time * 9f + q) * S), fy = tipY + (float)Math.Cos(time * 11f + q * 2) * 2 * S; g.FillRectangle(q % 2 == 0 ? b2 : b1, fx - S, fy - S / 2f, 2 * S, S); }
+                float R = (1.2f + 2.6f * gl) * S * pulse, arm = (1.5f + 3f * gl) * S * pulse, c = (0.5f + 0.9f * gl) * S;      // brilho pequeno e levemente transparente (pontilhado)
+                for (int iy = (int)Math.Floor((tipY - R) / S); iy <= (int)Math.Ceiling((tipY + R) / S); iy++)
+                    for (int ix = (int)Math.Floor((tipX - R) / S); ix <= (int)Math.Ceiling((tipX + R) / S); ix++)
+                    { float cx = ix * S + S / 2f - tipX, cy = iy * S + S / 2f - tipY; if (cx * cx + cy * cy <= R * R && ((ix + iy) & 1) == 0) g.FillRectangle(b1, ix * S, iy * S, S, S); }
+                DitherRect(g, b1, tipX - arm, tipY - S / 2f, 2 * arm, S); DitherRect(g, b1, tipX - S / 2f, tipY - arm, S, 2 * arm);
+                g.FillRectangle(b2, tipX - c / 2f, tipY - c / 2f, c, c);
+                for (int q = 0; q < 4; q++) { double an = time * (6 + 6 * gl) + q * Math.PI / 2, rr = (2.4f + 1.6f * gl) * S; g.FillRectangle(b2, tipX + (float)Math.Cos(an) * (float)rr - S / 2f, tipY + (float)Math.Sin(an) * (float)rr - S / 2f, S, S); }
             }
         }
 
