@@ -1,5 +1,68 @@
 # Changelog (resumo)
 
+## 11/11/2026 — Aviso da Fase 2 depois do Feiticeiro + zoom mais lento
+- O aviso **"VOCÊ PASSOU PARA A FASE 2!"** agora aparece **quando a Fase 2 começa**, depois da cena do Feiticeiro e do cajado (5 s, mais acima na tela para não cobrir o Link). Depois do dragão não aparece mais aviso: vai direto para a cena.
+- A tela **aproxima mais devagar** do Link (3,4 s em vez de 1,4 s) antes de o Feiticeiro chegar para conversar.
+
+## 11/11/2026 — Cena do Feiticeiro + fase intermediária escura (entre a Fase 1 e a 2)
+- Depois do dragão e de pegar as rupias: **os monstros somem, a tela amplia em cima do Link** (até 2,3x) e **chega o Feiticeiro, do tamanho do Link, fingindo ter boas intenções**. Conversa em caixa de texto com as letras aparecendo uma por uma (20/s), cada fala 2 s a mais: *Feiticeiro: "Preciso da sua ajuda, recupere meu cajado, você é forte e valente."* / *Link: "Por que precisa dele?"* / *Feiticeiro: "Seu poder..."* / *Feiticeiro: "Você só pode saber o lugar que está."* Depois a tela volta ao normal e escurece.
+- **Fase intermediária jogável** num lugar escuro: **pedras** (3 modelos) no lugar das macieiras, espalhadas pelo cenário todo, e o Link **não passa por cima delas** (para ao encostar); **4 poças de água** de formatos diferentes (ao andar nelas os pés ficam um pouco submersos e **espirram gotas**); **filtro cinza translúcido** por cima do jogo e **bordas em degradê de cinza para preto**; **muitos morcegos**; o **Feiticeiro segue o Link como aliado** (não ajuda a lutar).
+- Depois de **30 morcegos mortos**, o **cajado** (detalhado, na paleta do Feiticeiro: esfera roxa com brilho amarelo, garras e anéis dourados) **cai no meio da tela**, o Feiticeiro pega e some; a tela escurece e **começa a Fase 2 como antes**. **A partir daí o Feiticeiro segura o cajado sempre que aparece** (inclusive como chefe da Fase 2).
+- Atalhos de teste: `--cena` e item **"Atalho: cena do Feiticeiro"** no menu da bandeja. O Link não pisca mais nessa parte (a camada de escuridão só é redesenhada quando muda). Desktop; a web está sendo portada (não publicada).
+
+## 11/11/2026 — Cena do Feiticeiro + fase intermediária escura (antes da Fase 2)
+- **Depois do dragão** (e de pegar as rupias) **os monstros somem**, a tela **amplia (até 2,3x)** em volta do Link e o **Feiticeiro** (do tamanho do Link, fingindo ser bom) chega e fala, numa caixa embaixo (cada fala fica na tela 6,6 / 4,6 / 4,2 / 5,8 s): *Feiticeiro:* "Preciso da sua ajuda, recupere meu cajado, você é forte e valente." — *Link:* "Por que precisa dele?" — *Feiticeiro:* "Seu poder..." — *Feiticeiro:* "Você só pode saber o lugar que está." Depois a tela volta ao normal e **escurece**.
+- **Fase intermediária jogável** (entre a Fase 1 e a 2): lugar escuro com **filtro cinza** translúcido e **degradê de cinza para preto nas bordas**; **pedras** no lugar das macieiras, espalhadas pelo cenário em **3 modelos** (o Link **não passa por cima**, para ao encostar); **4 poças** de formatos diferentes (ao andar nelas o **pé fica um pouco submerso** e **espirram gotas**); **muitos morcegos**; o **Feiticeiro segue o Link como aliado** (não ajuda a lutar).
+- Depois de **30 morcegos mortos** o **cajado** cai no meio da tela (pixel-art detalhada: esfera roxa com brilho amarelo em garras douradas, haste roxa com anéis dourados), o Feiticeiro anda até ele, **pega e some**; a tela escurece e **começa a Fase 2** (como antes). **Dali em diante o Feiticeiro aparece sempre segurando o cajado** (ex.: o Feiticeiro Sombrio da Fase 2).
+- **Pedras redesenhadas** (3 modelos feitos à mão: bloco anguloso com musgo, rocha alta facetada, rocha larga com pedrinha), ~1,5x maiores. **Revisão de código:** o cajado agora começa fora dos loops de combate (antes podia travar o jogo ao matar o 30º morcego); sem ondas de chefe na fase intermediária; a Fase 2 sempre desfaz o mundo escuro; a cena não começa com o herói morto; na poça só os pés ficam escondidos; a cópia de segurança só grava em disco quando algo mudou; o bitmap escuro é liberado.
+- Corrigido o **Link piscando** nessa parte (a camada escura era redesenhada a cada quadro). Atalhos de teste: `--cena` / item "Atalho: cena do Feiticeiro" no menu da bandeja.
+- *Desktop; o arquivo da web está sendo portado (não publicado).*
+
+## 11/11/2026 — Nível 2 um pouco mais difícil
+- No **NV 2 da Fase 1** (de 20 a 39 rupias) a dificuldade ficou **meio passo** acima (+5% de monstros no campo e de ritmo de nascimento; antes +10%, agora +15%). Os outros níveis não mudaram. Desktop e arquivo da web (não publicado).
+
+## 11/11/2026 — Todos os prêmios 10% mais difíceis
+- Também subiram 10%: **evoluções** 1100 / 1650 / 2200 / 3300 (antes 1000 / 1500 / 2000 / 3000), **baú** 5500 (antes 5000) e **fadinha** 55 monstros, rosa +110, folha +1100, estrela +1650 (antes 50 / 100 / 1000 / 1500). Só vale para o que ainda não foi ganho: nada que você já tem é tirado. Veja a próxima seção para conjuntos e armas.
+
+## 11/11/2026 — Conjuntos 10% mais difíceis
+- Os 7 conjuntos agora liberam com **4950 / 6600 / 8800 / 11550 / 15400 / 17600 / 20900** monstros (antes 4500 / 6000 / 8000 / 10500 / 14000 / 16000 / 19000). As **armas** também: **550 / 1100 / 1650** (antes 500 / 1000 / 1500). Quem já tinha o conjunto cogumelo mantém (contador subido para 17600). *Só no desktop e no arquivo da web por enquanto (não publicado).*
+
+## 11/11/2026 — Cópia de segurança do progresso + gorro sem sombra escura
+- O jogo guarda **todo o progresso também em arquivo** (`%APPDATA%\HeroiDoDesktop\progresso.txt`, mais `progresso.bak`), a cada ~20 s e ao fechar, e **força o registro a gravar no disco**. Ao abrir, se o registro tiver **menos monstros** que a cópia (registro zerado/antigo, desligamento brusco do Windows), a **cópia volta para o registro**. A cópia nunca é trocada por algo com menos progresso.
+- **Morcegos da Fase 2** voam **mais rápido** (velocidade 30 → 48) e **mais retos** em direção ao herói (ondulação 26 → 12). Na Fase 1 continua igual. Desktop e arquivo da web (não publicado).
+- **Entre a Fase 1 e a 2:** depois de matar o dragão e da mensagem "VOCÊ PASSOU PARA A FASE 2!", o jogo **espera o herói pegar as rupias** (e mais 2 s) antes de começar a Fase 2 (no máximo 60 s). Antes a Fase 2 começava logo e as rupias soltas sumiam.
+- No inventário, a **espada comum mostra "150 de dano"** e a **Espada Mestre "300 de dano"** (as outras já mostravam).
+- **Bokoblin da Fase 2:** ao atacar (levantar o garrote) agora **continua na cor escura** da Fase 2; voltava à cor normal. *(O arquivo da web já estava certo nisso.)*
+- O **ícone do herói na bandeja** agora **acompanha a roupa**: é refeito a cada troca (antes ficava com a roupa de quando o jogo abriu).
+- O **gorro do herói** não tem mais o sombreado escuro: fica só o brilho claro (desktop e web). *Só no desktop e no arquivo da web por enquanto (não publicado).*
+
+## 10/11/2026 — Bokoblin ataca com o garrote
+- Ao chegar perto, o bokoblin **levanta o garrote de madeira** (aviso de 0,55 s) e **desce batendo** no herói. O garrote é o **mesmo que ele segura parado** (porrete fino de duas cores) e só gira; o golpe tira **1 coração**.
+
+## 10/11/2026 — Roupas sem descrição
+- Ao passar o mouse numa peça de **roupa** (gorros e blusas) o inventário **não mostra texto nenhum** embaixo (também na fadinha). Em armas, arcos e escudos mostra **só a descrição, sem o nome**.
+
+## 10/11/2026 — Conjunto cogumelo (+ Cogumelo-maça)
+- **Gorro cogumelo** (vermelho com bolinhas brancas), **blusa de cogumelo** (vermelha com bolinhas) e **calça cor do talo** (creme, sapatos bege), mais o **Cogumelo-maça**: uma arma de cogumelo gigante (talo cremoso e chapéu vermelho com bolinhas) que acerta em área, solta esporos e dá **700 de dano** (golpe 0,36 s, recarga 0,24 s, usa uma mão e o escudo). Libera com **mais 2000 monstros depois do conjunto mar**: 16000 no mesmo contador próprio dos conjuntos (começa em zero ao instalar). Já vem vestido ao liberar. Teste: `--conjuntos` / `?conjuntos` libera os 6 conjuntos. *Só no desktop por enquanto (não publicado na web nem no git).*
+
+## 10/11/2026 — Sem créditos no jogo
+- Os **créditos saíram do fluxo do jogo**. Ao matar o **Dragão** aparece **VOCÊ PASSOU PARA A FASE 2!** e a Fase 2 começa direto; ao matar o **Feiticeiro Sombrio** aparece **ESPERE POR MAIS ATUALIZAÇÕES** e o jogo volta ao automático. *Só no desktop por enquanto (não publicado na web nem no git).*
+
+## 10/11/2026 — Descrições sem número de monstros
+- As descrições dos itens no inventário (armas, conjuntos de roupa e aparências da fadinha) **não dizem mais quantos monstros** precisa para conseguir. A descrição do arco de cristal agora diz que as flechas saem uma logo depois da outra.
+
+## 10/11/2026 — Monstros da Fase 2 com outra aparência
+- Na Fase 2 os monstros são os mesmos, mas **mais detalhados** (sprites próprios): **octorok verde** (com espinhos e manchas), **bokoblin mais escuro** (pele vinho, couro escuro, ombreiras e botas de aço), morcego com membrana sombreada e presas, gelatina azul mais escura com brilho (sem boca). (Saiu o tom roxo geral.) *Só no desktop por enquanto (não publicado na web nem no git).*
+
+## 10/11/2026 — 20 rupias por nível
+- Passar de nível agora custa **20 rupias** (antes 25), nas **fases 1 e 2**. O nível máximo (NV 7) é com 120 rupias. *Só no desktop por enquanto (não publicado na web nem no git).*
+
+## 10/11/2026 — Monstros 10% mais rápidos na Fase 2
+- Na Fase 2 os monstros comuns são os mesmos, só que **10% mais rápidos** (andar, pular, atacar e atirar; o relógio deles corre 1,1×). Dragão e Feiticeiro não mudam. *Só no desktop por enquanto (não publicado na web nem no git).*
+
+## 10/11/2026 — Fase 2 começa no nível 8
+- A Fase 2 agora vai do **nível 8 ao 14** (HUD `NV 8`…`NV 14`). A dificuldade **começa igual à do nível 4** (+30% de monstros) e a cada nível sobe como sempre (+10%): do 8 ao 14 = passos 3 a 9. Voltou a **25 rupias por nível** e os monstros têm a **vida normal** (saiu o dobro de vida e o ×1,3 que eu tinha posto); continuam sombrios (tons roxos) e o vilão é o mesmo. *Só no desktop por enquanto (não publicado na web nem no git).*
+
 ## 10/11/2026 — Arco de cristal e inventário
 - **Arco de cristal:** as duas flechas saem **uma seguida da outra** (0,09 s), no mesmo rumo da mira (antes saíam em V). Nome e descrição do item no inventário agora ficam em **duas linhas**.
 
@@ -166,3 +229,17 @@
 - Publicada em https://heroi-games-2026.web.app (Firebase Hosting) e como Claude Artifact.
 
 **Descartado:** v2 (gráfico EPX), v3 (vetorial), web em 16 bits.
+
+- (10/11/2026) Conjunto cogumelo ajustado: faixa da blusa vermelho escuro, calça mais escura, Cogumelo-maça com cabo mais curto, chapéu maior e bolinhas menores. Ícone do programa/instalador atualizado (Link verde, sem armas).
+
+- (10/11/2026) Cogumelo-maça desenhado em pixels (grade de quadradinhos, contorno escuro) com bolinhas redondas.
+
+- (10/11/2026) Blusas dos conjuntos: barra na cor da blusa em tom mais escuro (amarela na blusa da noite), no personagem e nos ícones.
+
+- (10/11/2026) Gorros usados pelo Link ganham os detalhes do ícone do inventário: brilho no topo e faixa/borda em tom mais escuro.
+
+- (10/11/2026) Cogumelo-maça menor (cabo e chapéu cerca de 25% menores).
+
+- (10/11/2026) Cogumelo-maça: contorno escuro continuo entre o chapéu e o cabo.
+
+- (10/11/2026) 7º conjunto: **maçã** (gorro e blusa vermelho-maçã, calça cor de polpa, sapatos verde-folha) + **escudo de maçã cortada**. Libera com +3000 monstros depois do cogumelo (19.000 no contador dos conjuntos). Web: restaurado o ícone da marreta (hammerItem), que tinha sido apagado por engano ao incluir o cogumelo.

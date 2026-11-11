@@ -91,7 +91,7 @@ Teste rápido: `HeroiPet.exe --evolucao` (desktop) ou `?evolucao` na URL (web) �
   zeram e vida máxima volta a 5.
 - Controles: **mouse apertado** anda até o cursor; **1** espada; **2** arco mirando no cursor; **3** colher (perto da
   árvore) / pôr maçã na fogueira / comer; **Espaço** pausa. Sem acenar nem dormir.
-- **Dificuldade por rupias:** a cada 25 rupias, +10% de monstros (base = 2/3 de 4), até +60% (150 rupias).
+- **Dificuldade por rupias:** a cada **20 rupias** (fases 1 e 2), +10% de monstros (base = 2/3 de 4), até +60% (120 rupias na fase 1).
   A partir de +40% (100, 125, 150) cada degrau dá **+1 coração máximo** (até 8).
 - **Morte:** tela "VOCÊ MORREU" + "Tentar de novo"; volta com 10 rupias a menos (mínimo 0); nível/corações recalculados.
 
@@ -110,7 +110,7 @@ fica o **herói ampliado** mostrando o que está equipado; ao clicar em um item 
 limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão nasce em ~1 s. Pode ser repetido quantas vezes quiser.
 
 ## Chefão (Dragão) — só no modo jogo
-1. No nível máximo (150 rupias) e **5 mortes** depois: os monstros que sobraram explodem, aviso grande aparece.
+1. No nível máximo (120 rupias) e **5 mortes** depois: os monstros que sobraram explodem, aviso grande aparece.
 2. Fogueira no meio. O jogador colhe, põe maçãs (3+2) e come **assadas** (10 s) com a tecla 3; cada uma cura **2**.
 3. Com vida cheia (depois de comer ao menos uma): herói se afasta, a fogueira explode, fumaça, **Dragão** nasce.
 4. Dragão: **5000 de vida** (o dobro), ~1,7× maior, **anda** em volta do herói (14/s, não pisa nele), cospe bola de fogo mirada
@@ -177,20 +177,30 @@ limpa a tela e põe o herói à esquerda enquanto a fogueira explode; o dragão 
 | 6 | **Conjunto de rei** (coroa, manto, calça, sapatos, escudo roxo) | depois da fadinha: 5000 octoroks+bokoblins, abrir o baú com a tecla 4 |
 | 7 | Fadinha rosa | +100 monstros depois do baú |
 | 8 | Fadinha folha / estrela | 1000 / 1500 monstros depois do baú |
-| — | Conjuntos areia/gelo/fogo/noite/mar | 4500 / 6000 / 8000 / 10500 / 14000 monstros (contador próprio, começa ao instalar) |
+| — | Conjuntos areia/gelo/fogo/noite/mar | 4950 / 6600 / 8800 / 11550 / 15400 monstros (cogumelo 17600, maçã 20900; 10% a mais que antes) (contador próprio, começa ao instalar) |
 | — | Poder (15 s) | 20 gelatinas |
-| — | Modo jogo | níveis por 25 rupias; NV 7 = cavaleiros; Dragão dá 1000 rupias |
+| — | Modo jogo | níveis por 20 rupias; NV 7 = cavaleiros; Dragão dá 1000 rupias |
 
 ## Armas novas (uma depois da outra, 500 monstros cada)
-- Contador próprio (`wpnKills`/`MonstrosArmas`, começa em ZERO ao instalar a versão; só conta no automático): **500 → Marreta trovão · 1000 → Espada de chamas · 1500 → Arco de cristal**. Ao liberar já vem equipada (aviso NOVO ITEM).
+- Contador próprio (`wpnKills`/`MonstrosArmas`, começa em ZERO ao instalar a versão; só conta no automático): **550 → Marreta trovão · 1100 → Espada de chamas · 1650 → Arco de cristal** (10% a mais que antes: 500/1000/1500). Ao liberar já vem equipada (aviso NOVO ITEM).
 - **Marreta trovão:** ocupa as **duas mãos** (o escudo some e não bloqueia pedras), golpe lento (acerta aos 0,30 s, dura 0,55 s, recarga 0,40 s), **área 27 S** (a normal é 18), **600** de dano.
 - **Espada de chamas:** lâmina laranja ondulada com miolo amarelo e guarda vermelha; acerta aos 0,07 s, dura 0,20 s, recarga 0,08 s; **450** de dano.
 - **Arco de cristal:** turquesa com joia laranja; **2 flechas** em leque (±0,11 rad), **100** de dano cada, ponta de cristal.
 - Dano das armas: espada 150 · Espada Mestre 300 · marreta 600 · espada de chamas 450 · flecha 50 (×2 prateado/cristal). Teste: `--armas` / `?armas`.
 
 ## Fase 2 (depois do Dragão)
-- Começa sozinha depois dos créditos do Dragão (ou pelo atalho `--fase2` / `?fase2` / item de menu). 7 níveis a cada **40 rupias** (HUD `F2 NV n`); monstros em tons sombrios com **2× vida** (octorok 400, morcego/gelatina 100, bokoblin 200, cavaleiro 500) e limite de monstros ×1,3; a onda final do NV 7 (2 gelatinas + 5 cavaleiros) e a fogueira de cura acontecem como na fase 1.
+- Começa sozinha depois dos créditos do Dragão (ou pelo atalho `--fase2` / `?fase2` / item de menu). níveis **8 a 14** (HUD `NV 8`…`NV 14`), a cada **20 rupias**; dificuldade **começa igual à do nível 4** (passo 3, +30% de monstros) e sobe +10% por nível (passos 3 a 9); monstros com **aparência própria mais detalhada** (octorok **verde**, bokoblin **mais escuro**; sprites `Octo2A`/`Bat2Up`/`Slime2Tall`/`Boko2A`…), vida normal e **10% mais rápidos**; a onda final do NV 7 (2 gelatinas + 5 cavaleiros) e a fogueira de cura acontecem como na fase 1.
 - **Vilão: Feiticeiro Sombrio** (8000 de vida, tipo 7). Flutua a ~75-115 S do herói (velocidade 22 S/s; 30 na fúria) e a cada 2,1-2,7 s (1,3-1,9 na fúria) sorteia: **anel de 12 esferas** (16 na fúria) · **tiro mirado de 3 esferas** (5 na fúria) · **teleporte** (some 0,5 s e reaparece perto do herói) · **invoca 2 gelatinas** (máx. 4 vivas). Esferas: 1 coração, o escudo bloqueia, a espada corta. Fúria com metade da vida. Ao morrer: 1000 rupias, mensagem **VOCÊ VENCEU A FASE 2!**, créditos e volta ao automático (a fase 2 termina).
 
 ## Fadinha de estrela: ataca o dobro
 - Aparência estrela (look 3) equipada: **40%** dos monstros marcados para a fada (as outras 20%) e recarga de **15 s** (as outras 30 s). Código: `FairyRate` (desktop) / `fairyRate()` (web).
+
+## Fim do Dragão e do Feiticeiro (sem créditos)
+- Dragão morto → 1000 rupias → **VOCÊ PASSOU PARA A FASE 2!** (4,5 s) → começa a Fase 2. Feiticeiro morto → 1000 rupias → **ESPERE POR MAIS ATUALIZAÇÕES** (4,5 s) → volta ao automático. Os créditos não aparecem mais (o código `EndShow`/`showCredits` continua no arquivo, sem uso).
+
+## Conjunto cogumelo (6º conjunto)
+- `SetThr[5] = 16000` (2000 a mais que o conjunto mar, contador `setKills`). Gorro e blusa vermelhos com bolinhas brancas (`Art.MushHat`/`MushShirt` trocam pixels por branco), calça creme #EEE0BC, sapatos #AC8C62. Vem junto o **Cogumelo-maça** (`eqSword = 4`): 700 de dano, acerta aos 0,14 s, dura 0,36 s, recarga 0,24 s, área 23 S, esporos ao acertar. Código: `DrawSpecialSword` (desktop) / `drawSpecialSword` (web).
+
+- (10/11/2026) Conjunto cogumelo ajustado: faixa da blusa vermelho escuro, calça mais escura, Cogumelo-maça com cabo mais curto, chapéu maior e bolinhas menores. Ícone do programa/instalador atualizado (Link verde, sem armas).
+
+- (10/11/2026) 7º conjunto: **maçã** (gorro e blusa vermelho-maçã, calça cor de polpa, sapatos verde-folha) + **escudo de maçã cortada**. Libera com +3000 monstros depois do cogumelo (19.000 no contador dos conjuntos). Web: restaurado o ícone da marreta (hammerItem), que tinha sido apagado por engano ao incluir o cogumelo.

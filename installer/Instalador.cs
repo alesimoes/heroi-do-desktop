@@ -14,14 +14,14 @@ using Microsoft.Win32;
 
 [assembly: AssemblyTitle("Instalador do Herói do Desktop")]
 [assembly: AssemblyProduct("Herói do Desktop")]
-[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyVersion("2.0.0.0")]
 
 namespace HeroiInstalador
 {
     static class Info
     {
         public const string Nome = "Herói do Desktop";
-        public const string Versao = "1.0.0";
+        public const string Versao = "2.0.0";
         public const string Exe = "HeroiPet.exe";
         public const string UninstKey = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\HeroiDoDesktop";
         public const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
