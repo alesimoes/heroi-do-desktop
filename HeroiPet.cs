@@ -3770,8 +3770,8 @@ namespace HeroiPet
             new string[] { "Feiticeiro", "Preciso de equipamento" },
             new string[] { "Link", "NÃO!" },
             new string[] { "*", "" },
-            new string[] { "Feiticeiro", "Meu amigo, eu nunca o machucaria." } };
-        static readonly float[] DlgTime2 = { 6.2f, 2.4f, 3.4f, 2.4f, 12f, 4.4f };      // a ameaca com o cajado (acao) dura 12 s
+            new string[] { "Feiticeiro", "Meu amigo, não se preocupe, eu...| nunca o machucaria, he he" } };
+        static readonly float[] DlgTime2 = { 6.2f, 2.4f, 3.4f, 2.4f, 12f, 6f };      // a ameaca com o cajado (acao) dura 12 s
         int sceneKind = 1; float wizPoint, wizGlow;      // wizGlow 0..1: a ponta do cajado brilha como se fosse atirar      // sceneKind: 1 primeira conversa (vai para a fase intermediaria) | 2 segunda (vai para a Fase 3); wizPoint 0..1: o Feiticeiro aponta o cajado
         string[][] CurDlg { get { return sceneKind == 2 ? Dlg2 : Dlg; } }
         float[] CurDlgTime { get { return sceneKind == 2 ? DlgTime2 : DlgTime; } }
