@@ -1889,34 +1889,37 @@ namespace HeroiPet
                 }
             g.SmoothingMode = oldSm;
         }
-        // ESPADA COMUM / MESTRE PIXELADA (pixel art de verdade): a espada so aponta nas 8 direcoes de 45 graus (o angulo e "travado" na direcao mais proxima, como nos sprites de jogos antigos),
-        // e o eixo passa pelo CENTRO dos quadradinhos: lamina de 3 quadradinhos (centro claro) com contorno escuro, guarda de 5, cabo de 1 e pomo. Em qualquer angulo os quadradinhos ficam alinhados, sem deformar.
+        // ESPADA COMUM / MESTRE PIXELADA (pixel art de verdade): feita com quadradinhos MENORES que os do resto do jogo (metade do tamanho: 2 px quando S=3-4), entao a lamina fica fina.
+        // A espada so aponta nas 8 direcoes de 45 graus (o angulo e "travado" na mais proxima) e o eixo passa pelo CENTRO dos quadradinhos: nunca deforma.
+        // Medidas em quadradinhos pequenos: lamina de 3 (centro claro) com contorno escuro que afina em triangulo, guarda de 9, cabo de 1 e pomo.
         void DrawPixelatedSword(Graphics g, float handX, float handY, float dx, float dy, float sc, float lenCells)
         {
             double ang = Math.Round(Math.Atan2(dy, dx) / (Math.PI / 4)) * (Math.PI / 4); dx = (float)Math.Cos(ang); dy = (float)Math.Sin(ang);
             float px = -dy, py = dx; SmoothingMode oldSm = g.SmoothingMode; g.SmoothingMode = SmoothingMode.None;
+            float cell = Math.Max(1f, (float)Math.Floor(sc / 2f + 0.5f)); handX = (float)Math.Round(handX); handY = (float)Math.Round(handY);      // quadradinho pequeno, em pixels inteiros
             Color outl = Color.FromArgb(28, 22, 36), blade = BladeColor(), guard = GuardColor(), grip = GripColor(), lite = Lerp(blade, Color.White, 0.6f);
-            float tipU = (float)Math.Round(lenCells);
+            float tipU = (float)Math.Round(lenCells * sc / cell);
+            int R = (int)Math.Ceiling(tipU + 4);
             using (SolidBrush br = new SolidBrush(Color.Black))
-                for (int ci = -15; ci <= 15; ci++) for (int cj = -15; cj <= 15; cj++)
+                for (int ci = -R; ci <= R; ci++) for (int cj = -R; cj <= R; cj++)
                 {
-                    float vx = ci * sc, vy = cj * sc, u = (vx * dx + vy * dy) / sc, w = (vx * px + vy * py) / sc, aw = Math.Abs(w); Color? c = null;
-                    if (u >= -4.5f && u < -3.5f) { if (aw <= 0.4f) c = guard; else if (aw <= 1.2f) c = outl; }      // pomo (1 quadradinho da cor da guarda, com contorno)
-                    else if (u >= -3.5f && u < -1.5f) { if (aw <= 0.4f) c = grip; else if (aw <= 1.2f) c = outl; }      // cabo de 1 quadradinho
-                    else if (u >= -1.5f && u <= 1.5f && aw <= 3.2f)
+                    float vx = ci, vy = cj, u = vx * dx + vy * dy, w = vx * px + vy * py, aw = Math.Abs(w); Color? c = null;
+                    if (u >= -9.5f && u < -7.5f) { if (aw <= 0.4f) c = guard; else if (aw <= 1.2f) c = outl; }      // pomo
+                    else if (u >= -7.5f && u < -2.5f) { if (aw <= 0.4f) c = grip; else if (aw <= 1.2f) c = outl; }      // cabo de 1 quadradinho
+                    else if (u >= -2.5f && u <= 1.5f && aw <= 5.2f)
                     {
                         if (aw <= 1.5f && u > 0.5f) c = (aw <= 0.4f) ? lite : blade;      // a lamina nasce da guarda
-                        else c = (Math.Abs(u) <= 0.5f && aw <= 2.2f) ? guard : outl;      // guarda: barra de 5 com contorno em cima e embaixo
+                        else c = (Math.Abs(u) <= 0.5f && aw <= 4.2f) ? guard : outl;      // guarda: barra de 9 com contorno em cima e embaixo
                     }
                     else if (u > 1.5f && u <= tipU + 1.5f)
                     {
-                        float inW = 1.5f; if (u > tipU - 3f) inW = Math.Max(0.4f, 1.5f - (u - (tipU - 3f)) * 0.4f);      // lamina de 3 quadradinhos que afina em triangulo ate a ponta
-                        if (u <= tipU + 0.5f && aw <= inW) c = (aw <= 0.4f) ? lite : blade;      // centro mais claro, laterais da cor da lamina
-                        else if (u <= tipU + 0.5f && aw <= inW + 1f) c = outl;      // contorno escuro de 1 quadradinho
+                        float inW = 1.5f; if (u > tipU - 6f) inW = Math.Max(0.4f, 1.5f - (u - (tipU - 6f)) * 0.22f);      // lamina de 3 quadradinhos que afina em triangulo ate a ponta
+                        if (u <= tipU + 0.5f && aw <= inW) c = (aw <= 0.4f) ? lite : blade;
+                        else if (u <= tipU + 0.5f && aw <= inW + 1f) c = outl;
                         else if (u > tipU + 0.5f && aw <= 0.4f) c = outl;      // ultima ponta escura
                     }
                     if (c == null) continue;
-                    br.Color = c.Value; g.FillRectangle(br, handX + ci * sc - sc / 2f - 0.3f, handY + cj * sc - sc / 2f - 0.3f, sc + 0.6f, sc + 0.6f);
+                    br.Color = c.Value; g.FillRectangle(br, handX + ci * cell - cell / 2f, handY + cj * cell - cell / 2f, cell, cell);
                 }
             g.SmoothingMode = oldSm;
         }
