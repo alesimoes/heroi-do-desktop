@@ -1,5 +1,9 @@
 # Changelog (resumo)
 
+## 11/11/2026 — Entrada dos chefões das Fases 2 e 3
+- **A fumaça sai do monstrinho:** ao chegar a hora do chefão nas Fases 2 e 3, a fumaça (e as faíscas) **não saem mais da fogueira no meio da tela**; saem **do monstrinho que aparece** e a estrela vai atingir. (Na Fase 1, a fumaça da fogueira do dragão continua como antes.)
+- **O monstrinho não ataca antes da estrela:** o octorok (Fase 2) ou a gelatina de fogo (Fase 3) escolhido pela estrela **não atira nem machuca ao encostar** enquanto espera; só passa a atacar depois de virar chefão.
+
 ## 11/11/2026 — Armas no estilo do Cogumelo-maçã (formas grossas e cores vivas)
 - **Espada comum e Espada Mestre em pixel art de verdade, com quadradinhos MENORES** (metade do tamanho dos do resto do jogo), então a lâmina fica **fina**: 3 quadradinhos pequenos (centro mais claro) que afinam em triângulo até a ponta, contorno escuro, guarda de 9 (3 linhas de espessura), **cabo curto de 1 quadradinho** (a metade do comprimento que tinha) e pomo. A espada **só aponta nas 8 direções de 45°** (o ângulo é travado na mais próxima, como em jogos antigos) e o eixo passa pelo centro dos quadradinhos, então **nunca deforma** (a versão anterior girava em qualquer ângulo e ficava torta). Continuam **20% menores**. (Os redesenhos com muitos detalhes foram descartados.) Comum: aço azul-acinzentado, cabo marrom, pomo dourado. Mestre: lâmina azul e branca, cabo roxo, pomo azul.
 - **Marreta trovão:** cabo grosso de madeira e **cabeça grande de pedra** em 2 tons com borda escura e um **raio azul grande** no centro.

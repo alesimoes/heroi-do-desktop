@@ -960,6 +960,7 @@ namespace HeroiPet
         public float X, Y, VX, VY, KX, KY, T, Timer, Flash;
         public int HP, MaxHP, Face = 1, Mode; public bool Wave, Fairy;      // Fairy: marcado para a fadinha derrotar (20% dos monstros)
       //      // Wave: faz parte da onda final antes do dragao
+        public bool NoAtk;      // monstrinho que a estrela vai atingir: nao ataca (nem encosta) antes de virar chefao
         public float SlamCd, SlamT, SlamX, SlamY, SlamX0, SlamY0, Lift; public int SlamPh;      // salto esmagador da Gelatina de Fogo Gigante (fase 3)
         public float TX, TY, RT; public bool Moving; public float Scale = 1f, SmokeT, GrowT, SparkT, ShockT = 8f;      // dragao: destino, tempo para trocar de destino, esta andando
     }
@@ -3715,11 +3716,11 @@ namespace HeroiPet
 
         void FireExplode()
         {
-            for (int k = 0; k < 10; k++)
+            if (!phase2) for (int k = 0; k < 10; k++)      // a fumaca e as faiscas da fogueira so aparecem na fase 1 (dragao); nas fases 2 e 3 a fumaca sai do monstrinho
             {
                 puffs.Add(new Puff { Kind = k % 2, X = fireX + ((float)rnd.NextDouble() - 0.5f) * 20 * S, Y = fireY - (float)rnd.NextDouble() * 12 * S });
             }
-            for (int k = 0; k < 18; k++)
+            if (!phase2) for (int k = 0; k < 18; k++)
                 smokes.Add(new Smoke { X = fireX + ((float)rnd.NextDouble() - 0.5f) * 14 * S, Y = fireY - (float)rnd.NextDouble() * 6 * S, T = -(float)rnd.NextDouble() * 0.7f, Sz = 3 + (float)rnd.NextDouble() * 3 });
             fireK = 0;
             for (int i = 0; i < 5; i++) { onFire[i] = false; reserved[i] = false; }
@@ -4196,7 +4197,12 @@ namespace HeroiPet
             Enemy t = null; float bd = float.MaxValue;
             foreach (Enemy en in enemies) if (en.Type == BossTargetType) { float d = (en.X - hx) * (en.X - hx) + (en.Y - hy) * (en.Y - hy); if (d < bd) { bd = d; t = en; } }      // o octorok mais perto do Link
             if (t == null) t = NewStarTarget(Math.Max(20 * S, Math.Min(W - 20 * S, hx >= W / 2f ? hx - 150 * S : hx + 150 * S)), hy);
+            t.NoAtk = true; MonsterSmoke(t);      // a fumaca sai DO MONSTRINHO e ele nao ataca antes de ser atingido pela estrela
             starWait = 0; starTarget = t; starPh = 1; starX = W * (0.15f + 0.7f * (float)rnd.NextDouble()); starY = -10 * S;
+        }
+        void MonsterSmoke(Enemy t)
+        {
+            for (int k = 0; k < 18; k++) smokes.Add(new Smoke { X = t.X + ((float)rnd.NextDouble() - 0.5f) * 14 * S, Y = t.Y - (float)rnd.NextDouble() * 6 * S, T = -(float)rnd.NextDouble() * 0.7f, Sz = 3 + (float)rnd.NextDouble() * 3 });
         }
         Enemy NewStarTarget(float x, float y)      // nao ha octorok na tela: nasce um (com fumaca) para a estrela atingir
         {
@@ -4211,6 +4217,7 @@ namespace HeroiPet
             {
                 starTarget = null; foreach (Enemy en in enemies) if (en.Type == BossTargetType) { starTarget = en; break; }
                 if (starTarget == null) starTarget = NewStarTarget(W / 2f, H * 0.4f);
+                starTarget.NoAtk = true; MonsterSmoke(starTarget);
             }
             starWait += dt;
             float lx = starTarget.X - hx, ly = starTarget.Y - hy;
@@ -4227,7 +4234,7 @@ namespace HeroiPet
         }
         void TransformOcto(Enemy t)      // a estrela acerta: o octorok vira o Octorok Gigante
         {
-            t.Type = 7; t.HP = t.MaxHP = phase3 ? FireBossHP : OctoHP; t.SlamCd = 4f; t.SlamPh = 0; t.Lift = 0; t.T = 0; t.Scale = 0.25f; t.Timer = 2.6f; t.Mode = 0; t.KX = t.KY = 0; t.Fairy = false; t.Wave = false; t.Face = hx >= t.X ? 1 : -1;
+            t.NoAtk = false; t.Type = 7; t.HP = t.MaxHP = phase3 ? FireBossHP : OctoHP; t.SlamCd = 4f; t.SlamPh = 0; t.Lift = 0; t.T = 0; t.Scale = 0.25f; t.Timer = 2.6f; t.Mode = 0; t.KX = t.KY = 0; t.Fairy = false; t.Wave = false; t.Face = hx >= t.X ? 1 : -1;
             boss = t;
             for (int k = 0; k < 14; k++) puffs.Add(new Puff { Kind = k % 3 == 0 ? 2 : 1, X = t.X + ((float)rnd.NextDouble() - 0.5f) * 20 * S, Y = t.Y - (float)rnd.NextDouble() * 14 * S });
         }
@@ -5353,7 +5360,7 @@ namespace HeroiPet
                         Rock r = new Rock();
                         r.X = e.X + e.Face * 5 * S; r.Y = e.Y - 4 * S;
                         r.VX = ux * 80 * S; r.VY = uy * 80 * S;
-                        rocks.Add(r);
+                        if (!e.NoAtk) rocks.Add(r);      // o monstrinho da estrela nao atira
                         e.Mode = 0; e.Timer = 1.5f + (float)rnd.NextDouble() * 1.5f; e.VX = e.VY = 0;
                     }
                 }
@@ -5393,7 +5400,7 @@ namespace HeroiPet
                         e.SparkT -= dt;
                         if (e.SparkT <= 0)
                         {
-                            Rock em = new Rock(); em.Ember = true; em.X = e.X + e.Face * 3 * S; em.Y = e.Y - 5 * S; em.VX = ux * 80 * S; em.VY = uy * 80 * S; rocks.Add(em);
+                            Rock em = new Rock(); em.Ember = true; em.X = e.X + e.Face * 3 * S; em.Y = e.Y - 5 * S; em.VX = ux * 80 * S; em.VY = uy * 80 * S; if (!e.NoAtk) rocks.Add(em);
                             e.SparkT = 2.1f + (float)rnd.NextDouble() * 1.5f;
                         }
                     }
@@ -5427,7 +5434,7 @@ namespace HeroiPet
                             toca = e.T > 1.5f && e.SlamPh == 0 && (cx * cx) / (rx * rx) + (cy * cy) / (ry * ry) < 1f;
                         }
                         else toca = cx * cx + cy * cy < (9 * S) * (9 * S);
-                        if (toca) HurtHero(e.X, e.Y, 0.5f);      // encostar em monstro: meio coracao
+                        if (toca && !e.NoAtk) HurtHero(e.X, e.Y, 0.5f);      // encostar em monstro: meio coracao
                     }      // encostar em monstro: meio coracao
                 }
             }
