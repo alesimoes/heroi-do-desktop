@@ -1889,27 +1889,35 @@ namespace HeroiPet
                 }
             g.SmoothingMode = oldSm;
         }
+        // ESPADA COMUM / MESTRE PIXELADA: o mesmo desenho de antes (lamina com contorno e ponta, guarda em linha, cabo), mas desenhado em quadradinhos como o resto do jogo (nada de linhas suaves)
+        void DrawPixelatedSword(Graphics g, float handX, float handY, float dx, float dy, float sc, float lenCells)
+        {
+            float px = -dy, py = dx; SmoothingMode oldSm = g.SmoothingMode; g.SmoothingMode = SmoothingMode.None;
+            Color outl = Color.FromArgb(28, 22, 36), blade = BladeColor(), guard = GuardColor(), grip = GripColor();
+            float tip = lenCells + 3f;      // a ponta se estende 3 quadradinhos alem do comprimento (como o poligono antigo)
+            using (SolidBrush br = new SolidBrush(Color.Black))
+                for (int ci = -16; ci <= 16; ci++) for (int cj = -16; cj <= 16; cj++)
+                {
+                    float vx = (ci + 0.5f) * sc, vy = (cj + 0.5f) * sc, u = (vx * dx + vy * dy) / sc, w = (vx * px + vy * py) / sc, aw = Math.Abs(w); Color? c = null;
+                    if (u >= -3f && u < -0.5f) { if (aw <= 0.6f) c = grip; else if (aw <= 1.6f) c = outl; }      // cabo: 1 quadradinho + contorno
+                    else if (u >= -0.5f && u < 1f && aw <= 3.9f) c = aw <= 2.9f ? guard : outl;      // guarda: barra de 6 quadradinhos com contorno
+                    else if (u >= 1f && u <= tip)
+                    {
+                        float hw = u <= lenCells ? 1.05f : 1.05f * (1f - (u - lenCells) / 3f);      // lamina de 2 quadradinhos que afina na ponta
+                        if (aw <= hw) c = blade; else if (aw <= hw + 1f) c = outl;
+                    }
+                    else if (u > tip && u <= tip + 0.9f && aw <= 0.55f) c = outl;
+                    if (c == null) continue;
+                    br.Color = c.Value; g.FillRectangle(br, handX + ci * sc - 0.3f, handY + cj * sc - 0.3f, sc + 0.6f, sc + 0.6f);
+                }
+            g.SmoothingMode = oldSm;
+        }
         void DrawSwordAt(Graphics g, float handX, float handY, float deg)
         {
             double rad = deg * Math.PI / 180.0;
             float dx = (float)Math.Cos(rad), dy = (float)Math.Sin(rad), px = -dy, py = dx, len = 9.5f * S, w = 1.0f * S;
             if (DrawSpecialSword(g, handX, handY, dx, dy)) return;
-            PointF[] blade = {
-                new PointF(handX + px * w, handY + py * w), new PointF(handX - px * w, handY - py * w),
-                new PointF(handX + dx * len - px * w, handY + dy * len - py * w),
-                new PointF(handX + dx * (len + 3 * S), handY + dy * (len + 3 * S)),
-                new PointF(handX + dx * len + px * w, handY + dy * len + py * w) };
-            using (SolidBrush bl = new SolidBrush(BladeColor()))
-            using (Pen ol = new Pen(Color.FromArgb(28, 22, 36), Math.Max(1f, S)))
-            using (Pen gd = new Pen(GuardColor(), 2 * S))
-            {
-                g.FillPolygon(bl, blade); g.DrawPolygon(ol, blade);
-                g.DrawLine(gd, handX + px * 3 * S, handY + py * 3 * S, handX - px * 3 * S, handY - py * 3 * S);
-                // cabo (sem quadrado no fim); a mao segura o cabo
-                float gx1 = handX, gy1 = handY, gx2 = handX - dx * 4 * S, gy2 = handY - dy * 4 * S;
-                using (Pen go = new Pen(Color.FromArgb(28, 22, 36), 3.4f * S)) using (Pen gp = new Pen(GripColor(), 2 * S))
-                { g.DrawLine(go, gx1, gy1, gx2, gy2); g.DrawLine(gp, gx1, gy1, gx2, gy2); }
-            }
+            DrawPixelatedSword(g, handX, handY, dx, dy, S, 9.5f);
         }
         // ARCO em pixel art, igual no jogo, no menu de pausa, no inventario e no item grande: o arco e uma curva de quadradinhos (miolo de 1 unidade, contorno escuro de 1 unidade)
         // dx,dy = para onde aponta (a barriga do arco vai para la); half = meia altura; bend = quanto a barriga avanca; eq: 0 madeira | 1 metal | 2 cristal
@@ -5795,23 +5803,7 @@ namespace HeroiPet
                     }
             }
             if (DrawSpecialSword(g, handX, handY, dx, dy)) return;      // marreta / espada de chamas
-            PointF[] blade = {
-                new PointF(handX + px * w, handY + py * w),
-                new PointF(handX - px * w, handY - py * w),
-                new PointF(handX + dx * len - px * w, handY + dy * len - py * w),
-                new PointF(handX + dx * (len + 3 * S), handY + dy * (len + 3 * S)),
-                new PointF(handX + dx * len + px * w, handY + dy * len + py * w)
-            };
-            using (SolidBrush bl = new SolidBrush(BladeColor()))
-            using (Pen ol = new Pen(Color.FromArgb(28, 22, 36), Math.Max(1f, S)))      // contorno na mesma espessura do resto do jogo (1 pixel da arte)
-            {
-                g.FillPolygon(bl, blade);
-                g.DrawPolygon(ol, blade);
-            }
-            using (Pen gd = new Pen(GuardColor(), 2 * S))
-                g.DrawLine(gd, handX + px * 3 * S, handY + py * 3 * S, handX - px * 3 * S, handY - py * 3 * S);
-            using (Pen hd = new Pen(GripColor(), S + 1))
-                g.DrawLine(hd, handX, handY, handX - dx * 3 * S, handY - dy * 3 * S);
+            DrawPixelatedSword(g, handX, handY, dx, dy, S, 11f);      // espada comum / Mestre: o mesmo desenho de sempre, agora pixelado
         }
 
         // Descanso (fases 2-5): abaixa espada e escudo, [acena], agacha e dorme de costas, de perfil (pose do Snoopy)
