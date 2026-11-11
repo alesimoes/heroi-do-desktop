@@ -1,7 +1,7 @@
 # Changelog (resumo)
 
 ## 11/11/2026 — Armas no estilo do Cogumelo-maçã (formas grossas e cores vivas)
-- **Espada comum e Espada Mestre:** lâmina **larga** de 2 tons com ponta, **guarda grossa dourada**, cabo grosso e **pomo redondo**, contorno escuro forte. Comum: aço azul-acinzentado, cabo marrom, pomo dourado. Mestre: lâmina azul e branca, cabo roxo, pomo azul.
+- **Espada comum e Espada Mestre:** lâmina **larga** de 2 tons que **afina em triângulo até uma ponta bem definida** de 1 quadradinho, **guarda grossa dourada**, **cabo fino** e **pomo pequeno e redondo**, contorno escuro forte. Comum: aço azul-acinzentado, cabo marrom, pomo dourado. Mestre: lâmina azul e branca, cabo roxo, pomo azul.
 - **Marreta trovão:** cabo grosso de madeira e **cabeça grande de pedra** em 2 tons com borda escura e um **raio azul grande** no centro.
 - **Arcos:** membros **grossos** (2 quadradinhos) com contorno forte, lado de baixo mais escuro, brilho e empunhadura de cor própria.
 - (Duas tentativas anteriores, com muitos detalhes finos e depois só simples, ficaram confusas e foram descartadas. A espada de chamas e o Cogumelo-maçã não mudaram.)

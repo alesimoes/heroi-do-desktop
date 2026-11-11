@@ -1902,15 +1902,16 @@ namespace HeroiPet
                 for (int ci = -17; ci <= 17; ci++) for (int cj = -17; cj <= 17; cj++)
                 {
                     float vx = (ci + 0.5f) * sc, vy = (cj + 0.5f) * sc, u = (vx * dx + vy * dy) / sc, w = (vx * px + vy * py) / sc, aw = Math.Abs(w); Color? c = null;
-                    if (u < -2.6f && u >= -5.2f) { float du = u + 3.9f; if (du * du + w * w <= 1.3f * 1.3f) c = pomo; else if (du * du + w * w <= 2.3f * 2.3f) c = dark; }      // pomo redondo
-                    else if (u >= -2.6f && u < 0f) { if (aw <= 1.05f) c = grip; else if (aw <= 2.05f) c = dark; }      // cabo grosso
+                    if (u < -2.6f && u >= -4.8f) { float du = u + 3.6f; if (du * du + w * w <= 1.0f * 1.0f) c = pomo; else if (du * du + w * w <= 1.9f * 1.9f) c = dark; }      // pomo pequeno e redondo
+                    else if (u >= -2.6f && u < 0f) { if (aw <= 0.55f) c = grip; else if (aw <= 1.5f) c = dark; }      // cabo fino (1 quadradinho + contorno)
                     else if (u >= 0f && u < 2f) { if (aw <= halfG) c = (u < 1f) ? guard : guardD; else if (aw <= halfG + 1f) c = dark; }      // guarda grossa (2 quadradinhos de espessura)
                     else if (u >= 2f && u <= tipU)
                     {
-                        float t = (u - 2f) / (tipU - 2f), hw = 1.75f - 0.35f * t; if (u > tipU - 2.4f) hw = 0.3f + (hw - 0.3f) * (tipU - u) / 2.4f;      // lamina larga com ponta
+                        float t = (u - 2f) / (tipU - 2f), hw = 1.75f - 0.3f * t; if (u > tipU - 3.6f) hw = 0.15f + (hw - 0.15f) * (tipU - u) / 3.6f;      // lamina larga que afina em triangulo ate uma ponta de 1 quadradinho
                         if (aw <= hw) c = w > 0.15f ? lite : body;
-                        else if (aw <= hw + 1f) c = dark;
+                        else if (aw <= hw + 0.95f) c = dark;
                     }
+                    else if (u > tipU && u <= tipU + 1f && aw <= 0.55f) c = dark;      // ponta bem marcada: fecha o contorno
                     if (c == null) continue;
                     br.Color = c.Value; g.FillRectangle(br, handX + ci * sc - 0.3f, handY + cj * sc - 0.3f, sc + 0.6f, sc + 0.6f);
                 }
