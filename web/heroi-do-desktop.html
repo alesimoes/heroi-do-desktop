@@ -1861,31 +1861,33 @@ function drawFlameSword(handX, handY, dx, dy, px, py, sc) {
     if (c !== null) rect(c, handX + ci * sc - 0.3, handY + cj * sc - 0.3, sc + 0.6, sc + 0.6);
   }
 }
-// ESPADA COMUM / ESPADA MESTRE: formas simples (poucos detalhes, contorno escuro): lamina de 2 tons com ponta afilada, guarda reta e cabo. Comum: aco cinza, guarda cinza, cabo marrom. Mestre: lamina azulada, guarda dourada, cabo roxo.
+// ESPADA COMUM / ESPADA MESTRE (estilo do Cogumelo-maca): lamina larga de 2 tons com ponta, guarda grossa dourada (2 quadradinhos de espessura), cabo grosso e pomo redondo; cores vivas e contorno escuro forte. Mestre: lamina azul/branca, cabo roxo, pomo azul.
 function drawPixelSword(handX, handY, dx, dy, px, py, sc, master) {
-  const dark = '#221c34', tipU = master ? 12.4 : 11, halfG = master ? 3.9 : 3.3;
-  const lite = master ? '#e8f6ff' : '#e8ecf6', body = master ? '#a8ccf6' : '#acb6cc', shade = master ? '#6e96d6' : '#7c86a0', guard = master ? '#f0c846' : '#9298ac', grip = master ? '#7448b0' : '#7c502e';
-  for (let ci = -16; ci <= 16; ci++) for (let cj = -16; cj <= 16; cj++) {
+  const dark = '#221c34', tipU = master ? 12.6 : 11.4, halfG = master ? 4.8 : 4.2;
+  const lite = master ? '#ecf8ff' : '#dee8fc', body = master ? '#78b2f4' : '#96acd8', guard = master ? '#f6c83c' : '#f0ba34', guardD = master ? '#c48c1e' : '#c47c1e', grip = master ? '#7850be' : '#9c6030', pomo = master ? '#5abeff' : '#f6c83c';
+  for (let ci = -17; ci <= 17; ci++) for (let cj = -17; cj <= 17; cj++) {
     const vx = (ci + 0.5) * sc, vy = (cj + 0.5) * sc, u = (vx * dx + vy * dy) / sc, w = (vx * px + vy * py) / sc, aw = Math.abs(w); let c = null;
-    if (u >= -3.2 && u < 0) { if (aw <= 0.9) c = grip; else if (aw <= 1.85) c = dark; }
-    else if (u >= 0 && u < 1.4) { if (aw <= halfG) c = guard; else if (aw <= halfG + 0.9) c = dark; }
-    else if (u >= 1.4 && u <= tipU) {
-      const t = (u - 1.4) / (tipU - 1.4); let hw = 1.3 - 0.3 * t; if (u > tipU - 2) hw = 0.25 + (hw - 0.25) * (tipU - u) / 2;
-      if (aw <= hw) c = w > 0.1 ? lite : (aw > hw - 0.5 ? shade : body); else if (aw <= hw + 0.9) c = dark;
+    if (u < -2.6 && u >= -4.8) { const du = u + 3.6; if (du * du + w * w <= 1.0) c = pomo; else if (du * du + w * w <= 1.9 * 1.9) c = dark; }      // pomo pequeno e redondo
+    else if (u >= -2.6 && u < 0) { if (aw <= 0.55) c = grip; else if (aw <= 1.5) c = dark; }      // cabo fino
+    else if (u >= 0 && u < 2) { if (aw <= halfG) c = (u < 1) ? guard : guardD; else if (aw <= halfG + 1) c = dark; }
+    else if (u >= 2 && u <= tipU) {
+      const t = (u - 2) / (tipU - 2); let hw = 1.75 - 0.3 * t; if (u > tipU - 3.6) hw = 0.15 + (hw - 0.15) * (tipU - u) / 3.6;      // afina em triangulo ate uma ponta de 1 quadradinho
+      if (aw <= hw) c = w > 0.15 ? lite : body; else if (aw <= hw + 0.95) c = dark;
     }
+    else if (u > tipU && u <= tipU + 1 && aw <= 0.55) c = dark;      // ponta bem marcada
     if (c) rect(c, handX + ci * sc - 0.3, handY + cj * sc - 0.3, sc + 0.6, sc + 0.6);
   }
 }
-// MARRETA TROVAO: cabo de madeira reto e cabeca retangular de aco em 2 tons, com um pequeno raio azul no centro
+// MARRETA TROVAO (estilo do Cogumelo-maca): cabo grosso de madeira e cabeca grande de pedra em 2 tons com borda escura e um raio azul bem visivel no centro
 function drawPixelHammer(handX, handY, dx, dy, px, py, sc) {
   const dark = '#1e182c';
   for (let ci = -19; ci <= 19; ci++) for (let cj = -19; cj <= 19; cj++) {
     const vx = (ci + 0.5) * sc, vy = (cj + 0.5) * sc, u = (vx * dx + vy * dy) / sc, w = (vx * px + vy * py) / sc, aw = Math.abs(w); let c = null;
-    if (u >= -3.2 && u < 8) { if (aw <= 0.95) c = w > 0 ? '#a46c3c' : '#784c2a'; else if (aw <= 1.9) c = dark; }
-    else if (u >= 8 && u <= 14) {
-      const inside = aw <= 5.6 && u >= 8.9 && u <= 13.1;
-      if (inside) c = w > 0 ? '#ccd4e6' : '#8e96ac'; else if (aw <= 6.5 && u <= 14) c = dark;
-      if (inside && Math.abs(u - 11) <= 0.8 && aw <= 1.3) c = '#60e2ee';
+    if (u >= -3 && u < 8.5) { if (aw <= 1.15) c = w > 0 ? '#be7a3c' : '#8c5428'; else if (aw <= 2.15) c = dark; }
+    else if (u >= 8.5 && u <= 15) {
+      const inside = aw <= 6.4 && u >= 9.5 && u <= 14;
+      if (inside) { c = w > 0 ? '#d4daec' : '#96a0bc'; if (aw >= 5.2 || u >= 13) c = '#707a98'; } else if (aw <= 7.4) c = dark;
+      if (inside && Math.abs(u - 11.7) <= 1.5 && aw <= 2.2) c = (Math.abs(u - 11.7) <= 0.6 && aw <= 0.9) ? '#ffffff' : '#46d7f0';
     }
     if (c) rect(c, handX + ci * sc - 0.3, handY + cj * sc - 0.3, sc + 0.6, sc + 0.6);
   }
@@ -1912,7 +1914,8 @@ function pixelBow(cx, cy, dx, dy, half, bend, unit, eq) {
   const main = eq === 2 ? '#3cc8d2' : (eq === 1 ? '#b9c0cd' : '#87552d'), hi = eq === 2 ? '#d7ffff' : (eq === 1 ? '#f0f5ff' : '#b97d46'), px = -dy, py = dx, n = Math.max(10, Math.floor(half * 2 / unit * 1.6)), pts = [];
   for (let i = 0; i <= n; i++) { const u = i / n * 2 - 1, b = bend * (1 - u * u); pts.push([Math.floor((cx + px * u * half + dx * b) / unit) * unit, Math.floor((cy + py * u * half + dy * b) / unit) * unit]); }
   const sq = (p, c, o, w) => { ctx.fillStyle = c; ctx.fillRect(p[0] - o, p[1] - o, w, w); };
-  pts.forEach((p) => sq(p, '#1c1624', unit, 3 * unit)); pts.forEach((p) => sq(p, main, 0, unit)); for (let i = 1; i < n; i += 3) sq(pts[i], hi, 0, unit);
+  const shd = eq === 2 ? '#2296aa' : (eq === 1 ? '#808aa6' : '#965624');
+  pts.forEach((p) => sq(p, '#1c1624', unit, 4 * unit)); pts.forEach((p) => sq(p, main, 0, 2 * unit)); pts.forEach((p) => sq([p[0] + unit, p[1] + unit], shd, 0, unit)); for (let i = 1; i < n; i += 3) sq(pts[i], hi, 0, unit);      // membros GROSSOS (2 quadradinhos) com contorno forte e lado de baixo mais escuro
   { const gcol = eq === 2 ? '#ffaa28' : (eq === 1 ? '#deb040' : '#684024'); for (let k = -2; k <= 2; k++) sq(pts[Math.max(0, Math.min(n, (n >> 1) + k * 2))], gcol, 0, unit); }      // empunhadura: 5 quadradinhos no meio numa cor diferente
   if (eq === 2) { const m = pts[n >> 1]; sq([m[0] - unit / 2, m[1] - unit / 2], '#ffaa28', 0, 2 * unit); sq(pts[0], '#78ebf5', 0, unit); sq(pts[n], '#78ebf5', 0, unit); }
 }
