@@ -1,5 +1,11 @@
 # Changelog (resumo)
 
+## 11/11/2026 — Visual simples da espada comum, Espada Mestre, marreta e arcos
+- **Espada comum e Espada Mestre** redesenhadas em pixel art **simples e limpa**: lâmina de 2 tons (clara em cima, mais escura embaixo) com ponta afilada, guarda reta e cabo, contorno escuro. Comum: aço cinza, guarda cinza, cabo marrom. Mestre: lâmina azulada, guarda dourada, cabo roxo.
+- **Marreta trovão:** cabo reto de madeira e cabeça retangular de aço em 2 tons com um pequeno raio azul no centro.
+- **Arcos:** a empunhadura (5 quadradinhos no meio) ganhou cor própria (marrom escuro, dourado, laranja).
+- (Uma primeira tentativa, cheia de detalhes, ficou confusa e foi descartada.)
+
 ## 11/11/2026 — Visual do Link, escudos, armas e espada de chamas
 - **Link de lado:** as **costas** ficaram um pouco **menores** (cabelo/gorro e tronco 1 quadradinho mais curtos atrás).
 - **Escudos azul e vermelho** menores em proporção ao Link (de 8x10 para 6x8 quadradinhos, no mesmo lugar).
