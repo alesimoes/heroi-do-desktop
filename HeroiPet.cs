@@ -1614,7 +1614,7 @@ namespace HeroiPet
                 g.SmoothingMode = oldSm;
                 return true;
             }
-            // ESPADA DE CHAMAS: lamina de aco em brasa (do vermelho escuro no cabo ao amarelo na ponta) com labaredas que dancam nos dois lados, ponta em chama, guarda de aco com gemas e fagulhas subindo
+            // ESPADA DE CHAMAS: lamina de aco em brasa (do vermelho escuro no cabo ao amarelo na ponta), guarda de aco com gemas de fogo; SEM labaredas nem fagulhas saindo dela (cobriam o Link)
             DrawFlameSword(g, handX, handY, dx, dy, S);
             return true;
         }
@@ -1650,25 +1650,8 @@ namespace HeroiPet
                         }
                         else if (aw <= hw + 1.1f) c = outl;
                     }
-                    if (c == null && u >= L0 + 1f && u <= L1 + 3.5f)      // labaredas dancando nos dois lados da lamina e na ponta
-                    {
-                        for (int k = 0; k < 6 && c == null; k++)
-                        {
-                            float uk = 3.4f + k * 2.7f, hk = 1.7f + 1.9f * (0.5f + 0.5f * (float)Math.Sin(tm * 10f + k * 1.9f)), sgn = (k % 2 == 0) ? 1f : -1f;
-                            float hw2 = 1.9f - 1.4f * Math.Min(1f, (uk - L0) / (L1 - L0)), du = Math.Abs(u - uk), wo = w * sgn - hw2;
-                            if (du < 1.5f && wo > 0f && wo < hk * (1f - du / 1.5f)) c = (wo < hk * 0.45f) ? Color.FromArgb(255, 214, 80) : Color.FromArgb(255, 112, 28);
-                        }
-                        float tipH = 2.6f + 1.6f * (float)Math.Sin(tm * 12f);      // chama na ponta
-                        if (c == null && u > L1 - 0.5f && u < L1 + tipH && aw < 1.5f * (1f - (u - (L1 - 0.5f)) / (tipH + 0.5f))) c = (u < L1 + tipH * 0.5f) ? Color.FromArgb(255, 226, 110) : Color.FromArgb(255, 120, 30);
-                    }
                     if (c == null) continue;
                     br.Color = c.Value; g.FillRectangle(br, handX + ci * sc - 0.3f, handY + cj * sc - 0.3f, sc + 0.6f, sc + 0.6f);
-                }
-            using (SolidBrush eb = new SolidBrush(Color.FromArgb(255, 190, 70)))      // fagulhas subindo
-                for (int q = 0; q < 6; q++)
-                {
-                    float uu = 3f + ((tm * 7f + q * 3.1f) % 17f), ww = ((q % 2 == 0) ? 1f : -1f) * (2.2f + ((tm * 2.2f + q * 1.3f) % 3f));
-                    g.FillRectangle(eb, handX + (dx * uu + px * ww) * sc - sc / 2f, handY + (dy * uu + py * ww) * sc - sc / 2f, sc * 0.9f, sc * 0.9f);
                 }
             g.SmoothingMode = oldSm;
         }
