@@ -1861,23 +1861,6 @@ function drawFlameSword(handX, handY, dx, dy, px, py, sc) {
     if (c !== null) rect(c, handX + ci * sc - 0.3, handY + cj * sc - 0.3, sc + 0.6, sc + 0.6);
   }
 }
-// ESPADA COMUM / ESPADA MESTRE (estilo do Cogumelo-maca): lamina larga de 2 tons com ponta, guarda grossa dourada (2 quadradinhos de espessura), cabo grosso e pomo redondo; cores vivas e contorno escuro forte. Mestre: lamina azul/branca, cabo roxo, pomo azul.
-function drawPixelSword(handX, handY, dx, dy, px, py, sc, master) {
-  const dark = '#221c34', tipU = master ? 12.6 : 11.4, halfG = master ? 4.8 : 4.2;
-  const lite = master ? '#ecf8ff' : '#dee8fc', body = master ? '#78b2f4' : '#96acd8', guard = master ? '#f6c83c' : '#f0ba34', guardD = master ? '#c48c1e' : '#c47c1e', grip = master ? '#7850be' : '#9c6030', pomo = master ? '#5abeff' : '#f6c83c';
-  for (let ci = -17; ci <= 17; ci++) for (let cj = -17; cj <= 17; cj++) {
-    const vx = (ci + 0.5) * sc, vy = (cj + 0.5) * sc, u = (vx * dx + vy * dy) / sc, w = (vx * px + vy * py) / sc, aw = Math.abs(w); let c = null;
-    if (u < -2.6 && u >= -4.8) { const du = u + 3.6; if (du * du + w * w <= 1.0) c = pomo; else if (du * du + w * w <= 1.9 * 1.9) c = dark; }      // pomo pequeno e redondo
-    else if (u >= -2.6 && u < 0) { if (aw <= 0.55) c = grip; else if (aw <= 1.5) c = dark; }      // cabo fino
-    else if (u >= 0 && u < 2) { if (aw <= halfG) c = (u < 1) ? guard : guardD; else if (aw <= halfG + 1) c = dark; }
-    else if (u >= 2 && u <= tipU) {
-      const t = (u - 2) / (tipU - 2); let hw = 1.75 - 0.3 * t; if (u > tipU - 3.6) hw = 0.15 + (hw - 0.15) * (tipU - u) / 3.6;      // afina em triangulo ate uma ponta de 1 quadradinho
-      if (aw <= hw) c = w > 0.15 ? lite : body; else if (aw <= hw + 0.95) c = dark;
-    }
-    else if (u > tipU && u <= tipU + 1 && aw <= 0.55) c = dark;      // ponta bem marcada
-    if (c) rect(c, handX + ci * sc - 0.3, handY + cj * sc - 0.3, sc + 0.6, sc + 0.6);
-  }
-}
 // MARRETA TROVAO (estilo do Cogumelo-maca): cabo grosso de madeira e cabeca grande de pedra em 2 tons com borda escura e um raio azul bem visivel no centro
 function drawPixelHammer(handX, handY, dx, dy, px, py, sc) {
   const dark = '#1e182c';
@@ -1895,7 +1878,11 @@ function drawPixelHammer(handX, handY, dx, dy, px, py, sc) {
 function drawSword(handX, handY, aDeg, f) {
   const a = aDeg * Math.PI / 180, dx = f * Math.cos(a), dy = Math.sin(a), px = -dy, py = dx, len = 11 * S, w = 1.0 * S;      // espada menor em proporcao ao Link (antes 14 e 1,2)
   if (eqSword >= 2) { drawSpecialSword(handX, handY, dx, dy, px, py); return; }      // marreta / espada de chamas
-  drawPixelSword(handX, handY, dx, dy, px, py, S, eqSword === 1);      // espada comum ou Espada Mestre (formas simples e limpas)
+  ctx.fillStyle = eqSword === 1 ? '#cde8ff' : '#e1ebf5'; ctx.strokeStyle = '#1c1624'; ctx.lineWidth = Math.max(1, S);      // contorno na mesma espessura do resto do jogo
+  ctx.beginPath(); ctx.moveTo(handX + px * w, handY + py * w); ctx.lineTo(handX - px * w, handY - py * w); ctx.lineTo(handX + dx * len - px * w, handY + dy * len - py * w);
+  ctx.lineTo(handX + dx * (len + 3 * S), handY + dy * (len + 3 * S)); ctx.lineTo(handX + dx * len + px * w, handY + dy * len + py * w); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = eqSword === 1 ? '#3c5fcd' : '#d7a028'; ctx.lineWidth = 2 * S; ctx.beginPath(); ctx.moveTo(handX + px * 3 * S, handY + py * 3 * S); ctx.lineTo(handX - px * 3 * S, handY - py * 3 * S); ctx.stroke();
+  ctx.strokeStyle = eqSword === 1 ? '#503796' : '#87552d'; ctx.lineWidth = S + 1; ctx.beginPath(); ctx.moveTo(handX, handY); ctx.lineTo(handX - dx * 3 * S, handY - dy * 3 * S); ctx.stroke();
 }
 const APPLE_SHIELD = ['...KT.L.', '.KKKTKLK', 'KRRRRRRK', 'KRFFFFRK', 'KRFBBFRK', 'KRFBBFRK', 'KRFFFFRK', '.KRFFRK.', '..KRRK..', '...KK...'];
 const APPLE_COL = { K: '#1c1624', R: '#c8222c', F: '#faecbe', B: '#6e3c1e', T: '#785028', L: '#46a03c' };
