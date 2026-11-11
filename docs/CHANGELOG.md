@@ -3,6 +3,7 @@
 ## 11/11/2026 — Octorok Gigante verde e poças de ácido mais fortes (v2)
 - O **Octorok Gigante** (chefão da Fase 2) agora é **verde**, igual ao octorok da Fase 2 (antes era roxo).
 - As **poças de ácido** ficaram **30% maiores** (a figura e a área que machuca) e agora **tiram dois corações** (antes meio coração); se o Link ficar em cima, perde mais dois a cada 1,2 s de invulnerabilidade. Só no desktop por enquanto (o chefão ainda não existe na web).
+- A **estrela só atinge o octorok quando ele chega perto do Link** (a menos de ~38 de distância, ou depois de 10 s): ela fica pairando acima dele, esperando, e então mergulha mais devagar (antes acertava logo, de longe). Se não havia octorok na tela, ele nasce a ~150 de distância do Link.
 
 ## 11/11/2026 — Aviso da Fase 2 depois do Feiticeiro + zoom mais lento
 - O aviso **"VOCÊ PASSOU PARA A FASE 2!"** agora aparece **quando a Fase 2 começa**, depois da cena do Feiticeiro e do cajado (5 s, mais acima na tela para não cobrir o Link). Depois do dragão não aparece mais aviso: vai direto para a cena.

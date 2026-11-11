@@ -4011,7 +4011,7 @@ namespace HeroiPet
         const int OctoHP = 7500;
         List<Acid> acids = new List<Acid>(); List<float[]> pools = new List<float[]>();      // poca: x, y, tempo
         Sprite[] octoBoss = new Sprite[2]; Bitmap acidPoolBmp;
-        int starPh; float starX, starY; Enemy starTarget;
+        int starPh; float starX, starY, starWait; Enemy starTarget;      // starWait: tempo esperando o octorok chegar perto do Link
         List<Spark> sparks = new List<Spark>();
         void SparkBurst(float x, float y)      // explosao de estrelinhas roxas que somem no ar
         {
@@ -4044,9 +4044,9 @@ namespace HeroiPet
         {
             bossSpawned = true;
             Enemy t = null; float bd = float.MaxValue;
-            foreach (Enemy en in enemies) if (en.Type == 0) { float d = (en.X - W / 2f) * (en.X - W / 2f) + (en.Y - H / 2f) * (en.Y - H / 2f); if (d < bd) { bd = d; t = en; } }
-            if (t == null) t = NewStarTarget(fireX, fireY + 8 * S);
-            starTarget = t; starPh = 1; starX = W * (0.15f + 0.7f * (float)rnd.NextDouble()); starY = -10 * S;
+            foreach (Enemy en in enemies) if (en.Type == 0) { float d = (en.X - hx) * (en.X - hx) + (en.Y - hy) * (en.Y - hy); if (d < bd) { bd = d; t = en; } }      // o octorok mais perto do Link
+            if (t == null) t = NewStarTarget(Math.Max(20 * S, Math.Min(W - 20 * S, hx >= W / 2f ? hx - 150 * S : hx + 150 * S)), hy);
+            starWait = 0; starTarget = t; starPh = 1; starX = W * (0.15f + 0.7f * (float)rnd.NextDouble()); starY = -10 * S;
         }
         Enemy NewStarTarget(float x, float y)      // nao ha octorok na tela: nasce um (com fumaca) para a estrela atingir
         {
@@ -4062,9 +4062,12 @@ namespace HeroiPet
                 starTarget = null; foreach (Enemy en in enemies) if (en.Type == 0) { starTarget = en; break; }
                 if (starTarget == null) starTarget = NewStarTarget(W / 2f, H * 0.4f);
             }
-            float tx = starTarget.X, ty = starTarget.Y - 5 * S, dx = tx - starX, dy = ty - starY, d = (float)Math.Sqrt(dx * dx + dy * dy);
-            if (d < 7 * S) { TransformOcto(starTarget); starPh = 0; return; }
-            float st = Math.Min(d, 210 * S * dt); starX += dx / d * st; starY += dy / d * st;
+            starWait += dt;
+            float lx = starTarget.X - hx, ly = starTarget.Y - hy;
+            bool near = lx * lx + ly * ly < (38 * S) * (38 * S) || starWait > 10f;      // so acerta quando o octorok chega perto do Link (ou depois de 10 s)
+            float tx = starTarget.X, ty = near ? starTarget.Y - 5 * S : starTarget.Y - 46 * S + (float)Math.Sin(time * 4f) * 3 * S, dx = tx - starX, dy = ty - starY, d = (float)Math.Sqrt(dx * dx + dy * dy);
+            if (near && d < 7 * S) { TransformOcto(starTarget); starPh = 0; return; }
+            float st = Math.Min(d, (near ? 150f : 110f) * S * dt); if (d > 0.5f) { starX += dx / d * st; starY += dy / d * st; }      // espera pairando acima do octorok; ao chegar perto do Link, mergulha
             if (rnd.NextDouble() < 0.7) puffs.Add(new Puff { Kind = 1, X = starX + ((float)rnd.NextDouble() - 0.5f) * 4 * S, Y = starY + ((float)rnd.NextDouble() - 0.5f) * 4 * S });      // rastro
         }
         void TransformOcto(Enemy t)      // a estrela acerta: o octorok vira o Octorok Gigante
