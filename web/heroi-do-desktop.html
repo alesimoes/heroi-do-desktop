@@ -1883,9 +1883,9 @@ function drawPixelatedSword(handX, handY, dx0, dy0, px0, py0, sc, lenCells) {
   const tipU = Math.round(lenCells * sc / cell), R = Math.ceil(tipU + 4);
   for (let ci = -R; ci <= R; ci++) for (let cj = -R; cj <= R; cj++) {
     const u = ci * dx + cj * dy, w = ci * px + cj * py, aw = Math.abs(w); let c = null;
-    if (u >= -9.5 && u < -7.5) { if (aw <= 0.4) c = guard; else if (aw <= 1.2) c = outl; }
-    else if (u >= -7.5 && u < -2.5) { if (aw <= 0.4) c = grip; else if (aw <= 1.2) c = outl; }
-    else if (u >= -2.5 && u <= 1.5 && aw <= 5.2) {
+    if (u >= -6.5 && u < -5.5) { if (aw <= 0.4) c = guard; else if (aw <= 1.2) c = outl; }
+    else if (u >= -5.5 && u < -1.5) { if (aw <= 0.4) c = grip; else if (aw <= 1.2) c = outl; }
+    else if (u >= -1.5 && u <= 1.5 && aw <= 5.2) {
       if (aw <= 1.5 && u > 0.5) c = (aw <= 0.4) ? lite : blade;
       else c = (Math.abs(u) <= 0.5 && aw <= 4.2) ? guard : outl;
     }
