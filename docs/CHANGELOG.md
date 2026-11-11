@@ -1,7 +1,7 @@
 # Changelog (resumo)
 
 ## 11/11/2026 — Armas no estilo do Cogumelo-maçã (formas grossas e cores vivas)
-- **Espada comum e Espada Mestre pixeladas:** o **desenho original** (lâmina de uma cor com contorno e ponta, guarda em linha, cabo fino) agora é desenhado **em quadradinhos**, como o resto do jogo, em vez de linhas suaves. Continuam **20% menores**. (Os redesenhos com muitos detalhes foram descartados.) Comum: aço azul-acinzentado, cabo marrom, pomo dourado. Mestre: lâmina azul e branca, cabo roxo, pomo azul.
+- **Espada comum e Espada Mestre em pixel art de verdade:** lâmina de 3 quadradinhos (centro mais claro) que afina em triângulo até a ponta, contorno escuro, guarda de 5, **cabo de 1 quadradinho** e pomo. A espada **só aponta nas 8 direções de 45°** (o ângulo é travado na mais próxima, como em jogos antigos) e o eixo passa pelo centro dos quadradinhos, então **nunca deforma** (a versão anterior girava em qualquer ângulo e ficava torta). Continuam **20% menores**. (Os redesenhos com muitos detalhes foram descartados.) Comum: aço azul-acinzentado, cabo marrom, pomo dourado. Mestre: lâmina azul e branca, cabo roxo, pomo azul.
 - **Marreta trovão:** cabo grosso de madeira e **cabeça grande de pedra** em 2 tons com borda escura e um **raio azul grande** no centro.
 - **Arcos:** membros **grossos** (2 quadradinhos) com contorno forte, lado de baixo mais escuro, brilho e empunhadura de cor própria.
 - (Duas tentativas anteriores, com muitos detalhes finos e depois só simples, ficaram confusas e foram descartadas. A espada de chamas e o Cogumelo-maçã não mudaram.)

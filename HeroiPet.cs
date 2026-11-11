@@ -1889,26 +1889,34 @@ namespace HeroiPet
                 }
             g.SmoothingMode = oldSm;
         }
-        // ESPADA COMUM / MESTRE PIXELADA: o mesmo desenho de antes (lamina com contorno e ponta, guarda em linha, cabo), mas desenhado em quadradinhos como o resto do jogo (nada de linhas suaves)
+        // ESPADA COMUM / MESTRE PIXELADA (pixel art de verdade): a espada so aponta nas 8 direcoes de 45 graus (o angulo e "travado" na direcao mais proxima, como nos sprites de jogos antigos),
+        // e o eixo passa pelo CENTRO dos quadradinhos: lamina de 3 quadradinhos (centro claro) com contorno escuro, guarda de 5, cabo de 1 e pomo. Em qualquer angulo os quadradinhos ficam alinhados, sem deformar.
         void DrawPixelatedSword(Graphics g, float handX, float handY, float dx, float dy, float sc, float lenCells)
         {
+            double ang = Math.Round(Math.Atan2(dy, dx) / (Math.PI / 4)) * (Math.PI / 4); dx = (float)Math.Cos(ang); dy = (float)Math.Sin(ang);
             float px = -dy, py = dx; SmoothingMode oldSm = g.SmoothingMode; g.SmoothingMode = SmoothingMode.None;
-            Color outl = Color.FromArgb(28, 22, 36), blade = BladeColor(), guard = GuardColor(), grip = GripColor();
-            float tip = lenCells + 3f;      // a ponta se estende 3 quadradinhos alem do comprimento (como o poligono antigo)
+            Color outl = Color.FromArgb(28, 22, 36), blade = BladeColor(), guard = GuardColor(), grip = GripColor(), lite = Lerp(blade, Color.White, 0.6f);
+            float tipU = (float)Math.Round(lenCells);
             using (SolidBrush br = new SolidBrush(Color.Black))
-                for (int ci = -16; ci <= 16; ci++) for (int cj = -16; cj <= 16; cj++)
+                for (int ci = -15; ci <= 15; ci++) for (int cj = -15; cj <= 15; cj++)
                 {
-                    float vx = (ci + 0.5f) * sc, vy = (cj + 0.5f) * sc, u = (vx * dx + vy * dy) / sc, w = (vx * px + vy * py) / sc, aw = Math.Abs(w); Color? c = null;
-                    if (u >= -3f && u < -0.5f) { if (aw <= 0.6f) c = grip; else if (aw <= 1.6f) c = outl; }      // cabo: 1 quadradinho + contorno
-                    else if (u >= -0.5f && u < 1f && aw <= 3.9f) c = aw <= 2.9f ? guard : outl;      // guarda: barra de 6 quadradinhos com contorno
-                    else if (u >= 1f && u <= tip)
+                    float vx = ci * sc, vy = cj * sc, u = (vx * dx + vy * dy) / sc, w = (vx * px + vy * py) / sc, aw = Math.Abs(w); Color? c = null;
+                    if (u >= -4.5f && u < -3.5f) { if (aw <= 0.4f) c = guard; else if (aw <= 1.2f) c = outl; }      // pomo (1 quadradinho da cor da guarda, com contorno)
+                    else if (u >= -3.5f && u < -1.5f) { if (aw <= 0.4f) c = grip; else if (aw <= 1.2f) c = outl; }      // cabo de 1 quadradinho
+                    else if (u >= -1.5f && u <= 1.5f && aw <= 3.2f)
                     {
-                        float hw = u <= lenCells ? 1.05f : 1.05f * (1f - (u - lenCells) / 3f);      // lamina de 2 quadradinhos que afina na ponta
-                        if (aw <= hw) c = blade; else if (aw <= hw + 1f) c = outl;
+                        if (aw <= 1.5f && u > 0.5f) c = (aw <= 0.4f) ? lite : blade;      // a lamina nasce da guarda
+                        else c = (Math.Abs(u) <= 0.5f && aw <= 2.2f) ? guard : outl;      // guarda: barra de 5 com contorno em cima e embaixo
                     }
-                    else if (u > tip && u <= tip + 0.9f && aw <= 0.55f) c = outl;
+                    else if (u > 1.5f && u <= tipU + 1.5f)
+                    {
+                        float inW = 1.5f; if (u > tipU - 3f) inW = Math.Max(0.4f, 1.5f - (u - (tipU - 3f)) * 0.4f);      // lamina de 3 quadradinhos que afina em triangulo ate a ponta
+                        if (u <= tipU + 0.5f && aw <= inW) c = (aw <= 0.4f) ? lite : blade;      // centro mais claro, laterais da cor da lamina
+                        else if (u <= tipU + 0.5f && aw <= inW + 1f) c = outl;      // contorno escuro de 1 quadradinho
+                        else if (u > tipU + 0.5f && aw <= 0.4f) c = outl;      // ultima ponta escura
+                    }
                     if (c == null) continue;
-                    br.Color = c.Value; g.FillRectangle(br, handX + ci * sc - 0.3f, handY + cj * sc - 0.3f, sc + 0.6f, sc + 0.6f);
+                    br.Color = c.Value; g.FillRectangle(br, handX + ci * sc - sc / 2f - 0.3f, handY + cj * sc - sc / 2f - 0.3f, sc + 0.6f, sc + 0.6f);
                 }
             g.SmoothingMode = oldSm;
         }
@@ -2396,10 +2404,6 @@ namespace HeroiPet
             mAutoItem.Click += delegate { SetPlayMode(false); };
             mPlayItem.Click += delegate { SetPlayMode(true); };
             menu.Items.Add(mAutoItem); menu.Items.Add(mPlayItem); menu.Items.Add(new ToolStripSeparator());
-            menu.Items.Add("Atalho: ir para a Fase 2", null, delegate { StartPhase2Test(); });
-            menu.Items.Add("Atalho: cena do Feiticeiro", null, delegate { StartSceneTest(); });
-            menu.Items.Add("Atalho: 2a conversa do Feiticeiro", null, delegate { StartScene2Test(); });
-            menu.Items.Add("Atalho: ir para a Fase 3", null, delegate { StartPhase3Test(); });
             menu.Items.Add("Invocar inimigo", null, delegate { Spawn(rnd.Next(3)); });
             menu.Items.Add("Curar heroi", null, delegate { hp = MaxHP; });
             menu.Items.Add("Soneca agora", null, delegate { if (calmState == 0) nextCalm = 0; });
