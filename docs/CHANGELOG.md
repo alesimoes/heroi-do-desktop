@@ -1,10 +1,10 @@
 # Changelog (resumo)
 
-## 11/11/2026 — Visual simples da espada comum, Espada Mestre, marreta e arcos
-- **Espada comum e Espada Mestre** redesenhadas em pixel art **simples e limpa**: lâmina de 2 tons (clara em cima, mais escura embaixo) com ponta afilada, guarda reta e cabo, contorno escuro. Comum: aço cinza, guarda cinza, cabo marrom. Mestre: lâmina azulada, guarda dourada, cabo roxo.
-- **Marreta trovão:** cabo reto de madeira e cabeça retangular de aço em 2 tons com um pequeno raio azul no centro.
-- **Arcos:** a empunhadura (5 quadradinhos no meio) ganhou cor própria (marrom escuro, dourado, laranja).
-- (Uma primeira tentativa, cheia de detalhes, ficou confusa e foi descartada.)
+## 11/11/2026 — Armas no estilo do Cogumelo-maçã (formas grossas e cores vivas)
+- **Espada comum e Espada Mestre:** lâmina **larga** de 2 tons com ponta, **guarda grossa dourada**, cabo grosso e **pomo redondo**, contorno escuro forte. Comum: aço azul-acinzentado, cabo marrom, pomo dourado. Mestre: lâmina azul e branca, cabo roxo, pomo azul.
+- **Marreta trovão:** cabo grosso de madeira e **cabeça grande de pedra** em 2 tons com borda escura e um **raio azul grande** no centro.
+- **Arcos:** membros **grossos** (2 quadradinhos) com contorno forte, lado de baixo mais escuro, brilho e empunhadura de cor própria.
+- (Duas tentativas anteriores, com muitos detalhes finos e depois só simples, ficaram confusas e foram descartadas. A espada de chamas e o Cogumelo-maçã não mudaram.)
 
 ## 11/11/2026 — Visual do Link, escudos, armas e espada de chamas
 - **Link de lado:** as **costas** ficaram um pouco **menores** (cabelo/gorro e tronco 1 quadradinho mais curtos atrás).

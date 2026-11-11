@@ -1867,7 +1867,7 @@ namespace HeroiPet
                 g.DrawImage(appleSpr.R, (int)(hx - w / 2f), (int)(hy - 8 * S - h / 2f), w, h);
             }
         }
-        // MARRETA TROVAO: forma simples: cabo de madeira reto e cabeca retangular de aco em 2 tons, com um pequeno raio azul no centro
+        // MARRETA TROVAO (estilo do Cogumelo-maca: formas grossas, cores vivas, contorno forte): cabo grosso de madeira e cabeca grande de pedra em 2 tons com um raio azul bem visivel
         void DrawPixelHammer(Graphics g, float handX, float handY, float dx, float dy, float sc)
         {
             float px = -dy, py = dx; SmoothingMode oldSm = g.SmoothingMode; g.SmoothingMode = SmoothingMode.None;
@@ -1876,39 +1876,40 @@ namespace HeroiPet
                 for (int ci = -19; ci <= 19; ci++) for (int cj = -19; cj <= 19; cj++)
                 {
                     float vx = (ci + 0.5f) * sc, vy = (cj + 0.5f) * sc, u = (vx * dx + vy * dy) / sc, w = (vx * px + vy * py) / sc, aw = Math.Abs(w); Color? c = null;
-                    if (u >= -3.2f && u < 8f) { if (aw <= 0.95f) c = w > 0f ? Color.FromArgb(164, 108, 60) : Color.FromArgb(120, 76, 42); else if (aw <= 1.9f) c = dark; }      // cabo
-                    else if (u >= 8f && u <= 14f)
+                    if (u >= -3f && u < 8.5f) { if (aw <= 1.15f) c = w > 0f ? Color.FromArgb(190, 122, 60) : Color.FromArgb(140, 84, 40); else if (aw <= 2.15f) c = dark; }      // cabo grosso
+                    else if (u >= 8.5f && u <= 15f)
                     {
-                        bool inside = aw <= 5.6f && u >= 8.9f && u <= 13.1f;
-                        if (inside) c = w > 0f ? Color.FromArgb(204, 212, 230) : Color.FromArgb(142, 150, 172);      // cabeca de aco em 2 tons
-                        else if (aw <= 6.5f && u <= 14f) c = dark;
-                        if (inside && Math.Abs(u - 11f) <= 0.8f && aw <= 1.3f) c = Color.FromArgb(96, 226, 238);      // raio azul no centro
+                        bool inside = aw <= 6.4f && u >= 9.5f && u <= 14f;
+                        if (inside) { c = w > 0f ? Color.FromArgb(212, 218, 236) : Color.FromArgb(150, 160, 188); if (aw >= 5.2f || u >= 13f) c = Color.FromArgb(112, 122, 152); }      // cabeca de pedra: topo claro, base escura, borda mais escura
+                        else if (aw <= 7.4f) c = dark;
+                        if (inside && Math.Abs(u - 11.7f) <= 1.5f && aw <= 2.2f) c = (Math.Abs(u - 11.7f) <= 0.6f && aw <= 0.9f) ? Color.White : Color.FromArgb(70, 215, 240);      // raio azul grande no centro
                     }
                     if (c == null) continue;
                     br.Color = c.Value; g.FillRectangle(br, handX + ci * sc - 0.3f, handY + cj * sc - 0.3f, sc + 0.6f, sc + 0.6f);
                 }
             g.SmoothingMode = oldSm;
         }
-        // ESPADA COMUM / ESPADA MESTRE: formas simples e limpas (poucos detalhes, contorno escuro): lamina de 2 tons (clara em cima, mais escura embaixo) com ponta afilada, guarda reta e cabo.
-        // Comum: aco cinza, guarda cinza, cabo marrom. Mestre: lamina azulada, guarda dourada, cabo roxo.
+        // ESPADA COMUM / ESPADA MESTRE (estilo do Cogumelo-maca): lamina larga de 2 tons com ponta, guarda grossa dourada, cabo grosso e pomo redondo; cores vivas e contorno escuro forte
         void DrawPixelSword(Graphics g, float handX, float handY, float dx, float dy, float sc, bool master)
         {
             float px = -dy, py = dx; SmoothingMode oldSm = g.SmoothingMode; g.SmoothingMode = SmoothingMode.None;
             Color dark = Color.FromArgb(34, 28, 52);
-            float tipU = master ? 12.4f : 11f, halfG = master ? 3.9f : 3.3f;
-            Color lite = master ? Color.FromArgb(232, 246, 255) : Color.FromArgb(232, 236, 246), body = master ? Color.FromArgb(168, 204, 246) : Color.FromArgb(172, 182, 204), shade = master ? Color.FromArgb(110, 150, 214) : Color.FromArgb(124, 134, 160);
-            Color guard = master ? Color.FromArgb(240, 200, 70) : Color.FromArgb(146, 152, 172), grip = master ? Color.FromArgb(116, 72, 176) : Color.FromArgb(124, 80, 46);
+            float tipU = master ? 12.6f : 11.4f, halfG = master ? 4.8f : 4.2f;
+            Color lite = master ? Color.FromArgb(236, 248, 255) : Color.FromArgb(222, 232, 252), body = master ? Color.FromArgb(120, 178, 244) : Color.FromArgb(150, 172, 216);
+            Color guard = master ? Color.FromArgb(246, 200, 60) : Color.FromArgb(240, 186, 52), guardD = master ? Color.FromArgb(196, 140, 30) : Color.FromArgb(196, 124, 30);
+            Color grip = master ? Color.FromArgb(120, 80, 190) : Color.FromArgb(156, 96, 48), pomo = master ? Color.FromArgb(90, 190, 255) : Color.FromArgb(246, 200, 60);
             using (SolidBrush br = new SolidBrush(Color.Black))
-                for (int ci = -16; ci <= 16; ci++) for (int cj = -16; cj <= 16; cj++)
+                for (int ci = -17; ci <= 17; ci++) for (int cj = -17; cj <= 17; cj++)
                 {
                     float vx = (ci + 0.5f) * sc, vy = (cj + 0.5f) * sc, u = (vx * dx + vy * dy) / sc, w = (vx * px + vy * py) / sc, aw = Math.Abs(w); Color? c = null;
-                    if (u >= -3.2f && u < 0f) { if (aw <= 0.9f) c = grip; else if (aw <= 1.85f) c = dark; }      // cabo
-                    else if (u >= 0f && u < 1.4f) { if (aw <= halfG) c = guard; else if (aw <= halfG + 0.9f) c = dark; }      // guarda reta
-                    else if (u >= 1.4f && u <= tipU)
+                    if (u < -2.6f && u >= -5.2f) { float du = u + 3.9f; if (du * du + w * w <= 1.3f * 1.3f) c = pomo; else if (du * du + w * w <= 2.3f * 2.3f) c = dark; }      // pomo redondo
+                    else if (u >= -2.6f && u < 0f) { if (aw <= 1.05f) c = grip; else if (aw <= 2.05f) c = dark; }      // cabo grosso
+                    else if (u >= 0f && u < 2f) { if (aw <= halfG) c = (u < 1f) ? guard : guardD; else if (aw <= halfG + 1f) c = dark; }      // guarda grossa (2 quadradinhos de espessura)
+                    else if (u >= 2f && u <= tipU)
                     {
-                        float t = (u - 1.4f) / (tipU - 1.4f), hw = 1.3f - 0.3f * t; if (u > tipU - 2f) hw = 0.25f + (hw - 0.25f) * (tipU - u) / 2f;      // ponta afilada
-                        if (aw <= hw) c = w > 0.1f ? lite : (aw > hw - 0.5f ? shade : body);      // 2 tons + borda de sombra
-                        else if (aw <= hw + 0.9f) c = dark;
+                        float t = (u - 2f) / (tipU - 2f), hw = 1.75f - 0.35f * t; if (u > tipU - 2.4f) hw = 0.3f + (hw - 0.3f) * (tipU - u) / 2.4f;      // lamina larga com ponta
+                        if (aw <= hw) c = w > 0.15f ? lite : body;
+                        else if (aw <= hw + 1f) c = dark;
                     }
                     if (c == null) continue;
                     br.Color = c.Value; g.FillRectangle(br, handX + ci * sc - 0.3f, handY + cj * sc - 0.3f, sc + 0.6f, sc + 0.6f);
@@ -1940,9 +1941,14 @@ namespace HeroiPet
             }
             using (SolidBrush bd = new SolidBrush(dk)) using (SolidBrush bm = new SolidBrush(main)) using (SolidBrush bh = new SolidBrush(hi))
             {
-                foreach (PointF p in pts) g.FillRectangle(bd, p.X - unit, p.Y - unit, 3 * unit, 3 * unit);
-                foreach (PointF p in pts) g.FillRectangle(bm, p.X, p.Y, unit, unit);
-                for (int i = 1; i < n; i += 3) g.FillRectangle(bh, pts[i].X, pts[i].Y, unit, unit);      // brilho
+                Color shd = eq == 2 ? Color.FromArgb(34, 150, 170) : (eq == 1 ? Color.FromArgb(128, 138, 166) : Color.FromArgb(150, 86, 36));
+                using (SolidBrush bs2 = new SolidBrush(shd))
+                {
+                    foreach (PointF p in pts) g.FillRectangle(bd, p.X - unit, p.Y - unit, 4 * unit, 4 * unit);      // membros GROSSOS (2 quadradinhos) com contorno forte
+                    foreach (PointF p in pts) g.FillRectangle(bm, p.X, p.Y, 2 * unit, 2 * unit);
+                    foreach (PointF p in pts) g.FillRectangle(bs2, p.X + unit, p.Y + unit, unit, unit);      // lado de baixo mais escuro
+                    for (int i = 1; i < n; i += 3) g.FillRectangle(bh, pts[i].X, pts[i].Y, unit, unit);      // brilho
+                }
                 Color gc = eq == 2 ? Color.FromArgb(255, 170, 40) : (eq == 1 ? Color.FromArgb(222, 176, 64) : Color.FromArgb(104, 64, 36));      // empunhadura (5 quadradinhos no meio) numa cor diferente
                 using (SolidBrush gb = new SolidBrush(gc)) for (int k = -2; k <= 2; k++) { int idx = Math.Max(0, Math.Min(n, (n >> 1) + k * 2)); g.FillRectangle(gb, pts[idx].X, pts[idx].Y, unit, unit); }
                 if (eq == 2)      // joia laranja no meio e pontas de cristal
