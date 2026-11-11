@@ -1431,8 +1431,8 @@ let scene = 0, dlgIdx = 0, sceneT = 0, zoomE = 0, fadeA = 0, zfx = 0, zfy = 0, a
 let p2MsgT = 0, staffPending = false, wizHasStaff = false, drops = [], dropT = 0, wasInPuddle = false;
 let savedTrees = null, puddles = [], staffPh = 0, batKills = 0, staffT = 0, staffX = 0, staffGround = 0, darkOverlay = null;
 const BATS_FOR_STAFF = 30;
-const DLG = [['Feiticeiro', 'Preciso da sua ajuda, recupere meu cajado, você é forte e valente.'], ['Link', 'Por que precisa dele?'], ['Feiticeiro', 'Seu poder...'], ['Feiticeiro', 'Você só pode saber o lugar que está.']];
-const DLG_TIME = [6.6, 4.6, 4.2, 5.8];
+const DLG = [['Feiticeiro', 'Preciso da sua ajuda, recupere meu cajado, você é forte e valente.'], ['Link', 'Por que precisa dele?'], ['Feiticeiro', 'Seu poder...'], ['Feiticeiro', 'Você só pode saber onde ele está.']];
+const DLG_TIME = [6.6, 4.6, 2.8, 5.8];      // "Seu poder..." fica a metade do tempo das outras
 const ease = (t) => { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); };
 const zoomK = () => 1 + 1.3 * zoomE;      // amplia ate 2,3x
 const zoomOx = () => zfx + (W / 2 - zfx) * zoomE;      // onde o ponto do Link cai na tela

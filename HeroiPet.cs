@@ -3668,8 +3668,8 @@ namespace HeroiPet
             new string[] { "Feiticeiro", "Preciso da sua ajuda, recupere meu cajado, você é forte e valente." },
             new string[] { "Link", "Por que precisa dele?" },
             new string[] { "Feiticeiro", "Seu poder..." },
-            new string[] { "Feiticeiro", "Você só pode saber o lugar que está." } };
-        static readonly float[] DlgTime = { 6.6f, 4.6f, 4.2f, 5.8f };      // cada fala fica 2 s a mais na tela
+            new string[] { "Feiticeiro", "Você só pode saber onde ele está." } };
+        static readonly float[] DlgTime = { 6.6f, 4.6f, 2.8f, 5.8f };      // cada fala fica 2 s a mais na tela; "Seu poder..." fica a metade do tempo das outras
         float ZK { get { return 1f + 1.3f * zoomE; } }      // amplia ate 2,3x
         float ZOx { get { return zfx + (W / 2f - zfx) * zoomE; } }      // onde o ponto do Link cai na tela
         float ZOy { get { return zfy + (H / 2f - zfy) * zoomE; } }
