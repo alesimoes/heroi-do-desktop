@@ -1,5 +1,11 @@
 # Changelog (resumo)
 
+## 11/11/2026 — 2ª conversa do Feiticeiro (entre a Fase 2 e a 3)
+- Depois do Octorok Gigante e das rupias, **antes da Fase 3**: os monstros somem, a tela amplia no Link e o Feiticeiro (já com o cajado) chega. *Feiticeiro: "Preciso de ajuda..." (pausa) "Você pode me dar sua..." (pausa) "sua espada?"* / *Link: "Hã?"* / *Feiticeiro: "Preciso de equipamento"* / *Link: "NÃO!"*. Então o Feiticeiro **aponta o cajado para o Link por alguns segundos (sem fala)**, abaixa e diz *"Meu amigo, eu nunca o machucaria."*, e **vai embora**. A tela volta ao normal, escurece e a Fase 3 começa. As letras aparecem uma por uma, com pausa de 0,7 s onde há reticências. Atalhos de teste: item **Atalho: 2a conversa do Feiticeiro** na bandeja e `--cena2`. Só no desktop.
+
+## 11/11/2026 — Nome da espada do conjunto cogumelo
+- No inventário a arma agora se chama **"Espada cogumelo"** (antes "Cogumelo-maça"). Desktop e arquivo da web.
+
 ## 11/11/2026 — Octorok Gigante verde e poças de ácido mais fortes (v2)
 - O **Octorok Gigante** (chefão da Fase 2) agora é **verde**, igual ao octorok da Fase 2 (antes era roxo).
 - As **poças de ácido** ficaram **30% maiores** (a figura e a área que machuca) e agora **tiram dois corações** (antes meio coração); se o Link ficar em cima, perde mais dois a cada 1,2 s de invulnerabilidade. Só no desktop por enquanto (o chefão ainda não existe na web).

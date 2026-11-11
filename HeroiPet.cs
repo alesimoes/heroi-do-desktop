@@ -1465,6 +1465,7 @@ namespace HeroiPet
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--lanche") >= 0) apples = 5;
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--jogar") >= 0) SetPlayMode(true);
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--fase2") >= 0) StartPhase2Test();      // atalho: direto na fase 2
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "--cena2") >= 0) StartScene2Test();      // atalho: 2a conversa do Feiticeiro
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--fase3") >= 0) StartPhase3Test();      // atalho: direto na fase 3
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--cena") >= 0) StartSceneTest();      // atalho: cena do Feiticeiro e depois a fase 2
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--chefao") >= 0) StartBossTest();   // teste rapido do lanche
@@ -2005,7 +2006,7 @@ namespace HeroiPet
         {
             struct Hit { public Rectangle R; public int Kind, A, B; }      // Kind 0 aba | 1 item | 2 fechar
             static readonly string[][] Names = {
-                new string[] { "Arco de madeira", "Arco de metal", "Arco de cristal" }, new string[] { "Espada comum", "Espada Mestre", "Marreta trovão", "Espada de chamas", "Cogumelo-maça" }, new string[] { "Escudo azul", "Escudo vermelho", "Escudo do rei", "Escudo maçã" },
+                new string[] { "Arco de madeira", "Arco de metal", "Arco de cristal" }, new string[] { "Espada comum", "Espada Mestre", "Marreta trovão", "Espada de chamas", "Espada cogumelo" }, new string[] { "Escudo azul", "Escudo vermelho", "Escudo do rei", "Escudo maçã" },
                 new string[] { "Gorro verde", "Gorro roxo", "Coroa de ouro", "Gorro areia", "Gorro gelo", "Gorro fogo", "Gorro noite", "Gorro mar", "Gorro cogumelo", "Gorro maçã" }, new string[] { "Túnica verde", "Blusa azul", "Roupa de rei", "Blusa areia", "Blusa gelo", "Blusa fogo", "Blusa noite", "Blusa mar", "Blusa cogumelo", "Blusa maçã" }, new string[] { "Fadinha", "Fadinha rosa", "Fadinha folha", "Fadinha estrela" } };
             static readonly string[][] Descs = {
                 new string[] { "O arco de sempre.", "Flechas com o dobro de dano.", "Atira 2 flechas de cristal, uma logo depois da outra." }, new string[] { "A espada de sempre: 150 de dano.", "Espada Mestre: o dobro de dano, 300 de dano.", "Usa as DUAS mãos (sem escudo): golpe lento, área grande, 600 de dano.", "Lâmina de fogo: golpes muito rápidos, 450 de dano.", "Um cogumelo gigante de maça: acerta em área e solta esporos, 700 de dano (vem com o conjunto cogumelo)." }, new string[] { "Escudo comum.", "Escudo vermelho do herói.", "Escudo circular do tesouro do rei.", "Escudo de maçã cortada (vem com o conjunto maçã)." },
@@ -2323,6 +2324,7 @@ namespace HeroiPet
             menu.Items.Add(mAutoItem); menu.Items.Add(mPlayItem); menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add("Atalho: ir para a Fase 2", null, delegate { StartPhase2Test(); });
             menu.Items.Add("Atalho: cena do Feiticeiro", null, delegate { StartSceneTest(); });
+            menu.Items.Add("Atalho: 2a conversa do Feiticeiro", null, delegate { StartScene2Test(); });
             menu.Items.Add("Atalho: ir para a Fase 3", null, delegate { StartPhase3Test(); });
             menu.Items.Add("Invocar inimigo", null, delegate { Spawn(rnd.Next(3)); });
             menu.Items.Add("Curar heroi", null, delegate { hp = MaxHP; });
@@ -3680,14 +3682,27 @@ namespace HeroiPet
             new string[] { "Link", "Por que precisa dele?" },
             new string[] { "Feiticeiro", "Seu poder..." },
             new string[] { "Feiticeiro", "Você só pode saber onde ele está." } };
+        // 2a cena (entre a Fase 2 e a 3): o Feiticeiro pede a espada. '|' = pausa dentro da fala; speaker "*" = acao (aponta o cajado, sem fala)
+        static readonly string[][] Dlg2 = {
+            new string[] { "Feiticeiro", "Preciso de ajuda...| Você pode me dar sua...| sua espada?" },
+            new string[] { "Link", "Hã?" },
+            new string[] { "Feiticeiro", "Preciso de equipamento" },
+            new string[] { "Link", "NÃO!" },
+            new string[] { "*", "" },
+            new string[] { "Feiticeiro", "Meu amigo, eu nunca o machucaria." } };
+        static readonly float[] DlgTime2 = { 6.2f, 2.4f, 3.4f, 2.4f, 3.8f, 4.4f };
+        int sceneKind = 1; float wizPoint;      // sceneKind: 1 primeira conversa (vai para a fase intermediaria) | 2 segunda (vai para a Fase 3); wizPoint 0..1: o Feiticeiro aponta o cajado
+        string[][] CurDlg { get { return sceneKind == 2 ? Dlg2 : Dlg; } }
+        float[] CurDlgTime { get { return sceneKind == 2 ? DlgTime2 : DlgTime; } }
         static readonly float[] DlgTime = { 6.6f, 4.6f, 2.8f, 5.8f };      // cada fala fica 2 s a mais na tela; "Seu poder..." fica a metade do tempo das outras
         float ZK { get { return 1f + 1.3f * zoomE; } }      // amplia ate 2,3x
         float ZOx { get { return zfx + (W / 2f - zfx) * zoomE; } }      // onde o ponto do Link cai na tela
         float ZOy { get { return zfy + (H / 2f - zfy) * zoomE; } }
         static float Ease(float t) { t = Math.Max(0f, Math.Min(1f, t)); return t * t * (3f - 2f * t); }
 
-        void StartScene()
+        void StartScene(int kind = 1)
         {
+            sceneKind = kind; wizPoint = 0f; if (kind == 2) { wizHasStaff = true; acids.Clear(); pools.Clear(); sparks.Clear(); starPh = 0; starTarget = null; }
             ResetBoss(); CloseDeath(); if (dead) { dead = false; hp = MaxHP; }
             foreach (Enemy en in enemies) { puffs.Add(new Puff { Kind = 0, X = en.X, Y = en.Y - 4 * S }); puffs.Add(new Puff { Kind = 1, X = en.X, Y = en.Y - 8 * S }); }
             enemies.Clear(); rocks.Clear(); arrows.Clear(); items.Clear();
@@ -3695,13 +3710,14 @@ namespace HeroiPet
             zfx = hx; zfy = hy - 8 * S; hface = 1; walking = false; attacking = false; bowing = false; speechT = 0; inv = 0; kvx = kvy = 0;
         }
         void StartSceneTest() { if (!playMode) SetPlayMode(true); StartScene(); }
+        void StartScene2Test() { if (!playMode) SetPlayMode(true); phase2 = true; BuildSprites(); StartScene(2); }      // atalho: so a segunda conversa (Feiticeiro pede a espada) e depois a Fase 3
 
         void UpdateScene(float dt)
         {
             sceneT += dt; UpdateSparks(dt);
             for (int i = puffs.Count - 1; i >= 0; i--) { puffs[i].T += dt; if (puffs[i].T > 0.45f) puffs.RemoveAt(i); }
             if (speechT > 0) speechT -= dt;
-            walking = false; hface = (scene == 2 || scene == 3 || scene == 4) ? 1 : hface;
+            walking = false; hface = (scene == 2 || scene == 3 || scene == 4 || scene == 8) ? 1 : hface;
             switch (scene)
             {
                 case 1:
@@ -3715,7 +3731,15 @@ namespace HeroiPet
                         break;
                     }
                 case 3:
-                    if (sceneT >= DlgTime[dlgIdx]) { dlgIdx++; sceneT = 0; if (dlgIdx >= Dlg.Length) { scene = 4; sceneT = 0; } }
+                    {
+                        bool act = CurDlg[dlgIdx][0] == "*"; float dur = CurDlgTime[dlgIdx];
+                        wizPoint = act ? Math.Min(Ease(sceneT / 0.6f), Ease((dur - sceneT) / 0.6f)) : 0f;      // levanta o cajado, aponta para o Link e abaixa
+                        if (sceneT >= dur) { dlgIdx++; sceneT = 0; wizPoint = 0f; if (dlgIdx >= CurDlg.Length) { scene = sceneKind == 2 ? 8 : 4; sceneT = 0; } }
+                        break;
+                    }
+                case 8:      // 2a cena: o Feiticeiro vai embora (anda para a direita ate sair da tela)
+                    aface = 1; ax += 70 * S * dt; ay = hy;
+                    if (ax > hx + 230 * S) { allyOn = false; scene = 4; sceneT = 0; }
                     break;
                 case 4:
                     zoomE = 1f - Ease(sceneT / 1.2f);
@@ -3725,7 +3749,8 @@ namespace HeroiPet
                     fadeA = Math.Min(1f, sceneT / 1.0f);
                     if (sceneT >= 1.2f)
                     {
-                        StartInterlude();      // monta o lugar escuro (fase intermediaria) enquanto a tela esta preta
+                        if (sceneKind == 2) { allyOn = false; StartPhase3(); }      // 2a conversa: depois dela comeca a Fase 3
+                        else StartInterlude();      // monta o lugar escuro (fase intermediaria) enquanto a tela esta preta
                         scene = 6; sceneT = 0; fadeA = 1f;
                     }
                     break;
@@ -3758,7 +3783,22 @@ namespace HeroiPet
             float bob = (float)Math.Sin(time * 3f) * 1.2f * S;
             Shadow(g, ax, ay, 11);
             Spr(g, wizSpr, ax, ay - bob, aface > 0);
-            DrawHeldStaff(g, ax, ay - bob, 0.7f, aface);
+            if (wizPoint > 0f && staffSpr != null) DrawPointingStaff(g, ax, ay - bob); else DrawHeldStaff(g, ax, ay - bob, 0.7f, aface);
+        }
+        void DrawPointingStaff(Graphics g, float x, float feetY)      // cajado levantado e apontado para frente (para o Link), com a esfera brilhando
+        {
+            float k = 0.7f; int w = (int)(staffSpr.W * k), h = (int)(staffSpr.H * k);
+            float px = x + aface * 7 * S, py = feetY - 7 * S, ang = (aface > 0 ? 90f : -90f) * Ease(wizPoint);
+            GraphicsState st = g.Save(); g.TranslateTransform(px, py); g.RotateTransform(ang);
+            g.DrawImage(staffSpr.R, (int)(-w / 2f), (int)(-h + 2 * S * k), w, h);
+            g.Restore(st);
+            if (wizPoint < 0.9f) return;
+            float tipX = px + aface * (h - 4 * S * k), tipY = py, pulse = 1f + 0.4f * (float)Math.Sin(time * 14f);
+            using (SolidBrush b1 = new SolidBrush(Color.FromArgb(190, 120, 255))) using (SolidBrush b2 = new SolidBrush(Color.FromArgb(245, 230, 255)))
+            {
+                float r = 4 * S * pulse; g.FillRectangle(b1, tipX - r, tipY - r, 2 * r, 2 * r); g.FillRectangle(b2, tipX - r / 2f, tipY - r / 2f, r, r);
+                for (int q = 1; q <= 4; q++) { float fx = tipX + aface * (q * 5 * S + (float)Math.Sin(time * 9f + q) * S), fy = tipY + (float)Math.Cos(time * 11f + q * 2) * 2 * S; g.FillRectangle(q % 2 == 0 ? b2 : b1, fx - S, fy - S / 2f, 2 * S, S); }
+            }
         }
 
         // ---- fase intermediaria: lugar escuro (entre a Fase 1 e a 2) ----
@@ -3971,9 +4011,9 @@ namespace HeroiPet
         // ---- caixa de conversa (por cima de tudo, sem ampliar) ----
         void DrawDialog(Graphics g)
         {
-            if (scene != 3 || dlgIdx >= Dlg.Length) return;
+            if (scene != 3 || dlgIdx >= CurDlg.Length || CurDlg[dlgIdx][0] == "*") return;      // "*" = acao do Feiticeiro (sem fala)
             if (dlgFont == null) dlgFont = new Font("Consolas", S * 6, FontStyle.Bold, GraphicsUnit.Pixel);
-            string who = Dlg[dlgIdx][0], txt = Dlg[dlgIdx][1];
+            string who = CurDlg[dlgIdx][0], raw = CurDlg[dlgIdx][1], txt = raw.Replace("|", "");
             float maxW = Math.Min(W * 0.62f, 420f * S), pad = 6 * S;
             List<string> lines = new List<string>(); string cur = "";
             foreach (string w in txt.Split(' '))
@@ -3993,7 +4033,7 @@ namespace HeroiPet
                 g.FillRectangle(gold, x - pad, y, bw + 2 * pad, S);
             }
             DrawTextF(g, who, dlgFont, x, y + pad, who == "Link" ? Color.FromArgb(120, 225, 110) : Color.FromArgb(255, 220, 90));
-            int shown = (int)(sceneT * 20f);      // as letras vao aparecendo uma por uma (20 por segundo); a caixa ja nasce do tamanho final
+            int shown = 0; { float acc = 0f; foreach (char ch in raw) { if (ch == '|') { acc += 0.7f; continue; } acc += 0.05f; if (acc > sceneT) break; shown++; } }      // as letras vao aparecendo uma por uma (20 por segundo; '|' = pausa de 0,7 s); a caixa ja nasce do tamanho final
             for (int i = 0; i < lines.Count && shown > 0; i++)
             {
                 string part = lines[i].Length <= shown ? lines[i] : lines[i].Substring(0, shown);
@@ -4370,7 +4410,7 @@ namespace HeroiPet
                     {
                         rewardWaitT += dt;
                         bool sobrou3 = items.Exists(delegate (Item it) { return it.Reward; });
-                        if ((!sobrou3 && rewardWaitT >= 2f) || rewardWaitT >= 60f) StartPhase3();
+                        if ((!sobrou3 && rewardWaitT >= 2f) || rewardWaitT >= 60f) StartScene(2);      // antes da Fase 3: o Feiticeiro conversa de novo com o Link
                     }
                     else SetPlayMode(false);
                 }
