@@ -2254,10 +2254,10 @@ namespace HeroiPet
             Dictionary<char, Color> mgOv = Art.Ov('R', Color.FromArgb(105, 45, 165)); mgOv['r'] = Color.FromArgb(64, 26, 110); mgOv['E'] = Color.FromArgb(255, 240, 90); mgOv['G'] = Color.FromArgb(255, 205, 40); mgOv['K'] = Color.FromArgb(28, 22, 36);
             mageSpr = Art.Make(Art.MageRows, (int)Math.Round(S * 1.6), mgOv);
             wizSpr = Art.Make(Art.WizRows, S, mgOv);
-            Dictionary<char, Color> obOv = Art.Ov('G', Color.FromArgb(132, 62, 196)); obOv['g'] = Color.FromArgb(82, 36, 128); obOv['h'] = Color.FromArgb(196, 140, 245);
-            octoBoss[0] = Art.Make(Art.Octo2A, S * 4, obOv); octoBoss[1] = Art.Make(Art.Octo2B, S * 4, obOv);      // Octorok Gigante (roxo, 4x o tamanho de um octorok)
+            Dictionary<char, Color> obOv = Art.Ov('h', Color.FromArgb(150, 225, 120));      // Octorok Gigante: verde, igual ao octorok da fase 2
+            octoBoss[0] = Art.Make(Art.Octo2A, S * 4, obOv); octoBoss[1] = Art.Make(Art.Octo2B, S * 4, obOv);      // Octorok Gigante (verde, 4x o tamanho de um octorok)
             if (acidPoolBmp != null) acidPoolBmp.Dispose();
-            acidPoolBmp = BuildPuddleColored(24 * S, 12 * S, 0, Color.FromArgb(70, 120, 20), Color.FromArgb(150, 220, 40), Color.FromArgb(235, 255, 150));      // Feiticeiro do tamanho do Link (cena e aliado)
+            acidPoolBmp = BuildPuddleColored((int)Math.Round(31.2f * S), (int)Math.Round(15.6f * S), 0, Color.FromArgb(70, 120, 20), Color.FromArgb(150, 220, 40), Color.FromArgb(235, 255, 150));      // Feiticeiro do tamanho do Link (cena e aliado)
             Dictionary<char, Color> stOv = new Dictionary<char, Color>(); stOv['a'] = Color.FromArgb(118, 120, 134); stOv['c'] = Color.FromArgb(168, 172, 186); stOv['d'] = Color.FromArgb(84, 86, 100); stOv['m'] = Color.FromArgb(84, 134, 74);
             for (int sv = 0; sv < 3; sv++) stoneSpr[sv] = Art.Make(Art.StoneRows(sv), Math.Max(S + 1, S * 3 / 2), stOv);      // pedras maiores que 1 quadradinho do heroi (cerca de 1,5x)
             Dictionary<char, Color> sfOv = new Dictionary<char, Color>(); sfOv['o'] = Color.FromArgb(150, 80, 215); sfOv['q'] = Color.FromArgb(225, 185, 255); sfOv['E'] = Color.FromArgb(255, 240, 90); sfOv['R'] = Color.FromArgb(105, 45, 165); sfOv['r'] = Color.FromArgb(64, 26, 110); sfOv['G'] = Color.FromArgb(255, 205, 40); sfOv['K'] = Color.FromArgb(28, 22, 36);
@@ -4121,8 +4121,8 @@ namespace HeroiPet
             {
                 float[] p = pools[i]; p[2] += dt;
                 if (p[2] >= 5f) { pools.RemoveAt(i); continue; }
-                float ex = (hx - p[0]) / (11 * S), ey = (hy - p[1]) / (5.5f * S);
-                if (!dead && ex * ex + ey * ey < 1f) HurtHero(p[0], p[1], 0.5f);      // ficar em cima da poca de acido machuca
+                float ex = (hx - p[0]) / (14.3f * S), ey = (hy - p[1]) / (7.15f * S);      // poca 30% maior (11 x 5,5 -> 14,3 x 7,15)
+                if (!dead && ex * ex + ey * ey < 1f) HurtHero(p[0], p[1], 2f);      // ficar em cima da poca de acido tira DOIS coracoes (de novo a cada 1,2 s de invulnerabilidade)
             }
         }
         void DrawAcidPools(Graphics g)
