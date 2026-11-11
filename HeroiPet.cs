@@ -370,16 +370,16 @@ namespace HeroiPet
             "...KGGGGGGK...",
             "..KGGGGGGGGK..",
             ".KGGGGGGGGGGK.",
-            "KGGGYYYYYYYSK.",
-            "KGGYYYYYYYYSSK",
+            ".KGGYYYYYYYSK.",
+            ".KGYYYYYYYYSSK",
             ".KYYYYYYYYKSSK",
-            "..KYYYYYYSSSK.",
-            "..KYYYYYSSSK..",
-            "..KYYKGGGGKK..",
-            "..KGGGGGGGGGK.",
-            "..KGGGGGGGGGK.",
-            "..KGGGGGGGGSK.",
-            "..KBBBBBBBBBK.",
+            "...KYYYYYSSSK.",
+            "...KYYYYSSSK..",
+            "...KYKGGGGKK..",
+            "...KGGGGGGGGK.",
+            "...KGGGGGGGGK.",
+            "...KGGGGGGGSK.",
+            "...KBBBBBBBBK.",
             "...KWWK.KWWK..",
             "...KBBK.KBBK.."
         };
@@ -388,16 +388,16 @@ namespace HeroiPet
             "...KGGGGGGK...",
             "..KGGGGGGGGK..",
             ".KGGGGGGGGGGK.",
-            "KGGGYYYYYYYSK.",
-            "KGGYYYYYYYYSSK",
+            ".KGGYYYYYYYSK.",
+            ".KGYYYYYYYYSSK",
             ".KYYYYYYYYKSSK",
-            "..KYYYYYYSSSK.",
-            "..KYYYYYSSSK..",
-            "..KYYKGGGGKK..",
-            "..KGGGGGGGGGK.",
-            "..KGGGGGGGGGK.",
-            "..KGGGGGGGGSK.",
-            "..KBBBBBBBBBK.",
+            "...KYYYYYSSSK.",
+            "...KYYYYSSSK..",
+            "...KYKGGGGKK..",
+            "...KGGGGGGGGK.",
+            "...KGGGGGGGGK.",
+            "...KGGGGGGGSK.",
+            "...KBBBBBBBBK.",
             "....KWWKWWK...",
             "....KBBKBBK..."
         };
@@ -1573,7 +1573,14 @@ namespace HeroiPet
             if (dead || eqBow != 2) return;
             arrows.Add(new Arrow { X = hx + hface * 7 * S, Y = hy - 8 * S, VX = aimX * 210 * S, VY = aimY * 210 * S, Crystal = true });      // 2a flecha, mesma mira
         }        // arma especial na mao (marreta ou espada de chamas); devolve false para as espadas comuns
-        bool DrawSpecialSword(Graphics g, float handX, float handY, float dx, float dy)
+        bool DrawSpecialSword(Graphics g, float handX, float handY, float dx, float dy)      // armas especiais ficam 20% menores em proporcao ao Link (escala em volta da mao)
+        {
+            if (eqSword < 2) return false;
+            GraphicsState wst = g.Save(); g.TranslateTransform(handX, handY); g.ScaleTransform(0.8f, 0.8f); g.TranslateTransform(-handX, -handY);
+            bool wr = DrawSpecialSwordRaw(g, handX, handY, dx, dy);
+            g.Restore(wst); return wr;
+        }
+        bool DrawSpecialSwordRaw(Graphics g, float handX, float handY, float dx, float dy)
         {
             if (eqSword < 2) return false;
             float px = -dy, py = dx; Color dark = Color.FromArgb(28, 22, 36);
@@ -1607,16 +1614,65 @@ namespace HeroiPet
                 g.SmoothingMode = oldSm;
                 return true;
             }
-            // espada de chamas: lamina ondulada laranja com miolo amarelo
-            const int segs = 8; float len = 16 * S; PointF[] L = new PointF[segs + 1], R = new PointF[segs + 1];
-            for (int i = 0; i <= segs; i++) { float t = i / (float)segs, wv = ((i % 2 == 0) ? 1.0f : 2.1f) * S * (1 - t * 0.55f); float qx = handX + dx * len * t, qy = handY + dy * len * t; L[i] = new PointF(qx + px * wv, qy + py * wv); R[i] = new PointF(qx - px * wv, qy - py * wv); }
-            List<PointF> poly = new List<PointF>(L); poly.Add(new PointF(handX + dx * (len + 3.5f * S), handY + dy * (len + 3.5f * S))); for (int i = segs; i >= 0; i--) poly.Add(R[i]);
-            using (SolidBrush fl = new SolidBrush(Color.FromArgb(255, 140, 40))) using (Pen ol = new Pen(dark, Math.Max(1f, S))) using (Pen core = new Pen(Color.FromArgb(255, 225, 90), Math.Max(1f, S * 0.9f)))
-            { g.FillPolygon(fl, poly.ToArray()); g.DrawPolygon(ol, poly.ToArray()); g.DrawLine(core, handX + dx * 2 * S, handY + dy * 2 * S, handX + dx * len * 0.92f, handY + dy * len * 0.92f); }
-            using (Pen gd = new Pen(Color.FromArgb(215, 60, 40), 2 * S)) g.DrawLine(gd, handX + px * 3.5f * S, handY + py * 3.5f * S, handX - px * 3.5f * S, handY - py * 3.5f * S);
-            using (Pen hd = new Pen(Color.FromArgb(110, 40, 40), S + 1)) g.DrawLine(hd, handX, handY, handX - dx * 3 * S, handY - dy * 3 * S);
+            // ESPADA DE CHAMAS: lamina de aco em brasa (do vermelho escuro no cabo ao amarelo na ponta) com labaredas que dancam nos dois lados, ponta em chama, guarda de aco com gemas e fagulhas subindo
+            DrawFlameSword(g, handX, handY, dx, dy, S);
             return true;
         }
+        void DrawFlameSword(Graphics g, float handX, float handY, float dx, float dy, float sc)
+        {
+            float px = -dy, py = dx; SmoothingMode oldSm = g.SmoothingMode; g.SmoothingMode = SmoothingMode.None;
+            Color dark = Color.FromArgb(34, 14, 20), outl = Color.FromArgb(90, 20, 18);
+            const float L0 = 1.8f, L1 = 17f;      // inicio e fim da lamina (em quadradinhos)
+            float tm = time;
+            using (SolidBrush br = new SolidBrush(dark))
+                for (int ci = -23; ci <= 23; ci++) for (int cj = -23; cj <= 23; cj++)
+                {
+                    float vx = (ci + 0.5f) * sc, vy = (cj + 0.5f) * sc, u = (vx * dx + vy * dy) / sc, w = (vx * px + vy * py) / sc, aw = Math.Abs(w);
+                    Color? c = null;
+                    if (u >= -4.2f && u < 0f)      // cabo: couro escuro com aneis em brasa
+                    {
+                        if (aw <= 0.9f) c = (((int)Math.Floor(u + 8f)) % 2 == 0) ? Color.FromArgb(70, 34, 30) : Color.FromArgb(120, 46, 32);
+                        else if (aw <= 1.9f) c = dark;
+                    }
+                    else if (u >= 0f && u < 1.8f)      // guarda de aco com gemas de fogo nas pontas
+                    {
+                        if (aw <= 4.4f) c = (aw >= 3.0f) ? Color.FromArgb(255, 150, 40) : Color.FromArgb(104, 100, 122);
+                        else if (aw <= 5.4f) c = dark;
+                    }
+                    else if (u >= L0 && u <= L1)
+                    {
+                        float t = (u - L0) / (L1 - L0), hw = 1.9f - 1.4f * t;
+                        if (u > L1 - 2.6f) hw = Math.Max(0.35f, hw - (u - (L1 - 2.6f)) * 0.22f);      // ponta afilada
+                        if (aw <= hw)
+                        {
+                            Color b0 = t < 0.5f ? Lerp(Color.FromArgb(170, 28, 24), Color.FromArgb(255, 130, 28), t * 2f) : Lerp(Color.FromArgb(255, 130, 28), Color.FromArgb(255, 232, 110), (t - 0.5f) * 2f);
+                            c = aw <= 0.5f ? Lerp(b0, Color.FromArgb(255, 250, 205), 0.7f) : b0;      // fio central mais claro
+                        }
+                        else if (aw <= hw + 1.1f) c = outl;
+                    }
+                    if (c == null && u >= L0 + 1f && u <= L1 + 3.5f)      // labaredas dancando nos dois lados da lamina e na ponta
+                    {
+                        for (int k = 0; k < 6 && c == null; k++)
+                        {
+                            float uk = 3.4f + k * 2.7f, hk = 1.7f + 1.9f * (0.5f + 0.5f * (float)Math.Sin(tm * 10f + k * 1.9f)), sgn = (k % 2 == 0) ? 1f : -1f;
+                            float hw2 = 1.9f - 1.4f * Math.Min(1f, (uk - L0) / (L1 - L0)), du = Math.Abs(u - uk), wo = w * sgn - hw2;
+                            if (du < 1.5f && wo > 0f && wo < hk * (1f - du / 1.5f)) c = (wo < hk * 0.45f) ? Color.FromArgb(255, 214, 80) : Color.FromArgb(255, 112, 28);
+                        }
+                        float tipH = 2.6f + 1.6f * (float)Math.Sin(tm * 12f);      // chama na ponta
+                        if (c == null && u > L1 - 0.5f && u < L1 + tipH && aw < 1.5f * (1f - (u - (L1 - 0.5f)) / (tipH + 0.5f))) c = (u < L1 + tipH * 0.5f) ? Color.FromArgb(255, 226, 110) : Color.FromArgb(255, 120, 30);
+                    }
+                    if (c == null) continue;
+                    br.Color = c.Value; g.FillRectangle(br, handX + ci * sc - 0.3f, handY + cj * sc - 0.3f, sc + 0.6f, sc + 0.6f);
+                }
+            using (SolidBrush eb = new SolidBrush(Color.FromArgb(255, 190, 70)))      // fagulhas subindo
+                for (int q = 0; q < 6; q++)
+                {
+                    float uu = 3f + ((tm * 7f + q * 3.1f) % 17f), ww = ((q % 2 == 0) ? 1f : -1f) * (2.2f + ((tm * 2.2f + q * 1.3f) % 3f));
+                    g.FillRectangle(eb, handX + (dx * uu + px * ww) * sc - sc / 2f, handY + (dy * uu + py * ww) * sc - sc / 2f, sc * 0.9f, sc * 0.9f);
+                }
+            g.SmoothingMode = oldSm;
+        }
+        static Color Lerp(Color a, Color b, float t) { t = Math.Max(0f, Math.Min(1f, t)); return Color.FromArgb((int)(a.R + (b.R - a.R) * t), (int)(a.G + (b.G - a.G) * t), (int)(a.B + (b.B - a.B) * t)); }
         bool OwnShield(int i) { return i == 0 || (i == 1 && evoStage >= 4) || (i == 2 && kingGear) || (i == 3 && SetsOwned >= 7); }      // 3 = escudo maca cortada (conjunto maca)
         bool OwnHat(int i) { return i == 0 || (i == 1 && evoStage >= 2) || (i == 2 && kingGear) || (i >= 3 && i - 3 < SetsOwned); }
         bool OwnTunic(int i) { return i == 0 || (i == 1 && evoStage >= 3) || (i == 2 && kingGear) || (i >= 3 && i - 3 < SetsOwned); }
@@ -1841,7 +1897,7 @@ namespace HeroiPet
         void DrawSwordAt(Graphics g, float handX, float handY, float deg)
         {
             double rad = deg * Math.PI / 180.0;
-            float dx = (float)Math.Cos(rad), dy = (float)Math.Sin(rad), px = -dy, py = dx, len = 12 * S, w = 1.2f * S;
+            float dx = (float)Math.Cos(rad), dy = (float)Math.Sin(rad), px = -dy, py = dx, len = 9.5f * S, w = 1.0f * S;
             if (DrawSpecialSword(g, handX, handY, dx, dy)) return;
             PointF[] blade = {
                 new PointF(handX + px * w, handY + py * w), new PointF(handX - px * w, handY - py * w),
@@ -1891,8 +1947,8 @@ namespace HeroiPet
         }
         void DrawFrontBow(Graphics g, float x, float y)      // arco vertical na mao direita (de frente), com a barriga para a direita
         {
-            PixelBow(g, x, y, 1f, 0f, 7 * S, 3 * S, S, eqBow);
-            using (Pen st = new Pen(Color.FromArgb(235, 235, 235), Math.Max(1f, S * 0.5f))) g.DrawLine(st, x, y - 7 * S, x, y + 7 * S);
+            PixelBow(g, x, y, 1f, 0f, 5.6f * S, 2.4f * S, S, eqBow);
+            using (Pen st = new Pen(Color.FromArgb(235, 235, 235), Math.Max(1f, S * 0.5f))) g.DrawLine(st, x, y - 5.6f * S, x, y + 5.6f * S);
         }
         void BowIcon(Graphics g, int eq, float cx, float cy, float u)      // arco para icones e item grande (a barriga para a direita, como no jogo)
         {
@@ -3034,9 +3090,9 @@ namespace HeroiPet
             using (SolidBrush bb = new SolidBrush(ShieldColor()))
             using (SolidBrush yb = new SolidBrush(Color.FromArgb(245, 205, 70)))
             {
-                g.FillRectangle(kb, sx - S, sy - S, 8 * S, 10 * S);
-                g.FillRectangle(bb, sx, sy, 6 * S, 8 * S);
-                g.FillRectangle(yb, sx + 2 * S, sy + 2 * S, 2 * S, 3 * S);
+                g.FillRectangle(kb, sx, sy, 6 * S, 8 * S);      // escudo azul/vermelho menor em proporcao ao Link (antes 8 x 10)
+                g.FillRectangle(bb, sx + S, sy + S, 4 * S, 6 * S);
+                g.FillRectangle(yb, sx + 2 * S, sy + 2 * S, 2 * S, 2 * S);
             }
         }
 
@@ -5652,12 +5708,12 @@ namespace HeroiPet
             float cx = hx + f * 8 * S, cy = hy - bob - 8 * S;
             float dx = aimX, dy = aimY, px = -dy, py = dx;
             float pull = Math.Min(1f, bowT / 0.4f);
-            PixelBow(g, cx, cy, dx, dy, 7 * S, 3 * S, S, eqBow);
+            PixelBow(g, cx, cy, dx, dy, 5.6f * S, 2.4f * S, S, eqBow);      // arco 20% menor em proporcao ao Link
             float nx = cx - dx * pull * 3 * S, ny = cy - dy * pull * 3 * S;      // a corda vai ate a mao, sem entrar no rosto
             using (Pen st = new Pen(Color.FromArgb(235, 235, 235), 1))
             {
-                g.DrawLine(st, cx + px * 7 * S, cy + py * 7 * S, nx, ny);
-                g.DrawLine(st, nx, ny, cx - px * 7 * S, cy - py * 7 * S);
+                g.DrawLine(st, cx + px * 5.6f * S, cy + py * 5.6f * S, nx, ny);
+                g.DrawLine(st, nx, ny, cx - px * 5.6f * S, cy - py * 5.6f * S);
             }
             using (SolidBrush sk = new SolidBrush(Color.FromArgb(250, 208, 165))) using (SolidBrush kb = new SolidBrush(Color.FromArgb(28, 22, 36)))
             { g.FillRectangle(kb, cx - 2 * S, cy - 2 * S, 3 * S, 3 * S); g.FillRectangle(sk, cx - S, cy - S, S, S); }      // a mao no meio do arco
@@ -5723,7 +5779,7 @@ namespace HeroiPet
             double rad = ang * Math.PI / 180.0;
             float dx = f * (float)Math.Cos(rad), dy = (float)Math.Sin(rad);
             float px = -dy, py = dx;
-            float len = 14 * S, w = 1.2f * S;
+            float len = 11 * S, w = 1.0f * S;      // espada comum menor em proporcao ao Link (antes 14)
 
             if (attacking && prog > 0.2f && prog < 0.95f)
             {
@@ -5794,7 +5850,7 @@ namespace HeroiPet
                 float handX = hx + 6 * S, handY = hy - 5 * S;
                 double rad = (-80f + 175f * q) * Math.PI / 180.0;
                 float dx = (float)Math.Cos(rad), dy = (float)Math.Sin(rad), px = -dy, py = dx;
-                float len = 12 * S, w = 1.2f * S;
+                float len = 9.5f * S, w = 1.0f * S;
                 if (DrawSpecialSword(g, handX, handY, dx, dy)) goto swordDone;      // marreta / espada de chamas
                 PointF[] blade = {
                     new PointF(handX + px * w, handY + py * w), new PointF(handX - px * w, handY - py * w),

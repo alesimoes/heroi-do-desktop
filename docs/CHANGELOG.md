@@ -1,5 +1,11 @@
 # Changelog (resumo)
 
+## 11/11/2026 — Visual do Link, escudos, armas e espada de chamas
+- **Link de lado:** as **costas** ficaram um pouco **menores** (cabelo/gorro e tronco 1 quadradinho mais curtos atrás).
+- **Escudos azul e vermelho** menores em proporção ao Link (de 8x10 para 6x8 quadradinhos, no mesmo lugar).
+- **Armas 20% menores** em proporção ao Link: espada comum (14 → 11), arco (7 → 5,6 de meia altura), e marreta, Cogumelo-maçã e espada de chamas na escala 0,8.
+- **Espada de chamas com visual novo:** lâmina em brasa (vermelho escuro → laranja → amarelo) com fio central claro, **labaredas animadas** nos dois lados, **chama na ponta**, guarda de aço com gemas de fogo, cabo com anéis em brasa e **fagulhas** subindo.
+
 ## 11/11/2026 — 2ª conversa do Feiticeiro (entre a Fase 2 e a 3)
 - **Mais ajustes:** a ameaça com o cajado agora dura **12 s** (levanta em 0,9 s; brilho começa aos 4,5 s, brilha 4,5 s e some em 1,5 s; **volta à posição inicial em 1,5 s**). O Feiticeiro **treme a cada quadro, bem mais rápido e movendo-se menos** de um lado para o outro. O **brilho é transparente de verdade** (gradiente na camada de transparência), **não mais quadriculado**.
 - **Brilho da ponta do cajado:** agora **menor e levemente transparente** (pontilhado em xadrez, que deixa ver o fundo); **começa a brilhar aos poucos aos 3 s** da ameaça, **brilha por 3 s** (de 4 s a 7 s) e **para de brilhar aos poucos** até os 8 s. Enquanto **aponta o cajado o Feiticeiro fica parado, tremendo rapidamente e de leve**.
