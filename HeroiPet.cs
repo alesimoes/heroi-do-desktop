@@ -960,9 +960,10 @@ namespace HeroiPet
         public float X, Y, VX, VY, KX, KY, T, Timer, Flash;
         public int HP, MaxHP, Face = 1, Mode; public bool Wave, Fairy;      // Fairy: marcado para a fadinha derrotar (20% dos monstros)
       //      // Wave: faz parte da onda final antes do dragao
+        public float SlamCd, SlamT, SlamX, SlamY, SlamX0, SlamY0, Lift; public int SlamPh;      // salto esmagador da Gelatina de Fogo Gigante (fase 3)
         public float TX, TY, RT; public bool Moving; public float Scale = 1f, SmokeT, GrowT, SparkT, ShockT = 8f;      // dragao: destino, tempo para trocar de destino, esta andando
     }
-    class Rock { public float X, Y, VX, VY, Life; public bool Fire, Homing, Arrow, Orb; }      // Orb: esfera sombria do Feiticeiro      // Arrow: flecha dos bokoblins a cavalo
+    class Rock { public float X, Y, VX, VY, Life; public bool Fire, Homing, Arrow, Orb, Ember; }      // Ember: bolinha de fogo da gelatina de fogo (fase 3): igual a pedra de octorok (explode em 3 s)      // Orb: esfera sombria do Feiticeiro      // Arrow: flecha dos bokoblins a cavalo
     class Arrow { public float X, Y, VX, VY; public bool Power, Crystal; }
     class Tree { public float X, Y; public bool Stone; public int Variant; public bool[] Has = new bool[5]; public float[] Regrow = new float[5]; }      // Stone: pedra da Fase 2 (no lugar da macieira)
     class AllyMark { }
@@ -1464,6 +1465,7 @@ namespace HeroiPet
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--lanche") >= 0) apples = 5;
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--jogar") >= 0) SetPlayMode(true);
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--fase2") >= 0) StartPhase2Test();      // atalho: direto na fase 2
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "--fase3") >= 0) StartPhase3Test();      // atalho: direto na fase 3
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--cena") >= 0) StartSceneTest();      // atalho: cena do Feiticeiro e depois a fase 2
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--chefao") >= 0) StartBossTest();   // teste rapido do lanche
             timer = new System.Windows.Forms.Timer();
@@ -2239,6 +2241,11 @@ namespace HeroiPet
                 octo[0] = Art.Make(Art.Octo2A, S, o2); octo[1] = Art.Make(Art.Octo2B, S, o2);
                 bat[0] = Art.Make(Art.Bat2Up, S, b2); bat[1] = Art.Make(Art.Bat2Down, S, b2);
                 slime[0] = Art.Make(Art.Slime2Tall, S, s2); slime[1] = Art.Make(Art.Slime2Flat, S, s2);
+                if (phase3)      // fase 3: nao ha mais a gelatina normal, so a de fogo (atira bolinhas de fogo)
+                {
+                    Dictionary<char, Color> f3 = Art.Ov('U', Color.FromArgb(238, 96, 34)); f3['L'] = Color.FromArgb(255, 186, 76); f3['u'] = Color.FromArgb(188, 46, 24);
+                    slime[0] = Art.Make(Art.Slime2Tall, S, f3); slime[1] = Art.Make(Art.Slime2Flat, S, f3);
+                }
                 boko[0] = Art.Make(Art.Boko2A, S, k2); boko[1] = Art.Make(Art.Boko2B, S, k2); boko[2] = Art.Make(Art.Boko2C, S, k2);
                 boko[3] = Art.Make(Art.NoClub(Art.Boko2A), S, k2);      // sem o porrete (golpe): tambem na cor escura da fase 2
             }
@@ -2256,7 +2263,9 @@ namespace HeroiPet
             wizSpr = Art.Make(Art.WizRows, S, mgOv);
             Dictionary<char, Color> obOv = Art.Ov('h', Color.FromArgb(150, 225, 120));      // Octorok Gigante: verde, igual ao octorok da fase 2
             octoBoss[0] = Art.Make(Art.Octo2A, S * 4, obOv); octoBoss[1] = Art.Make(Art.Octo2B, S * 4, obOv);      // Octorok Gigante (verde, 4x o tamanho de um octorok)
+            if (phase3) { Dictionary<char, Color> fb = Art.Ov('U', Color.FromArgb(238, 96, 34)); fb['L'] = Color.FromArgb(255, 186, 76); fb['u'] = Color.FromArgb(188, 46, 24); slimeBoss[0] = Art.Make(Art.Slime2Tall, S * 5, fb); slimeBoss[1] = Art.Make(Art.Slime2Flat, S * 5, fb); }      // Gelatina de Fogo Gigante (chefao da fase 3)
             if (acidPoolBmp != null) acidPoolBmp.Dispose();
+            if (phase3) acidPoolBmp = BuildPuddleColored((int)Math.Round(31.2f * S), (int)Math.Round(15.6f * S), 0, Color.FromArgb(150, 50, 10), Color.FromArgb(240, 110, 30), Color.FromArgb(255, 220, 120)); else
             acidPoolBmp = BuildPuddleColored((int)Math.Round(31.2f * S), (int)Math.Round(15.6f * S), 0, Color.FromArgb(70, 120, 20), Color.FromArgb(150, 220, 40), Color.FromArgb(235, 255, 150));      // Feiticeiro do tamanho do Link (cena e aliado)
             Dictionary<char, Color> stOv = new Dictionary<char, Color>(); stOv['a'] = Color.FromArgb(118, 120, 134); stOv['c'] = Color.FromArgb(168, 172, 186); stOv['d'] = Color.FromArgb(84, 86, 100); stOv['m'] = Color.FromArgb(84, 134, 74);
             for (int sv = 0; sv < 3; sv++) stoneSpr[sv] = Art.Make(Art.StoneRows(sv), Math.Max(S + 1, S * 3 / 2), stOv);      // pedras maiores que 1 quadradinho do heroi (cerca de 1,5x)
@@ -2314,6 +2323,7 @@ namespace HeroiPet
             menu.Items.Add(mAutoItem); menu.Items.Add(mPlayItem); menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add("Atalho: ir para a Fase 2", null, delegate { StartPhase2Test(); });
             menu.Items.Add("Atalho: cena do Feiticeiro", null, delegate { StartSceneTest(); });
+            menu.Items.Add("Atalho: ir para a Fase 3", null, delegate { StartPhase3Test(); });
             menu.Items.Add("Invocar inimigo", null, delegate { Spawn(rnd.Next(3)); });
             menu.Items.Add("Curar heroi", null, delegate { hp = MaxHP; });
             menu.Items.Add("Soneca agora", null, delegate { if (calmState == 0) nextCalm = 0; });
@@ -3392,7 +3402,8 @@ namespace HeroiPet
             return r < 40 ? 2 : (r < 70 ? 4 : (r < 90 ? 3 : 5));       // 40% de 5, 30% de 10, 20% de 20, 10% de 50
         }
         int RupeeStep() { return Math.Min(6, rupees / 20); }       // indice do nivel dentro da fase (0..6): cada 20 rupias sobe um nivel (fases 1 e 2)
-        float DiffStep() { return RupeeStep() + (phase2 ? 3 : 0) + ((!phase2 && RupeeStep() == 1) ? 0.5f : 0f); }      // NIVEL 2 da fase 1: um pouco mais dificil (+5% de monstros e de ritmo)
+        float DiffStep() { if (phase3) return 5f + 0.5f * RupeeStep(); return RupeeStep() + (phase2 ? 3 : 0) +      // FASE 3: comeca na dificuldade do 3o nivel da fase 2 (passo 5) e sobe +5% por nivel (meio passo)
+             ((!phase2 && RupeeStep() == 1) ? 0.5f : 0f); }      // NIVEL 2 da fase 1: um pouco mais dificil (+5% de monstros e de ritmo)
         //      // dificuldade: cada nivel = +10% de monstros. A fase 2 comeca no NIVEL 8 com a dificuldade do nivel 4 (passo 3) e sobe 1 por nivel ate o 14
 
         // Quantidade de monstros: comeca em 2/3 do maximo da animacao (4) e cresce 10% (do inicial) a cada 20 rupias
@@ -3447,7 +3458,7 @@ namespace HeroiPet
             bool was = playMode;
             playMode = on;
             if (!on) RestoreWorld();      // volta as macieiras, tira o escuro, a cena e o aliado
-            if (!on && phase2) { phase2 = false; BuildSprites(); }      // saiu do jogo: a fase 2 acaba
+            if (!on && (phase2 || phase3)) { phase2 = false; phase3 = false; p3EndT = 0; BuildSprites(); }      // saiu do jogo: a fase 2 acaba
             if (mAutoItem != null) { mAutoItem.Checked = !on; mPlayItem.Checked = on; }
             attacking = false; bowing = false; bowT = 0; playPickT = 0;
             if (!on && paused) { paused = false; if (pauseItem != null) pauseItem.Text = "Pausar"; }
@@ -3646,7 +3657,7 @@ namespace HeroiPet
         // ================= FASE 2 =================
         // Depois de vencer o Dragao comeca a FASE 2: os mesmos 7 niveis (agora a cada 40 rupias), monstros sombrios com o dobro de vida e,
         // no fim, o vilao: o FEITICEIRO SOMBRIO (8000 de vida), que teleporta, lanca aneis de esferas, tiros mirados e invoca gelatinas.
-        bool phase2, bossDeadMage; Sprite mageSpr;
+        bool phase2, phase3, bossDeadMage; Sprite mageSpr; float p3EndT;      // phase3: Fase 3 (usa tudo da Fase 2 com phase2 = true)
         float rewardWaitT, p2MsgT;      // p2MsgT: aviso 'VOCE PASSOU PARA A FASE 2!' (depois da cena)
               // tempo esperando o heroi pegar as rupias do dragao antes da Fase 2
 
@@ -4000,6 +4011,16 @@ namespace HeroiPet
             apples = 0; hx = W / 2; hy = H / 2; spawnTimer = 2f; killsAtMax = 0;
             Say("Fase 2!");
         }
+        void StartPhase3()
+        {
+            if (interlude || savedTrees != null) RestoreWorld();
+            phase2 = true; phase3 = true; ResetBoss(); BuildSprites();
+            enemies.Clear(); rocks.Clear(); arrows.Clear(); items.Clear(); puffs.Clear(); acids.Clear(); pools.Clear(); sparks.Clear(); starPh = 0; starTarget = null;
+            rupees = 0; lastStep = 0; SetMaxHp(Math.Max(MaxHP, 8)); hp = MaxHP; dead = false; deathWait = false; inv = 2f;
+            apples = 0; hx = W / 2; hy = H / 2; spawnTimer = 2f; killsAtMax = 0; p3EndT = 0; msgT = 0;
+            Say("Fase 3!");
+        }
+        void StartPhase3Test() { if (!playMode) SetPlayMode(true); StartPhase3(); }      // atalho: direto na FASE 3 (nivel 1)
         void StartPhase2Test()      // atalho: liga o modo jogo direto na FASE 2 (nivel 1, vida cheia)
         {
             if (!playMode) SetPlayMode(true);
@@ -4008,7 +4029,9 @@ namespace HeroiPet
         // ================= CHEFAO DA FASE 2: OCTOROK GIGANTE =================
         // Uma estrela roxa voa ate um octorok da tela, que fica enorme. Ele cospe bolas de acido na direcao do Link; se o Link desvia, a bola cai no chao onde ele estava
         // e faz uma poca de acido que dura 5 s (machuca quem fica em cima). Vida: 150% da do dragao (5000 -> 7500).
-        const int OctoHP = 7500;
+        const int OctoHP = 7500, FireBossHP = 11250;      // Fase 3: Gelatina de Fogo Gigante com 150% da vida do Octorok Gigante
+        int BossTargetType { get { return phase3 ? 2 : 0; } }      // a estrela atinge um octorok (fase 2) ou uma gelatina de fogo (fase 3)
+        Sprite[] slimeBoss = new Sprite[2];
         List<Acid> acids = new List<Acid>(); List<float[]> pools = new List<float[]>();      // poca: x, y, tempo
         Sprite[] octoBoss = new Sprite[2]; Bitmap acidPoolBmp;
         int starPh; float starX, starY, starWait; Enemy starTarget;      // starWait: tempo esperando o octorok chegar perto do Link
@@ -4044,35 +4067,40 @@ namespace HeroiPet
         {
             bossSpawned = true;
             Enemy t = null; float bd = float.MaxValue;
-            foreach (Enemy en in enemies) if (en.Type == 0) { float d = (en.X - hx) * (en.X - hx) + (en.Y - hy) * (en.Y - hy); if (d < bd) { bd = d; t = en; } }      // o octorok mais perto do Link
+            foreach (Enemy en in enemies) if (en.Type == BossTargetType) { float d = (en.X - hx) * (en.X - hx) + (en.Y - hy) * (en.Y - hy); if (d < bd) { bd = d; t = en; } }      // o octorok mais perto do Link
             if (t == null) t = NewStarTarget(Math.Max(20 * S, Math.Min(W - 20 * S, hx >= W / 2f ? hx - 150 * S : hx + 150 * S)), hy);
             starWait = 0; starTarget = t; starPh = 1; starX = W * (0.15f + 0.7f * (float)rnd.NextDouble()); starY = -10 * S;
         }
         Enemy NewStarTarget(float x, float y)      // nao ha octorok na tela: nasce um (com fumaca) para a estrela atingir
         {
-            Enemy t = Spawn(0); t.X = x; t.Y = y;
+            Enemy t = Spawn(BossTargetType); t.X = x; t.Y = y;
             for (int k = 0; k < 6; k++) puffs.Add(new Puff { Kind = 2, X = x + ((float)rnd.NextDouble() - 0.5f) * 14 * S, Y = y - (float)rnd.NextDouble() * 10 * S });
             return t;
         }
         void UpdateStar(float dt)
         {
             if (starPh == 0) return;
-            if (starTarget == null || starTarget.Type != 0 || !enemies.Contains(starTarget))      // o octorok foi derrotado: acha outro (ou cria)
+            if (starTarget == null || starTarget.Type != BossTargetType || !enemies.Contains(starTarget))      // o octorok foi derrotado: acha outro (ou cria)
             {
-                starTarget = null; foreach (Enemy en in enemies) if (en.Type == 0) { starTarget = en; break; }
+                starTarget = null; foreach (Enemy en in enemies) if (en.Type == BossTargetType) { starTarget = en; break; }
                 if (starTarget == null) starTarget = NewStarTarget(W / 2f, H * 0.4f);
             }
             starWait += dt;
             float lx = starTarget.X - hx, ly = starTarget.Y - hy;
             bool near = lx * lx + ly * ly < (38 * S) * (38 * S) || starWait > 10f;      // so acerta quando o octorok chega perto do Link (ou depois de 10 s)
-            float tx = starTarget.X, ty = near ? starTarget.Y - 5 * S : starTarget.Y - 46 * S + (float)Math.Sin(time * 4f) * 3 * S, dx = tx - starX, dy = ty - starY, d = (float)Math.Sqrt(dx * dx + dy * dy);
-            if (near && d < 7 * S) { TransformOcto(starTarget); starPh = 0; return; }
-            float st = Math.Min(d, (near ? 150f : 110f) * S * dt); if (d > 0.5f) { starX += dx / d * st; starY += dy / d * st; }      // espera pairando acima do octorok; ao chegar perto do Link, mergulha
+            if (starPh == 1)      // ainda nao apareceu: a estrela so surge quando o octorok chega perto do Link
+            {
+                if (!near) return;
+                starPh = 2; starX = Math.Max(10 * S, Math.Min(W - 10 * S, starTarget.X + ((float)rnd.NextDouble() - 0.5f) * 80 * S)); starY = -10 * S;
+            }
+            float tx = starTarget.X, ty = starTarget.Y - 5 * S, dx = tx - starX, dy = ty - starY, d = (float)Math.Sqrt(dx * dx + dy * dy);
+            if (d < 7 * S) { TransformOcto(starTarget); starPh = 0; return; }
+            float st = Math.Min(d, 150 * S * dt); starX += dx / d * st; starY += dy / d * st;
             if (rnd.NextDouble() < 0.7) puffs.Add(new Puff { Kind = 1, X = starX + ((float)rnd.NextDouble() - 0.5f) * 4 * S, Y = starY + ((float)rnd.NextDouble() - 0.5f) * 4 * S });      // rastro
         }
         void TransformOcto(Enemy t)      // a estrela acerta: o octorok vira o Octorok Gigante
         {
-            t.Type = 7; t.HP = t.MaxHP = OctoHP; t.T = 0; t.Scale = 0.25f; t.Timer = 2.6f; t.Mode = 0; t.KX = t.KY = 0; t.Fairy = false; t.Wave = false; t.Face = hx >= t.X ? 1 : -1;
+            t.Type = 7; t.HP = t.MaxHP = phase3 ? FireBossHP : OctoHP; t.SlamCd = 4f; t.SlamPh = 0; t.Lift = 0; t.T = 0; t.Scale = 0.25f; t.Timer = 2.6f; t.Mode = 0; t.KX = t.KY = 0; t.Fairy = false; t.Wave = false; t.Face = hx >= t.X ? 1 : -1;
             boss = t;
             for (int k = 0; k < 14; k++) puffs.Add(new Puff { Kind = k % 3 == 0 ? 2 : 1, X = t.X + ((float)rnd.NextDouble() - 0.5f) * 20 * S, Y = t.Y - (float)rnd.NextDouble() * 14 * S });
         }
@@ -4081,6 +4109,11 @@ namespace HeroiPet
             if (e.T < 1.5f) { e.Scale = 0.25f + 0.75f * Ease(e.T / 1.5f); return; }      // crescendo
             e.Scale = 1f;
             bool rage = e.HP * 2 <= e.MaxHP;
+            if (phase3)      // Gelatina de Fogo Gigante: alem de cuspir fogo como o octorok, SALTA em cima do Link
+            {
+                if (e.SlamPh != 0) { UpdateSlam(e, dt, rage); return; }
+                if (!dead) { e.SlamCd -= dt; if (e.SlamCd <= 0) { StartSlam(e); return; } }
+            }
             e.SparkT -= dt;
             if (e.SparkT <= 0 || ((e.TX - e.X) * (e.TX - e.X) + (e.TY - e.Y) * (e.TY - e.Y)) < (3 * S) * (3 * S))      // anda devagar para perto do heroi (sem encostar)
             {
@@ -4095,6 +4128,32 @@ namespace HeroiPet
             if (e.Timer > 0) return;
             SpitAcid(e, rage);
             e.Timer = (rage ? 1.4f : 2.3f) + (float)rnd.NextDouble() * 0.6f;
+        }
+        // ---- ataque novo da Gelatina de Fogo Gigante: SALTO ESMAGADOR ----
+        // Marca no chao onde o Link esta, salta em arco (1,3 s) e cai ali: quem estiver na marca perde 2 coracoes e a queda solta bolinhas de fogo em roda (explodem em 3 s, como a pedra do octorok).
+        void StartSlam(Enemy e)
+        {
+            e.SlamPh = 1; e.SlamT = 0; e.SlamX0 = e.X; e.SlamY0 = e.Y; e.Moving = false;
+            e.SlamX = Math.Max(30 * S, Math.Min(W - 30 * S, hx)); e.SlamY = Math.Max(48 * S, Math.Min(H - 4 * S, hy + 4 * S));
+        }
+        void UpdateSlam(Enemy e, float dt, bool rage)
+        {
+            e.SlamT += dt; float u = Math.Min(1f, e.SlamT / 1.3f), k = Ease(u);
+            e.X = e.SlamX0 + (e.SlamX - e.SlamX0) * k; e.Y = e.SlamY0 + (e.SlamY - e.SlamY0) * k;
+            e.Lift = (float)Math.Sin(u * Math.PI) * 78 * S; e.Face = hx >= e.X ? 1 : -1;
+            if (u < 1f) return;
+            e.SlamPh = 0; e.Lift = 0; e.X = e.SlamX; e.Y = e.SlamY; e.SlamCd = (rage ? 4f : 6.5f) + (float)rnd.NextDouble() * 1.5f; e.Timer = Math.Max(e.Timer, 0.8f); e.SparkT = 1.5f;
+            for (int q = 0; q < 16; q++) puffs.Add(new Puff { Kind = q % 3 == 0 ? 2 : (q % 2), X = e.X + ((float)rnd.NextDouble() - 0.5f) * 50 * S, Y = e.Y - (float)rnd.NextDouble() * 12 * S });
+            float ex = (hx - e.X) / (26 * S), ey = (hy - e.Y) / (13 * S);
+            if (!dead && ex * ex + ey * ey < 1f) HurtHero(e.X, e.Y, 2f);      // a queda tira dois coracoes
+            int n = rage ? 10 : 8; double a0 = rnd.NextDouble() * Math.PI;
+            for (int q = 0; q < n; q++) { double an = a0 + q * 2 * Math.PI / n; Rock em = new Rock(); em.Ember = true; em.X = e.X; em.Y = e.Y - 6 * S; em.VX = (float)Math.Cos(an) * 60 * S; em.VY = (float)Math.Sin(an) * 50 * S; rocks.Add(em); }
+        }
+        void DrawSlamTarget(Graphics g, Enemy e)      // marca no chao onde o salto vai cair (pisca mais rapido perto da queda)
+        {
+            float u = Math.Min(1f, e.SlamT / 1.3f); if (((int)(e.SlamT * (6 + 10 * u))) % 2 == 0) return;
+            using (Pen p = new Pen(Color.FromArgb(255, 96, 28), Math.Max(1f, S))) using (Pen p2 = new Pen(Color.FromArgb(255, 220, 120), Math.Max(1f, S * 0.5f)))
+            { g.DrawEllipse(p, e.SlamX - 26 * S, e.SlamY - 13 * S, 52 * S, 26 * S); g.DrawEllipse(p2, e.SlamX - 13 * S, e.SlamY - 6.5f * S, 26 * S, 13 * S); }
         }
         void SpitAcid(Enemy e, bool rage)      // 1 bola na direcao do heroi (3 em leque com furia)
         {
@@ -4139,7 +4198,7 @@ namespace HeroiPet
         }
         void DrawAcidBalls(Graphics g)
         {
-            using (SolidBrush rim = new SolidBrush(Color.FromArgb(60, 110, 15))) using (SolidBrush body = new SolidBrush(Color.FromArgb(140, 225, 40))) using (SolidBrush hi = new SolidBrush(Color.FromArgb(230, 255, 150)))
+            using (SolidBrush rim = new SolidBrush(phase3 ? Color.FromArgb(150, 50, 10) : Color.FromArgb(60, 110, 15))) using (SolidBrush body = new SolidBrush(phase3 ? Color.FromArgb(255, 130, 30) : Color.FromArgb(140, 225, 40))) using (SolidBrush hi = new SolidBrush(phase3 ? Color.FromArgb(255, 235, 150) : Color.FromArgb(230, 255, 150)))      // fase 3: bolas e pocas de fogo
                 foreach (Acid a in acids)
                 {
                     float u = Math.Min(1f, a.T / a.Dur);
@@ -4151,7 +4210,7 @@ namespace HeroiPet
         }
         void DrawStar(Graphics g)      // estrela roxa que voa ate o octorok
         {
-            if (starPh == 0) return;
+            if (starPh != 2) return;
             PointF[] pt = new PointF[10]; double rot = time * 6;
             for (int i = 0; i < 10; i++) { double an = rot + i * Math.PI / 5 - Math.PI / 2; float r = (i % 2 == 0 ? 8 : 3.4f) * S; pt[i] = new PointF(starX + (float)Math.Cos(an) * r, starY + (float)Math.Sin(an) * r); }
             using (SolidBrush fb = new SolidBrush(Color.FromArgb(150, 80, 205))) using (Pen ol = new Pen(Color.FromArgb(28, 22, 36), Math.Max(1f, S))) using (SolidBrush core = new SolidBrush(Color.FromArgb(240, 220, 255)))
@@ -4160,11 +4219,12 @@ namespace HeroiPet
         void DrawOctoBoss(Graphics g, Enemy e)
         {
             Shadow(g, e.X, e.Y, 40 * e.Scale);
-            Sprite sp = octoBoss[e.Moving ? ((int)(e.T * 4)) % 2 : 0];
+            if (phase3 && e.SlamPh != 0) DrawSlamTarget(g, e);
+            Sprite sp = (phase3 ? slimeBoss : octoBoss)[e.Moving && e.SlamPh == 0 ? ((int)(e.T * 4)) % 2 : 0];
             int w = (int)(sp.W * e.Scale), h = (int)(sp.H * e.Scale);
-            g.DrawImage(e.Face > 0 ? sp.R : sp.L, (int)(e.X - w / 2f), (int)(e.Y - h), w, h);
+            g.DrawImage(e.Face > 0 ? sp.R : sp.L, (int)(e.X - w / 2f), (int)(e.Y - h - e.Lift), w, h);
             if (e.T >= 1.5f && e.Timer < 0.45f)      // carregando o acido na boca antes de cuspir
-                using (SolidBrush ob = new SolidBrush(Color.FromArgb(140, 225, 40))) using (SolidBrush ib = new SolidBrush(Color.FromArgb(230, 255, 150)))
+                using (SolidBrush ob = new SolidBrush(phase3 ? Color.FromArgb(255, 130, 30) : Color.FromArgb(140, 225, 40))) using (SolidBrush ib = new SolidBrush(phase3 ? Color.FromArgb(255, 235, 150) : Color.FromArgb(230, 255, 150)))
                 { float ox = e.X + e.Face * 16 * S, oy = e.Y - 16 * S; g.FillRectangle(ob, ox - 3 * S, oy - 3 * S, 6 * S, 6 * S); g.FillRectangle(ib, ox - S, oy - S, 2 * S, 2 * S); }
         }
 
@@ -4197,7 +4257,7 @@ namespace HeroiPet
         {
             if (bossPhase != 5 || rewardSpawned) return;
             if (((int)(bossT * 12)) % 2 == 0) return;
-            if (bossDeadMage) { Shadow(g, bossDeadX, bossDeadY, 40); g.DrawImage(octoBoss[0].R, (int)(bossDeadX - octoBoss[0].W / 2f), (int)(bossDeadY - octoBoss[0].H), octoBoss[0].W, octoBoss[0].H); return; }      // Octorok Gigante piscando antes de explodir
+            if (bossDeadMage) { Sprite bd = (phase3 ? slimeBoss : octoBoss)[0]; Shadow(g, bossDeadX, bossDeadY, 40); g.DrawImage(bd.R, (int)(bossDeadX - bd.W / 2f), (int)(bossDeadY - bd.H), bd.W, bd.H); return; }      // Octorok Gigante piscando antes de explodir
             Sprite sp = dragonSpr[0];
             Shadow(g, bossDeadX, bossDeadY, 34 * DK);
             g.DrawImage(bossDeadFace > 0 ? sp.R : sp.L, (int)(bossDeadX - sp.W / 2f), (int)(bossDeadY - sp.H), sp.W, sp.H);
@@ -4207,8 +4267,9 @@ namespace HeroiPet
         void DrawBossMsg(Graphics g)
         {
             if (p2MsgT > 0) { DrawBanner(g, "VOCÊ PASSOU PARA A FASE 2!", H * 0.28f); return; }      // mais alto, para nao cobrir o Link no centro      // aviso depois da cena do Feiticeiro
+            if (p3EndT > 0) { DrawBanner(g, "ESPERE POR MAIS ATUALIZAÇÕES"); return; }
             if (msgT <= 0) return;
-            DrawBanner(g, phase2 ? "ESPERE POR MAIS ATUALIZAÇÕES" : "VOCÊ PASSOU PARA A FASE 2!");
+            DrawBanner(g, phase3 ? "ESPERE POR MAIS ATUALIZAÇÕES" : (phase2 ? "VOCÊ PASSOU PARA A FASE 3!" : "VOCÊ PASSOU PARA A FASE 2!"));      // depois do Octorok Gigante: Fase 3
         }
         void DrawBanner(Graphics g, string a, float cy = -1f)
         {
@@ -4256,7 +4317,7 @@ namespace HeroiPet
         void UpdateBoss(float dt)
         {
             if (!playMode) return;
-            if (bossPhase == 0) { if (!interlude) UpdateWave(dt); if (killsAtMax >= 5 && WaveDone() && !interlude) StartFinalPhase(); return; }      // na fase intermediaria o fim e o cajado (30 morcegos), nao o chefe
+            if (bossPhase == 0) { if (!interlude) UpdateWave(dt); if (killsAtMax >= 5 && WaveDone() && !interlude) StartFinalPhase(); return; }      // fase 2 e 3 terminam com o chefao (octorok / gelatina de fogo); na intermediaria o fim e o cajado      // na fase intermediaria o fim e o cajado (30 morcegos), nao o chefe
             bossT += dt;
             for (int i = 0; i < 5; i++) if (onFire[i]) bakeTs[i] += dt;
             for (int i = smokes.Count - 1; i >= 0; i--) { smokes[i].T += dt; if (smokes[i].T > smokes[i].Life) smokes.RemoveAt(i); }
@@ -4305,7 +4366,13 @@ namespace HeroiPet
                         bool sobrou = items.Exists(delegate (Item it) { return it.Reward; });
                         if ((!sobrou && rewardWaitT >= 2f) || rewardWaitT >= 60f) StartScene();      // cena do Feiticeiro, e so depois a Fase 2
                     }
-                    else SetPlayMode(false);      // depois do Feiticeiro acaba e volta ao automatico
+                    else if (!phase3)      // depois do Octorok Gigante: a Fase 3 so comeca depois de pegar as rupias (e mais um instante); no maximo espera 60 s
+                    {
+                        rewardWaitT += dt;
+                        bool sobrou3 = items.Exists(delegate (Item it) { return it.Reward; });
+                        if ((!sobrou3 && rewardWaitT >= 2f) || rewardWaitT >= 60f) StartPhase3();
+                    }
+                    else SetPlayMode(false);
                 }
             }
         }
@@ -4420,7 +4487,7 @@ namespace HeroiPet
                 g.FillRectangle(fg, x, y, bw * frac, bh);
                 g.FillRectangle(hl, x, y, bw * frac, S);
             }
-            string name = boss != null && boss.Type == 7 ? "Octorok Gigante" : "Dragão";
+            string name = boss != null && boss.Type == 7 ? (phase3 ? "Gelatina de Fogo Gigante" : "Octorok Gigante") : "Dragão";
             SizeF sz = g.MeasureString(name, font);
             DrawText(g, name, x + bw / 2 - sz.Width / 2, y + bh + S, Color.White);
         }
@@ -5193,6 +5260,16 @@ namespace HeroiPet
                 }
                 else // slime: pula em ciclos
                 {
+                    if (phase3 && !dead)      // GELATINA DE FOGO: mesma frequencia do octorok (1,5-3 s de andar + 0,6 s de mira = a cada ~2,1 a 3,6 s) e a bolinha explode em 3 s como a pedra dele
+                    {
+                        if (e.SparkT == 0f) e.SparkT = 1.2f + (float)rnd.NextDouble() * 1.8f;
+                        e.SparkT -= dt;
+                        if (e.SparkT <= 0)
+                        {
+                            Rock em = new Rock(); em.Ember = true; em.X = e.X + e.Face * 3 * S; em.Y = e.Y - 5 * S; em.VX = ux * 80 * S; em.VY = uy * 80 * S; rocks.Add(em);
+                            e.SparkT = 2.1f + (float)rnd.NextDouble() * 1.5f;
+                        }
+                    }
                     e.Timer -= dt;
                     if (e.Mode == 0 && e.Timer <= 0) { e.Mode = 1; e.Timer = 0.45f; }
                     else if (e.Mode == 1)
@@ -5220,7 +5297,7 @@ namespace HeroiPet
                         else if (e.Type == 7)      // Octorok Gigante: elipse no chao (corpo grande), so depois de crescer
                         {
                             float rx = 20 * S, ry = 8 * S;
-                            toca = e.T > 1.5f && (cx * cx) / (rx * rx) + (cy * cy) / (ry * ry) < 1f;
+                            toca = e.T > 1.5f && e.SlamPh == 0 && (cx * cx) / (rx * rx) + (cy * cy) / (ry * ry) < 1f;
                         }
                         else toca = cx * cx + cy * cy < (9 * S) * (9 * S);
                         if (toca) HurtHero(e.X, e.Y, 0.5f);      // encostar em monstro: meio coracao
@@ -5430,6 +5507,12 @@ namespace HeroiPet
                     else if (r.Arrow) DrawArrow(g, r.X, r.Y, r.VX, r.VY, 1f);
                     else if (r.Orb) using (SolidBrush ob = new SolidBrush(Color.FromArgb(150, 70, 230))) using (SolidBrush ib = new SolidBrush(Color.FromArgb(235, 210, 255))) using (SolidBrush kb = new SolidBrush(Color.FromArgb(28, 22, 36))) { g.FillRectangle(kb, r.X - 4 * S, r.Y - 4 * S, 8 * S, 8 * S); g.FillRectangle(ob, r.X - 3 * S, r.Y - 3 * S, 6 * S, 6 * S); g.FillRectangle(ib, r.X - S, r.Y - S, 2 * S, 2 * S); }
                     else if (r.Fire) Spr(g, fireSpr[((int)(time * 12)) % 2], r.X, r.Y + fireSpr[0].H / 2f, true);
+                    else if (r.Ember)      // bolinha de fogo da gelatina: pisca mais forte perto de explodir
+                    {
+                        Sprite fs = fireSpr[((int)(time * 12)) % 2]; float ek = 0.8f + (r.Life > 2f ? 0.16f * (float)Math.Sin(r.Life * 34) : 0f);
+                        int fw = (int)(fs.W * ek), fh = (int)(fs.H * ek);
+                        g.DrawImage(fs.R, (int)(r.X - fw / 2f), (int)(r.Y - fh / 2f), fw, fh);
+                    }
                     else Spr(g, rockSpr, r.X, r.Y + 2 * S, true);
                 }
 
@@ -5905,7 +5988,7 @@ namespace HeroiPet
             float axx = rx + rupeeSpr[0].W + 2 * S + 18 * S;
             g.DrawImage(appleHud.R, (int)axx, (int)y0 - S);          // maca do tamanho da rupia
             DrawText(g, "x" + apples, axx + appleHud.W + 2 * S, y0, Color.White);
-            if (playMode) DrawText(g, "NV " + ((phase2 ? 8 : 1) + RupeeStep()), axx + appleHud.W + 2 * S + 16 * S, y0, Color.FromArgb(255, 220, 90));
+            if (playMode) DrawText(g, "NV " + ((phase3 ? 15 : (phase2 ? 8 : 1)) + RupeeStep()), axx + appleHud.W + 2 * S + 16 * S, y0, Color.FromArgb(255, 220, 90));
             DrawBossBar(g);
             if (!playMode)
             {
