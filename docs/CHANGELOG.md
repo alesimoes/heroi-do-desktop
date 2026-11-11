@@ -1,5 +1,9 @@
 # Changelog (resumo)
 
+## 11/11/2026 — Atalhos para as conversas do Feiticeiro
+- **Ctrl+Shift+F1** toca a **1ª conversa** do Feiticeiro e **Ctrl+Shift+F2** a **2ª conversa**, em qualquer momento do jogo (liga o modo jogo se estiver no automático). Também há dois itens no menu da bandeja (**Atalho: 1a / 2a conversa do Feiticeiro**) e os parâmetros `--cena` e `--cena2` ao abrir o jogo.
+- Os atalhos tocam **só a conversa** (zoom, falas, ameaça, saída do Feiticeiro) e **voltam ao jogo normal**, sem seguir para a fase intermediária nem para a Fase 3. Só no desktop.
+
 ## 11/11/2026 — Entrada dos chefões das Fases 2 e 3
 - **A fumaça sai do monstrinho:** ao chegar a hora do chefão nas Fases 2 e 3, a fumaça (e as faíscas) **não saem mais da fogueira no meio da tela**; saem **do monstrinho que aparece** e a estrela vai atingir. (Na Fase 1, a fumaça da fogueira do dragão continua como antes.)
 - **O monstrinho não ataca antes da estrela:** o octorok (Fase 2) ou a gelatina de fogo (Fase 3) escolhido pela estrela **não atira nem machuca ao encostar** enquanto espera; só passa a atacar depois de virar chefão.

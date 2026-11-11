@@ -2408,6 +2408,8 @@ namespace HeroiPet
             mAutoItem.Click += delegate { SetPlayMode(false); };
             mPlayItem.Click += delegate { SetPlayMode(true); };
             menu.Items.Add(mAutoItem); menu.Items.Add(mPlayItem); menu.Items.Add(new ToolStripSeparator());
+            menu.Items.Add("Atalho: 1a conversa do Feiticeiro (Ctrl+Shift+F1)", null, delegate { StartSceneTest(); });
+            menu.Items.Add("Atalho: 2a conversa do Feiticeiro (Ctrl+Shift+F2)", null, delegate { StartScene2Test(); });
             menu.Items.Add("Invocar inimigo", null, delegate { Spawn(rnd.Next(3)); });
             menu.Items.Add("Curar heroi", null, delegate { hp = MaxHP; });
             menu.Items.Add("Soneca agora", null, delegate { if (calmState == 0) nextCalm = 0; });
@@ -2503,7 +2505,7 @@ namespace HeroiPet
             double now = clock.Elapsed.TotalSeconds;
             float dt = (float)Math.Min(0.05, now - lastT);
             lastT = now;
-            CheckSpacePause();
+            CheckSpacePause(); CheckSceneHotkeys();
             if (!paused && !EvoWaiting && !MenuOpen) Step(dt);      // com o menu aberto o jogo fica pausado          // com o item grande na tela o jogo fica pausado ate apertar "USAR ITEM"
             Invalidate();
         }
@@ -3773,7 +3775,7 @@ namespace HeroiPet
             new string[] { "*", "" },
             new string[] { "Feiticeiro", "Meu amigo, não se preocupe, eu...| nunca o machucaria, he he" } };
         static readonly float[] DlgTime2 = { 6.2f, 2.4f, 3.4f, 2.4f, 12f, 6f };      // a ameaca com o cajado (acao) dura 12 s
-        int sceneKind = 1; float wizPoint, wizGlow;      // wizGlow 0..1: a ponta do cajado brilha como se fosse atirar      // sceneKind: 1 primeira conversa (vai para a fase intermediaria) | 2 segunda (vai para a Fase 3); wizPoint 0..1: o Feiticeiro aponta o cajado
+        bool sceneTest, prevHk1, prevHk2; int sceneKind = 1; float wizPoint, wizGlow;      // sceneTest: atalho de teste: toca so a conversa e volta ao jogo normal      // wizGlow 0..1: a ponta do cajado brilha como se fosse atirar      // sceneKind: 1 primeira conversa (vai para a fase intermediaria) | 2 segunda (vai para a Fase 3); wizPoint 0..1: o Feiticeiro aponta o cajado
         string[][] CurDlg { get { return sceneKind == 2 ? Dlg2 : Dlg; } }
         float[] CurDlgTime { get { return sceneKind == 2 ? DlgTime2 : DlgTime; } }
         static readonly float[] DlgTime = { 6.6f, 4.6f, 2.8f, 5.8f };      // cada fala fica 2 s a mais na tela; "Seu poder..." fica a metade do tempo das outras
@@ -3791,8 +3793,15 @@ namespace HeroiPet
             scene = 1; sceneT = 0; dlgIdx = 0; zoomE = 0; fadeA = 0; allyOn = false; staffPh = 0;
             zfx = hx; zfy = hy - 8 * S; hface = 1; walking = false; attacking = false; bowing = false; speechT = 0; inv = 0; kvx = kvy = 0;
         }
-        void StartSceneTest() { if (!playMode) SetPlayMode(true); StartScene(); }
-        void StartScene2Test() { if (!playMode) SetPlayMode(true); phase2 = true; BuildSprites(); StartScene(2); }      // atalho: so a segunda conversa (Feiticeiro pede a espada) e depois a Fase 3
+        void StartSceneTest() { if (!playMode) SetPlayMode(true); sceneTest = true; StartScene(); }      // atalho: so a 1a conversa do Feiticeiro
+        // ATALHOS DE TECLADO (escondidos): Ctrl+Shift+F1 = 1a conversa do Feiticeiro | Ctrl+Shift+F2 = 2a conversa. Tambem: --cena e --cena2 ao abrir o jogo.
+        void CheckSceneHotkeys()
+        {
+            bool cs = IsDown(0x11) && IsDown(0x10), k1 = cs && IsDown(0x70), k2 = cs && IsDown(0x71);
+            if (scene == 0 && !paused && !deathWait) { if (k1 && !prevHk1) StartSceneTest(); else if (k2 && !prevHk2) StartScene2Test(); }
+            prevHk1 = k1; prevHk2 = k2;
+        }
+        void StartScene2Test() { if (!playMode) SetPlayMode(true); phase2 = true; BuildSprites(); sceneTest = true; StartScene(2); }      // atalho: so a segunda conversa (Feiticeiro pede a espada) e depois a Fase 3
 
         void UpdateScene(float dt)
         {
@@ -3832,6 +3841,7 @@ namespace HeroiPet
                     fadeA = Math.Min(1f, sceneT / 1.0f);
                     if (sceneT >= 1.2f)
                     {
+                        if (sceneTest) { sceneTest = false; allyOn = false; scene = 6; sceneT = 0; fadeA = 1f; break; }      // atalho de teste: acabou a conversa, volta ao jogo normal
                         if (sceneKind == 2) { allyOn = false; StartPhase3(); }      // 2a conversa: depois dela comeca a Fase 3
                         else StartInterlude();      // monta o lugar escuro (fase intermediaria) enquanto a tela esta preta
                         scene = 6; sceneT = 0; fadeA = 1f;
