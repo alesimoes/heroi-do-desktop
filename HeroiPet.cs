@@ -388,10 +388,10 @@ namespace HeroiPet
             "..KYYYYYYSSSK.",
             "..KYYYYYSSSK..",
             "..KYYKGGGGKK..",
-            "...KGGGGGGGK..",
-            "...KGGGGGGGK..",
-            "...KGGGGGGSK..",
-            "...KBBBBBBBK..",
+            "..KGGGGGGGGK..",
+            "..KGGGGGGGGK..",
+            "..KGGGGGGGSK..",
+            "..KBBBBBBBBK..",
             "...KWWK.KWWK..",
             "...KBBK.KBBK.."
         };
@@ -406,10 +406,10 @@ namespace HeroiPet
             "..KYYYYYYSSSK.",
             "..KYYYYYSSSK..",
             "..KYYKGGGGKK..",
-            "...KGGGGGGGK..",
-            "...KGGGGGGGK..",
-            "...KGGGGGGSK..",
-            "...KBBBBBBBK..",
+            "..KGGGGGGGGK..",
+            "..KGGGGGGGGK..",
+            "..KGGGGGGGSK..",
+            "..KBBBBBBBBK..",
             "....KWWKWWK...",
             "....KBBKBBK..."
         };
