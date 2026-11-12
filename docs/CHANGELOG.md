@@ -1,5 +1,9 @@
 ﻿# Changelog (resumo)
 
+## 12/11/2026 — Web: botão Deixar rodando ao morrer e revisão
+- **Web:** a tela "VOCÊ MORREU" ganhou o botão **Deixar rodando** (o do menu ficava atrás da tela e não dava para clicar): volta com a perda das rupias e deixa o automático rodando.
+- Revisão da web contra o desktop: tiara encostada na cabeça, asas de frente do Link-fada mais perto das costas, blusa de fada simétrica de frente, código morto removido, gladiador com 52700 (700 a mais que o último conjunto).
+
 ## 12/11/2026 — Link de lado mais estreito
 - A cabeça do Link de lado perdeu 1 quadradinho atrás (nuca/gorro), ficando mais estreito.
 

@@ -184,6 +184,7 @@ html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout
       <h1>VOCÊ MORREU</h1>
       <p id="deathMsg">Você perde 10 rupias ao tentar de novo.</p>
       <button id="retry" class="primary">Tentar de novo</button>
+      <button id="deathAuto">Deixar rodando</button>
     </div>
   </div>
 
@@ -619,7 +620,6 @@ const hatDetail = (s, i) => {      // i = brilho, n = sombra (como no icone do i
 const cuteTunic = (s, i) => {      // blusa do conjunto doce: 1 quadradinho maior para tras e, nas linhas da blusa, o meio fica lilas ('z')
   const a = s.split(''); let f = 0; while (f < a.length && a[f] === '.') f++;
   if (f > 0 && f + 1 < a.length) { a[f - 1] = 'K'; a[f] = a[f + 1] === 'K' ? 'Q' : a[f + 1]; if (i === 13) a[f] = 'B'; }
-  if (false) { let q0 = -1, q1 = -1; for (let c = 0; c < a.length; c++) if (a[c] === 'Q') { if (q0 < 0) q0 = c; q1 = c; } if (q0 >= 0) { const m = (q0 + q1) >> 1; if (a[m] === 'Q') a[m] = 'z'; if (m + 1 < a.length && a[m + 1] === 'Q') a[m + 1] = 'z'; } }
   return a.join('');
 };
 const heroRows = (rows) => {
@@ -2083,10 +2083,6 @@ function drawShieldBody(sx, sy) {
   if (eqShield === 3) { drawApplePix(sx - S, sy - S, S); return; }
   if (eqShield === 4) { drawDarkShieldPix(sx - S, sy - S, S); return; }      // escudo sombrio: triangular embaixo
   if (eqShield === 2) { drawKingShieldPix(sx + 3 * S, sy + 4 * S, 0.72 * S); return; }
-  if (false) {      // tesouro do bau: escudo circular roxo escuro com quadrado azul, um pouco menor (cobre menos o personagem)
-    const cx = sx + 3 * S, cy = sy + 4 * S, circ = (r, c) => { ctx.beginPath(); ctx.arc(cx, cy, r, 0, TAU); ctx.fillStyle = c; ctx.fill(); };
-    circ(3.6 * S, '#1c1624'); circ(2.8 * S, '#461e6e'); rect('#1c1624', cx - 1.7 * S, cy - 1.7 * S, 3.4 * S, 3.4 * S); rect('#467deb', cx - 1.3 * S, cy - 1.3 * S, 2.6 * S, 2.6 * S); return;
-  }
   rect('#1c1624', sx, sy, 6 * S, 8 * S); rect(eqShield === 4 ? '#342e54' : (eqShield === 1 ? '#cd3232' : '#375fcd'), sx + S, sy + S, 4 * S, 6 * S); rect(eqShield === 4 ? '#cccee0' : '#f5cd46', sx + 2 * S, sy + 2 * S, 2 * S, 2 * S); }      // escudo menor em proporcao ao Link (6 x 8; antes 8 x 10)
 // ARCO em pixel art (os tres arcos), igual no jogo, no menu, no inventario e no item grande: curva de quadradinhos (miolo de 1 unidade, contorno escuro de 1 unidade).
 // dx,dy = para onde aponta (a barriga vai para la); half = meia altura; bend = quanto a barriga avanca; eq: 0 madeira | 1 metal | 2 cristal
@@ -2285,6 +2281,7 @@ function setSizeMode(m) {
 }
 for (let i = 0; i < 3; i++) { $('mSize' + i).addEventListener('click', () => { setSizeMode(i); closeMenu(); }); $('mSize' + i).setAttribute('aria-pressed', String(i === sizeMode)); }
 $('retry').addEventListener('click', doRetry);
+$('deathAuto').addEventListener('click', () => { doRetry(); setPlayMode(false); });      // morreu: volta e deixa o automatico rodando (o menu fica atras da tela de morte e nao dava para clicar nele)
 $('mAbout').addEventListener('click', () => { closeMenu(); $('about').hidden = false; $('aboutClose').focus(); });
 $('aboutClose').addEventListener('click', () => { $('about').hidden = true; });
 addEventListener('keydown', (e) => { if (e.code === 'Escape' && !$('about').hidden) $('about').hidden = true; });
