@@ -163,8 +163,15 @@ namespace HeroiPet
         };
 
         // separa o verde do gorro (linhas 0-8) do verde da roupa (linhas 9+) para poder recolorir cada um na evolucao
-        public static bool Crown, Robe, Legs, MushHat, MushShirt, AppleHat;      // AppleHat: gorro do conjunto maca (cabinho de maca em cima)
+        public static bool Crown, Robe, Legs, MushHat, MushShirt, AppleHat, Tiara, CuteShirt;      // Tiara: conjunto doce (tiara em vez de gorro); CuteShirt: blusa 1 quadradinho maior com centro lilas      // AppleHat: gorro do conjunto maca (cabinho de maca em cima)
         static string Ctr(string t, int w) { int pad = Math.Max(0, (w - 14) / 2); return (new string('.', pad) + t).PadRight(w, '.').Substring(0, w); }      // centraliza um desenho de 14 de largura      // MushHat/MushShirt: bolinhas brancas do conjunto cogumelo      // Legs: conjunto com calca e sapatos coloridos (J/Z)     // equipado: coroa de ouro / roupa de rei (com calca marrom e sapatos roxos)
+        static string CuteTunic(string s, int i)      // blusa um pouco maior (1 quadradinho para tras) e, nas linhas da blusa, o meio fica lilas ('z')
+        {
+            char[] a = s.ToCharArray(); int f = 0; while (f < a.Length && a[f] == '.') f++;
+            if (f > 0 && f + 1 < a.Length) { a[f - 1] = 'K'; a[f] = a[f + 1] == 'K' ? 'Q' : a[f + 1]; if (i == 13) a[f] = 'B'; }      // aumenta a blusa para tras (o contorno vai 1 quadradinho para fora)
+            if (i <= 12) { int q0 = -1, q1 = -1; for (int c = 0; c < a.Length; c++) if (a[c] == 'Q') { if (q0 < 0) q0 = c; q1 = c; } if (q0 >= 0) { int m = (q0 + q1) / 2; if (a[m] == 'Q') a[m] = 'z'; if (m + 1 < a.Length && a[m + 1] == 'Q') a[m + 1] = 'z'; } }
+            return new string(a);
+        }
         static string HatDetail(string s, int i)      // i = brilho (claro); so troca pixels do gorro (H). Sem sombra escura.
         {
             char[] a = s.ToCharArray();
@@ -181,7 +188,8 @@ namespace HeroiPet
         public static string[] HeroRecolor(string[] rows)
         {
             List<string> r = new List<string>();
-            if (Crown) { r.Add("....C.CC.C...."); r.Add("....CCCCCC...."); r.Add("....CRCCRC...."); }      // coroa sobre o gorro
+            if (Crown && !Tiara) { r.Add("....C.CC.C...."); r.Add("....CCCCCC...."); r.Add("....CRCCRC...."); }      // coroa sobre o gorro
+            if (Tiara) { int tw = rows[0].Length; r.Add(Ctr("....C..PP..C..", tw)); r.Add(Ctr("....CCCCCCCC..", tw)); }      // tiara dourada com joia lilas (sem gorro: o cabelo aparece)
             if (AppleHat) { int aw = rows[0].Length; r.Add(Ctr("........KNNK..", aw)); r.Add(Ctr(".....KBBKNNK..", aw)); r.Add(Ctr(".....KBBK.....", aw)); }      // cabinho de maca: talo marrom e folha verde
             for (int i = 0; i < rows.Length; i++)
             {
@@ -189,6 +197,7 @@ namespace HeroiPet
                 if (Crown && (i == 4 || i == 5) && s.StartsWith("KV")) s = ".K" + s.Substring(2);      // sem gorro: tira a pontinha do canto esquerdo da cabeca
                 if (MushHat && i >= 1 && i <= 3) s = Spots(s, i == 1 ? new int[] { 6 } : (i == 2 ? new int[] { 4, 8 } : new int[] { 3, 6, 10 }), 'H');
                 if (!Crown && i >= 1 && i <= 3) s = HatDetail(s, i);      // brilho e sombra do gorro, como no icone do inventario
+                if (CuteShirt && i >= 10 && i <= 13) s = CuteTunic(s, i);      // blusa do conjunto doce: 1 quadradinho maior atras e centro lilas
                 if (Legs && i == 13) s = s.Replace('B', 'b');      // faixa marrom da blusa vira tom mais escuro da blusa (amarela na noite); cor via hov[b]
                 if (MushShirt && i >= 10 && i <= 12) s = Spots(s, i == 10 ? new int[] { 5, 9 } : (i == 11 ? new int[] { 4, 7, 10 } : new int[] { 5, 9 }), 'Q');
                 if (Legs && !Robe) { if (i == 14) s = s.Replace('W', 'J'); else if (i == 15) s = s.Replace('B', 'Z'); }
@@ -375,9 +384,9 @@ namespace HeroiPet
             ".KGGYYYYYYYSK.",
             ".KGYYYYYYYYSSK",
             ".KYYYYYYYYKSSK",
-            "...KYYYYYSSSK.",
-            "...KYYYYSSSK..",
-            "...KYKGGGGKK..",
+            "..KYYYYYYSSSK.",
+            "..KYYYYYSSSK..",
+            "..KYYKGGGGKK..",
             "...KGGGGGGGGK.",
             "...KGGGGGGGGK.",
             "...KGGGGGGGSK.",
@@ -393,9 +402,9 @@ namespace HeroiPet
             ".KGGYYYYYYYSK.",
             ".KGYYYYYYYYSSK",
             ".KYYYYYYYYKSSK",
-            "...KYYYYYSSSK.",
-            "...KYYYYSSSK..",
-            "...KYKGGGGKK..",
+            "..KYYYYYYSSSK.",
+            "..KYYYYYSSSK..",
+            "..KYYKGGGGKK..",
             "...KGGGGGGGGK.",
             "...KGGGGGGGGK.",
             "...KGGGGGGGSK.",
@@ -1536,8 +1545,8 @@ namespace HeroiPet
         // ================= EQUIPAMENTO (menu de pausa: Espaco) =================
         // indices: arco 0 madeira/1 metal | espada 0 comum/1 Espada Mestre | escudo 0 azul/1 vermelho/2 do rei | gorro 0 verde/1 roxo/2 coroa | roupa 0 verde/1 blusa azul/2 roupa de rei
         int eqBow, eqSword, eqShield, eqHat, eqTunic;
-        bool OwnBow(int i) { return i == 0 || (i == 1 && evoStage >= 1) || (i == 2 && WeaponsOwned >= 3); }
-        bool OwnSword(int i) { return i == 0 || (i == 1 && evoStage >= 4) || (i == 2 && WeaponsOwned >= 1) || (i == 3 && WeaponsOwned >= 2) || (i == 4 && SetsOwned >= 6); }      // (6 = conjunto cogumelo)
+        bool OwnBow(int i) { return i == 0 || (i == 1 && evoStage >= 1) || (i == 2 && WeaponsOwned >= 3) || (i == 3 && SetsOwned >= 9); }      // 3 = arco sombrio (conjunto sombra)
+        bool OwnSword(int i) { return i == 0 || (i == 1 && evoStage >= 4) || (i == 2 && WeaponsOwned >= 1) || (i == 3 && WeaponsOwned >= 2) || (i == 4 && SetsOwned >= 6) || (i == 5 && SetsOwned >= 9); }      // (6 = conjunto cogumelo)
         // ================= 3 ARMAS NOVAS: marreta (2 maos), espada de chamas e arco de cristal =================
         // Liberadas UMA DEPOIS DA OUTRA, 500 monstros cada (marreta com 500, espada com 1000, arco com 1500), por um contador proprio que comeca em zero ao instalar a versao.
         static readonly int[] WpnThr = { 550, 1100, 1650 };      // 10% mais dificil que 500/1000/1500
@@ -1564,7 +1573,7 @@ namespace HeroiPet
         float SwHit { get { return eqSword == 2 ? 0.30f : (eqSword == 3 ? 0.07f : (eqSword == 4 ? 0.14f : 0.11f)); } }      // marreta: golpe lento e pesado; espada de chamas: rapida
         float SwEnd { get { return eqSword == 2 ? 0.55f : (eqSword == 3 ? 0.20f : (eqSword == 4 ? 0.36f : 0.32f)); } }
         float SwCool { get { return eqSword == 2 ? 0.40f : (eqSword == 3 ? 0.08f : (eqSword == 4 ? 0.24f : 0.22f)); } }
-        int SwordDamage() { return eqSword == 1 ? 300 : (eqSword == 2 ? 600 : (eqSword == 3 ? 450 : (eqSword == 4 ? 700 : 150))); }
+        int SwordDamage() { return eqSword == 1 ? 300 : (eqSword == 2 ? 600 : (eqSword == 3 ? 450 : (eqSword == 4 ? 700 : (eqSword == 5 ? 800 : 150)))); }
         float crystalQ = -1f;      // arco de cristal: a 2a flecha sai logo depois da 1a, no mesmo rumo (uma seguida da outra)
         void FireArrows(float sx, float sy)
         {
@@ -1582,14 +1591,14 @@ namespace HeroiPet
         }        // arma especial na mao (marreta ou espada de chamas); devolve false para as espadas comuns
         bool DrawSpecialSword(Graphics g, float handX, float handY, float dx, float dy)      // armas especiais ficam 20% menores em proporcao ao Link (escala em volta da mao)
         {
-            if (eqSword < 2) return false;
+            if (eqSword < 2 || eqSword == 5) return false;
             GraphicsState wst = g.Save(); g.TranslateTransform(handX, handY); g.ScaleTransform(0.8f, 0.8f); g.TranslateTransform(-handX, -handY);
             bool wr = DrawSpecialSwordRaw(g, handX, handY, dx, dy);
             g.Restore(wst); return wr;
         }
         bool DrawSpecialSwordRaw(Graphics g, float handX, float handY, float dx, float dy)
         {
-            if (eqSword < 2) return false;
+            if (eqSword < 2 || eqSword == 5) return false;
             float px = -dy, py = dx; Color dark = Color.FromArgb(28, 22, 36);
             if (eqSword == 2) { DrawPixelHammer(g, handX, handY, dx, dy, S); return true; }      // marreta (forma simples)
             if (eqSword == 4)      // Cogumelo-maca em pixels: talo cremoso, chapeu vermelho e bolinhas redondas
@@ -1653,7 +1662,7 @@ namespace HeroiPet
             g.SmoothingMode = oldSm;
         }
         static Color Lerp(Color a, Color b, float t) { t = Math.Max(0f, Math.Min(1f, t)); return Color.FromArgb((int)(a.R + (b.R - a.R) * t), (int)(a.G + (b.G - a.G) * t), (int)(a.B + (b.B - a.B) * t)); }
-        bool OwnShield(int i) { return i == 0 || (i == 1 && evoStage >= 4) || (i == 2 && kingGear) || (i == 3 && SetsOwned >= 7); }      // 3 = escudo maca cortada (conjunto maca)
+        bool OwnShield(int i) { return i == 0 || (i == 1 && evoStage >= 4) || (i == 2 && kingGear) || (i == 3 && SetsOwned >= 7) || (i == 4 && SetsOwned >= 9); }      // 3 = escudo maca cortada (conjunto maca)
         bool OwnHat(int i) { return i == 0 || (i == 1 && evoStage >= 2) || (i == 2 && kingGear) || (i >= 3 && i - 3 < SetsOwned); }
         bool OwnTunic(int i) { return i == 0 || (i == 1 && evoStage >= 3) || (i == 2 && kingGear) || (i >= 3 && i - 3 < SetsOwned); }
 
@@ -1668,7 +1677,7 @@ namespace HeroiPet
             new OutSet("mar", Color.FromArgb(30, 160, 170), Color.FromArgb(28, 125, 150), Color.FromArgb(20, 80, 110), Color.FromArgb(240, 230, 200)),
             new OutSet("cogumelo", Color.FromArgb(214, 48, 52), Color.FromArgb(214, 48, 52), Color.FromArgb(214, 196, 156), Color.FromArgb(172, 140, 98)),
             new OutSet("maça", Color.FromArgb(200, 34, 44), Color.FromArgb(200, 34, 44), Color.FromArgb(244, 228, 168), Color.FromArgb(70, 150, 60)),
-            new OutSet("doce", Color.FromArgb(255, 170, 205), Color.FromArgb(255, 190, 215), Color.FromArgb(255, 246, 250), Color.FromArgb(190, 160, 235)),      // SURPRESA: rosa de algodao-doce com bolinhas brancas, calca clarinha e sapatinhos lilas (bonitinho e fofo)
+            new OutSet("doce", Color.FromArgb(255, 170, 205), Color.FromArgb(255, 190, 215), Color.FromArgb(255, 160, 196), Color.FromArgb(226, 54, 66)),      // SURPRESA: rosa de algodao-doce com bolinhas brancas, calca clarinha e sapatinhos lilas (bonitinho e fofo)
             new OutSet("sombra", Color.FromArgb(34, 34, 50), Color.FromArgb(38, 38, 56), Color.FromArgb(22, 22, 32), Color.FromArgb(78, 22, 30)) };      // imita o Link Sombrio: gorro e blusa quase pretos, calca escura, sapatos vinho, cinto prateado e rosto palido      // maca: gorro e blusa vermelho-maca, calca cor de polpa, sapatos verde-folha, mais o escudo de maca cortada
         // cogumelo: gorro e blusa vermelhos com bolinhas brancas, calca cor do talo, mais o Cogumelo-maca (arma)
         static readonly int[] SetThr = { 4950, 6600, 8800, 11550, 15400, 17600, 20900, 36000, 52000 };      // os 2 ultimos (doce e sombra) sao DIFICEIS: +15000 e +31000 monstros depois do conjunto maca;      // (10% mais dificil que 4500/6000/8000/10500/14000/16000/19000) monstros derrotados depois de instalar esta versao (setKills) para liberar cada conjunto
@@ -1687,11 +1696,11 @@ namespace HeroiPet
             try { using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"Software\HeroiDoDesktop")) k.SetValue("MonstrosConjuntos", v); } catch { }
         }
         int SetsOwned { get { if (setsTest) return Sets.Length; int n = 0; while (n < Sets.Length && setKills >= SetThr[n]) n++; return n; } }
-        static Color SetBelt(int si) { return si == 3 ? Color.FromArgb(240, 200, 40) : (si == 8 ? Color.FromArgb(196, 198, 214) : Shade(Sets[si].Tunic, -0.45f)); }      // noite: amarelo; sombra: prateado
+        static Color SetBelt(int si) { if (si == 7) return Color.FromArgb(176, 216, 255); return si == 3 ? Color.FromArgb(240, 200, 40) : (si == 8 ? Color.FromArgb(196, 198, 214) : Shade(Sets[si].Tunic, -0.45f)); }      // noite: amarelo; sombra: prateado
         static Color Shade(Color c, float t) { return t >= 0 ? Color.FromArgb((int)(c.R + (255 - c.R) * t), (int)(c.G + (255 - c.G) * t), (int)(c.B + (255 - c.B) * t)) : Color.FromArgb((int)(c.R * (1 + t)), (int)(c.G * (1 + t)), (int)(c.B * (1 + t))); }
         void UnlockSet(int i)      // conjunto novo: ja vem vestido, com aviso
         {
-            eqHat = 3 + i; eqTunic = 3 + i; if (i == 5) eqSword = 4; if (i == 6) eqShield = 3; ValidateEquip(); SaveEquip(); BuildSprites(); newItemUntil = time + 5f;
+            eqHat = 3 + i; eqTunic = 3 + i; if (i == 5) eqSword = 4; if (i == 6) eqShield = 3; if (i == 8) { eqSword = 5; eqShield = 4; eqBow = 3; } ValidateEquip(); SaveEquip(); BuildSprites(); newItemUntil = time + 5f;
             Say("Conjunto novo: " + Sets[i].Name + "!");
             for (int k = 0; k < 10; k++) puffs.Add(new Puff { Kind = k % 2, X = hx + ((float)rnd.NextDouble() - 0.5f) * 20 * S, Y = hy - (float)rnd.NextDouble() * 18 * S });
         }
@@ -1864,6 +1873,7 @@ namespace HeroiPet
         // heroi de frente para o inventario: sprite frontal (com as maos dos dois lados), escudo no peito e espada ou arco na mao direita (sem armas na aba Roupas)
         void DrawHeroFrontPreview(Graphics g, bool bow, bool bare)
         {
+            if (eqTunic == 10 && eqHat == 10) DrawFairyWings(g, hx, hy - 12 * S, 1, true);      // conjunto doce: asinhas atras
             Spr(g, heroFrontInv, hx, hy, true);      // mesma aparencia atual de frente (cabeca e franja da pausa), com o corpo mais estreito
             if (!bare)
             {
@@ -1944,8 +1954,8 @@ namespace HeroiPet
         void PixelBow(Graphics g, float cx, float cy, float dx, float dy, float half, float bend, float unit, int eq)
         {
             Color dk = Color.FromArgb(28, 22, 36);
-            Color main = eq == 2 ? Color.FromArgb(60, 200, 210) : (eq == 1 ? Color.FromArgb(185, 192, 205) : Color.FromArgb(135, 85, 45));
-            Color hi = eq == 2 ? Color.FromArgb(215, 255, 255) : (eq == 1 ? Color.FromArgb(240, 245, 255) : Color.FromArgb(185, 125, 70));
+            Color main = eq == 3 ? Color.FromArgb(78, 74, 108) : eq == 2 ? Color.FromArgb(60, 200, 210) : (eq == 1 ? Color.FromArgb(185, 192, 205) : Color.FromArgb(135, 85, 45));
+            Color hi = eq == 3 ? Color.FromArgb(160, 156, 200) : eq == 2 ? Color.FromArgb(215, 255, 255) : (eq == 1 ? Color.FromArgb(240, 245, 255) : Color.FromArgb(185, 125, 70));
             SmoothingMode sm = g.SmoothingMode; g.SmoothingMode = SmoothingMode.None;
             float px = -dy, py = dx; int n = Math.Max(10, (int)(half * 2 / unit * 1.6f));
             PointF[] pts = new PointF[n + 1];
@@ -1957,7 +1967,7 @@ namespace HeroiPet
             }
             using (SolidBrush bd = new SolidBrush(dk)) using (SolidBrush bm = new SolidBrush(main)) using (SolidBrush bh = new SolidBrush(hi))
             {
-                Color shd = eq == 2 ? Color.FromArgb(34, 150, 170) : (eq == 1 ? Color.FromArgb(128, 138, 166) : Color.FromArgb(150, 86, 36));
+                Color shd = eq == 3 ? Color.FromArgb(46, 42, 74) : eq == 2 ? Color.FromArgb(34, 150, 170) : (eq == 1 ? Color.FromArgb(128, 138, 166) : Color.FromArgb(150, 86, 36));
                 using (SolidBrush bs2 = new SolidBrush(shd))
                 {
                     foreach (PointF p in pts) g.FillRectangle(bd, p.X - unit, p.Y - unit, 4 * unit, 4 * unit);      // membros GROSSOS (2 quadradinhos) com contorno forte
@@ -1965,7 +1975,7 @@ namespace HeroiPet
                     foreach (PointF p in pts) g.FillRectangle(bs2, p.X + unit, p.Y + unit, unit, unit);      // lado de baixo mais escuro
                     for (int i = 1; i < n; i += 3) g.FillRectangle(bh, pts[i].X, pts[i].Y, unit, unit);      // brilho
                 }
-                Color gc = eq == 2 ? Color.FromArgb(255, 170, 40) : (eq == 1 ? Color.FromArgb(222, 176, 64) : Color.FromArgb(104, 64, 36));      // empunhadura (5 quadradinhos no meio) numa cor diferente
+                Color gc = eq == 3 ? Color.FromArgb(196, 40, 56) : eq == 2 ? Color.FromArgb(255, 170, 40) : (eq == 1 ? Color.FromArgb(222, 176, 64) : Color.FromArgb(104, 64, 36));      // empunhadura (5 quadradinhos no meio) numa cor diferente
                 using (SolidBrush gb = new SolidBrush(gc)) for (int k = -2; k <= 2; k++) { int idx = Math.Max(0, Math.Min(n, (n >> 1) + k * 2)); g.FillRectangle(gb, pts[idx].X, pts[idx].Y, unit, unit); }
                 if (eq == 2)      // joia laranja no meio e pontas de cristal
                 {
@@ -2055,8 +2065,8 @@ namespace HeroiPet
         {
             if (type == 2) { DrawShieldItem(g, cx, cy, u * 0.9f); return; }
             if (type == 3) { float k3 = u * 2.2f; DrawApplePix(g, cx - 4 * k3, cy - 5 * k3, k3); return; }
-            Color dark = Color.FromArgb(28, 22, 36), col = type == 1 ? Color.FromArgb(205, 50, 50) : Color.FromArgb(55, 95, 205);
-            using (SolidBrush kb = new SolidBrush(dark)) using (SolidBrush b = new SolidBrush(col)) using (SolidBrush ye = new SolidBrush(Color.FromArgb(245, 205, 70)))
+            Color dark = Color.FromArgb(28, 22, 36), col = type == 4 ? Color.FromArgb(52, 46, 84) : (type == 1 ? Color.FromArgb(205, 50, 50) : Color.FromArgb(55, 95, 205));
+            using (SolidBrush kb = new SolidBrush(dark)) using (SolidBrush b = new SolidBrush(col)) using (SolidBrush ye = new SolidBrush(type == 4 ? Color.FromArgb(204, 206, 224) : Color.FromArgb(245, 205, 70)))
             {      // mesmo formato do escudo do jogo: retangulo 6x8 com borda escura e quadradinho amarelo 2x3
                 float k = u * 2.2f, x = cx - 3 * k, y = cy - 4 * k;
                 g.FillRectangle(kb, x - k, y - k, 8 * k, 10 * k); g.FillRectangle(b, x, y, 6 * k, 8 * k); g.FillRectangle(ye, x + 2 * k, y + 2 * k, 2 * k, 3 * k);
@@ -2100,10 +2110,10 @@ namespace HeroiPet
         {
             struct Hit { public Rectangle R; public int Kind, A, B; }      // Kind 0 aba | 1 item | 2 fechar
             static readonly string[][] Names = {
-                new string[] { "Arco de madeira", "Arco de metal", "Arco de cristal" }, new string[] { "Espada comum", "Espada Mestre", "Marreta trovão", "Espada de chamas", "Espada cogumelo" }, new string[] { "Escudo azul", "Escudo vermelho", "Escudo do rei", "Escudo maçã" },
+                new string[] { "Arco de madeira", "Arco de metal", "Arco de cristal", "Arco sombrio" }, new string[] { "Espada comum", "Espada Mestre", "Marreta trovão", "Espada de chamas", "Espada cogumelo", "Espada sombria" }, new string[] { "Escudo azul", "Escudo vermelho", "Escudo do rei", "Escudo maçã", "Escudo sombrio" },
                 new string[] { "Gorro verde", "Gorro roxo", "Coroa de ouro", "Gorro areia", "Gorro gelo", "Gorro fogo", "Gorro noite", "Gorro mar", "Gorro cogumelo", "Gorro maçã", "Gorro doce", "Gorro sombra" }, new string[] { "Túnica verde", "Blusa azul", "Roupa de rei", "Blusa areia", "Blusa gelo", "Blusa fogo", "Blusa noite", "Blusa mar", "Blusa cogumelo", "Blusa maçã", "Blusa doce", "Blusa sombra" }, new string[] { "Fadinha", "Fadinha rosa", "Fadinha folha", "Fadinha estrela" } };
             static readonly string[][] Descs = {
-                new string[] { "O arco de sempre.", "Flechas com o dobro de dano.", "Atira 2 flechas de cristal, uma logo depois da outra." }, new string[] { "A espada de sempre: 150 de dano.", "Espada Mestre: o dobro de dano, 300 de dano.", "Usa as DUAS mãos (sem escudo): golpe lento, área grande, 600 de dano.", "Lâmina de fogo: golpes muito rápidos, 450 de dano.", "Um cogumelo gigante de maça: acerta em área e solta esporos, 700 de dano (vem com o conjunto cogumelo)." }, new string[] { "Escudo comum.", "Escudo vermelho do herói.", "Escudo circular do tesouro do rei.", "Escudo de maçã cortada (vem com o conjunto maçã)." },
+                new string[] { "O arco de sempre.", "Flechas com o dobro de dano.", "Atira 2 flechas de cristal, uma logo depois da outra.", "Arco escuro do Link Sombrio (vem com o conjunto sombra)." }, new string[] { "A espada de sempre: 150 de dano.", "Espada Mestre: o dobro de dano, 300 de dano.", "Usa as DUAS mãos (sem escudo): golpe lento, área grande, 600 de dano.", "Lâmina de fogo: golpes muito rápidos, 450 de dano.", "Um cogumelo gigante de maça: acerta em área e solta esporos, 700 de dano (vem com o conjunto cogumelo).", "Lâmina escura do Link Sombrio: 800 de dano (vem com o conjunto sombra)." }, new string[] { "Escudo comum.", "Escudo vermelho do herói.", "Escudo circular do tesouro do rei.", "Escudo de maçã cortada (vem com o conjunto maçã).", "Escudo escuro com emblema prateado, do Link Sombrio (vem com o conjunto sombra)." },
                 new string[] { "O gorro de sempre.", "Gorro roxo da evolução.", "Coroa de ouro do tesouro do rei.", "Conjunto areia: gorro, blusa, calça e sapatos.", "Conjunto gelo: gorro, blusa, calça e sapatos.", "Conjunto fogo: gorro, blusa, calça e sapatos.", "Conjunto noite: gorro, blusa, calça e sapatos.", "Conjunto mar: gorro, blusa, calça e sapatos.", "Conjunto cogumelo: gorro com bolinhas, blusa de cogumelo e calça cor do talo.", "Conjunto maçã: gorro, blusa, calça e sapatos, mais o escudo de maçã cortada.", "Conjunto doce: gorro, blusa, calça e sapatos fofos, rosinha com bolinhas.", "Conjunto sombra: gorro, blusa, calça e sapatos escuros, no estilo do Link Sombrio." }, new string[] { "A túnica de sempre.", "Blusa azul da evolução.", "Manto vermelho, calça marrom e sapatos roxos.", "Blusa, calça e sapatos do conjunto areia.", "Blusa, calça e sapatos do conjunto gelo.", "Blusa, calça e sapatos do conjunto fogo.", "Blusa, calça e sapatos do conjunto noite.", "Blusa, calça e sapatos do conjunto mar.", "Blusa de cogumelo com bolinhas e calça cor do talo (conjunto cogumelo).", "Blusa, calça e sapatos do conjunto maçã.", "Blusa, calça e sapatos do conjunto doce.", "Blusa, calça e sapatos do conjunto sombra." }, new string[] { "A fadinha ajudante.", "Corpo rosa e asas azul escuro.", "Corpo verde e asas douradas.", "Corpo violeta e asas turquesa." } };
             static readonly string[] TabNames = { "Armas", "Roupas", "Comida" };
             PetForm p; float sc; int tab = -1, hover = -1; bool showBow;      // showBow: o heroi do exemplo segura o arco (ao clicar num arco) ou espada e escudo (ao clicar neles)
@@ -2270,10 +2280,11 @@ namespace HeroiPet
         void BuildSprites()
         {
             ValidateEquip();
-            Art.Crown = eqHat == 2; Art.Robe = eqTunic == 2; Art.Legs = eqTunic >= 3; Art.MushHat = eqHat == 8 || eqHat == 10; Art.AppleHat = eqHat == 9; Art.MushShirt = eqTunic == 8 || eqTunic == 10;
+            Art.Crown = eqHat == 2 || eqHat == 10; Art.Tiara = eqHat == 10; Art.CuteShirt = eqTunic == 10; Art.Robe = eqTunic == 2; Art.Legs = eqTunic >= 3; Art.MushHat = eqHat == 8; Art.AppleHat = eqHat == 9; Art.MushShirt = eqTunic == 8;
             Dictionary<char, Color> hov = new Dictionary<char, Color>();
             if (eqHat == 1) hov['H'] = Color.FromArgb(150, 80, 205);       // gorro roxo
             if (eqTunic == 1) hov['Q'] = Color.FromArgb(70, 125, 235);       // blusa azul
+            if (eqTunic == 10) hov['z'] = Color.FromArgb(206, 176, 244);      // conjunto doce: meio da blusa lilas
             if (eqHat == 11) { hov['S'] = Color.FromArgb(206, 198, 214); hov['V'] = Color.FromArgb(54, 54, 72); }      // conjunto sombra: rosto palido e cabelo escuro como o Link Sombrio
             if (eqHat >= 3) hov['H'] = Sets[eqHat - 3].Hat;                                                  // conjuntos novos: gorro
             if (eqTunic >= 3) { OutSet os = Sets[eqTunic - 3]; hov['Q'] = os.Tunic; hov['J'] = os.Pants; hov['Z'] = os.Shoes; }
@@ -2328,6 +2339,8 @@ namespace HeroiPet
             wpnSpr[1] = Art.Make(Art.FlameItem, S, flOv);
             Dictionary<char, Color> mhOv = Art.Ov('R', Color.FromArgb(214, 48, 52)); mhOv['W'] = Color.FromArgb(250, 250, 250); mhOv['T'] = Color.FromArgb(238, 224, 188); mhOv['t'] = Color.FromArgb(200, 175, 130);
             wpnSpr[2] = Art.Make(Art.MushItem, S, mhOv);
+            Dictionary<char, Color> dkOv = Art.Ov('O', Color.FromArgb(84, 80, 120)); dkOv['F'] = Color.FromArgb(84, 80, 120); dkOv['Y'] = Color.FromArgb(172, 170, 204); dkOv['R'] = Color.FromArgb(176, 34, 54); dkOv['B'] = Color.FromArgb(56, 44, 90); dkOv['b'] = Color.FromArgb(34, 26, 56);
+            wpnSpr[3] = Art.Make(Art.FlameItem, S, dkOv);      // icone da espada sombria (mesma forma, cores escuras)
             heroFrontWave = Art.Make(Art.HeroRecolor(Art.HeroFrontWave), S, hov);
             if (phase2)      // fase 2: os mesmos monstros, mais detalhados (octorok verde, bokoblin mais escuro com armadura)
             {
@@ -2539,7 +2552,7 @@ namespace HeroiPet
             if (p2MsgT > 0) { p2MsgT += dt; if (p2MsgT >= 5f) p2MsgT = 0; }
             if (scene != 0) { UpdateScene(dt); return; }      // cena do Feiticeiro: o jogo fica parado
             if (staffPending) { staffPending = false; if (interlude && staffPh == 0) StartStaffEvent(); }
-            UpdateStaff(dt); UpdateAlly(dt); UpdateDrops(dt); UpdateStar(dt); UpdateAcid(dt); UpdateSparks(dt);
+            UpdateStaff(dt); UpdateAlly(dt); UpdateDrops(dt); UpdateFairyFx(dt); UpdateStar(dt); UpdateAcid(dt); UpdateSparks(dt);
             // ---- ciclo de descanso: a cada 2-5 min, 1 min sem inimigos ----
             if (calmState == 0)
             {
@@ -2640,16 +2653,16 @@ namespace HeroiPet
         int evoNext;                         // proximo estagio a anunciar (1 a 4; 5 = acabou)
         Queue<int> evoQueue = new Queue<int>();
         EvoAnim evo;
-        Sprite[] wpnSpr = new Sprite[3];      // icones: marreta, espada de chamas
+        Sprite[] wpnSpr = new Sprite[4];      // icones: marreta, espada de chamas
         Sprite[] menuSpr = new Sprite[4]; Sprite[] setCap = new Sprite[9], setShirt = new Sprite[9];      // gorro verde, blusa verde e roupa de rei em pixel art (para o menu)
         Sprite[] evoItemSpr = new Sprite[2];      // gorro e blusa em pixel art (iguais ao corpo)
         Font evoFont;
         const float EvoFly = 1.5f;
 
-        Color ShieldColor() { return eqShield == 1 ? Color.FromArgb(205, 50, 50) : Color.FromArgb(55, 95, 205); }
-        Color BladeColor() { return eqSword == 1 ? Color.FromArgb(205, 232, 255) : Color.FromArgb(225, 235, 245); }
-        Color GuardColor() { return eqSword == 1 ? Color.FromArgb(60, 95, 205) : Color.FromArgb(215, 160, 40); }
-        Color GripColor() { return eqSword == 1 ? Color.FromArgb(80, 55, 150) : Color.FromArgb(135, 85, 45); }
+        Color ShieldColor() { if (eqShield == 4) return Color.FromArgb(52, 46, 84); return eqShield == 1 ? Color.FromArgb(205, 50, 50) : Color.FromArgb(55, 95, 205); }
+        Color BladeColor() { if (eqSword == 5) return Color.FromArgb(84, 80, 120); return eqSword == 1 ? Color.FromArgb(205, 232, 255) : Color.FromArgb(225, 235, 245); }
+        Color GuardColor() { if (eqSword == 5) return Color.FromArgb(176, 34, 54); return eqSword == 1 ? Color.FromArgb(60, 95, 205) : Color.FromArgb(215, 160, 40); }
+        Color GripColor() { if (eqSword == 5) return Color.FromArgb(52, 40, 84); return eqSword == 1 ? Color.FromArgb(80, 55, 150) : Color.FromArgb(135, 85, 45); }
         Color TunicColor() { if (eqTunic >= 3) return Sets[eqTunic - 3].Tunic; return eqTunic == 2 ? Color.FromArgb(190, 35, 60) : (eqTunic == 1 ? Color.FromArgb(70, 125, 235) : Color.FromArgb(58, 165, 62)); }
 
         int LoadKills()
@@ -3162,7 +3175,7 @@ namespace HeroiPet
             }
             using (SolidBrush kb = new SolidBrush(Color.FromArgb(28, 22, 36)))
             using (SolidBrush bb = new SolidBrush(ShieldColor()))
-            using (SolidBrush yb = new SolidBrush(Color.FromArgb(245, 205, 70)))
+            using (SolidBrush yb = new SolidBrush(eqShield == 4 ? Color.FromArgb(204, 206, 224) : Color.FromArgb(245, 205, 70)))      // escudo sombrio: emblema prateado
             {
                 g.FillRectangle(kb, sx, sy, 6 * S, 8 * S);      // escudo azul/vermelho menor em proporcao ao Link (antes 8 x 10)
                 g.FillRectangle(bb, sx + S, sy + S, 4 * S, 6 * S);
@@ -4097,6 +4110,64 @@ namespace HeroiPet
         {
             using (SolidBrush a = new SolidBrush(Color.FromArgb(190, 225, 250))) using (SolidBrush b = new SolidBrush(Color.FromArgb(255, 255, 255)))
                 foreach (Drop d in drops) { g.FillRectangle(a, d.X - S, d.Y - S, 2 * S, 2 * S); g.FillRectangle(b, d.X - S, d.Y - S, S, S); }
+        }
+        // CONJUNTO DOCE: o Link age como uma FADA: flutua (pairando e balancando no ar), tem asinhas que batem e deixa um rastro de brilhinhos
+        bool FairyOn { get { return eqTunic == 10 && eqHat == 10 && !dead && powerT <= 0 && !previewMode; } }
+        float FairyLift { get { return 4.5f * S + (float)Math.Sin(time * 3.4f) * 0.9f * S; } }
+        float fairyFxT;
+        void DrawHeroFx(Graphics g)
+        {
+            if (!FairyOn) { DrawHeroMaybeWading(g); return; }
+            GraphicsState st = g.Save(); g.TranslateTransform(0, -FairyLift);
+            DrawFairyWings(g, hx, hy - 12 * S, hface, false);
+            DrawHeroMaybeWading(g);
+            g.Restore(st);
+        }
+        void DrawHeroFxSparks(Graphics g) { DrawFairySparks(g); }
+        List<float[]> linkFairySparks = new List<float[]>();      // brilhinhos do Link-fada: x, y, tempo
+        void UpdateFairyFx(float dt)      // rastro de brilhinhos pequenos atras do Link-fada
+        {
+            for (int i = linkFairySparks.Count - 1; i >= 0; i--) { linkFairySparks[i][2] += dt; linkFairySparks[i][1] += 6 * S * dt; if (linkFairySparks[i][2] > 0.8f) linkFairySparks.RemoveAt(i); }
+            if (!FairyOn || scene != 0) { return; }
+            fairyFxT -= dt; if (fairyFxT > 0) return;
+            fairyFxT = walking ? 0.07f : 0.16f;
+            linkFairySparks.Add(new float[] { hx + ((float)rnd.NextDouble() - 0.5f) * 12 * S - hface * 3 * S, hy - FairyLift - (float)rnd.NextDouble() * 15 * S, 0f });
+        }
+        void DrawFairySparks(Graphics g)
+        {
+            using (SolidBrush a = new SolidBrush(Color.FromArgb(255, 205, 232))) using (SolidBrush b = new SolidBrush(Color.FromArgb(255, 255, 255)))
+                foreach (float[] p in linkFairySparks)
+                {
+                    float k = Math.Max(0f, 1f - p[2] / 0.8f); int n = k > 0.55f ? 2 : 1;      // estrelinha em cruz que encolhe
+                    g.FillRectangle(a, p[0] - n * S / 2f, p[1] - S / 2f, n * S, S); g.FillRectangle(a, p[0] - S / 2f, p[1] - n * S / 2f, S, n * S); if (n == 2) g.FillRectangle(b, p[0] - S / 2f, p[1] - S / 2f, S, S);
+                }
+        }
+        void DrawFairyWings(Graphics g, float x, float y, int face, bool front)      // asinhas de fada: brancas e azul bebe, batendo; de lado uma grande atras e uma pequena embaixo; de frente uma de cada lado
+        {
+            string[] w1 = { "..KK..", ".KWWK.", "KWBWWK", "KWWBWK", "KWWWWK", ".KWWK.", "..KK.." };
+            string[] w2 = { ".KK.", "KWWK", "KWBK", ".KK." };
+            bool flap = ((int)(time * 9f)) % 2 == 0; int rowsN = flap ? 7 : 6;
+            Color k = Color.FromArgb(150, 190, 236), wc = Color.FromArgb(252, 252, 255), bc = Color.FromArgb(188, 224, 255);
+            SmoothingMode sm = g.SmoothingMode; g.SmoothingMode = SmoothingMode.None;
+            using (SolidBrush b = new SolidBrush(Color.Black))
+            {
+                for (int side = 0; side < (front ? 2 : 1); side++)
+                {
+                    float dir = front ? (side == 0 ? -1f : 1f) : -face;      // de lado fica atras do herói
+                    float ox = x + dir * (front ? 6 : 4) * S, oy = y - 5 * S;
+                    for (int r = 0; r < rowsN; r++) for (int c = 0; c < 6; c++)
+                    {
+                        char ch = w1[r][c]; if (ch == '.') continue; b.Color = ch == 'K' ? k : (ch == 'W' ? wc : bc);
+                        float cx = dir > 0 ? c : 5 - c; g.FillRectangle(b, ox + (dir > 0 ? 0 : -6 * S) + cx * S, oy + r * S, S, S);
+                    }
+                    for (int r = 0; r < 4; r++) for (int c = 0; c < 4; c++)      // asa pequena embaixo
+                    {
+                        char ch = w2[r][c]; if (ch == '.') continue; b.Color = ch == 'K' ? k : (ch == 'W' ? wc : bc);
+                        float cx = dir > 0 ? c : 3 - c; g.FillRectangle(b, ox + (dir > 0 ? S : -5 * S) + cx * S, oy + (rowsN + 0) * S + r * S - S, S, S);
+                    }
+                }
+            }
+            g.SmoothingMode = sm;
         }
         void DrawHeroMaybeWading(Graphics g)      // dentro da poca o pe fica um pouquinho submerso
         {
@@ -5686,7 +5757,7 @@ namespace HeroiPet
             ents.Sort(delegate (object a, object b) { return YOf(a).CompareTo(YOf(b)); });
             foreach (object o in ents)
             {
-                if (o == this) DrawHeroMaybeWading(g);
+                if (o == this) DrawHeroFx(g);
                 else if (o == allyMark) DrawAlly(g);
                 else if (o is Tree) DrawTree(g, (Tree)o);
                 else if (o is Fire) DrawFire(g);
@@ -5737,6 +5808,7 @@ namespace HeroiPet
             DrawAcidBalls(g);
             DrawStar(g);
             DrawSparks(g);
+            DrawFairySparks(g);
             DrawStaff(g);
             if (zst != null) g.Restore(zst);      // HUD e mensagens nao ampliam
             DrawChestPrompt(g);

@@ -1,5 +1,13 @@
 # Changelog (resumo)
 
+## 12/11/2026 — Armas sombrias, conjunto doce de fada e Link-fada
+- **Armas sombrias** (vêm com o conjunto sombra e já saem equipadas ao liberar): **Espada sombria** (lâmina escura com guarda vermelha, **800 de dano**), **Escudo sombrio** (escuro com emblema prateado) e **Arco sombrio** (escuro com empunhadura vermelha). Aparecem no inventário, em Armas.
+- **Conjunto doce refeito:** agora tem **tiara dourada com joia lilás** (no lugar do gorro), **blusa um quadradinho maior com o meio lilás**, **faixa azul bebê**, **calça rosa** e **sapatos vermelhos**, sem as bolinhas brancas.
+- **Link-fada:** com o conjunto doce completo (tiara + blusa) o Link **age como uma fada**: **flutua** no ar balançando, tem **asinhas de fada** que batem (também na prévia do inventário) e deixa um **rastro de brilhinhos**.
+
+## 12/11/2026 — Cabeça do Link de lado sem falha atrás
+- Ao diminuir as costas, o contorno da **parte de trás da cabeça** (pescoço/cabelo, 3 linhas) tinha sido cortado junto, deixando um **degrau de 2 quadradinhos** abaixo da cabeça. Essas 3 linhas voltaram ao que eram, então a cabeça fica inteira e só o **tronco** continua mais curto atrás (degrau de 1 quadradinho). Desktop e web.
+
 ## 12/11/2026 — Dois conjuntos novos (doce e sombra) e escudo maçã mais simples
 - **Conjunto doce (surpresa, fofo):** gorro e blusa **rosa de algodão-doce com bolinhas brancas**, calça clarinha e **sapatinhos lilás**. Libera com **36.000** monstros no contador dos conjuntos (muito difícil: faltam 15.100 depois da maçã).
 - **Conjunto sombra (imita o Link Sombrio):** gorro e blusa **quase pretos**, calça escura, **sapatos vinho**, **cinto prateado**, **rosto pálido e cabelo escuro**. Libera com **52.000** monstros (mais difícil ainda).
