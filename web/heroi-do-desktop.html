@@ -726,7 +726,7 @@ const saveWpnKills = () => { try { localStorage.setItem('heroi_monstros_armas', 
 while (wpnKnown < 3 && wpnKills >= WPN_THR[wpnKnown]) wpnKnown++;
 if (/[?&]armas\b/.test(location.search)) wpnTest = true;      // teste rapido: as 3 armas liberadas
 const weaponsOwned = () => { if (wpnTest) return 3; let n = 0; while (n < 3 && wpnKills >= WPN_THR[n]) n++; return n; };
-const swHit = () => (fairyOn() ? 0.22 : eqSword === 2 ? 0.30 : eqSword === 3 ? 0.07 : eqSword === 4 ? 0.14 : 0.11), swEnd = () => (fairyOn() ? 0.60 : eqSword === 2 ? 0.55 : eqSword === 3 ? 0.20 : eqSword === 4 ? 0.36 : 0.32), swCool = () => (fairyOn() ? 0.08 : eqSword === 2 ? 0.40 : eqSword === 3 ? 0.08 : eqSword === 4 ? 0.24 : 0.22);      // marreta lenta e pesada; espada de chamas rapida
+const swHit = () => (fairyOn() ? 0.12 : eqSword === 2 ? 0.30 : eqSword === 3 ? 0.07 : eqSword === 4 ? 0.14 : 0.11), swEnd = () => (fairyOn() ? 0.36 : eqSword === 2 ? 0.55 : eqSword === 3 ? 0.20 : eqSword === 4 ? 0.36 : 0.32), swCool = () => (fairyOn() ? 0.08 : eqSword === 2 ? 0.40 : eqSword === 3 ? 0.08 : eqSword === 4 ? 0.24 : 0.22);      // marreta lenta e pesada; espada de chamas rapida
 const swordDamage = () => (fairyOn() ? 450 : eqSword === 1 ? 300 : eqSword === 2 ? 600 : eqSword === 3 ? 450 : eqSword === 4 ? 700 : eqSword === 5 ? 800 : 150);
 function unlockWeapon(i) {      // arma nova: ja vem equipada, com aviso
   if (i === 0) eqSword = 2; else if (i === 1) eqSword = 3; else eqBow = 2;
@@ -1013,9 +1013,9 @@ function hurtHero(fx, fy, dmg = 1, ignoreInv = false) {
   else say('Ai!');
 }
 function doSwing() {
-  const cx = fairyOn() ? hero.x : hero.x + hero.face * 8 * S, R = (eqSword === 2 ? 27 : eqSword === 4 ? 23 : 18) * S;      // marreta e cogumelo-maca: area maior; Link-fada: giro em volta do heroi
+  const cx = fairyOn() ? hero.x : hero.x + hero.face * 8 * S, R = (fairyOn() ? 36 : eqSword === 2 ? 27 : eqSword === 4 ? 23 : 18) * S;      // marreta e cogumelo-maca: area maior; Link-fada: giro em volta do heroi
   if (eqSword === 4) for (let k = 0; k < 6; k++) puffs.push({ kind: 1, x: cx + (rnd() - 0.5) * 26 * S, y: hero.y - rnd() * 10 * S, t: 0 });      // esporos
-  for (let i = enemies.length - 1; i >= 0; i--) { const e = enemies[i]; const dx = e.x - cx, dy = e.y - hero.y; const rad = e.type === 3 ? R + 14 * S * DK * (e.scale || 1) : (e.type === 7 ? R + 8 * S : R); if (dx * dx + dy * dy < rad * rad) damageEnemy(e, swordDamage()); }      // 150 comum | 300 Espada Mestre | 600 marreta | 450 espada de chamas
+  for (let i = enemies.length - 1; i >= 0; i--) { const e = enemies[i]; const dx = e.x - cx, dy = e.y - hero.y; const rad = e.type === 3 ? R + 14 * S * DK * (e.scale || 1) : (e.type === 7 ? R + 8 * S : R); if (dx * dx + dy * dy < rad * rad) damageEnemy(e, fairyOn() && e.type !== 3 && e.type !== 7 ? 999999 : swordDamage()); }      // 150 comum | 300 Espada Mestre | 600 marreta | 450 espada de chamas
   for (let i = rocks.length - 1; i >= 0; i--) { const r = rocks[i]; const dx = r.x - cx, dy = r.y - (hero.y - 6 * S); if (dx * dx + dy * dy < R * R) { puffs.push({ kind: 1, x: r.x, y: r.y, t: 0 }); rocks.splice(i, 1); } }
 }
 function damageEnemy(e, dmg) {
@@ -2112,7 +2112,7 @@ function drawHero() {
     const fprog = hero.attacking ? Math.min(1, hero.atkT / swEnd()) : 0, qd = hero.attacking ? Math.min(7, Math.floor(fprog * 8)) % 4 : 0;      // DUAS voltas de 360 graus
     if (hero.attacking && fprog > 0.05 && fprog < 0.97) {      // estrelinhas azuis meio transparentes fazendo o arco da espada
       const fang = -110 + 170 * (1 - Math.pow(1 - fprog, 2)); ctx.save();
-      for (let a = -110; a < fang; a += 8) { const r2 = a * Math.PI / 180, q = (a + 110) / Math.max(1, fang + 110), rr = 12 * S + (Math.floor(a / 8) % 2 === 0 ? 0 : 2 * S), px = hero.x + f * 3 * S + f * Math.cos(r2) * rr, py = hero.y - 6 * S + Math.sin(r2) * rr, sz = 2.4 * S; ctx.globalAlpha = (60 + 120 * q) / 255; rect('#6eafff', px - sz / 2, py - sz / 6, sz, sz / 3); rect('#6eafff', px - sz / 6, py - sz / 2, sz / 3, sz); }
+      for (let a = -110; a < fang; a += 3) for (let m = 0; m < 2; m++) { const fr1 = (v) => Math.abs(v) % 1, h1 = fr1(Math.sin(a * 12.9898 + m * 78.233) * 43758.5453), h2 = fr1(Math.sin(a * 39.346 + m * 11.135) * 24634.6345), r2 = (a + (h2 - 0.5) * 14) * Math.PI / 180, q = (a + 110) / Math.max(1, fang + 110), rr = (10 + h1 * 18) * S, px = hero.x + f * 3 * S + f * Math.cos(r2) * rr, py = hero.y - 6 * S + Math.sin(r2) * rr, sz = (1.6 + h2 * 1.6) * S; ctx.globalAlpha = (60 + 120 * q) / 255; rect('#6eafff', px - sz / 2, py - sz / 6, sz, sz / 3); rect('#6eafff', px - sz / 6, py - sz / 2, sz / 3, sz); }
       ctx.restore();
     }
     if (qd === 0 || qd === 2) spr(fr ? SP.heroB : SP.heroA, hero.x, hero.y - bob, qd === 0 ? right : !right); else spr(SP.front, hero.x, hero.y - bob, true);

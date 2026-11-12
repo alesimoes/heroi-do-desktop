@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 12/11/2026 — Giro do Link-fada: mais brilhos, mais alcance, mais rápido
+- Estrelinhas azuis **mais espalhadas e em maior quantidade**; ataque **2x o alcance** e **mata os monstros ao redor** (dentro do alcance, mesmo sem acertá-los; chefões só levam o dano normal); ataque **mais rápido** (0,36 s).
+
 ## 12/11/2026 — Giro do Link-fada com estrelinhas azuis
 - Modo jogável, tecla 1 com o conjunto de fada: o Link dá **duas voltas de 360°** em torno de si e solta **estrelinhas azuis meio transparentes** desenhando o **arco** da espada (os brilhinhos amarelos saíram).
 
