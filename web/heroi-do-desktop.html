@@ -817,7 +817,7 @@ function updateFairy(dt) {
   if (F.target && enemies.indexOf(F.target) < 0) { F.target = null; F.ph = 0; }
   if (bossPhase !== 0 || hero.dead) { F.target = null; F.ph = 0; }
   if (!F.target && bossPhase === 0 && !hero.dead) {
-    let bd = 1e18; for (const e of enemies) { if (!e.fairy || e.wave || e.type === 3 || e.type === 7) continue; const d = (e.x - F.x) ** 2 + (e.y - F.y) ** 2; if (d < bd) { bd = d; F.target = e; } }
+    let bd = 1e18; for (const e of enemies) { if (e.type === 3 || e.type === 7) continue; if (!(eqFairy === 4 && e.type === 0) && (!e.fairy || e.wave)) continue; const d = (e.x - F.x) ** 2 + (e.y - F.y) ** 2; /* fadinha sombria (4): tambem ataca TODOS os monstros vermelhos (octoroks); sem chefoes */ if (d < bd) { bd = d; F.target = e; } }
     if (F.target) { F.ph = 1; F.orbit = 0; }
   }
   const ox = F.x, oy = F.y;
