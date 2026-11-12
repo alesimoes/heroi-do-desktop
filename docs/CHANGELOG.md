@@ -1,6 +1,9 @@
 # Changelog (resumo)
 
-## 12/11/2026 — Gorro maçã com cabinho e escudo maçã mais detalhado
+## 12/11/2026 — Dois conjuntos novos (doce e sombra) e escudo maçã mais simples
+- **Conjunto doce (surpresa, fofo):** gorro e blusa **rosa de algodão-doce com bolinhas brancas**, calça clarinha e **sapatinhos lilás**. Libera com **36.000** monstros no contador dos conjuntos (muito difícil: faltam 15.100 depois da maçã).
+- **Conjunto sombra (imita o Link Sombrio):** gorro e blusa **quase pretos**, calça escura, **sapatos vinho**, **cinto prateado**, **rosto pálido e cabelo escuro**. Libera com **52.000** monstros (mais difícil ainda).
+- **Escudo maçã mais simples e com quadradinhos 8% maiores:** grade de 11 x 14 (antes 12 x 15): casca vermelha com um brilho, polpa creme, 2 sementes, talo e folha.
 - **Gorro maçã:** ganhou um **cabinho de maçã em cima** (talo marrom e folha verde), no herói e na prévia do inventário.
 - **Escudo maçã:** desenhado com **quadradinhos menores** (grade de 12 x 15 em vez de 8 x 10, no mesmo tamanho total) para caber mais detalhe: casca vermelha com brilho e sombra, polpa creme com borda mais escura, miolo com duas sementes, talo e folha.
 
