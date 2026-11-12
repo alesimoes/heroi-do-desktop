@@ -614,13 +614,13 @@ const hatDetail = (s, i) => {      // i = brilho, n = sombra (como no icone do i
 const cuteTunic = (s, i) => {      // blusa do conjunto doce: 1 quadradinho maior para tras e, nas linhas da blusa, o meio fica lilas ('z')
   const a = s.split(''); let f = 0; while (f < a.length && a[f] === '.') f++;
   if (f > 0 && f + 1 < a.length) { a[f - 1] = 'K'; a[f] = a[f + 1] === 'K' ? 'Q' : a[f + 1]; if (i === 13) a[f] = 'B'; }
-  if (i <= 12) { let q0 = -1, q1 = -1; for (let c = 0; c < a.length; c++) if (a[c] === 'Q') { if (q0 < 0) q0 = c; q1 = c; } if (q0 >= 0) { const m = (q0 + q1) >> 1; if (a[m] === 'Q') a[m] = 'z'; if (m + 1 < a.length && a[m + 1] === 'Q') a[m + 1] = 'z'; } }
+  if (false) { let q0 = -1, q1 = -1; for (let c = 0; c < a.length; c++) if (a[c] === 'Q') { if (q0 < 0) q0 = c; q1 = c; } if (q0 >= 0) { const m = (q0 + q1) >> 1; if (a[m] === 'Q') a[m] = 'z'; if (m + 1 < a.length && a[m + 1] === 'Q') a[m + 1] = 'z'; } }
   return a.join('');
 };
 const heroRows = (rows) => {
   const out = rows.map((r, i) => { let s = r.replace(/Y/g, 'V').replace(/G/g, i < 9 ? ((eqHat === 2 || eqHat === 10) ? 'V' : 'H') : 'Q'); if (eqHat === 8 && i >= 1 && i <= 3) s = spotRow(s, i === 1 ? [6] : i === 2 ? [4, 8] : [3, 6, 10], 'H'); if (eqHat !== 2 && eqHat !== 10 && i >= 1 && i <= 3) s = hatDetail(s, i); if (eqTunic === 10 && i >= 10 && i <= 13) s = cuteTunic(s, i); if (eqTunic >= 3 && i === 13) s = s.replace(/B/g, 'b'); if (eqTunic === 8 && i >= 10 && i <= 12) s = spotRow(s, i === 10 ? [5, 9] : i === 11 ? [4, 7, 10] : [5, 9], 'Q'); if ((eqHat === 2 || eqHat === 10) && (i === 4 || i === 5) && s.startsWith('KV')) s = '.K' + s.slice(2); if (eqTunic === 2) { if (i === 9) s = s.replace(/Q/g, 'F'); else if (i === 13) s = s.replace(/B/g, 'C'); else if (i === 14) s = s.replace(/W/g, 'J'); else if (i === 15) s = s.replace(/B/g, 'Z'); } else if (eqTunic >= 3) { if (i === 14) s = s.replace(/W/g, 'J'); else if (i === 15) s = s.replace(/B/g, 'Z'); } return s; });
   const ctr = (t) => { const w = rows[0].length, pad = Math.max(0, Math.floor((w - 14) / 2)); return ('.'.repeat(pad) + t).padEnd(w, '.').slice(0, w); };      // centra o desenho de 14 na largura da linha 0
-  if (eqHat === 10) return [ctr('....C..PP..C..'), ctr('....CCCCCCCC..'), ...out];      // conjunto doce: tiara dourada com joia lilas (sem gorro: o cabelo aparece)
+  if (eqHat === 10) return [ctr('......FPPF....'), ctr('....F.FFFF.F..'), ctr('....AFFFFFFA..'), ...out];      // conjunto doce: tiara PRATEADA com joia lilas (sem gorro: o cabelo aparece)
   if (eqHat === 9) return [ctr('........KNNK..'), ctr('.....KBBKNNK..'), ctr('.....KBBK.....'), ...out];      // gorro maca: cabinho (talo marrom e folha verde) em cima
   return eqHat === 2 ? ['....C.CC.C....', '....CCCCCC....', '....CRCCRC....', ...out] : out;      // coroa sobre o gorro
 };
@@ -989,6 +989,7 @@ function startAttack(practice) {
 function moveHero(tx, ty, speed, dt) {
   const dx = tx - hero.x, dy = ty - hero.y, d = Math.hypot(dx, dy);
   if (d < 1) { hero.walking = false; return; }
+  if (fairyOn()) speed *= 0.6;      // Link-fada voa mais devagar
   const step = Math.min(d, speed * dt); hero.x += dx / d * step; hero.y += dy / d * step;
   if (Math.abs(dx) > 2) hero.face = dx > 0 ? 1 : -1; hero.walking = true;
 }
@@ -1656,8 +1657,10 @@ function drawFairyWings(x, y, face, front) {      // asinhas de fada: brancas e 
 function drawHeroFx() {
   if (!fairyOn()) { drawHeroMaybeWading(); return; }
   shadow(hero.x, hero.y, 12);      // a sombra fica no chao
-  noShadow = true; ctx.save(); ctx.translate(0, -fairyLift());
-  drawFairyWings(hero.x, hero.y - 12 * S, hero.face, false);
+  const calmF = calmState === 2 && phase >= 2;
+  noShadow = true; ctx.save(); ctx.translate(0, calmF ? 0 : -fairyLift());
+  if (calmF) { if (phase < 5) drawFairyWings(hero.x, hero.y - 12 * S, 1, true); }      // dormindo/descansando: de frente, asas dos dois lados, sem flutuar
+  else drawFairyWings(hero.x, hero.y - 12 * S, hero.face, false);
   drawHeroMaybeWading();
   ctx.restore(); noShadow = false;
 }
@@ -2094,7 +2097,7 @@ function drawHero() {
   if (hero.inv > 0 && cookState === 0 && Math.floor(time * 14) % 2 === 0) return;
   if (calmState === 2 && phase >= 2) { drawCalm(); return; }
   shadow(hero.x, hero.y, 12);
-  const fr = hero.walking ? Math.floor(hero.walkT * 9) % 2 : 0, bob = (hero.walking && fr === 1) ? S : 0;
+  const fr = hero.walking && !fairyOn() ? Math.floor(hero.walkT * 9) % 2 : 0, bob = (hero.walking && fr === 1) ? S : 0;      // Link-fada voa: nao anda (sem passinhos)
   if (fairyOn() && !previewBare) {      // Link-fada: sem arma nem escudo (as asas protegem); no ataque gira uma vez em torno de si (lado, frente, lado oposto, frente)
     const qd = hero.attacking ? Math.min(3, Math.floor(hero.atkT / swEnd() * 4)) : 0;
     if (qd === 0 || qd === 2) spr(fr ? SP.heroB : SP.heroA, hero.x, hero.y - bob, qd === 0 ? right : !right); else spr(SP.front, hero.x, hero.y - bob, true);
@@ -2123,8 +2126,8 @@ function drawCalm() {
   if (phase === 4) { spr(SP.front, hero.x, hero.y + 2 * S, true); return; }
   const waving = phase === 3; spr(waving ? SP.wave : SP.front, hero.x, hero.y, true);
   let q = phase === 2 ? Math.min(1, phaseT / 1.5) : 1; q = q * q * (3 - 2 * q);
-  drawShieldBody(hero.x - 7 * S + (-5 * S) * q, hero.y - 12 * S + 6 * S * q);
-  if (!waving) drawSword(hero.x + 6 * S, hero.y - 5 * S, -80 + 175 * q, 1);
+  if (!fairyOn()) drawShieldBody(hero.x - 7 * S + (-5 * S) * q, hero.y - 12 * S + 6 * S * q);
+  if (!waving) { if (!fairyOn()) drawSword(hero.x + 6 * S, hero.y - 5 * S, -80 + 175 * q, 1); }      // Link-fada nao usa armas
   else { const sw = Math.sin(time * 10) * S, bx = hero.x + 4 * S, by = hero.y;      // braco levantado, curto e proporcional (6 S); a mao balanca de lado a lado
     rect('#1c1624', bx, by - 10 * S, 4 * S, 4 * S); rect(tunicColor(), bx + S, by - 9 * S, 2 * S, 3 * S); rect('#1c1624', bx + sw, by - 12 * S, 4 * S, 3 * S); rect('#fad0a5', bx + S + sw, by - 11 * S, 2 * S, 2 * S); }
 }
@@ -2267,7 +2270,7 @@ $('goPlay').addEventListener('click', () => { $('intro').hidden = true; goFullsc
 $('goAuto').addEventListener('click', () => { $('intro').hidden = true; goFullscreen(); });
 /* ---------- MENU DE PAUSA (heroi de frente com franja no olho; sem atalhos de teste nem "dar 5 macas"; Espaco; clicar na maca = comer; Roupas: heroi sem armas): abas Armas / Roupas / Comida e o heroi ampliado ---------- */
 let invOn = false, invTab = -1, invBow = false, invEatT = 0, previewBare = false, invMsg = '', eatRaw = false, autoEatPh = 0, autoEatTree = null;      // invBow: o heroi do exemplo segura o arco (clicou num arco) ou espada e escudo (clicou neles)
-const INV_NAMES = [['Arco de madeira', 'Arco de metal', 'Arco de cristal', 'Arco sombrio'], ['Espada comum', 'Espada Mestre', 'Marreta trovão', 'Espada de chamas', 'Espada cogumelo', 'Espada sombria'], ['Escudo azul', 'Escudo vermelho', 'Escudo do rei', 'Escudo maçã', 'Escudo sombrio'], ['Gorro verde', 'Gorro roxo', 'Coroa de ouro', 'Gorro areia', 'Gorro gelo', 'Gorro fogo', 'Gorro noite', 'Gorro mar', 'Gorro cogumelo', 'Gorro maçã', 'Gorro doce', 'Gorro sombra'], ['Túnica verde', 'Blusa azul', 'Roupa de rei', 'Blusa areia', 'Blusa gelo', 'Blusa fogo', 'Blusa noite', 'Blusa mar', 'Blusa cogumelo', 'Blusa maçã', 'Blusa doce', 'Blusa sombra'], ['Fadinha', 'Fadinha rosa', 'Fadinha folha', 'Fadinha estrela']];
+const INV_NAMES = [['Arco de madeira', 'Arco de metal', 'Arco de cristal', 'Arco sombrio'], ['Espada comum', 'Espada Mestre', 'Marreta trovão', 'Espada de chamas', 'Espada cogumelo', 'Espada sombria'], ['Escudo azul', 'Escudo vermelho', 'Escudo do rei', 'Escudo maçã', 'Escudo sombrio'], ['Gorro verde', 'Gorro roxo', 'Coroa de ouro', 'Gorro areia', 'Gorro gelo', 'Gorro fogo', 'Gorro noite', 'Gorro mar', 'Gorro cogumelo', 'Gorro maçã', 'Tiara', 'Gorro sombra'], ['Túnica verde', 'Blusa azul', 'Roupa de rei', 'Blusa areia', 'Blusa gelo', 'Blusa fogo', 'Blusa noite', 'Blusa mar', 'Blusa cogumelo', 'Blusa maçã', 'Blusa doce', 'Blusa sombra'], ['Fadinha', 'Fadinha rosa', 'Fadinha folha', 'Fadinha estrela']];
 const INV_DESC = [['O arco de sempre.', 'Flechas com o dobro de dano.', 'Atira 2 flechas de cristal, uma logo depois da outra.', 'Arco escuro do Link Sombrio (vem com o conjunto sombra).'], ['A espada de sempre: 150 de dano.', 'Espada Mestre: o dobro de dano, 300 de dano.', 'Usa as DUAS mãos (sem escudo): golpe lento, área grande, 600 de dano.', 'Lâmina de fogo: golpes muito rápidos, 450 de dano.', 'Um cogumelo gigante de maça: acerta em área e solta esporos, 700 de dano (vem com o conjunto cogumelo).', 'Lâmina escura do Link Sombrio: 800 de dano (vem com o conjunto sombra).'], ['Escudo comum.', 'Escudo vermelho do herói.', 'Escudo circular do tesouro do rei.', 'Escudo de maçã cortada (vem com o conjunto maçã).', 'Escudo escuro com emblema prateado, do Link Sombrio (vem com o conjunto sombra).'], ['O gorro de sempre.', 'Gorro roxo da evolução.', 'Coroa de ouro do tesouro do rei.', 'Conjunto areia: gorro, blusa, calça e sapatos.', 'Conjunto gelo: gorro, blusa, calça e sapatos.', 'Conjunto fogo: gorro, blusa, calça e sapatos.', 'Conjunto noite: gorro, blusa, calça e sapatos.', 'Conjunto mar: gorro, blusa, calça e sapatos.', 'Conjunto cogumelo: gorro com bolinhas, blusa de cogumelo e calça cor do talo.', 'Conjunto maçã: gorro, blusa, calça e sapatos, mais o escudo de maçã cortada.', 'Conjunto doce: gorro, blusa, calça e sapatos fofos, rosinha com bolinhas.', 'Conjunto sombra: gorro, blusa, calça e sapatos escuros, no estilo do Link Sombrio.'], ['A túnica de sempre.', 'Blusa azul da evolução.', 'Manto vermelho, calça marrom e sapatos roxos.', 'Blusa, calça e sapatos do conjunto areia.', 'Blusa, calça e sapatos do conjunto gelo.', 'Blusa, calça e sapatos do conjunto fogo.', 'Blusa, calça e sapatos do conjunto noite.', 'Blusa, calça e sapatos do conjunto mar.', 'Blusa de cogumelo com bolinhas e calça cor do talo (conjunto cogumelo).', 'Blusa, calça e sapatos do conjunto maçã.', 'Blusa, calça e sapatos do conjunto doce.', 'Blusa, calça e sapatos do conjunto sombra.'], ['A fadinha ajudante.', 'Corpo rosa e asas azul escuro.']];
 const withCtx = (c, fn) => { const old = ctx; ctx = c; try { fn(); } finally { ctx = old; } };
 function iconShape(g, pts, fill, u) { g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.closePath(); g.fillStyle = fill; g.fill(); g.lineWidth = Math.max(1, u * 0.7); g.strokeStyle = '#1c1624'; g.lineJoin = 'round'; g.stroke(); }

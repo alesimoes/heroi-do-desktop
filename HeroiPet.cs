@@ -169,7 +169,7 @@ namespace HeroiPet
         {
             char[] a = s.ToCharArray(); int f = 0; while (f < a.Length && a[f] == '.') f++;
             if (f > 0 && f + 1 < a.Length) { a[f - 1] = 'K'; a[f] = a[f + 1] == 'K' ? 'Q' : a[f + 1]; if (i == 13) a[f] = 'B'; }      // aumenta a blusa para tras (o contorno vai 1 quadradinho para fora)
-            if (i <= 12) { int q0 = -1, q1 = -1; for (int c = 0; c < a.Length; c++) if (a[c] == 'Q') { if (q0 < 0) q0 = c; q1 = c; } if (q0 >= 0) { int m = (q0 + q1) / 2; if (a[m] == 'Q') a[m] = 'z'; if (m + 1 < a.Length && a[m + 1] == 'Q') a[m + 1] = 'z'; } }
+            if (false) { int q0 = -1, q1 = -1; for (int c = 0; c < a.Length; c++) if (a[c] == 'Q') { if (q0 < 0) q0 = c; q1 = c; } if (q0 >= 0) { int m = (q0 + q1) / 2; if (a[m] == 'Q') a[m] = 'z'; if (m + 1 < a.Length && a[m + 1] == 'Q') a[m + 1] = 'z'; } }
             return new string(a);
         }
         static string HatDetail(string s, int i)      // i = brilho (claro); so troca pixels do gorro (H). Sem sombra escura.
@@ -189,7 +189,7 @@ namespace HeroiPet
         {
             List<string> r = new List<string>();
             if (Crown && !Tiara) { r.Add("....C.CC.C...."); r.Add("....CCCCCC...."); r.Add("....CRCCRC...."); }      // coroa sobre o gorro
-            if (Tiara) { int tw = rows[0].Length; r.Add(Ctr("....C..PP..C..", tw)); r.Add(Ctr("....CCCCCCCC..", tw)); }      // tiara dourada com joia lilas (sem gorro: o cabelo aparece)
+            if (Tiara) { int tw = rows[0].Length; r.Add(Ctr("......FPPF....", tw)); r.Add(Ctr("....F.FFFF.F..", tw)); r.Add(Ctr("....AFFFFFFA..", tw)); }      // tiara PRATEADA (F/A) com joia lilas;  com joia lilas (sem gorro: o cabelo aparece)
             if (AppleHat) { int aw = rows[0].Length; r.Add(Ctr("........KNNK..", aw)); r.Add(Ctr(".....KBBKNNK..", aw)); r.Add(Ctr(".....KBBK.....", aw)); }      // cabinho de maca: talo marrom e folha verde
             for (int i = 0; i < rows.Length; i++)
             {
@@ -2125,7 +2125,7 @@ namespace HeroiPet
             struct Hit { public Rectangle R; public int Kind, A, B; }      // Kind 0 aba | 1 item | 2 fechar
             static readonly string[][] Names = {
                 new string[] { "Arco de madeira", "Arco de metal", "Arco de cristal", "Arco sombrio" }, new string[] { "Espada comum", "Espada Mestre", "Marreta trovão", "Espada de chamas", "Espada cogumelo", "Espada sombria" }, new string[] { "Escudo azul", "Escudo vermelho", "Escudo do rei", "Escudo maçã", "Escudo sombrio" },
-                new string[] { "Gorro verde", "Gorro roxo", "Coroa de ouro", "Gorro areia", "Gorro gelo", "Gorro fogo", "Gorro noite", "Gorro mar", "Gorro cogumelo", "Gorro maçã", "Gorro doce", "Gorro sombra" }, new string[] { "Túnica verde", "Blusa azul", "Roupa de rei", "Blusa areia", "Blusa gelo", "Blusa fogo", "Blusa noite", "Blusa mar", "Blusa cogumelo", "Blusa maçã", "Blusa doce", "Blusa sombra" }, new string[] { "Fadinha", "Fadinha rosa", "Fadinha folha", "Fadinha estrela" } };
+                new string[] { "Gorro verde", "Gorro roxo", "Coroa de ouro", "Gorro areia", "Gorro gelo", "Gorro fogo", "Gorro noite", "Gorro mar", "Gorro cogumelo", "Gorro maçã", "Tiara", "Gorro sombra" }, new string[] { "Túnica verde", "Blusa azul", "Roupa de rei", "Blusa areia", "Blusa gelo", "Blusa fogo", "Blusa noite", "Blusa mar", "Blusa cogumelo", "Blusa maçã", "Blusa doce", "Blusa sombra" }, new string[] { "Fadinha", "Fadinha rosa", "Fadinha folha", "Fadinha estrela" } };
             static readonly string[][] Descs = {
                 new string[] { "O arco de sempre.", "Flechas com o dobro de dano.", "Atira 2 flechas de cristal, uma logo depois da outra.", "Arco escuro do Link Sombrio (vem com o conjunto sombra)." }, new string[] { "A espada de sempre: 150 de dano.", "Espada Mestre: o dobro de dano, 300 de dano.", "Usa as DUAS mãos (sem escudo): golpe lento, área grande, 600 de dano.", "Lâmina de fogo: golpes muito rápidos, 450 de dano.", "Um cogumelo gigante de maça: acerta em área e solta esporos, 700 de dano (vem com o conjunto cogumelo).", "Lâmina escura do Link Sombrio: 800 de dano (vem com o conjunto sombra)." }, new string[] { "Escudo comum.", "Escudo vermelho do herói.", "Escudo circular do tesouro do rei.", "Escudo de maçã cortada (vem com o conjunto maçã).", "Escudo escuro com emblema prateado, do Link Sombrio (vem com o conjunto sombra)." },
                 new string[] { "O gorro de sempre.", "Gorro roxo da evolução.", "Coroa de ouro do tesouro do rei.", "Conjunto areia: gorro, blusa, calça e sapatos.", "Conjunto gelo: gorro, blusa, calça e sapatos.", "Conjunto fogo: gorro, blusa, calça e sapatos.", "Conjunto noite: gorro, blusa, calça e sapatos.", "Conjunto mar: gorro, blusa, calça e sapatos.", "Conjunto cogumelo: gorro com bolinhas, blusa de cogumelo e calça cor do talo.", "Conjunto maçã: gorro, blusa, calça e sapatos, mais o escudo de maçã cortada.", "Conjunto doce: gorro, blusa, calça e sapatos fofos, rosinha com bolinhas.", "Conjunto sombra: gorro, blusa, calça e sapatos escuros, no estilo do Link Sombrio." }, new string[] { "A túnica de sempre.", "Blusa azul da evolução.", "Manto vermelho, calça marrom e sapatos roxos.", "Blusa, calça e sapatos do conjunto areia.", "Blusa, calça e sapatos do conjunto gelo.", "Blusa, calça e sapatos do conjunto fogo.", "Blusa, calça e sapatos do conjunto noite.", "Blusa, calça e sapatos do conjunto mar.", "Blusa de cogumelo com bolinhas e calça cor do talo (conjunto cogumelo).", "Blusa, calça e sapatos do conjunto maçã.", "Blusa, calça e sapatos do conjunto doce.", "Blusa, calça e sapatos do conjunto sombra." }, new string[] { "A fadinha ajudante.", "Corpo rosa e asas azul escuro.", "Corpo verde e asas douradas.", "Corpo violeta e asas turquesa." } };
@@ -4184,8 +4184,10 @@ namespace HeroiPet
         void DrawHeroFx(Graphics g)
         {
             if (!FairyOn) { DrawHeroMaybeWading(g); return; }
-            GraphicsState st = g.Save(); g.TranslateTransform(0, -FairyLift);
-            DrawFairyWings(g, hx, hy - 12 * S, hface, false);
+            bool calm = calmState == 2 && phase >= 2;
+            GraphicsState st = g.Save(); g.TranslateTransform(0, calm ? 0 : -FairyLift);
+            if (calm) { if (phase < 5) DrawFairyWings(g, hx, hy - 12 * S, 1, true); }      // dormindo/descansando: de frente, asas dos dois lados, sem flutuar
+            else DrawFairyWings(g, hx, hy - 12 * S, hface, false);
             DrawHeroMaybeWading(g);
             g.Restore(st);
         }
@@ -5260,6 +5262,7 @@ namespace HeroiPet
         {
             float dx = tx - hx, dy = ty - hy, d = (float)Math.Sqrt(dx * dx + dy * dy);
             if (d < 1) { walking = false; return; }
+            if (FairyOn) speed *= 0.6f;      // Link-fada voa mais devagar
             float step = Math.Min(d, speed * dt);
             hx += dx / d * step; hy += dy / d * step;
             if (Math.Abs(dx) > 2) hface = dx > 0 ? 1 : -1;
@@ -6037,7 +6040,7 @@ namespace HeroiPet
             if (inv > 0 && cookState == 0 && ((int)(time * 14)) % 2 == 0) return;
             Shadow(g, hx, hy, 12);
             bool right = hface > 0;
-            int fr = walking ? ((int)(walkT * 9)) % 2 : 0;
+            int fr = walking && !FairyOn ? ((int)(walkT * 9)) % 2 : 0;      // Link-fada voa: nao anda (sem passinhos)
             float bob = (walking && fr == 1) ? S : 0;
             if (FairyOn)      // Link-fada: sem arma nem escudo (as asas protegem); no ataque gira uma vez em torno de si
             {
@@ -6124,9 +6127,10 @@ namespace HeroiPet
 
             // escudo: do peito para o chao, ao lado
             float sx = hx - 7 * S + (-5 * S) * q, sy = hy - 12 * S + 6 * S * q;
-            if (eqSword != 2) DrawShieldBody(g, sx, sy);
+            if (eqSword != 2 && !FairyOn) DrawShieldBody(g, sx, sy);
 
 
+            if (FairyOn && !waving) return;      // Link-fada nao usa armas
             if (!waving)
             {
                 // espada na mao direita: da posicao de combate para a ponta no chao
@@ -6159,8 +6163,8 @@ namespace HeroiPet
                 using (SolidBrush gold = new SolidBrush(Color.FromArgb(215, 160, 40)))
                 using (SolidBrush br = new SolidBrush(Color.FromArgb(135, 85, 45)))
                 {
-                    g.FillRectangle(br, hx - 7 * S, hy - 11 * S, 2 * S, 3 * S);
-                    g.FillRectangle(gold, hx - 8 * S, hy - 9 * S, 4 * S, S);
+                    if (!FairyOn) { g.FillRectangle(br, hx - 7 * S, hy - 11 * S, 2 * S, 3 * S);
+                    g.FillRectangle(gold, hx - 8 * S, hy - 9 * S, 4 * S, S); }
                     // braco levantado, curto e proporcional (6 S de ponta a ponta, perto do tamanho do braco abaixado)
                     g.FillRectangle(kb, hx + 4 * S, hy - 10 * S, 4 * S, 4 * S);       // manga, saindo do ombro
                     g.FillRectangle(gb, hx + 5 * S, hy - 9 * S, 2 * S, 3 * S);

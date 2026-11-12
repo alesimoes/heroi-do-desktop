@@ -1,5 +1,11 @@
 # Changelog (resumo)
 
+## 12/11/2026 — Ajustes do Link-fada
+- **Tiara prateada** mais bonita (3 fileiras, pontas laterais e joia lilás no meio); o item do inventário agora se chama **"Tiara"**.
+- **Faixa azul fina e horizontal** (some a listra vertical lilás da blusa).
+- **Voa, não anda:** sem passinhos de caminhada; **voa mais devagar** (60% da velocidade).
+- **Descansar/dormir:** de frente, **sem armas nem escudo** (ele não usa armas), asas dos dois lados e sem flutuar.
+
 ## 12/11/2026 — Link-fada luta como fada
 - Com o conjunto doce (tiara + blusa) **não usa arma, escudo nem arco**: **as asas servem de escudo** e protegem de pedras e flechas de qualquer lado (bola de fogo continua passando).
 - **Modo automático:** mata os monstros como a fadinha: voa até o mais próximo (menos chefões), dá voltas rápidas em volta da cabeça dele por 0,7 s e o derrota; fica invulnerável enquanto faz isso e pega itens entre um alvo e outro.
