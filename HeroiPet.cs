@@ -3715,6 +3715,7 @@ namespace HeroiPet
         }
 
         // Ao entrar no modo jogo: o heroi vai para o meio da tela e os monstros do modo automatico somem
+        int walletAuto, walletPlay;      // rupias de cada modo: ao trocar de modo cada um guarda as suas
         void EnterPlay()
         {
             foreach (Enemy e in enemies) puffs.Add(new Puff { Kind = 0, X = e.X, Y = e.Y - 4 * S });
@@ -3723,7 +3724,7 @@ namespace HeroiPet
             if (dead) { dead = false; hp = MaxHP; }
             hx = W / 2; hy = H / 2; kvx = kvy = 0; inv = 1f; walking = false;
             puffs.Add(new Puff { Kind = 2, X = hx, Y = hy });
-            rupees = 0; apples = 0; flyApples.Clear(); toastShown = false;     // o que foi juntado no automatico some
+            walletAuto = rupees; rupees = walletPlay; apples = 0; flyApples.Clear(); toastShown = false;     // as rupias do automatico ficam guardadas; entram as do jogo
             spawnTimer = 2.5f;
         }
 
@@ -3750,7 +3751,8 @@ namespace HeroiPet
             {
                 if (shield != null) { shield.Close(); shield = null; }
                 SetMaxHp(5);                                                // no automatico os coracoes extras sao perdidos
-                rupees = 0; lastStep = 0;                                    // e as rupias tambem voltam a zero
+                if (was) { walletPlay = rupees; rupees = walletAuto; }      // as rupias do jogo ficam guardadas; voltam as do automatico
+                lastStep = RupeeStep();
                 nextCalm = 120f + (float)rnd.NextDouble() * 180f;
             }
         }

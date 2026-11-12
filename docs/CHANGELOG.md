@@ -1,4 +1,7 @@
-# Changelog (resumo)
+﻿# Changelog (resumo)
+
+## 12/11/2026 — Rupias separadas por modo
+- As rupias **não zeram mais** ao trocar de modo: o automático guarda as suas (X) e o jogável as dele (Y); ao voltar, cada modo retoma o que tinha na última vez (enquanto o jogo estiver aberto).
 
 ## 12/11/2026 — Sem arma, sem ataque
 - Com a espada e o arco guardados (desequipados) o Link **não ataca**, no jogável e no automático. Sem **uma** das armas ele **usa a outra**: sem espada, a tecla 1 atira com o arco (e o automático só atira); sem arco, a tecla 2 golpeia com a espada (e o automático luta só de espada). O conjunto de fada não é afetado.
