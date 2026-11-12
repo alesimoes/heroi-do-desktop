@@ -1157,6 +1157,10 @@ namespace HeroiPet
                             using (PathGradientBrush pg = new PathGradientBrush(gp)) { pg.CenterColor = Color.FromArgb((int)r[3], 255, 235, 90); pg.SurroundColors = new Color[] { Color.FromArgb(0, 255, 210, 40) }; gfx.FillPath(pg, gp); }
                         }
                     }
+                    else if (r[4] == 2f) using (SolidBrush bb2 = new SolidBrush(Color.FromArgb((int)r[3], 110, 175, 255)))      // estrelinha azul (cruz) meio transparente
+                    {
+                        float u3 = r[2] / 3f; gfx.FillRectangle(bb2, r[0] - r[2] / 2f, r[1] - u3 / 2f, r[2], u3); gfx.FillRectangle(bb2, r[0] - u3 / 2f, r[1] - r[2] / 2f, u3, r[2]);
+                    }
                     else using (SolidBrush yb = new SolidBrush(Color.FromArgb((int)r[3], 255, 226, 70))) gfx.FillRectangle(yb, r[0] - r[2] / 2f, r[1] - r[2] / 2f, r[2], r[2]);
                 }
                 else if (r.Length > 4)      // onda de choque do dragao: anel amarelo transparente
@@ -1595,7 +1599,7 @@ namespace HeroiPet
             for (int k = 0; k < 10; k++) puffs.Add(new Puff { Kind = k % 2, X = hx + ((float)rnd.NextDouble() - 0.5f) * 20 * S, Y = hy - (float)rnd.NextDouble() * 18 * S });
         }
         float SwHit { get { return FairyOn ? 0.22f : eqSword == 2 ? 0.30f : (eqSword == 3 ? 0.07f : (eqSword == 4 ? 0.14f : 0.11f)); } }      // marreta: golpe lento e pesado; espada de chamas: rapida
-        float SwEnd { get { return FairyOn ? 0.50f : eqSword == 2 ? 0.55f : (eqSword == 3 ? 0.20f : (eqSword == 4 ? 0.36f : 0.32f)); } }
+        float SwEnd { get { return FairyOn ? 0.60f : eqSword == 2 ? 0.55f : (eqSword == 3 ? 0.20f : (eqSword == 4 ? 0.36f : 0.32f)); } }
         float SwCool { get { return FairyOn ? 0.08f : eqSword == 2 ? 0.40f : (eqSword == 3 ? 0.08f : (eqSword == 4 ? 0.24f : 0.22f)); } }
         int SwordDamage() { return FairyOn ? 450 : eqSword == 1 ? 300 : (eqSword == 2 ? 600 : (eqSword == 3 ? 450 : (eqSword == 4 ? 700 : (eqSword == 5 ? 800 : 150)))); }
         float crystalQ = -1f;      // arco de cristal: a 2a flecha sai logo depois da 1a, no mesmo rumo (uma seguida da outra)
@@ -5443,7 +5447,6 @@ namespace HeroiPet
         void DoSwing()
         {
             float cx = FairyOn ? hx : hx + hface * 8 * S, R = (eqSword == 2 ? 27 : (eqSword == 4 ? 23 : 18)) * S;      // marreta e cogumelo-maca: area maior
-            if (FairyOn) for (int k = 0; k < 10; k++) { double ga = rnd.NextDouble() * Math.PI * 2; float gr = (4 + (float)rnd.NextDouble() * 14) * S; spinSparks.Add(new float[] { hx + (float)Math.Cos(ga) * gr, hy - 8 * S + (float)Math.Sin(ga) * gr * 0.7f, 0f }); }
             if (eqSword == 4) for (int k = 0; k < 6; k++) puffs.Add(new Puff { Kind = 1, X = cx + ((float)rnd.NextDouble() - 0.5f) * 26 * S, Y = hy - (float)rnd.NextDouble() * 10 * S });      // esporos
             if (eqSword == 2) for (int k = 0; k < 5; k++) puffs.Add(new Puff { Kind = k % 2, X = cx + ((float)rnd.NextDouble() - 0.5f) * 22 * S, Y = hy + ((float)rnd.NextDouble() - 0.3f) * 6 * S });      // impacto
             for (int i = enemies.Count - 1; i >= 0; i--)
@@ -6094,7 +6097,17 @@ namespace HeroiPet
             float bob = (walking && fr == 1) ? S : 0;
             if (FairyOn)      // Link-fada: sem arma nem escudo (as asas protegem); no ataque gira uma vez em torno de si
             {
-                int qd = attacking ? Math.Min(3, (int)(atkT / SwEnd * 4f)) : 0;
+                float fprog = attacking ? Math.Min(1f, atkT / SwEnd) : 0f;
+                int qd = attacking ? Math.Min(7, (int)(fprog * 8f)) % 4 : 0;      // DUAS voltas de 360 graus em torno de si
+                if (attacking && fprog > 0.05f && fprog < 0.97f)      // estrelinhas azuis meio transparentes fazendo o arco da espada
+                {
+                    float fang = -110f + 170f * (float)(1 - Math.Pow(1 - fprog, 2));
+                    for (float a = -110f; a < fang; a += 8f)
+                    {
+                        double r2 = a * Math.PI / 180.0; float q = (a + 110f) / Math.Max(1f, fang + 110f), rr = 12f * S + ((int)(a / 8f) % 2 == 0 ? 0f : 2f * S);
+                        shadowList.Add(new float[] { hx + hface * 3 * S + hface * (float)Math.Cos(r2) * rr, hy - 6 * S - FairyLift + (float)Math.Sin(r2) * rr, 2.4f * S, 60f + 120f * q, 2f, 0f, 0f, 0f });
+                    }
+                }
                 if (qd == 0 || qd == 2) Spr(g, heroWalk[fr], hx, hy - bob, qd == 0 ? right : !right); else Spr(g, heroFront, hx, hy - bob, true);
                 if (bowing)      // 2: carrega a bolinha amarela na mao
                 {

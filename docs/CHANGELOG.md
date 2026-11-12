@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 12/11/2026 — Giro do Link-fada com estrelinhas azuis
+- Modo jogável, tecla 1 com o conjunto de fada: o Link dá **duas voltas de 360°** em torno de si e solta **estrelinhas azuis meio transparentes** desenhando o **arco** da espada (os brilhinhos amarelos saíram).
+
 ## 12/11/2026 — Velocidade do Link-fada
 - Voltou à **velocidade padrão** no modo jogável e no automático (antes: 60% no jogável e muito rápido no automático).
 
