@@ -1,5 +1,8 @@
 ﻿# Changelog (resumo)
 
+## 12/11/2026 — Moedas voam para o Link no poder
+- Durante o **surto de poder** as moedas (e itens) que os monstros soltam **voam direto para o Link**.
+
 ## 12/11/2026 — Desequipar a fadinha
 - Na aba Roupas → Fadinha, clicar de novo na fadinha equipada **a guarda**: ela some do jogo e do inventário do Link, **não ataca** nem marca monstros. Clicar outra vez a traz de volta. Fica salvo.
 

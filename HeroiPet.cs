@@ -5866,6 +5866,7 @@ namespace HeroiPet
                 if (it.T > 15f) { items.RemoveAt(i); continue; }
                 if (dead) continue;
                 float dx = it.X - hx, dy = it.Y - hy;
+                if (powerT > 0 && !it.Reward) { float dd = (float)Math.Sqrt(dx * dx + dy * dy); if (dd > 0.5f) { float st = Math.Min(dd, 220f * S * dt); it.X -= dx / dd * st; it.Y -= dy / dd * st; dx = it.X - hx; dy = it.Y - hy; } }      // durante o poder as moedas voam direto para o Link
                 if (dx * dx + dy * dy < (8 * S) * (8 * S))
                 {
                     if (it.Kind == 0) { if (hp < MaxHP) hp = Math.Min(MaxHP, hp + 1f); }
