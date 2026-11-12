@@ -1,5 +1,8 @@
 ﻿# Changelog (resumo)
 
+## 12/11/2026 — Link de lado mais estreito
+- A cabeça do Link de lado perdeu 1 quadradinho atrás (nuca/gorro), ficando mais estreito.
+
 ## 12/11/2026 — Link de lado volta ao original
 - Escudo, espada, mão e inclinação da espada voltaram ao que eram no início; o bracinho foi removido (uma outra sessão o tinha reposto sem querer).
 
