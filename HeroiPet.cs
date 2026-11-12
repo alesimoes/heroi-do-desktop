@@ -3720,13 +3720,13 @@ namespace HeroiPet
         void LoadWallets()
         {
             if (Environment.GetEnvironmentVariable("HEROI_TESTE") != null) return;
-            try { using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"SoftwareHeroiDoDesktop")) { if (k != null) { object a = k.GetValue("RupiasAuto"); if (a != null) rupees = Math.Max(0, Convert.ToInt32(a)); } } } catch { }
+            try { using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"Software\HeroiDoDesktop")) { if (k != null) { object a = k.GetValue("RupiasAuto"); if (a != null) rupees = Math.Max(0, Convert.ToInt32(a)); } } } catch { }
             lastStep = RupeeStep();
         }
         void SaveWallets()
         {
             if (Environment.GetEnvironmentVariable("HEROI_TESTE") != null) return;
-            try { using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"SoftwareHeroiDoDesktop")) k.SetValue("RupiasAuto", playMode ? walletAuto : rupees); } catch { }
+            try { using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"Software\HeroiDoDesktop")) k.SetValue("RupiasAuto", playMode ? walletAuto : rupees); } catch { }
         }
         void EnterPlay()
         {
