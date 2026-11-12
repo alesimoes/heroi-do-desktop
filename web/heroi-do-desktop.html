@@ -396,10 +396,12 @@ const OUTSETS = [
   { name: 'noite', hat: '#5242b4', tunic: '#3a328c', pants: '#221e50', shoes: '#cdaf46' },
   { name: 'mar', hat: '#1ea0aa', tunic: '#1c7d96', pants: '#14506e', shoes: '#f0e6c8' },
   { name: 'cogumelo', hat: '#d63034', tunic: '#d63034', pants: '#d6c49c', shoes: '#ac8c62' },
-  { name: 'maça', hat: '#c8222c', tunic: '#c8222c', pants: '#f4e4a8', shoes: '#46963c' }];      // maca: gorro e blusa vermelho-maca, calca cor de polpa, sapatos verde-folha, mais o escudo de maca cortada
+  { name: 'maça', hat: '#c8222c', tunic: '#c8222c', pants: '#f4e4a8', shoes: '#46963c' },
+  { name: 'doce', hat: '#ffaacd', tunic: '#ffbed7', pants: '#fff6fa', shoes: '#bea0eb' },      // SURPRESA: rosa de algodao-doce com bolinhas brancas, calca clarinha e sapatinhos lilas
+  { name: 'sombra', hat: '#222232', tunic: '#262638', pants: '#161620', shoes: '#4e161e' }];      // imita o Link Sombrio: gorro e blusa quase pretos, calca escura, sapatos vinho, cinto prateado e rosto palido      // maca: gorro e blusa vermelho-maca, calca cor de polpa, sapatos verde-folha, mais o escudo de maca cortada
 //      // cogumelo: gorro e blusa vermelhos com bolinhas brancas, calca cor do talo, mais o Cogumelo-maca
-const SET_THR = [4950, 6600, 8800, 11550, 15400, 17600, 20900];      // total de monstros derrotados (evoKills) para liberar cada conjunto
-const setBelt = (si) => si === 3 ? '#f0c828' : shadeHex(OUTSETS[si].tunic, -0.45);
+const SET_THR = [4950, 6600, 8800, 11550, 15400, 17600, 20900, 36000, 52000];      // os 2 ultimos (doce e sombra) sao DIFICEIS: 36000 e 52000      // total de monstros derrotados (evoKills) para liberar cada conjunto
+const setBelt = (si) => si === 3 ? '#f0c828' : (si === 8 ? '#c4c6d6' : shadeHex(OUTSETS[si].tunic, -0.45));
 const shadeHex = (hex, t) => { const n = parseInt(hex.slice(1), 16), c = [n >> 16 & 255, n >> 8 & 255, n & 255].map((v) => Math.round(t >= 0 ? v + (255 - v) * t : v * (1 + t))); return '#' + c.map((v) => v.toString(16).padStart(2, '0')).join(''); };
 /* ---------- FASE 2 ----------
    Depois de vencer o Dragao comeca a FASE 2 (atalho ?fase2): os mesmos 7 niveis (agora a cada 40 rupias), monstros sombrios com o dobro de vida e, no fim, o vilao:
@@ -422,6 +424,7 @@ function buildSprites() {
   const hov = {}; if (eqHat === 1) hov.H = '#9650cd'; if (eqTunic === 1) hov.Q = '#467deb';      // equipado: gorro roxo / blusa azul
   if (eqTunic === 2) { hov.Q = '#be233c'; hov.J = '#966437'; hov.Z = '#823cbe'; }      // bau: manto vermelho, calca marrom, sapatos roxos
   if (eqHat >= 3) hov.H = OUTSETS[eqHat - 3].hat;      // conjuntos novos: gorro, blusa, calca e sapatos
+  if (eqHat === 11) { hov.S = '#cec6d6'; hov.V = '#363648'; }      // conjunto sombra: rosto palido e cabelo escuro como o Link Sombrio
   if (eqTunic >= 3) { const o = OUTSETS[eqTunic - 3]; hov.Q = o.tunic; hov.J = o.pants; hov.Z = o.shoes; }
   { const hb = hov.H || '#3aa53e'; hov.i = shadeHex(hb, 0.4); hov.n = shadeHex(hb, -0.4); }
   if (eqTunic >= 3) hov.b = setBelt(eqTunic - 3);      // faixa da blusa: tom mais escuro (noite: amarela)
@@ -607,7 +610,9 @@ const hatDetail = (s, i) => {      // i = brilho, n = sombra (como no icone do i
   return a.join('');
 };
 const heroRows = (rows) => {
-  const out = rows.map((r, i) => { let s = r.replace(/Y/g, 'V').replace(/G/g, i < 9 ? (eqHat === 2 ? 'V' : 'H') : 'Q'); if (eqHat === 8 && i >= 1 && i <= 3) s = spotRow(s, i === 1 ? [6] : i === 2 ? [4, 8] : [3, 6, 10], 'H'); if (eqHat !== 2 && i >= 1 && i <= 3) s = hatDetail(s, i); if (eqTunic >= 3 && i === 13) s = s.replace(/B/g, 'b'); if (eqTunic === 8 && i >= 10 && i <= 12) s = spotRow(s, i === 10 ? [5, 9] : i === 11 ? [4, 7, 10] : [5, 9], 'Q'); if (eqHat === 2 && (i === 4 || i === 5) && s.startsWith('KV')) s = '.K' + s.slice(2); if (eqTunic === 2) { if (i === 9) s = s.replace(/Q/g, 'F'); else if (i === 13) s = s.replace(/B/g, 'C'); else if (i === 14) s = s.replace(/W/g, 'J'); else if (i === 15) s = s.replace(/B/g, 'Z'); } else if (eqTunic >= 3) { if (i === 14) s = s.replace(/W/g, 'J'); else if (i === 15) s = s.replace(/B/g, 'Z'); } return s; });
+  const out = rows.map((r, i) => { let s = r.replace(/Y/g, 'V').replace(/G/g, i < 9 ? (eqHat === 2 ? 'V' : 'H') : 'Q'); if ((eqHat === 8 || eqHat === 10) && i >= 1 && i <= 3) s = spotRow(s, i === 1 ? [6] : i === 2 ? [4, 8] : [3, 6, 10], 'H'); if (eqHat !== 2 && i >= 1 && i <= 3) s = hatDetail(s, i); if (eqTunic >= 3 && i === 13) s = s.replace(/B/g, 'b'); if ((eqTunic === 8 || eqTunic === 10) && i >= 10 && i <= 12) s = spotRow(s, i === 10 ? [5, 9] : i === 11 ? [4, 7, 10] : [5, 9], 'Q'); if (eqHat === 2 && (i === 4 || i === 5) && s.startsWith('KV')) s = '.K' + s.slice(2); if (eqTunic === 2) { if (i === 9) s = s.replace(/Q/g, 'F'); else if (i === 13) s = s.replace(/B/g, 'C'); else if (i === 14) s = s.replace(/W/g, 'J'); else if (i === 15) s = s.replace(/B/g, 'Z'); } else if (eqTunic >= 3) { if (i === 14) s = s.replace(/W/g, 'J'); else if (i === 15) s = s.replace(/B/g, 'Z'); } return s; });
+  const ctr = (t) => { const w = rows[0].length, pad = Math.max(0, Math.floor((w - 14) / 2)); return ('.'.repeat(pad) + t).padEnd(w, '.').slice(0, w); };      // centra o desenho de 14 na largura da linha 0
+  if (eqHat === 9) return [ctr('........KNNK..'), ctr('.....KBBKNNK..'), ctr('.....KBBK.....'), ...out];      // gorro maca: cabinho (talo marrom e folha verde) em cima
   return eqHat === 2 ? ['....C.CC.C....', '....CCCCCC....', '....CRCCRC....', ...out] : out;      // coroa sobre o gorro
 };
 const tunicColor = () => (eqTunic >= 3 ? OUTSETS[eqTunic - 3].tunic : eqTunic === 2 ? '#be233c' : (eqTunic === 1 ? '#467deb' : '#3aa53e'));
@@ -1903,9 +1908,43 @@ function drawSword(handX, handY, aDeg, f) {
   if (eqSword >= 2) { drawSpecialSword(handX, handY, dx, dy, px, py); return; }      // marreta / espada de chamas
   drawPixelatedSword(handX, handY, dx, dy, px, py, S, 11);      // espada comum / Mestre pixelada (mesmo desenho de antes, em quadradinhos)
 }
-const APPLE_SHIELD = ['...KT.L.', '.KKKTKLK', 'KRRRRRRK', 'KRFFFFRK', 'KRFBBFRK', 'KRFBBFRK', 'KRFFFFRK', '.KRFFRK.', '..KRRK..', '...KK...'];
-const APPLE_COL = { K: '#1c1624', R: '#c8222c', F: '#faecbe', B: '#6e3c1e', T: '#785028', L: '#46a03c' };
-function drawApplePix(x0, y0, k) { for (let r = 0; r < APPLE_SHIELD.length; r++) for (let c = 0; c < APPLE_SHIELD[r].length; c++) { const col = APPLE_COL[APPLE_SHIELD[r][c]]; if (col) rect(col, x0 + c * k - 0.3, y0 + r * k - 0.3, k + 0.6, k + 0.6); } }      // escudo de maca cortada em pixels (8 x 10)
+// ESCUDO DE MACA CORTADA: grade de 11 x 14 quadradinhos (8% maiores que na versao de 12 x 15, e mais simples): casca vermelha com um brilho, polpa creme, 2 sementes, talo e folha. A forma (dois lobos com covinha em cima) e gerada por codigo (igual ao desktop).
+const APPLE_SHIELD = (() => {
+  const W = 11, H = 14, ins = [], dep = [];
+  for (let y = 0; y < H; y++) {
+    ins.push([]); dep.push([]);
+    for (let x = 0; x < W; x++) {
+      const px = x + 0.5, py = y + 0.5, ax = (px - 3.7) / 3.6, ay = (py - 8.6) / 5.0, bx = (px - 7.3) / 3.6, by = (py - 8.6) / 5.0;
+      const body = (ax * ax + ay * ay <= 1) || (bx * bx + by * by <= 1), dimple = (px - 5.5) * (px - 5.5) + (py - 4.0) * (py - 4.0) < 1.4 * 1.4;
+      ins[y].push(body && !dimple && y >= 3); dep[y].push(ins[y][x] ? 99 : -1);
+    }
+  }
+  const d4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  for (let pass = 0; pass < 4; pass++) for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (!ins[y][x] || dep[y][x] !== 99) continue;
+    let edge = y === 0 || x === 0 || y === H - 1 || x === W - 1, best = 99;
+    for (const [ddx, ddy] of d4) { const nx = x + ddx, ny = y + ddy; if (nx < 0 || ny < 0 || nx >= W || ny >= H || !ins[ny][nx]) edge = true; else if (dep[ny][nx] < 99) best = Math.min(best, dep[ny][nx] + 1); }
+    if (edge) dep[y][x] = 0; else if (best < 99) dep[y][x] = best;
+  }
+  const g = []; for (let y = 0; y < H; y++) { g.push([]); for (let x = 0; x < W; x++) g[y].push('.'); }
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (!ins[y][x]) continue; const d = dep[y][x];
+    g[y][x] = d === 0 ? 'K' : (d === 1 ? ((x <= 3 && y >= 5 && y <= 7) ? 'h' : 'R') : 'F');
+  }
+  g[8][4] = 'B'; g[9][4] = 'B'; g[8][6] = 'B'; g[9][6] = 'B';
+  const top = ['....KK.KKK.', '....TTKLLLK', '....TT.KKK.'];
+  for (let y = 0; y < top.length; y++) for (let x = 0; x < W; x++) if (top[y][x] !== '.') g[y][x] = top[y][x];
+  return g.map((r) => r.join(''));
+})();
+const APPLE_KEYS = 'KRrhFfcBbTLl', APPLE_COLS = ['#1c1624', '#c8222c', '#961622', '#f27878', '#faecbe', '#e2ce94', '#d6be80', '#6e3c1e', '#462614', '#785028', '#46a03c', '#88d664'];
+function drawApplePix(x0, y0, k) {      // mesmo tamanho de antes (8k x 10k), com quadradinhos menores (2/3)
+  const cell = k * 8 / 11;
+  for (let r = 0; r < APPLE_SHIELD.length; r++) for (let c = 0; c < APPLE_SHIELD[r].length; c++) {
+    const ci = APPLE_KEYS.indexOf(APPLE_SHIELD[r][c]); if (ci < 0) continue;
+    const xa = Math.round(x0 + c * cell), xb = Math.round(x0 + (c + 1) * cell), ya = Math.round(y0 + r * cell), yb = Math.round(y0 + (r + 1) * cell);
+    rect(APPLE_COLS[ci], xa, ya, Math.max(1, xb - xa), Math.max(1, yb - ya));
+  }
+}
 function drawShieldBody(sx, sy) {
   if (eqSword === 2) return;      // a marreta usa as duas maos: sem escudo
   if (eqShield === 3) { drawApplePix(sx - S, sy - S, S); return; }
@@ -2117,8 +2156,8 @@ $('goPlay').addEventListener('click', () => { $('intro').hidden = true; goFullsc
 $('goAuto').addEventListener('click', () => { $('intro').hidden = true; goFullscreen(); });
 /* ---------- MENU DE PAUSA (heroi de frente com franja no olho; sem atalhos de teste nem "dar 5 macas"; Espaco; clicar na maca = comer; Roupas: heroi sem armas): abas Armas / Roupas / Comida e o heroi ampliado ---------- */
 let invOn = false, invTab = -1, invBow = false, invEatT = 0, previewBare = false, invMsg = '', eatRaw = false, autoEatPh = 0, autoEatTree = null;      // invBow: o heroi do exemplo segura o arco (clicou num arco) ou espada e escudo (clicou neles)
-const INV_NAMES = [['Arco de madeira', 'Arco de metal', 'Arco de cristal'], ['Espada comum', 'Espada Mestre', 'Marreta trovão', 'Espada de chamas', 'Espada cogumelo'], ['Escudo azul', 'Escudo vermelho', 'Escudo do rei', 'Escudo maçã'], ['Gorro verde', 'Gorro roxo', 'Coroa de ouro', 'Gorro areia', 'Gorro gelo', 'Gorro fogo', 'Gorro noite', 'Gorro mar', 'Gorro cogumelo', 'Gorro maçã'], ['Túnica verde', 'Blusa azul', 'Roupa de rei', 'Blusa areia', 'Blusa gelo', 'Blusa fogo', 'Blusa noite', 'Blusa mar', 'Blusa cogumelo', 'Blusa maçã'], ['Fadinha', 'Fadinha rosa', 'Fadinha folha', 'Fadinha estrela']];
-const INV_DESC = [['O arco de sempre.', 'Flechas com o dobro de dano.', 'Atira 2 flechas de cristal, uma logo depois da outra.'], ['A espada de sempre: 150 de dano.', 'Espada Mestre: o dobro de dano, 300 de dano.', 'Usa as DUAS mãos (sem escudo): golpe lento, área grande, 600 de dano.', 'Lâmina de fogo: golpes muito rápidos, 450 de dano.', 'Um cogumelo gigante de maça: acerta em área e solta esporos, 700 de dano (vem com o conjunto cogumelo).'], ['Escudo comum.', 'Escudo vermelho do herói.', 'Escudo circular do tesouro do rei.', 'Escudo de maçã cortada (vem com o conjunto maçã).'], ['O gorro de sempre.', 'Gorro roxo da evolução.', 'Coroa de ouro do tesouro do rei.', 'Conjunto areia: gorro, blusa, calça e sapatos.', 'Conjunto gelo: gorro, blusa, calça e sapatos.', 'Conjunto fogo: gorro, blusa, calça e sapatos.', 'Conjunto noite: gorro, blusa, calça e sapatos.', 'Conjunto mar: gorro, blusa, calça e sapatos.', 'Conjunto cogumelo: gorro com bolinhas, blusa de cogumelo e calça cor do talo.', 'Conjunto maçã: gorro, blusa, calça e sapatos, mais o escudo de maçã cortada.'], ['A túnica de sempre.', 'Blusa azul da evolução.', 'Manto vermelho, calça marrom e sapatos roxos.', 'Blusa, calça e sapatos do conjunto areia.', 'Blusa, calça e sapatos do conjunto gelo.', 'Blusa, calça e sapatos do conjunto fogo.', 'Blusa, calça e sapatos do conjunto noite.', 'Blusa, calça e sapatos do conjunto mar.', 'Blusa de cogumelo com bolinhas e calça cor do talo (conjunto cogumelo).', 'Blusa, calça e sapatos do conjunto maçã.'], ['A fadinha ajudante.', 'Corpo rosa e asas azul escuro.']];
+const INV_NAMES = [['Arco de madeira', 'Arco de metal', 'Arco de cristal'], ['Espada comum', 'Espada Mestre', 'Marreta trovão', 'Espada de chamas', 'Espada cogumelo'], ['Escudo azul', 'Escudo vermelho', 'Escudo do rei', 'Escudo maçã'], ['Gorro verde', 'Gorro roxo', 'Coroa de ouro', 'Gorro areia', 'Gorro gelo', 'Gorro fogo', 'Gorro noite', 'Gorro mar', 'Gorro cogumelo', 'Gorro maçã', 'Gorro doce', 'Gorro sombra'], ['Túnica verde', 'Blusa azul', 'Roupa de rei', 'Blusa areia', 'Blusa gelo', 'Blusa fogo', 'Blusa noite', 'Blusa mar', 'Blusa cogumelo', 'Blusa maçã', 'Blusa doce', 'Blusa sombra'], ['Fadinha', 'Fadinha rosa', 'Fadinha folha', 'Fadinha estrela']];
+const INV_DESC = [['O arco de sempre.', 'Flechas com o dobro de dano.', 'Atira 2 flechas de cristal, uma logo depois da outra.'], ['A espada de sempre: 150 de dano.', 'Espada Mestre: o dobro de dano, 300 de dano.', 'Usa as DUAS mãos (sem escudo): golpe lento, área grande, 600 de dano.', 'Lâmina de fogo: golpes muito rápidos, 450 de dano.', 'Um cogumelo gigante de maça: acerta em área e solta esporos, 700 de dano (vem com o conjunto cogumelo).'], ['Escudo comum.', 'Escudo vermelho do herói.', 'Escudo circular do tesouro do rei.', 'Escudo de maçã cortada (vem com o conjunto maçã).'], ['O gorro de sempre.', 'Gorro roxo da evolução.', 'Coroa de ouro do tesouro do rei.', 'Conjunto areia: gorro, blusa, calça e sapatos.', 'Conjunto gelo: gorro, blusa, calça e sapatos.', 'Conjunto fogo: gorro, blusa, calça e sapatos.', 'Conjunto noite: gorro, blusa, calça e sapatos.', 'Conjunto mar: gorro, blusa, calça e sapatos.', 'Conjunto cogumelo: gorro com bolinhas, blusa de cogumelo e calça cor do talo.', 'Conjunto maçã: gorro, blusa, calça e sapatos, mais o escudo de maçã cortada.', 'Conjunto doce: gorro, blusa, calça e sapatos fofos, rosinha com bolinhas.', 'Conjunto sombra: gorro, blusa, calça e sapatos escuros, no estilo do Link Sombrio.'], ['A túnica de sempre.', 'Blusa azul da evolução.', 'Manto vermelho, calça marrom e sapatos roxos.', 'Blusa, calça e sapatos do conjunto areia.', 'Blusa, calça e sapatos do conjunto gelo.', 'Blusa, calça e sapatos do conjunto fogo.', 'Blusa, calça e sapatos do conjunto noite.', 'Blusa, calça e sapatos do conjunto mar.', 'Blusa de cogumelo com bolinhas e calça cor do talo (conjunto cogumelo).', 'Blusa, calça e sapatos do conjunto maçã.', 'Blusa, calça e sapatos do conjunto doce.', 'Blusa, calça e sapatos do conjunto sombra.'], ['A fadinha ajudante.', 'Corpo rosa e asas azul escuro.']];
 const withCtx = (c, fn) => { const old = ctx; ctx = c; try { fn(); } finally { ctx = old; } };
 function iconShape(g, pts, fill, u) { g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.closePath(); g.fillStyle = fill; g.fill(); g.lineWidth = Math.max(1, u * 0.7); g.strokeStyle = '#1c1624'; g.lineJoin = 'round'; g.stroke(); }
 function drawIcon(cat, id, cx, cy, u) {      // desenha o icone no 'ctx' atual
