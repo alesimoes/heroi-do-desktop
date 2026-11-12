@@ -1,7 +1,7 @@
 ﻿# Changelog (resumo)
 
 ## 12/11/2026 — Link de lado: escudo e espada
-- O **escudo** foi para trás (2 quadradinhos), deixando o tronco à mostra; a **espada** parada fica mais à frente e inclinada, longe do rosto.
+- O **escudo** foi para trás (2 quadradinhos), deixando o tronco à mostra; a **espada** parada fica **afastada do corpo** (contornos separados) e inclinada, longe do rosto.
 
 ## 12/11/2026 — Moedas voam para o Link no poder
 - Durante o **surto de poder** as moedas (e itens) que os monstros soltam **voam direto para o Link**.
@@ -358,3 +358,4 @@
 - (10/11/2026) Cogumelo-maça: contorno escuro continuo entre o chapéu e o cabo.
 
 - (10/11/2026) 7º conjunto: **maçã** (gorro e blusa vermelho-maçã, calça cor de polpa, sapatos verde-folha) + **escudo de maçã cortada**. Libera com +3000 monstros depois do cogumelo (19.000 no contador dos conjuntos). Web: restaurado o ícone da marreta (hammerItem), que tinha sido apagado por engano ao incluir o cogumelo.
+

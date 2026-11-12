@@ -2140,7 +2140,7 @@ function drawHero() {
   }
   if (hero.bowing) { if (!offBow) drawBow(f, bob); return; }
   if (offSword) return;      // espada desequipada
-  const handX = hero.x + f * 6 * S, handY = hero.y - bob - 4 * S, prog = hero.attacking ? Math.min(1, hero.atkT / swEnd()) : 0;
+  const handX = hero.x + f * 9 * S, handY = hero.y - bob - 4 * S, prog = hero.attacking ? Math.min(1, hero.atkT / swEnd()) : 0;
   const ang = hero.attacking ? -110 + 170 * (1 - Math.pow(1 - prog, 2)) : (hero.walking ? -58 : -62);
   if (hero.attacking && prog > 0.2 && prog < 0.95) { ctx.fillStyle = '#ebf5ff'; for (let a = -110; a < ang; a += 10) { const r2 = a * Math.PI / 180; ctx.fillRect(Math.round(handX + f * Math.cos(r2) * 14 * S * 1.05 - S), Math.round(handY + Math.sin(r2) * 14 * S * 1.05 - S), 2 * S, 2 * S); } }
   drawSword(handX, handY, ang, f);
