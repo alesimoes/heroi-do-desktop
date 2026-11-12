@@ -993,7 +993,9 @@ function spawn(type) {
 function nearestMelee() { let b = null, bd = 1e18; for (const e of enemies) { if (e.type === 1) continue; const d = (e.x - hero.x) ** 2 + (e.y - hero.y) ** 2; if (d < bd) { bd = d; b = e; } } return b; }
 function nearestItem() { let b = null, bd = 1e18; for (const it of items) { const d = (it.x - hero.x) ** 2 + (it.y - hero.y) ** 2; if (d < bd) { bd = d; b = it; } } return b; }
 
+const swordUse = () => fairyOn() || !offSword, bowUse = () => fairyOn() || !offBow;      // espada/arco guardados nao atacam: sem uma, usa a outra
 function startAttack(practice) {
+  if (!practice && !swordUse()) return;
   hero.attacking = true; hero.atkT = 0; hero.hitDone = false;
   if (rnd() < 0.45) say(['Hyaa!', 'Hah!', 'Yah!', 'Toma!'][Math.floor(rnd() * 4)]);
 }
@@ -1238,6 +1240,7 @@ function tryDodge(dt) {
   return false;
 }
 function aimAndShoot(e, dt) {
+  if (!bowUse()) return;
   hero.bowing = true;
   const d = NEAR(e.x, e.y, hero.x, hero.y), lead = d / (210 * S);
   const tx = e.x + e.vx * lead, ty = e.y - (e.type === 1 ? 9 : 4) * S + e.vy * lead;
@@ -1313,7 +1316,7 @@ function autoControl(dt) {
   if (tryDodge(dt)) { if (autoEatPh === 2) autoEatAbort(); hero.bowT = 0; return; }
   if (autoEatApple(dt)) { hero.bowT = 0; return; }
   if (fairyOn() && fairyAutoControl(dt)) return;      // Link-fada: mata como a fadinha
-  if (near && near.type !== 1 && nd < 110 * S) {
+  if (near && (near.type !== 1 || !bowUse()) && swordUse() && nd < 110 * S) {
     const it0 = nearestItem(); if (it0 && nd >= TUNE.item * S) { moveHero(it0.x, it0.y, 56 * S, dt); hero.bowT = 0; return; }
     if (Math.abs(near.x - hero.x) > 2) hero.face = near.x >= hero.x ? 1 : -1;
     if (nd < TUNE.atk * S && hero.atkCool <= 0) startAttack(false); else if (nd > (TUNE.atk - 3) * S) moveHero(near.x, near.y, 52 * S, dt);
@@ -1321,7 +1324,7 @@ function autoControl(dt) {
   }
   if (near && nd < (near.type === 1 && !lowHp ? TUNE.bat * S : safe)) {
     const cornered = hero.x < 10 * S || hero.x > W - 10 * S || hero.y < 28 * S || hero.y > H - 4 * S;
-    const melee = hero.atkCool <= 0 && nd < 15 * S && ((crowd <= 1 && !lowHp) || (cornered && nd < 13 * S));
+    const melee = swordUse() && hero.atkCool <= 0 && nd < 15 * S && ((crowd <= 1 && !lowHp) || (cornered && nd < 13 * S));
     if (melee) { hero.face = near.x >= hero.x ? 1 : -1; startAttack(false); return; }
     retreat(dt); aimAndShoot(near, dt); return;
   }
@@ -1396,7 +1399,8 @@ function checkRupeeLevel() {
 }
 function playerControl(dt) {
   hero.bowCool -= dt;
-  let cx = mx, cy = my; const k1 = isDown(1), k2 = isDown(2), k3 = isDown(3);
+  let cx = mx, cy = my; let k1 = isDown(1), k2 = isDown(2); const k3 = isDown(3);
+  { const a1 = k1, a2 = k2; if (!swordUse()) k1 = false; if (!bowUse()) k2 = false; if (a1 && !swordUse() && bowUse()) k2 = true; if (a2 && !bowUse() && swordUse()) k1 = true; }
   if (touchMode) {   // celular: mira e espada seguem a direcao do direcional; sem cursor
     const ax = Math.abs(aimX) < 0.01 && Math.abs(aimY) < 0.01 ? hero.face : aimX, ay = Math.abs(aimX) < 0.01 && Math.abs(aimY) < 0.01 ? 0 : aimY;
     cx = hero.x + ax * 40 * S; cy = hero.y - 8 * S + ay * 40 * S;

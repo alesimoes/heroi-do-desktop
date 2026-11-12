@@ -3762,6 +3762,7 @@ namespace HeroiPet
             float cx = cp.X - Left, cy = cp.Y - Top;
             bool mouse = IsDown(0x01) && !IsDown(0x11);     // com Ctrl apertado o mouse e do Windows, o Link nao anda
             bool k1 = IsDown(0x31) || IsDown(0x61), k2 = IsDown(0x32) || IsDown(0x62), k3 = IsDown(0x33) || IsDown(0x63);
+            { bool a1 = k1, a2 = k2; if (!SwordUse) k1 = false; if (!BowUse) k2 = false; if (a1 && !SwordUse && BowUse) k2 = true; if (a2 && !BowUse && SwordUse) k1 = true; }      // sem uma das armas, a tecla usa a outra
             if (playEatT > 0)                        // comendo uma maca assada: recupera 2 coracoes
             {
                 playEatT += dt;
@@ -5153,6 +5154,7 @@ namespace HeroiPet
 
         void AimAndShoot(Enemy e, float dt)
         {
+            if (!BowUse) return;
             bowing = true;
             float d = ED(e), lead = d / (210f * S);
             float tx = e.X + e.VX * lead, ty = e.Y - (e.Type == 1 ? 9 : 4) * S + e.VY * lead;
@@ -5209,7 +5211,7 @@ namespace HeroiPet
             if (FairyOn && FairyAutoControl(dt)) return;      // Link-fada: mata como a fadinha
 
             // octoroks e slimes: luta de espada (aproxima e golpeia), mas so se nao houver item para pegar primeiro
-            if (near != null && near.Type != 1 && nd < 110 * S)
+            if (near != null && (near.Type != 1 || !BowUse) && SwordUse && nd < 110 * S)
             {
                 Item it0 = NearestItem();
                 if (it0 != null && nd >= TuneItem * S) { MoveHero(it0.X, it0.Y, 56 * S, dt); bowT = 0; return; }
@@ -5223,7 +5225,7 @@ namespace HeroiPet
             if (near != null && nd < (near.Type == 1 && !lowHp ? TuneBat * S : safe))
             {
                 bool cornered = hx < 10 * S || hx > W - 10 * S || hy < 28 * S || hy > H - 4 * S;
-                bool melee = atkCool <= 0 && nd < 15 * S && ((crowd <= 1 && !lowHp) || (cornered && nd < 13 * S));
+                bool melee = SwordUse && atkCool <= 0 && nd < 15 * S && ((crowd <= 1 && !lowHp) || (cornered && nd < 13 * S));
                 if (melee)
                 {
                     hface = near.X >= hx ? 1 : -1;
@@ -5307,8 +5309,11 @@ namespace HeroiPet
             return true;
         }
 
+        bool SwordUse { get { return FairyOn || !offSword; } }      // espada/arco guardados (desequipados) nao atacam: sem uma, usa a outra
+        bool BowUse { get { return FairyOn || !offBow; } }
         void StartAttack(bool practice)
         {
+            if (!practice && !SwordUse) return;
             attacking = true; atkT = 0; hitDone = false; swingPractice = practice;
             if (rnd.Next(100) < 45) Say(new string[] { "Hyaa!", "Hah!", "Yah!", "Toma!" }[rnd.Next(4)]);
         }

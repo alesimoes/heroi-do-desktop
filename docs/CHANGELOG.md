@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 12/11/2026 — Sem arma, sem ataque
+- Com a espada e o arco guardados (desequipados) o Link **não ataca**, no jogável e no automático. Sem **uma** das armas ele **usa a outra**: sem espada, a tecla 1 atira com o arco (e o automático só atira); sem arco, a tecla 2 golpeia com a espada (e o automático luta só de espada). O conjunto de fada não é afetado.
+
 ## 12/11/2026 — Giro do Link-fada: mais brilhos, mais alcance, mais rápido
 - Estrelinhas azuis **mais espalhadas e em maior quantidade**; ataque **2x o alcance** e **mata os monstros ao redor** (dentro do alcance, mesmo sem acertá-los; chefões só levam o dano normal); ataque **mais rápido** (0,36 s).
 
