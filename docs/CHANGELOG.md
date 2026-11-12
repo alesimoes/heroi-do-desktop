@@ -1,5 +1,10 @@
 # Changelog (resumo)
 
+## 12/11/2026 — Link-fada luta como fada
+- Com o conjunto doce (tiara + blusa) **não usa arma, escudo nem arco**: **as asas servem de escudo** e protegem de pedras e flechas de qualquer lado (bola de fogo continua passando).
+- **Modo automático:** mata os monstros como a fadinha: voa até o mais próximo (menos chefões), dá voltas rápidas em volta da cabeça dele por 0,7 s e o derrota; fica invulnerável enquanto faz isso e pega itens entre um alvo e outro.
+- **Modo jogo:** tecla 1 / ataque = **gira uma vez em torno de si**, soltando **brilhinhos amarelos meio transparentes**, com o **mesmo alcance e dano da espada de fogo** (450). Tecla 2 = em vez de flecha, **bolinha amarela brilhante** (sem arco).
+
 ## 12/11/2026 — Armas sombrias, conjunto doce de fada e Link-fada
 - **Armas sombrias** (vêm com o conjunto sombra e já saem equipadas ao liberar): **Espada sombria** (lâmina escura com guarda vermelha, **800 de dano**), **Escudo sombrio** (escuro com emblema prateado) e **Arco sombrio** (escuro com empunhadura vermelha). Aparecem no inventário, em Armas.
 - **Conjunto doce refeito:** agora tem **tiara dourada com joia lilás** (no lugar do gorro), **blusa um quadradinho maior com o meio lilás**, **faixa azul bebê**, **calça rosa** e **sapatos vermelhos**, sem as bolinhas brancas.
