@@ -197,7 +197,7 @@ namespace HeroiPet
                 if (Crown && (i == 4 || i == 5) && s.StartsWith("KV")) s = ".K" + s.Substring(2);      // sem gorro: tira a pontinha do canto esquerdo da cabeca
                 if (MushHat && i >= 1 && i <= 3) s = Spots(s, i == 1 ? new int[] { 6 } : (i == 2 ? new int[] { 4, 8 } : new int[] { 3, 6, 10 }), 'H');
                 if (!Crown && i >= 1 && i <= 3) s = HatDetail(s, i);      // brilho e sombra do gorro, como no icone do inventario
-                if (CuteShirt && i >= 10 && i <= 13) s = CuteTunic(s, i);      // blusa do conjunto fada: 1 quadradinho maior atras e centro lilas
+                if (CuteShirt && i >= 10 && i <= 13 && (rows == HeroA || rows == HeroB)) s = CuteTunic(s, i);      // so de lado: de frente a blusa fica simetrica      // blusa do conjunto fada: 1 quadradinho maior atras e centro lilas
                 if (Legs && i == 13) s = s.Replace('B', 'b');      // faixa marrom da blusa vira tom mais escuro da blusa (amarela na noite); cor via hov[b]
                 if (MushShirt && i >= 10 && i <= 12) s = Spots(s, i == 10 ? new int[] { 5, 9 } : (i == 11 ? new int[] { 4, 7, 10 } : new int[] { 5, 9 }), 'Q');
                 if (Legs && !Robe) { if (i == 14) s = s.Replace('W', 'J'); else if (i == 15) s = s.Replace('B', 'Z'); }
