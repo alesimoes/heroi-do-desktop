@@ -1,7 +1,7 @@
 ﻿# Changelog (resumo)
 
 ## 12/11/2026 — Link de lado: barriga menos saliente
-- O tronco do Link de lado perdeu 1 quadradinho na frente (barriga), ficando alinhado com as pernas. As costas (tronco) ficam alinhadas com a perna de trás.
+- O tronco do Link de lado perdeu 1 quadradinho na frente (barriga), ficando alinhado com as pernas. As costas (tronco) ficam alinhadas com a perna de trás. No quadro de andar com as pernas juntas, as pernas agora têm a mesma largura do tronco (antes ficavam 1 quadradinho para dentro dos dois lados).
 
 ## 12/11/2026 — Moedas voam para o Link no poder
 - Durante o **surto de poder** as moedas (e itens) que os monstros soltam **voam direto para o Link**.

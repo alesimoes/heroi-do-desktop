@@ -410,8 +410,8 @@ namespace HeroiPet
             "...KGGGGGGGK..",
             "...KGGGGGGSK..",
             "...KBBBBBBBK..",
-            "....KWWKWWK...",
-            "....KBBKBBK..."
+            "...KWWKKWWWK..",
+            "...KBBKKBBBK.."
         };
 
         // ---------- Heroi dormindo: o desenho de frente (olhos fechados, maos na barriga)
