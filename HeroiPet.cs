@@ -6161,7 +6161,7 @@ namespace HeroiPet
             if (offSword) return;      // espada desequipada
 
             // espada
-            float handX = hx + f * 9 * S, handY = hy - bob - 4 * S;
+            float handX = hx + f * 6 * S, handY = hy - bob - 4 * S;
             float ang;
             float prog = attacking ? Math.Min(1f, atkT / SwEnd) : 0;
             if (attacking) ang = -110f + 170f * (float)(1 - Math.Pow(1 - prog, 2));
