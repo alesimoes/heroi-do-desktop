@@ -4288,7 +4288,7 @@ namespace HeroiPet
                 for (int side = 0; side < (front ? 2 : 1); side++)
                 {
                     float dir = front ? (side == 0 ? -1f : 1f) : -face;      // de lado fica atras do herói
-                    float ox = x + dir * (front ? 6 : 4) * S, oy = y;      // asas nas costas (altura do tronco), nao na cabeca
+                    float ox = x + dir * (front ? 4 : 4) * S, oy = y;      // asas nas costas (altura do tronco), nao na cabeca
                     for (int r = 0; r < rowsN; r++) for (int c = 0; c < 6; c++)
                     {
                         char ch = w1[r][c]; if (ch == '.') continue; b.Color = ch == 'K' ? k : (ch == 'W' ? wc : bc);
