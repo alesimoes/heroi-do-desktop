@@ -976,7 +976,7 @@ namespace HeroiPet
         public float TX, TY, RT; public bool Moving; public float Scale = 1f, SmokeT, GrowT, SparkT, ShockT = 8f;      // dragao: destino, tempo para trocar de destino, esta andando
     }
     class Rock { public float X, Y, VX, VY, Life; public bool Fire, Homing, Arrow, Orb, Ember; }      // Ember: bolinha de fogo da gelatina de fogo (fase 3): igual a pedra de octorok (explode em 3 s)      // Orb: esfera sombria do Feiticeiro      // Arrow: flecha dos bokoblins a cavalo
-    class Arrow { public float X, Y, VX, VY; public bool Power, Crystal; }
+    class Arrow { public float X, Y, VX, VY; public bool Power, Crystal, Glow; }
     class Tree { public float X, Y; public bool Stone; public int Variant; public bool[] Has = new bool[5]; public float[] Regrow = new float[5]; }      // Stone: pedra da Fase 2 (no lugar da macieira)
     class AllyMark { }
     class Spark { public float X, Y, VX, VY, T, Life; public int Col; }      // estrelinha roxa da explosao do Feiticeiro
@@ -1136,6 +1136,18 @@ namespace HeroiPet
                 {
                     Color sc = Color.FromArgb((int)r[3], 90, 175, 255);      // brilhinhos azuis
                     using (SolidBrush sb = new SolidBrush(sc)) gfx.FillRectangle(sb, r[0], r[1], r[2], r[2]);
+                }
+                else if (r.Length == 8)      // Link-fada: r[4]==1 -> brilho redondo amarelo (raio r[2]); senao quadradinho amarelo (lado r[2]); r[3] = opacidade
+                {
+                    if (r[4] == 1f)
+                    {
+                        using (GraphicsPath gp = new GraphicsPath())
+                        {
+                            gp.AddEllipse(r[0] - r[2], r[1] - r[2], 2 * r[2], 2 * r[2]);
+                            using (PathGradientBrush pg = new PathGradientBrush(gp)) { pg.CenterColor = Color.FromArgb((int)r[3], 255, 235, 90); pg.SurroundColors = new Color[] { Color.FromArgb(0, 255, 210, 40) }; gfx.FillPath(pg, gp); }
+                        }
+                    }
+                    else using (SolidBrush yb = new SolidBrush(Color.FromArgb((int)r[3], 255, 226, 70))) gfx.FillRectangle(yb, r[0] - r[2] / 2f, r[1] - r[2] / 2f, r[2], r[2]);
                 }
                 else if (r.Length > 4)      // onda de choque do dragao: anel amarelo transparente
                 {
@@ -1570,13 +1582,14 @@ namespace HeroiPet
             ValidateEquip(); SaveEquip(); newItemUntil = time + 5f; Say("Arma nova: " + WpnName[i] + "!");
             for (int k = 0; k < 10; k++) puffs.Add(new Puff { Kind = k % 2, X = hx + ((float)rnd.NextDouble() - 0.5f) * 20 * S, Y = hy - (float)rnd.NextDouble() * 18 * S });
         }
-        float SwHit { get { return eqSword == 2 ? 0.30f : (eqSword == 3 ? 0.07f : (eqSword == 4 ? 0.14f : 0.11f)); } }      // marreta: golpe lento e pesado; espada de chamas: rapida
-        float SwEnd { get { return eqSword == 2 ? 0.55f : (eqSword == 3 ? 0.20f : (eqSword == 4 ? 0.36f : 0.32f)); } }
-        float SwCool { get { return eqSword == 2 ? 0.40f : (eqSword == 3 ? 0.08f : (eqSword == 4 ? 0.24f : 0.22f)); } }
-        int SwordDamage() { return eqSword == 1 ? 300 : (eqSword == 2 ? 600 : (eqSword == 3 ? 450 : (eqSword == 4 ? 700 : (eqSword == 5 ? 800 : 150)))); }
+        float SwHit { get { return FairyOn ? 0.22f : eqSword == 2 ? 0.30f : (eqSword == 3 ? 0.07f : (eqSword == 4 ? 0.14f : 0.11f)); } }      // marreta: golpe lento e pesado; espada de chamas: rapida
+        float SwEnd { get { return FairyOn ? 0.50f : eqSword == 2 ? 0.55f : (eqSword == 3 ? 0.20f : (eqSword == 4 ? 0.36f : 0.32f)); } }
+        float SwCool { get { return FairyOn ? 0.08f : eqSword == 2 ? 0.40f : (eqSword == 3 ? 0.08f : (eqSword == 4 ? 0.24f : 0.22f)); } }
+        int SwordDamage() { return FairyOn ? 450 : eqSword == 1 ? 300 : (eqSword == 2 ? 600 : (eqSword == 3 ? 450 : (eqSword == 4 ? 700 : (eqSword == 5 ? 800 : 150)))); }
         float crystalQ = -1f;      // arco de cristal: a 2a flecha sai logo depois da 1a, no mesmo rumo (uma seguida da outra)
         void FireArrows(float sx, float sy)
         {
+            if (FairyOn) { arrows.Add(new Arrow { X = sx, Y = sy, VX = aimX * 190 * S, VY = aimY * 190 * S, Glow = true }); return; }      // Link-fada: bolinha amarela brilhante no lugar da flecha
             if (eqBow == 2) { arrows.Add(new Arrow { X = sx, Y = sy, VX = aimX * 210 * S, VY = aimY * 210 * S, Crystal = true }); crystalQ = 0.09f; }
             else arrows.Add(new Arrow { X = sx, Y = sy, VX = aimX * 210 * S, VY = aimY * 210 * S });
         }
@@ -2065,6 +2078,7 @@ namespace HeroiPet
         {
             if (type == 2) { DrawShieldItem(g, cx, cy, u * 0.9f); return; }
             if (type == 3) { float k3 = u * 2.2f; DrawApplePix(g, cx - 4 * k3, cy - 5 * k3, k3); return; }
+            if (type == 4) { float k4 = u * 2.2f; DrawDarkShieldPix(g, cx - 4 * k4, cy - 5 * k4, k4); return; }      // escudo sombrio
             Color dark = Color.FromArgb(28, 22, 36), col = type == 4 ? Color.FromArgb(52, 46, 84) : (type == 1 ? Color.FromArgb(205, 50, 50) : Color.FromArgb(55, 95, 205));
             using (SolidBrush kb = new SolidBrush(dark)) using (SolidBrush b = new SolidBrush(col)) using (SolidBrush ye = new SolidBrush(type == 4 ? Color.FromArgb(204, 206, 224) : Color.FromArgb(245, 205, 70)))
             {      // mesmo formato do escudo do jogo: retangulo 6x8 com borda escura e quadradinho amarelo 2x3
@@ -2591,7 +2605,7 @@ namespace HeroiPet
                     Enemy en = enemies[k];
                     float dx = en.X - a.X, dy = (en.Y - (en.Type == 1 ? 9 * S : (en.Type == 5 ? 9 * S : (en.Type == 7 ? 16 * S * en.Scale : (en.Type == 3 ? 12 * S * DK * en.Scale : 4 * S))))) - a.Y;
                     float hitR = en.Type == 3 ? 14 * S * DK * en.Scale : (en.Type == 7 ? 22 * S * en.Scale : (en.Type == 5 ? 9 * S : 7 * S));
-                    if (dx * dx + dy * dy < hitR * hitR) { DamageEnemy(en, a.Power ? 9999999 : 50 * (eqBow >= 1 ? 2 : 1)); gone = true; }      // arco prateado (evolucao 1): o dobro de dano (flecha de poder nao muda)
+                    if (dx * dx + dy * dy < hitR * hitR) { DamageEnemy(en, a.Power ? 9999999 : (a.Glow ? 100 : 50 * (eqBow >= 1 ? 2 : 1))); gone = true; }      // arco prateado (evolucao 1): o dobro de dano (flecha de poder nao muda)
                 }
                 if (gone) arrows.RemoveAt(i);
             }
@@ -3141,6 +3155,57 @@ namespace HeroiPet
             string[] rows = new string[H]; for (int y = 0; y < H; y++) rows[y] = new string(g[y]);
             appleRows = rows; return rows;
         }
+        // ESCUDO SOMBRIO (conjunto sombra): escudo em "brasao" - topo reto e lados retos que afunilam em TRIANGULO ate uma ponta embaixo. Grade de 11 x 14 gerada por codigo
+        // (mesmo tamanho do escudo maca: 8k x 10k): contorno escuro, borda de aco arroxeada, corpo roxo escuro com sombra a direita e um losango prateado no centro.
+        static string[] darkShieldRows;
+        static string[] DarkShieldRows()
+        {
+            if (darkShieldRows != null) return darkShieldRows;
+            const int W = 11, H = 14; bool[,] ins = new bool[H, W]; int[,] dep = new int[H, W];
+            for (int y = 0; y < H; y++) for (int x = 0; x < W; x++)
+            {
+                float half = y <= 6 ? 5.2f : 5.2f * (13.6f - y) / 7f, dxp = Math.Abs(x + 0.5f - 5.5f);
+                ins[y, x] = dxp <= half && !(y == 0 && (x == 0 || x == W - 1));
+                dep[y, x] = ins[y, x] ? 99 : -1;
+            }
+            for (int pass = 0; pass < 3; pass++)
+                for (int y = 0; y < H; y++) for (int x = 0; x < W; x++)
+                {
+                    if (!ins[y, x] || dep[y, x] != 99) continue;
+                    bool edge = false; int best = 99; int[] ddx = { 1, -1, 0, 0, 1, -1, 1, -1 }, ddy = { 0, 0, 1, -1, 1, 1, -1, -1 };
+                    for (int d = 0; d < 8; d++) { int nx = x + ddx[d], ny = y + ddy[d]; if (nx < 0 || ny < 0 || nx >= W || ny >= H || !ins[ny, nx]) edge = true; else if (dep[ny, nx] < 99) best = Math.Min(best, dep[ny, nx] + 1); }
+                    if (edge) dep[y, x] = 0; else if (best < 99) dep[y, x] = best;
+                }
+            string[] rows = new string[H];
+            for (int y = 0; y < H; y++)
+            {
+                char[] c = new char[W];
+                for (int x = 0; x < W; x++)
+                {
+                    if (!ins[y, x]) { c[x] = '.'; continue; }
+                    int d = dep[y, x];
+                    c[x] = d == 0 ? 'K' : (d == 1 ? 'M' : (x >= 7 ? 'd' : 'D'));
+                    if (d >= 2 && Math.Abs(x - 5) + Math.Abs(y - 5) <= 2) c[x] = (x == 5 && y == 5) ? 'e' : 'E';      // losango prateado no centro
+                }
+                rows[y] = new string(c);
+            }
+            darkShieldRows = rows; return rows;
+        }
+        void DrawDarkShieldPix(Graphics g, float x0, float y0, float k)
+        {
+            SmoothingMode sm = g.SmoothingMode; g.SmoothingMode = SmoothingMode.None;
+            string[] rows = DarkShieldRows(); float cell = k * 8f / 11f;
+            Color[] cs = { Color.FromArgb(28, 22, 36), Color.FromArgb(138, 132, 178), Color.FromArgb(56, 48, 90), Color.FromArgb(38, 32, 66), Color.FromArgb(204, 206, 224), Color.FromArgb(246, 246, 255) };
+            const string keys = "KMDdEe";
+            using (SolidBrush b = new SolidBrush(Color.Black))
+                for (int r = 0; r < rows.Length; r++) for (int c = 0; c < rows[r].Length; c++)
+                {
+                    int ci = keys.IndexOf(rows[r][c]); if (ci < 0) continue;
+                    float xa = (float)Math.Round(x0 + c * cell), xb = (float)Math.Round(x0 + (c + 1) * cell), ya = (float)Math.Round(y0 + r * cell), yb = (float)Math.Round(y0 + (r + 1) * cell);
+                    b.Color = cs[ci]; g.FillRectangle(b, xa, ya, Math.Max(1f, xb - xa), Math.Max(1f, yb - ya));
+                }
+            g.SmoothingMode = sm;
+        }
         void DrawApplePix(Graphics g, float x0, float y0, float k)      // escudo de maca cortada: mesmo tamanho de antes (8k x 10k), agora com quadradinhos menores (2/3)
         {
             SmoothingMode sm = g.SmoothingMode; g.SmoothingMode = SmoothingMode.None;
@@ -3159,6 +3224,7 @@ namespace HeroiPet
         void DrawShieldBody(Graphics g, float sx, float sy)
         {
             if (eqShield == 3) { DrawApplePix(g, sx - S, sy - S, S); return; }
+            if (eqShield == 4) { DrawDarkShieldPix(g, sx - S, sy - S, S); return; }      // escudo sombrio: triangular embaixo
             if (eqShield == 2)
             {
                 float cx = sx + 3 * S, cy = sy + 4 * S, ro = 3.6f * S, ri = 2.8f * S;
@@ -4123,7 +4189,18 @@ namespace HeroiPet
             DrawHeroMaybeWading(g);
             g.Restore(st);
         }
-        void DrawHeroFxSparks(Graphics g) { DrawFairySparks(g); }
+        List<float[]> spinSparks = new List<float[]>();      // brilhinhos amarelos do giro do Link-fada: x, y, tempo
+        void DrawHeroFxSparks(Graphics g)
+        {
+            DrawFairySparks(g);
+            for (int i = spinSparks.Count - 1; i >= 0; i--)
+            {
+                float[] p = spinSparks[i]; p[2] += 0.016f;
+                if (p[2] > 0.55f) { spinSparks.RemoveAt(i); continue; }
+                float q = 1f - p[2] / 0.55f;
+                shadowList.Add(new float[] { p[0], p[1] - p[2] * 8 * S, 2.2f * S, 150f * q, 0f, 0f, 0f, 0f });      // quadradinho amarelo meio transparente (camada com transparencia real)
+            }
+        }
         List<float[]> linkFairySparks = new List<float[]>();      // brilhinhos do Link-fada: x, y, tempo
         void UpdateFairyFx(float dt)      // rastro de brilhinhos pequenos atras do Link-fada
         {
@@ -5072,6 +5149,7 @@ namespace HeroiPet
 
             if (TryDodge(dt)) { AutoEatAbortIfBusy(); bowT = 0; return; }
             if (AutoEatApple(dt)) { bowT = 0; return; }
+            if (FairyOn && FairyAutoControl(dt)) return;      // Link-fada: mata como a fadinha
 
             // octoroks e slimes: luta de espada (aproxima e golpeia), mas so se nao houver item para pegar primeiro
             if (near != null && near.Type != 1 && nd < 110 * S)
@@ -5130,6 +5208,46 @@ namespace HeroiPet
                     else if (rnd.Next(100) < 30) hface = -hface;
                 }
             }
+        }
+
+        bool fairyStrike; Enemy fhTarget; int fhPh; float fhOrbit, fhRest;
+        // LINK-FADA no automatico: voa ate o monstro mais perto (menos chefoes), da voltas rapidas em torno da cabeca dele e o derrota, igual a fadinha
+        bool FairyAutoControl(float dt)
+        {
+            fairyStrike = false;
+            if (fhTarget != null && !enemies.Contains(fhTarget)) { fhTarget = null; fhPh = 0; }
+            if (fhTarget == null)
+            {
+                fhRest -= dt;
+                if (fhRest <= 0)
+                {
+                    Enemy best = null; float bd = float.MaxValue;
+                    foreach (Enemy e in enemies) { if (e.Type == 3 || e.Type == 7) continue; float d = (e.X - hx) * (e.X - hx) + (e.Y - hy) * (e.Y - hy); if (d < bd) { bd = d; best = e; } }
+                    if (best != null) { fhTarget = best; fhPh = 1; fhOrbit = 0; }
+                }
+                if (fhTarget == null)
+                {
+                    if (fhRest > 0) { Item it = NearestItem(); if (it != null) { MoveHero(it.X, it.Y, 56 * S, dt); bowT = 0; return true; } }
+                    return false;
+                }
+            }
+            Enemy tg = fhTarget; fairyStrike = true; bowT = 0;
+            if (fhPh == 1)
+            {
+                float dx = tg.X - hx, dy = tg.Y - hy, d = (float)Math.Sqrt(dx * dx + dy * dy);
+                if (d < 8 * S) { fhPh = 2; fhOrbit = 0; } else MoveHero(tg.X, tg.Y, 150 * S, dt);
+            }
+            else
+            {
+                fhOrbit += dt; float a = fhOrbit * 18f;
+                hx = tg.X + (float)Math.Cos(a) * 8 * S; hy = tg.Y + (float)Math.Sin(a) * 4 * S; hface = tg.X >= hx ? 1 : -1; walking = true;
+                if (fhOrbit >= 0.7f)
+                {
+                    for (int k = 0; k < 6; k++) puffs.Add(new Puff { Kind = 1, X = tg.X + ((float)rnd.NextDouble() - 0.5f) * 12 * S, Y = tg.Y - (float)rnd.NextDouble() * 10 * S });
+                    fhTarget = null; fhPh = 0; fhRest = 1f; fairyStrike = false; DamageEnemy(tg, 9999);
+                }
+            }
+            return true;
         }
 
         void StartAttack(bool practice)
@@ -5271,7 +5389,8 @@ namespace HeroiPet
 
         void DoSwing()
         {
-            float cx = hx + hface * 8 * S, R = (eqSword == 2 ? 27 : (eqSword == 4 ? 23 : 18)) * S;      // marreta e cogumelo-maca: area maior
+            float cx = FairyOn ? hx : hx + hface * 8 * S, R = (eqSword == 2 ? 27 : (eqSword == 4 ? 23 : 18)) * S;      // marreta e cogumelo-maca: area maior
+            if (FairyOn) for (int k = 0; k < 10; k++) { double ga = rnd.NextDouble() * Math.PI * 2; float gr = (4 + (float)rnd.NextDouble() * 14) * S; spinSparks.Add(new float[] { hx + (float)Math.Cos(ga) * gr, hy - 8 * S + (float)Math.Sin(ga) * gr * 0.7f, 0f }); }
             if (eqSword == 4) for (int k = 0; k < 6; k++) puffs.Add(new Puff { Kind = 1, X = cx + ((float)rnd.NextDouble() - 0.5f) * 26 * S, Y = hy - (float)rnd.NextDouble() * 10 * S });      // esporos
             if (eqSword == 2) for (int k = 0; k < 5; k++) puffs.Add(new Puff { Kind = k % 2, X = cx + ((float)rnd.NextDouble() - 0.5f) * 22 * S, Y = hy + ((float)rnd.NextDouble() - 0.3f) * 6 * S });      // impacto
             for (int i = enemies.Count - 1; i >= 0; i--)
@@ -5330,7 +5449,7 @@ namespace HeroiPet
         // dano: 1 coracao por padrao; encostar em monstro tira meio (0,5); bola de fogo tira 1 e ignora o escudo e o tempo de invulnerabilidade
         void HurtHero(float fromX, float fromY, float dmg = 1f, bool ignoreInv = false)
         {
-            if ((inv > 0 && !ignoreInv) || dead || powerT > 0) return;
+            if ((inv > 0 && !ignoreInv) || dead || powerT > 0 || (fairyStrike && FairyOn && !playMode)) return;
             hp -= dmg; hurtCount++; inv = 1.2f; attacking = false; atkCool = 0.3f;
             float dx = hx - fromX, dy = hy - fromY, d = (float)Math.Sqrt(dx * dx + dy * dy);
             if (d < 1) { dx = -hface; dy = 0; d = 1; }
@@ -5646,7 +5765,8 @@ namespace HeroiPet
                 if (dx * dx + dy * dy < rr7 * rr7)
                 {
                     float sp = (float)Math.Sqrt(r.VX * r.VX + r.VY * r.VY);
-                    bool blocked = eqSword != 2 && !r.Fire && sp > 0 && (r.VX * hface) / sp < -0.35f;   // pedra vem de frente: escudo! (bola de fogo nao e bloqueada)
+                    bool blocked = !r.Fire && sp > 0 && (FairyOn || (eqSword != 2 && (r.VX * hface) / sp < -0.35f));      // Link-fada: as asas protegem de todos os lados
+                    if (false) ;   // pedra vem de frente: escudo! (bola de fogo nao e bloqueada)
                     if (blocked) puffs.Add(new Puff { Kind = 1, X = hx + hface * 3 * S, Y = hy - 7 * S });
                     else HurtHero(r.X - r.VX, r.Y - r.VY, 1f, r.Fire);      // cada bola de fogo tira 1 coracao, mesmo durante a invulnerabilidade
                     rocks.RemoveAt(i);
@@ -5787,6 +5907,13 @@ namespace HeroiPet
 
             foreach (Arrow a in arrows)
             {
+                if (a.Glow)
+                {
+                    shadowList.Add(new float[] { a.X, a.Y, 5 * S, 190f, 1f, 0f, 0f, 0f });
+                    using (SolidBrush yb = new SolidBrush(Color.FromArgb(255, 235, 70))) g.FillRectangle(yb, a.X - 1.5f * S, a.Y - 1.5f * S, 3 * S, 3 * S);
+                    using (SolidBrush wb = new SolidBrush(Color.FromArgb(255, 255, 220))) g.FillRectangle(wb, a.X - S / 2f, a.Y - S / 2f, S, S);
+                    continue;
+                }
                 if (a.Power) DrawPowerArrow(g, a); else DrawArrow(g, a.X, a.Y, a.VX, a.VY, 1f);
                 if (a.Crystal) using (SolidBrush cb = new SolidBrush(Color.FromArgb(120, 235, 245))) g.FillRectangle(cb, a.X - S, a.Y - S, 2 * S, 2 * S);      // ponta de cristal
             }
@@ -5912,6 +6039,18 @@ namespace HeroiPet
             bool right = hface > 0;
             int fr = walking ? ((int)(walkT * 9)) % 2 : 0;
             float bob = (walking && fr == 1) ? S : 0;
+            if (FairyOn)      // Link-fada: sem arma nem escudo (as asas protegem); no ataque gira uma vez em torno de si
+            {
+                int qd = attacking ? Math.Min(3, (int)(atkT / SwEnd * 4f)) : 0;
+                if (qd == 0 || qd == 2) Spr(g, heroWalk[fr], hx, hy - bob, qd == 0 ? right : !right); else Spr(g, heroFront, hx, hy - bob, true);
+                if (bowing)      // 2: carrega a bolinha amarela na mao
+                {
+                    float gl = 0.5f + Math.Min(1f, bowT / 0.4f) * 0.5f;
+                    shadowList.Add(new float[] { hx + hface * 7 * S, hy - 8 * S - FairyLift, 4 * S * gl, 170f * gl, 1f, 0f, 0f, 0f });
+                    using (SolidBrush yb = new SolidBrush(Color.FromArgb(255, 235, 90))) g.FillRectangle(yb, hx + hface * 7 * S - S, hy - 9 * S, 2 * S * gl, 2 * S * gl);
+                }
+                return;
+            }
             Spr(g, heroWalk[fr], hx, hy - bob, right);
             if (previewBare)      // aba Roupas: sem armas nem escudo; o braco do outro lado (esquerda da tela) e igual ao da direita: a mao na mesma altura
             {

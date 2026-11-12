@@ -5,6 +5,9 @@
 - **Conjunto doce refeito:** agora tem **tiara dourada com joia lilás** (no lugar do gorro), **blusa um quadradinho maior com o meio lilás**, **faixa azul bebê**, **calça rosa** e **sapatos vermelhos**, sem as bolinhas brancas.
 - **Link-fada:** com o conjunto doce completo (tiara + blusa) o Link **age como uma fada**: **flutua** no ar balançando, tem **asinhas de fada** que batem (também na prévia do inventário) e deixa um **rastro de brilhinhos**.
 
+## 12/11/2026 — Escudo sombrio triangular embaixo
+- O **escudo sombrio** (conjunto sombra) agora tem **a parte de baixo triangular**, em forma de brasão: topo reto com cantos cortados, lados retos que afunilam até uma ponta. Contorno escuro, borda de aço arroxeada, corpo roxo escuro com sombra à direita e um **losango prateado** no centro. No jogo e no ícone do inventário; mesmo tamanho do escudo maçã.
+
 ## 12/11/2026 — Cabeça do Link de lado sem falha atrás
 - Ao diminuir as costas, o contorno da **parte de trás da cabeça** (pescoço/cabelo, 3 linhas) tinha sido cortado junto, deixando um **degrau de 2 quadradinhos** abaixo da cabeça. Essas 3 linhas voltaram ao que eram, então a cabeça fica inteira e só o **tronco** continua mais curto atrás (degrau de 1 quadradinho). Desktop e web.
 
