@@ -6151,7 +6151,7 @@ namespace HeroiPet
 
             // escudo
             float f = hface;
-            float sx = hx - f * 1 * S - 3 * S, sy = hy - bob - 11 * S;
+            float sx = hx - f * 3 * S - 3 * S, sy = hy - bob - 11 * S;
             if (eqSword != 2 && !offShield) DrawShieldBody(g, sx, sy);      // a marreta usa as duas maos: sem escudo
 
 
@@ -6161,17 +6161,11 @@ namespace HeroiPet
             if (offSword) return;      // espada desequipada
 
             // espada
-            float handX = hx + f * 10 * S, handY = hy - bob - 6 * S;
-            using (SolidBrush ak = new SolidBrush(Color.FromArgb(28, 22, 36))) using (SolidBrush asl = new SolidBrush(TunicColor())) using (SolidBrush ask = new SolidBrush(Color.FromArgb(250, 208, 165)))      // bracinho: manga da cor da blusa, mao e contorno, ligando o corpo a espada
-                for (int k = 0; k < 6; k++) for (int r = 0; r < 3; r++)
-                {
-                    Brush ab = (r != 1 || k == 5) ? ak : (k < 3 ? asl : ask); float ax0 = hx + f * (4 + k) * S;
-                    g.FillRectangle(ab, f > 0 ? ax0 : ax0 - S, handY - S - S / 2f + r * S, S, S);
-                }
+            float handX = hx + f * 5 * S, handY = hy - bob - 4 * S;
             float ang;
             float prog = attacking ? Math.Min(1f, atkT / SwEnd) : 0;
             if (attacking) ang = -110f + 170f * (float)(1 - Math.Pow(1 - prog, 2));
-            else ang = walking ? -58f : -62f;
+            else ang = walking ? -70f : -80f;
             double rad = ang * Math.PI / 180.0;
             float dx = f * (float)Math.Cos(rad), dy = (float)Math.Sin(rad);
             float px = -dy, py = dx;
