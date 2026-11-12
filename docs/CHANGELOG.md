@@ -1,7 +1,7 @@
 ﻿# Changelog (resumo)
 
 ## 12/11/2026 — Link de lado: escudo e espada
-- O **escudo** voltou à posição original; a **espada** parada fica mais à frente e inclinada, longe do rosto.
+- O **escudo** fica no meio do corpo (como preso ao braço) e a **espada** parada sai bem à frente do peito, inclinada, com o contorno separado do contorno do Link e longe do rosto.
 
 ## 12/11/2026 — Moedas voam para o Link no poder
 - Durante o **surto de poder** as moedas (e itens) que os monstros soltam **voam direto para o Link**.

@@ -2131,7 +2131,7 @@ function drawHero() {
   }
   spr(fr ? SP.heroB : SP.heroA, hero.x, hero.y - bob, right);
   if (previewBare) { const sp0 = fr ? SP.heroB : SP.heroA; rect('#fad0a5', Math.round(hero.x - sp0.w / 2) + 3 * S, Math.round(hero.y - bob) - 4 * S, S, S); return; }      // aba Roupas: sem armas nem escudo; o braco do outro lado (esquerda da tela) e igual ao da direita: a mao na mesma altura (relativa aos pes: a coroa muda a altura do desenho)
-  const sx = hero.x - f * 3 * S - 3 * S, sy = hero.y - bob - 11 * S; if (!offShield) drawShieldBody(sx, sy);
+  const sx = hero.x - f * 1 * S - 3 * S, sy = hero.y - bob - 11 * S; if (!offShield) drawShieldBody(sx, sy);
   if (cookState === 6) { const p = (cookT % 1.2) / 1.2; if (Math.floor(cookT / 1.2) <= 4) drawBakeApple(3, hero.x + f * 5 * S, hero.y - bob - 9 * S, 2.3 - 1.7 * p); }
   else if (playEatT > 0) { const sc2 = 2.3 - 1.7 * Math.min(1, playEatT / 0.9); if (eatRaw) { const a = SP.apple, w = a.w * sc2 * 0.8, h = a.h * sc2 * 0.8; ctx.drawImage(a.r, Math.round(hero.x + f * 5 * S - w / 2), Math.round(hero.y - bob - 9 * S - h / 2), Math.round(w), Math.round(h)); } else drawBakeApple(3, hero.x + f * 5 * S, hero.y - bob - 9 * S, sc2); }
   if (calmState === 2 || cookState !== 0 || playPickT > 0 || playEatT > 0) {
@@ -2140,7 +2140,7 @@ function drawHero() {
   }
   if (hero.bowing) { if (!offBow) drawBow(f, bob); return; }
   if (offSword) return;      // espada desequipada
-  const handX = hero.x + f * 6 * S, handY = hero.y - bob - 4 * S, prog = hero.attacking ? Math.min(1, hero.atkT / swEnd()) : 0;
+  const handX = hero.x + f * 10 * S, handY = hero.y - bob - 6 * S, prog = hero.attacking ? Math.min(1, hero.atkT / swEnd()) : 0;
   const ang = hero.attacking ? -110 + 170 * (1 - Math.pow(1 - prog, 2)) : (hero.walking ? -58 : -62);
   if (hero.attacking && prog > 0.2 && prog < 0.95) { ctx.fillStyle = '#ebf5ff'; for (let a = -110; a < ang; a += 10) { const r2 = a * Math.PI / 180; ctx.fillRect(Math.round(handX + f * Math.cos(r2) * 14 * S * 1.05 - S), Math.round(handY + Math.sin(r2) * 14 * S * 1.05 - S), 2 * S, 2 * S); } }
   drawSword(handX, handY, ang, f);
