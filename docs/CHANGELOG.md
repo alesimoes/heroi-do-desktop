@@ -359,3 +359,4 @@
 
 - (10/11/2026) 7º conjunto: **maçã** (gorro e blusa vermelho-maçã, calça cor de polpa, sapatos verde-folha) + **escudo de maçã cortada**. Libera com +3000 monstros depois do cogumelo (19.000 no contador dos conjuntos). Web: restaurado o ícone da marreta (hammerItem), que tinha sido apagado por engano ao incluir o cogumelo.
 
+

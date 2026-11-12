@@ -6162,6 +6162,12 @@ namespace HeroiPet
 
             // espada
             float handX = hx + f * 10 * S, handY = hy - bob - 6 * S;
+            using (SolidBrush ak = new SolidBrush(Color.FromArgb(28, 22, 36))) using (SolidBrush asl = new SolidBrush(TunicColor())) using (SolidBrush ask = new SolidBrush(Color.FromArgb(250, 208, 165)))      // bracinho: manga da cor da blusa, mao e contorno, ligando o corpo a espada
+                for (int k = 0; k < 6; k++) for (int r = 0; r < 3; r++)
+                {
+                    Brush ab = (r != 1 || k == 5) ? ak : (k < 3 ? asl : ask); float ax0 = hx + f * (4 + k) * S;
+                    g.FillRectangle(ab, f > 0 ? ax0 : ax0 - S, handY - S - S / 2f + r * S, S, S);
+                }
             float ang;
             float prog = attacking ? Math.Min(1f, atkT / SwEnd) : 0;
             if (attacking) ang = -110f + 170f * (float)(1 - Math.Pow(1 - prog, 2));
