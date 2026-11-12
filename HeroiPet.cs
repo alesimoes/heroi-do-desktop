@@ -1708,7 +1708,7 @@ namespace HeroiPet
         }
         static Color Lerp(Color a, Color b, float t) { t = Math.Max(0f, Math.Min(1f, t)); return Color.FromArgb((int)(a.R + (b.R - a.R) * t), (int)(a.G + (b.G - a.G) * t), (int)(a.B + (b.B - a.B) * t)); }
         bool OwnShield(int i) { return i == 0 || (i == 1 && evoStage >= 4) || (i == 2 && kingGear) || (i == 3 && SetsOwned >= 7) || (i == 4 && SetsOwned >= 9); }      // 3 = escudo maca cortada (conjunto maca)
-        const int GladSet = 9;      // indice do conjunto gladiador (libera sozinho com 700 monstros)
+        const int GladSet = 9;      // indice do conjunto gladiador (libera com 700 monstros a mais que o conjunto anterior)
         bool SetOwn(int si) { if (setsTest) return true; if (si == GladSet) return setKills >= SetThr[GladSet]; return si < SetsOwned; }
         bool OwnHat(int i) { return i == 0 || (i == 1 && evoStage >= 2) || (i == 2 && kingGear) || (i >= 3 && SetOwn(i - 3)); }
         bool OwnTunic(int i) { return i == 0 || (i == 1 && evoStage >= 3) || (i == 2 && kingGear) || (i >= 3 && SetOwn(i - 3)); }
@@ -1728,7 +1728,7 @@ namespace HeroiPet
             new OutSet("sombra", Color.FromArgb(34, 34, 50), Color.FromArgb(38, 38, 56), Color.FromArgb(22, 22, 32), Color.FromArgb(78, 22, 30)),
             new OutSet("gladiador", Color.FromArgb(172, 180, 198), Color.FromArgb(200, 142, 58), Color.FromArgb(196, 46, 40), Color.FromArgb(108, 68, 36)) };      // GLADIADOR (700 monstros): elmo de bronze com crista vermelha, peitoral de bronze, saiote vermelho e sandalias      // imita o Link Sombrio: gorro e blusa quase pretos, calca escura, sapatos vinho, cinto prateado e rosto palido      // maca: gorro e blusa vermelho-maca, calca cor de polpa, sapatos verde-folha, mais o escudo de maca cortada
         // cogumelo: gorro e blusa vermelhos com bolinhas brancas, calca cor do talo, mais o Cogumelo-maca (arma)
-        static readonly int[] SetThr = { 4950, 6600, 8800, 11550, 15400, 17600, 20900, 36000, 52000, 700 };      // o ultimo (gladiador) libera com 700 monstros, fora da ordem dos outros;      // os 2 ultimos (fada e sombra) sao DIFICEIS: +15000 e +31000 monstros depois do conjunto maca;      // (10% mais dificil que 4500/6000/8000/10500/14000/16000/19000) monstros derrotados depois de instalar esta versao (setKills) para liberar cada conjunto
+        static readonly int[] SetThr = { 4950, 6600, 8800, 11550, 15400, 17600, 20900, 36000, 52000, 52700 };      // o ultimo (gladiador) libera com 700 monstros A MAIS que o conjunto anterior (sombra: 52000 + 700);      // os 2 ultimos (fada e sombra) sao DIFICEIS: +15000 e +31000 monstros depois do conjunto maca;      // (10% mais dificil que 4500/6000/8000/10500/14000/16000/19000) monstros derrotados depois de instalar esta versao (setKills) para liberar cada conjunto
         bool setsTest, gladKnown; int setsKnown;
         int setKills;      // monstros derrotados DEPOIS de instalar esta versao (contador proprio: nao herda os monstros que ja foram mortos em versoes antigas)
         int LoadSetKills()
