@@ -1505,6 +1505,7 @@ namespace HeroiPet
 
             BuildTray();
             record = LoadRecord(); nextPower = Math.Max(25, record + 1);
+            LoadWallets();
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--poder") >= 0) { rupees = 30; powerPending = true; }      // teste rapido do poder
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--teste") >= 0) { nextCalm = 3f; testLong = true; }   // teste rapido
 
@@ -2520,7 +2521,7 @@ namespace HeroiPet
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             tray.Visible = false;
-            SaveRecord();
+            SaveRecord(); SaveWallets();
             SaveKills(); SaveChest(); SaveFairy(); SaveSetKills(setKills); SaveWpnKills(wpnKills);
             Guarda.Backup();
             if (evoForm != null) { try { evoForm.Close(); } catch { } evoForm = null; }
@@ -2556,7 +2557,7 @@ namespace HeroiPet
         void Tick()
         {
             if ((zTick++ % 6) == 0) PushLayers();
-            if (zTick % 700 == 0) Guarda.Backup();      // ~a cada 20 s: copia de seguranca do progresso (arquivo) e grava o registro no disco
+            if (zTick % 700 == 0) { SaveWallets(); Guarda.Backup(); }      // ~a cada 20 s: copia de seguranca do progresso (arquivo) e grava o registro no disco
             if (deathForm != null && !deathForm.IsDisposed && deathForm.Ready && IsDown(0x0D)) deathForm.Retry();      // Enter = Tentar de novo (se a janela estiver escondida atras de um aplicativo)
             if (shield != null) shield.PassThrough(IsDown(0x11));        // Ctrl apertado: cliques passam para a area de trabalho
             double now = clock.Elapsed.TotalSeconds;
@@ -3715,7 +3716,19 @@ namespace HeroiPet
         }
 
         // Ao entrar no modo jogo: o heroi vai para o meio da tela e os monstros do modo automatico somem
-        int walletAuto, walletPlay;      // rupias de cada modo: ao trocar de modo cada um guarda as suas
+        int walletAuto, walletPlay;      // rupias de cada modo: ao trocar de modo cada um guarda as suas (e ficam salvas no registro)
+        void LoadWallets()
+        {
+            if (Environment.GetEnvironmentVariable("HEROI_TESTE") != null) return;
+            try { using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"SoftwareHeroiDoDesktop")) { if (k != null) { object a = k.GetValue("RupiasAuto"), b = k.GetValue("RupiasJogo"); if (a != null) walletAuto = Math.Max(0, Convert.ToInt32(a)); if (b != null) walletPlay = Math.Max(0, Convert.ToInt32(b)); } } } catch { }
+            rupees = walletAuto; lastStep = RupeeStep();      // o jogo abre no automatico
+        }
+        void SaveWallets()
+        {
+            if (Environment.GetEnvironmentVariable("HEROI_TESTE") != null) return;
+            if (playMode) walletPlay = rupees; else walletAuto = rupees;
+            try { using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"SoftwareHeroiDoDesktop")) { k.SetValue("RupiasAuto", walletAuto); k.SetValue("RupiasJogo", walletPlay); } } catch { }
+        }
         void EnterPlay()
         {
             foreach (Enemy e in enemies) puffs.Add(new Puff { Kind = 0, X = e.X, Y = e.Y - 4 * S });
@@ -3752,7 +3765,7 @@ namespace HeroiPet
                 if (shield != null) { shield.Close(); shield = null; }
                 SetMaxHp(5);                                                // no automatico os coracoes extras sao perdidos
                 if (was) { walletPlay = rupees; rupees = walletAuto; }      // as rupias do jogo ficam guardadas; voltam as do automatico
-                lastStep = RupeeStep();
+                lastStep = RupeeStep(); SaveWallets();
                 nextCalm = 120f + (float)rnd.NextDouble() * 180f;
             }
         }

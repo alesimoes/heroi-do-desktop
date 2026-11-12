@@ -1431,7 +1431,10 @@ function playerControl(dt) {
   if (mouseDown && NEAR(cx, cy, hero.x, hero.y) > 3 * S) { const keep = hero.face; moveHero(cx, cy, 56 * S, dt); if (hero.bowing) hero.face = keep; }
 }
 // Ao entrar no modo jogo: o heroi vai para o meio da tela e os monstros do modo automatico somem
-let walletAuto = 0, walletPlay = 0;      // rupias de cada modo: ao trocar de modo cada um guarda as suas
+let walletAuto = 0, walletPlay = 0;      // rupias de cada modo: ao trocar de modo cada um guarda as suas (e ficam salvas no navegador)
+try { const w = JSON.parse(localStorage.getItem('heroi_rupias') || '[0,0]'); walletAuto = Math.max(0, w[0] | 0); walletPlay = Math.max(0, w[1] | 0); hero.rupees = walletAuto; } catch (_) {}
+function saveWallets() { if (playMode) walletPlay = hero.rupees; else walletAuto = hero.rupees; try { localStorage.setItem('heroi_rupias', JSON.stringify([walletAuto, walletPlay])); } catch (_) {} }
+addEventListener('pagehide', saveWallets); addEventListener('beforeunload', saveWallets); document.addEventListener('visibilitychange', () => { if (document.hidden) saveWallets(); }); setInterval(saveWallets, 20000);
 function enterPlay() {
   for (const e of enemies) puffs.push({ kind: 0, x: e.x, y: e.y - 4 * S, t: 0 });
   enemies.length = 0; rocks.length = 0; arrows.length = 0;

@@ -1,5 +1,8 @@
 ﻿# Changelog (resumo)
 
+## 12/11/2026 — Rupias salvas ao fechar
+- As rupias dos dois modos (automático e jogável) ficam **salvas** ao fechar o jogo (e a cada ~20 s); ao abrir, o automático volta com as dele e o jogável com as dele. Na web ficam no navegador.
+
 ## 12/11/2026 — Rupias separadas por modo
 - As rupias **não zeram mais** ao trocar de modo: o automático guarda as suas (X) e o jogável as dele (Y); ao voltar, cada modo retoma o que tinha na última vez (enquanto o jogo estiver aberto).
 
