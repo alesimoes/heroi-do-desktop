@@ -2272,8 +2272,7 @@ namespace HeroiPet
                         int y = area.Y - scrollY; clipArea = area; if (tab != 2) g.SetClip(area);
                         if (tab == 0) { Section(g, "ARCOS", 0, ref y, area, hf, nf); Section(g, "ESPADAS", 1, ref y, area, hf, nf); Section(g, "ESCUDOS", 2, ref y, area, hf, nf); }
                         else if (tab == 1) { Section(g, "GORROS", 3, ref y, area, hf, nf); Section(g, "ROUPAS", 4, ref y, area, hf, nf); if (p.Owns(5, 0)) Section(g, "FADINHA", 5, ref y, area, hf, nf); }
-                        if (tab != 2) { contentH = y - (area.Y - scrollY); g.ResetClip(); }
-                        if (tab == 0 && p.FairySet) g.DrawString("Com a tiara e a blusa de fada o Link voa e não usa armas.", sf, Brushes.Gold, area.X, H - pad - 26 * sc);
+                        if (tab != 2) { contentH = y - (area.Y - scrollY); g.ResetClip(); if (tab == 0 && p.FairySet) g.DrawString("Com a tiara e a blusa de fada o Link voa e não usa armas.", sf, Brushes.Gold, area.X, H - pad - 26 * sc); }
                         else
                         {
                             g.DrawString("COMIDA", hf, Brushes.Gold, area.X, y); y += (int)(26 * sc);
