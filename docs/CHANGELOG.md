@@ -1,5 +1,8 @@
 ﻿# Changelog (resumo)
 
+## 12/11/2026 — Conjunto gladiador (700 monstros)
+- Novo conjunto **gladiador**: elmo de bronze com **crista vermelha**, peitoral de bronze, saiote vermelho e sandálias. **Libera com 700 monstros** (contador dos conjuntos, só no automático), independente da ordem dos outros conjuntos; já vem vestido ao liberar e aparece em Roupas (Gorros: "Elmo de gladiador"; Roupas: "Roupa de gladiador").
+
 ## 12/11/2026 — Link de lado: tronco mais fino
 - O tronco do Link de lado perdeu **1 quadradinho na frente (barriga)** e **1 atrás (costas)**, também na faixa da cintura.
 
