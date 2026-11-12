@@ -2131,7 +2131,7 @@ function drawHero() {
   }
   spr(fr ? SP.heroB : SP.heroA, hero.x, hero.y - bob, right);
   if (previewBare) { const sp0 = fr ? SP.heroB : SP.heroA; rect('#fad0a5', Math.round(hero.x - sp0.w / 2) + 3 * S, Math.round(hero.y - bob) - 4 * S, S, S); return; }      // aba Roupas: sem armas nem escudo; o braco do outro lado (esquerda da tela) e igual ao da direita: a mao na mesma altura (relativa aos pes: a coroa muda a altura do desenho)
-  const sx = hero.x - f * 5 * S - 3 * S, sy = hero.y - bob - 11 * S; if (!offShield) drawShieldBody(sx, sy);
+  const sx = hero.x - f * 3 * S - 3 * S, sy = hero.y - bob - 11 * S; if (!offShield) drawShieldBody(sx, sy);
   if (cookState === 6) { const p = (cookT % 1.2) / 1.2; if (Math.floor(cookT / 1.2) <= 4) drawBakeApple(3, hero.x + f * 5 * S, hero.y - bob - 9 * S, 2.3 - 1.7 * p); }
   else if (playEatT > 0) { const sc2 = 2.3 - 1.7 * Math.min(1, playEatT / 0.9); if (eatRaw) { const a = SP.apple, w = a.w * sc2 * 0.8, h = a.h * sc2 * 0.8; ctx.drawImage(a.r, Math.round(hero.x + f * 5 * S - w / 2), Math.round(hero.y - bob - 9 * S - h / 2), Math.round(w), Math.round(h)); } else drawBakeApple(3, hero.x + f * 5 * S, hero.y - bob - 9 * S, sc2); }
   if (calmState === 2 || cookState !== 0 || playPickT > 0 || playEatT > 0) {

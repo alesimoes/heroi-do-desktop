@@ -6151,7 +6151,7 @@ namespace HeroiPet
 
             // escudo
             float f = hface;
-            float sx = hx - f * 5 * S - 3 * S, sy = hy - bob - 11 * S;
+            float sx = hx - f * 3 * S - 3 * S, sy = hy - bob - 11 * S;
             if (eqSword != 2 && !offShield) DrawShieldBody(g, sx, sy);      // a marreta usa as duas maos: sem escudo
 
 
