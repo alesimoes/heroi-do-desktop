@@ -1,5 +1,11 @@
 # Changelog (resumo)
 
+## 12/11/2026 — Fadinha sombria, desequipar armas e conjunto de fada
+- **Fadinha sombria** (5ª aparência, aba Roupas → Fadinha): corpo roxo escuro e asas sombrias; vem junto com o conjunto sombra.
+- Com **tiara + blusa de fada** equipadas **não dá para equipar armas** (aba Armas avisa; nada aparece como equipado).
+- **Desequipar:** clicar de novo em arco, espada ou escudo já equipado o guarda (o Link não o segura); clicar outra vez equipa de novo. Fica salvo.
+- Ícone da **tiara** no inventário (seleção de conjunto) refeito; "Blusa doce" agora é **"Blusa de fada"**.
+
 ## 12/11/2026 — Asas do Link-fada nas costas
 - As asas ficavam na altura da cabeça; agora ficam nas costas (altura do tronco).
 
