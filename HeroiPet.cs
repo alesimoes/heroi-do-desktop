@@ -3716,7 +3716,7 @@ namespace HeroiPet
         }
 
         // Ao entrar no modo jogo: o heroi vai para o meio da tela e os monstros do modo automatico somem
-        // as rupias valem para o modo automatico e para o jogavel (as mesmas) e ficam salvas no registro
+        int walletAuto;      // saldo do modo automatico: guardado enquanto joga no modo jogavel e salvo no registro (o saldo do jogavel e temporario, como sempre foi)
         void LoadWallets()
         {
             if (Environment.GetEnvironmentVariable("HEROI_TESTE") != null) return;
@@ -3726,7 +3726,7 @@ namespace HeroiPet
         void SaveWallets()
         {
             if (Environment.GetEnvironmentVariable("HEROI_TESTE") != null) return;
-            try { using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"SoftwareHeroiDoDesktop")) k.SetValue("RupiasAuto", rupees); } catch { }
+            try { using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"SoftwareHeroiDoDesktop")) k.SetValue("RupiasAuto", playMode ? walletAuto : rupees); } catch { }
         }
         void EnterPlay()
         {
@@ -3736,7 +3736,7 @@ namespace HeroiPet
             if (dead) { dead = false; hp = MaxHP; }
             hx = W / 2; hy = H / 2; kvx = kvy = 0; inv = 1f; walking = false;
             puffs.Add(new Puff { Kind = 2, X = hx, Y = hy });
-            apples = 0; flyApples.Clear(); toastShown = false;      // as rupias valem para os dois modos (nao zeram)
+            walletAuto = rupees; rupees = 0; apples = 0; flyApples.Clear(); toastShown = false;     // as rupias do automatico ficam guardadas (salvas); o jogavel comeca do zero, como antes
             spawnTimer = 2.5f;
         }
 
@@ -3763,6 +3763,7 @@ namespace HeroiPet
             {
                 if (shield != null) { shield.Close(); shield = null; }
                 SetMaxHp(5);                                                // no automatico os coracoes extras sao perdidos
+                if (was) rupees = walletAuto;      // volta o saldo do automatico; o do jogavel some, como antes
                 lastStep = RupeeStep(); SaveWallets();
                 nextCalm = 120f + (float)rnd.NextDouble() * 180f;
             }

@@ -1,5 +1,10 @@
 ﻿# Changelog (resumo)
 
+## 12/11/2026 — Rupias: automático salvo, jogável como antes (substitui as 3 entradas abaixo)
+- O saldo do **automático** nunca se perde: fica guardado ao jogar no modo jogável e **salvo ao fechar** o jogo (e a cada ~20 s). O saldo do **jogável** funciona como antes (começa do zero e some ao sair).
+- Morrer **não zera**: perde 10 rupias (como já era).
+- Corrigido o caminho do registro das rupias salvas.
+
 ## 12/11/2026 — Rupias iguais nos dois modos (substitui as duas entradas abaixo)
 - As rupias **valem para o automático e para o jogável** (as mesmas), não zeram ao trocar de modo e ficam **salvas ao fechar** (registro no desktop; navegador na web).
 
