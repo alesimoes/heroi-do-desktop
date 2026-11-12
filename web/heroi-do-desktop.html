@@ -1000,7 +1000,6 @@ function startAttack(practice) {
 function moveHero(tx, ty, speed, dt) {
   const dx = tx - hero.x, dy = ty - hero.y, d = Math.hypot(dx, dy);
   if (d < 1) { hero.walking = false; return; }
-  if (fairyOn()) speed *= 0.6;      // Link-fada voa mais devagar
   const step = Math.min(d, speed * dt); hero.x += dx / d * step; hero.y += dy / d * step;
   if (Math.abs(dx) > 2) hero.face = dx > 0 ? 1 : -1; hero.walking = true;
 }
@@ -1296,7 +1295,7 @@ function fairyAutoControl(dt) {
     if (!fhTarget) { if (fhRest > 0) { const it = nearestItem(); if (it) { moveHero(it.x, it.y, 56 * S, dt); hero.bowT = 0; return true; } } return false; }
   }
   const tg = fhTarget; fairyStrike = true; hero.bowT = 0;
-  if (fhPh === 1) { const dx = tg.x - hero.x, dy = tg.y - hero.y; if (Math.hypot(dx, dy) < 8 * S) { fhPh = 2; fhOrbit = 0; } else moveHero(tg.x, tg.y, 150 * S, dt); }
+  if (fhPh === 1) { const dx = tg.x - hero.x, dy = tg.y - hero.y; if (Math.hypot(dx, dy) < 8 * S) { fhPh = 2; fhOrbit = 0; } else moveHero(tg.x, tg.y, 56 * S, dt); }
   else {
     fhOrbit += dt; const a = fhOrbit * 18;
     hero.x = tg.x + Math.cos(a) * 8 * S; hero.y = tg.y + Math.sin(a) * 4 * S; hero.face = tg.x >= hero.x ? 1 : -1; hero.walking = true;

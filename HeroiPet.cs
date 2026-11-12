@@ -5288,7 +5288,7 @@ namespace HeroiPet
             if (fhPh == 1)
             {
                 float dx = tg.X - hx, dy = tg.Y - hy, d = (float)Math.Sqrt(dx * dx + dy * dy);
-                if (d < 8 * S) { fhPh = 2; fhOrbit = 0; } else MoveHero(tg.X, tg.Y, 150 * S, dt);
+                if (d < 8 * S) { fhPh = 2; fhOrbit = 0; } else MoveHero(tg.X, tg.Y, 56 * S, dt);      // velocidade padrao
             }
             else
             {
@@ -5313,7 +5313,6 @@ namespace HeroiPet
         {
             float dx = tx - hx, dy = ty - hy, d = (float)Math.Sqrt(dx * dx + dy * dy);
             if (d < 1) { walking = false; return; }
-            if (FairyOn) speed *= 0.6f;      // Link-fada voa mais devagar
             float step = Math.Min(d, speed * dt);
             hx += dx / d * step; hy += dy / d * step;
             if (Math.Abs(dx) > 2) hface = dx > 0 ? 1 : -1;

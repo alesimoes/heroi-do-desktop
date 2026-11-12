@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 12/11/2026 — Velocidade do Link-fada
+- Voltou à **velocidade padrão** no modo jogável e no automático (antes: 60% no jogável e muito rápido no automático).
+
 ## 12/11/2026 — Fadinha sombria ataca os monstros vermelhos
 - Com a **fadinha sombria** equipada, ela passa a atacar **todos os monstros vermelhos (octoroks)**, além das regras de ataque que já tinha (os chefões continuam de fora).
 
