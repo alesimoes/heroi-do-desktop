@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 12/11/2026 — Fadinha sombria ataca os monstros vermelhos
+- Com a **fadinha sombria** equipada, ela passa a atacar **todos os monstros vermelhos (octoroks)**, além das regras de ataque que já tinha (os chefões continuam de fora).
+
 ## 12/11/2026 — Escudo do rei pixelado
 - O escudo do rei (circular roxo com quadrado azul) agora é feito de quadradinhos como os outros escudos, no jogo e no inventário.
 

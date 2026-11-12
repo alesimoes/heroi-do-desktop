@@ -2981,7 +2981,7 @@ namespace HeroiPet
                 float bd = float.MaxValue;
                 foreach (Enemy e in enemies)
                 {
-                    if (!e.Fairy || e.Wave || e.Type == 3 || e.Type == 7) continue;
+                    if (e.Type == 3 || e.Type == 7) continue; if (!(eqFairy == 4 && e.Type == 0) && (!e.Fairy || e.Wave)) continue;      // fadinha sombria: tambem ataca TODOS os monstros vermelhos (octoroks)
                     float d = (e.X - fx) * (e.X - fx) + (e.Y - fy) * (e.Y - fy);
                     if (d < bd) { bd = d; fairyTarget = e; }
                 }
