@@ -380,7 +380,7 @@ namespace HeroiPet
         public static string[] HeroA = {
             "....KKKKKK....",
             "...KGGGGGGK...",
-            "..KGGGGGGGGK..",
+            "...KGGGGGGGK..",
             ".KGGGGGGGGGGK.",
             ".KGGYYYYYYYSK.",
             ".KGYYYYYYYYSSK",
@@ -388,17 +388,17 @@ namespace HeroiPet
             "..KYYYYYYSSSK.",
             "..KYYYYYSSSK..",
             "..KYYKGGGGKK..",
-            "..KGGGGGGGGK..",
-            "..KGGGGGGGGK..",
-            "..KGGGGGGGSK..",
-            "..KBBBBBBBBK..",
+            "...KGGGGGGGK..",
+            "...KGGGGGGGK..",
+            "...KGGGGGGSK..",
+            "...KBBBBBBBK..",
             "...KWWK.KWWK..",
             "...KBBK.KBBK.."
         };
         public static string[] HeroB = {
             "....KKKKKK....",
             "...KGGGGGGK...",
-            "..KGGGGGGGGK..",
+            "...KGGGGGGGK..",
             ".KGGGGGGGGGGK.",
             ".KGGYYYYYYYSK.",
             ".KGYYYYYYYYSSK",
@@ -406,10 +406,10 @@ namespace HeroiPet
             "..KYYYYYYSSSK.",
             "..KYYYYYSSSK..",
             "..KYYKGGGGKK..",
-            "..KGGGGGGGGK..",
-            "..KGGGGGGGGK..",
-            "..KGGGGGGGSK..",
-            "..KBBBBBBBBK..",
+            "...KGGGGGGGK..",
+            "...KGGGGGGGK..",
+            "...KGGGGGGSK..",
+            "...KBBBBBBBK..",
             "....KWWKWWK...",
             "....KBBKBBK..."
         };
