@@ -3716,18 +3716,17 @@ namespace HeroiPet
         }
 
         // Ao entrar no modo jogo: o heroi vai para o meio da tela e os monstros do modo automatico somem
-        int walletAuto, walletPlay;      // rupias de cada modo: ao trocar de modo cada um guarda as suas (e ficam salvas no registro)
+        // as rupias valem para o modo automatico e para o jogavel (as mesmas) e ficam salvas no registro
         void LoadWallets()
         {
             if (Environment.GetEnvironmentVariable("HEROI_TESTE") != null) return;
-            try { using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"SoftwareHeroiDoDesktop")) { if (k != null) { object a = k.GetValue("RupiasAuto"), b = k.GetValue("RupiasJogo"); if (a != null) walletAuto = Math.Max(0, Convert.ToInt32(a)); if (b != null) walletPlay = Math.Max(0, Convert.ToInt32(b)); } } } catch { }
-            rupees = walletAuto; lastStep = RupeeStep();      // o jogo abre no automatico
+            try { using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"SoftwareHeroiDoDesktop")) { if (k != null) { object a = k.GetValue("RupiasAuto"); if (a != null) rupees = Math.Max(0, Convert.ToInt32(a)); } } } catch { }
+            lastStep = RupeeStep();
         }
         void SaveWallets()
         {
             if (Environment.GetEnvironmentVariable("HEROI_TESTE") != null) return;
-            if (playMode) walletPlay = rupees; else walletAuto = rupees;
-            try { using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"SoftwareHeroiDoDesktop")) { k.SetValue("RupiasAuto", walletAuto); k.SetValue("RupiasJogo", walletPlay); } } catch { }
+            try { using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"SoftwareHeroiDoDesktop")) k.SetValue("RupiasAuto", rupees); } catch { }
         }
         void EnterPlay()
         {
@@ -3737,7 +3736,7 @@ namespace HeroiPet
             if (dead) { dead = false; hp = MaxHP; }
             hx = W / 2; hy = H / 2; kvx = kvy = 0; inv = 1f; walking = false;
             puffs.Add(new Puff { Kind = 2, X = hx, Y = hy });
-            walletAuto = rupees; rupees = walletPlay; apples = 0; flyApples.Clear(); toastShown = false;     // as rupias do automatico ficam guardadas; entram as do jogo
+            apples = 0; flyApples.Clear(); toastShown = false;      // as rupias valem para os dois modos (nao zeram)
             spawnTimer = 2.5f;
         }
 
@@ -3764,7 +3763,6 @@ namespace HeroiPet
             {
                 if (shield != null) { shield.Close(); shield = null; }
                 SetMaxHp(5);                                                // no automatico os coracoes extras sao perdidos
-                if (was) { walletPlay = rupees; rupees = walletAuto; }      // as rupias do jogo ficam guardadas; voltam as do automatico
                 lastStep = RupeeStep(); SaveWallets();
                 nextCalm = 120f + (float)rnd.NextDouble() * 180f;
             }

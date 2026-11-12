@@ -1,5 +1,8 @@
 ﻿# Changelog (resumo)
 
+## 12/11/2026 — Rupias iguais nos dois modos (substitui as duas entradas abaixo)
+- As rupias **valem para o automático e para o jogável** (as mesmas), não zeram ao trocar de modo e ficam **salvas ao fechar** (registro no desktop; navegador na web).
+
 ## 12/11/2026 — Rupias salvas ao fechar
 - As rupias dos dois modos (automático e jogável) ficam **salvas** ao fechar o jogo (e a cada ~20 s); ao abrir, o automático volta com as dele e o jogável com as dele. Na web ficam no navegador.
 
