@@ -189,7 +189,7 @@ namespace HeroiPet
         {
             List<string> r = new List<string>();
             if (Crown && !Tiara) { r.Add("....C.CC.C...."); r.Add("....CCCCCC...."); r.Add("....CRCCRC...."); }      // coroa sobre o gorro
-            if (Tiara) { int tw = rows[0].Length; r.Add(Ctr("......FPPF....", tw)); r.Add(Ctr("....F.FFFF.F..", tw)); r.Add(Ctr("....AFFFFFFA..", tw)); }      // tiara PRATEADA (F/A) com joia lilas;  com joia lilas (sem gorro: o cabelo aparece)
+            if (Tiara) { int tw = rows[0].Length; r.Add(Ctr(".....FPPF.....", tw)); r.Add(Ctr("...F.FFFF.F...", tw)); r.Add(Ctr("...AFFFFFFA...", tw)); }      // tiara PRATEADA (F/A) com joia lilas;  com joia lilas (sem gorro: o cabelo aparece)
             if (AppleHat) { int aw = rows[0].Length; r.Add(Ctr("........KNNK..", aw)); r.Add(Ctr(".....KBBKNNK..", aw)); r.Add(Ctr(".....KBBK.....", aw)); }      // cabinho de maca: talo marrom e folha verde
             for (int i = 0; i < rows.Length; i++)
             {
