@@ -189,10 +189,11 @@ namespace HeroiPet
         {
             List<string> r = new List<string>();
             if (Crown && !Tiara) { r.Add("....C.CC.C...."); r.Add("....CCCCCC...."); r.Add("....CRCCRC...."); }      // coroa sobre o gorro
-            if (Tiara) { int tw = rows[0].Length; r.Add(Ctr(".....FPPF.....", tw)); r.Add(Ctr("...F.FFFF.F...", tw)); r.Add(Ctr("...AFFFFFFA...", tw)); }      // tiara PRATEADA (F/A) com joia lilas;  com joia lilas (sem gorro: o cabelo aparece)
+            if (Tiara) { int tw = rows[0].Length; r.Add(Ctr(".....FPPF.....", tw)); r.Add(Ctr("...F.FFFF.F...", tw)); }      // a 3a fileira da tiara substitui o contorno de cima da cabeca (i == 0): assim ela encosta no cabelo      // tiara PRATEADA (F/A) com joia lilas;  com joia lilas (sem gorro: o cabelo aparece)
             if (AppleHat) { int aw = rows[0].Length; r.Add(Ctr("........KNNK..", aw)); r.Add(Ctr(".....KBBKNNK..", aw)); r.Add(Ctr(".....KBBK.....", aw)); }      // cabinho de maca: talo marrom e folha verde
             for (int i = 0; i < rows.Length; i++)
             {
+                if (Tiara && i == 0) { r.Add(Ctr("...AFFFFFFA...", rows[0].Length)); continue; }
                 string s = rows[i].Replace('Y', 'V').Replace('G', i < 9 ? (Crown ? 'V' : 'H') : 'Q');      // cabelo castanho ('V') para contrastar com o rosto; com a coroa: sem gorro (cabelo aparece) e a coroa fica sobre a cabeca
                 if (Crown && (i == 4 || i == 5) && s.StartsWith("KV")) s = ".K" + s.Substring(2);      // sem gorro: tira a pontinha do canto esquerdo da cabeca
                 if (MushHat && i >= 1 && i <= 3) s = Spots(s, i == 1 ? new int[] { 6 } : (i == 2 ? new int[] { 4, 8 } : new int[] { 3, 6, 10 }), 'H');
