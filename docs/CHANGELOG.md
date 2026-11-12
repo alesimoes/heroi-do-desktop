@@ -1,7 +1,10 @@
 ﻿# Changelog (resumo)
 
+## 12/11/2026 — Link de lado volta ao original
+- Escudo, espada, mão e inclinação da espada voltaram ao que eram no início; o bracinho foi removido (uma outra sessão o tinha reposto sem querer).
+
 ## 12/11/2026 — Conjunto gladiador (700 monstros)
-- Novo conjunto **gladiador**: elmo de bronze com **crista vermelha**, peitoral de bronze, saiote vermelho e sandálias. **Libera com 700 monstros** (contador dos conjuntos, só no automático), independente da ordem dos outros conjuntos; já vem vestido ao liberar e aparece em Roupas (Gorros: "Elmo de gladiador"; Roupas: "Roupa de gladiador").
+- Novo conjunto **gladiador**: elmo de aço com **faixa dourada** e **crista vermelha** grande, peitoral de bronze com **placas** (faixa escura no peito), cinto de couro, saiote vermelho e sandálias. **Libera com 700 monstros** (contador dos conjuntos, só no automático), independente da ordem dos outros conjuntos; já vem vestido ao liberar e aparece em Roupas (Gorros: "Elmo de gladiador"; Roupas: "Roupa de gladiador").
 
 ## 12/11/2026 — Link de lado: tronco mais fino
 - O tronco do Link de lado perdeu **1 quadradinho na frente (barriga)** e **1 atrás (costas)**, também na faixa da cintura.
