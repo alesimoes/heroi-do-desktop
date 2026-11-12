@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 12/11/2026 — Escudo do rei pixelado
+- O escudo do rei (circular roxo com quadrado azul) agora é feito de quadradinhos como os outros escudos, no jogo e no inventário.
+
 ## 12/11/2026 — Fadinha sombria, desequipar armas e conjunto de fada
 - **Fadinha sombria** (5ª aparência, aba Roupas → Fadinha): corpo roxo escuro e asas sombrias; vem junto com o conjunto sombra.
 - Com **tiara + blusa de fada** equipadas **não dá para equipar armas** (aba Armas avisa; nada aparece como equipado).

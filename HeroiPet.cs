@@ -3237,8 +3237,42 @@ namespace HeroiPet
                 }
             g.SmoothingMode = sm;
         }
+        static string[] kingShieldRows;
+        static string[] KingShieldRows()      // escudo do rei: circulo de 10x10 quadradinhos (contorno, aro lilas, fundo roxo e quadrado azul no centro)
+        {
+            if (kingShieldRows != null) return kingShieldRows;
+            string[] r = new string[10];
+            for (int y = 0; y < 10; y++)
+            {
+                char[] c = new char[10];
+                for (int x = 0; x < 10; x++)
+                {
+                    double dx = x - 4.5, dy = y - 4.5, d = Math.Sqrt(dx * dx + dy * dy);
+                    if (d > 4.95) c[x] = '.'; else if (d > 4.0) c[x] = 'K'; else if (d > 3.1) c[x] = 'M'; else c[x] = 'P';
+                    if (Math.Abs(dx) <= 1.6 && Math.Abs(dy) <= 1.6) c[x] = (Math.Abs(dx) <= 0.6 && Math.Abs(dy) <= 0.6) ? 'U' : 'K';
+                }
+                r[y] = new string(c);
+            }
+            kingShieldRows = r; return r;
+        }
+        void DrawKingShieldPix(Graphics g, float cx, float cy, float cell)      // pixelado como os outros escudos; (cx,cy) = centro
+        {
+            SmoothingMode sm = g.SmoothingMode; g.SmoothingMode = SmoothingMode.None;
+            string[] rows = KingShieldRows(); float x0 = cx - 5 * cell, y0 = cy - 5 * cell;
+            Color[] cs = { Color.FromArgb(28, 22, 36), Color.FromArgb(110, 60, 160), Color.FromArgb(70, 30, 110), Color.FromArgb(70, 125, 235) };
+            const string keys = "KMPU";
+            using (SolidBrush b = new SolidBrush(Color.Black))
+                for (int r = 0; r < rows.Length; r++) for (int c = 0; c < rows[r].Length; c++)
+                {
+                    int ci = keys.IndexOf(rows[r][c]); if (ci < 0) continue;
+                    float xa = (float)Math.Round(x0 + c * cell), xb = (float)Math.Round(x0 + (c + 1) * cell), ya = (float)Math.Round(y0 + r * cell), yb = (float)Math.Round(y0 + (r + 1) * cell);
+                    b.Color = cs[ci]; g.FillRectangle(b, xa, ya, Math.Max(1f, xb - xa), Math.Max(1f, yb - ya));
+                }
+            g.SmoothingMode = sm;
+        }
         void DrawShieldBody(Graphics g, float sx, float sy)
         {
+            if (eqShield == 2) { DrawKingShieldPix(g, sx + 3 * S, sy + 4 * S, 0.72f * S); return; }
             if (eqShield == 3) { DrawApplePix(g, sx - S, sy - S, S); return; }
             if (eqShield == 4) { DrawDarkShieldPix(g, sx - S, sy - S, S); return; }      // escudo sombrio: triangular embaixo
             if (eqShield == 2)
@@ -3267,6 +3301,7 @@ namespace HeroiPet
 
         void DrawShieldItem(Graphics g, float cx, float cy, float u)
         {
+            DrawKingShieldPix(g, cx, cy, 1.7f * u); return;      // icone pixelado
             Color dark = Color.FromArgb(28, 22, 36);
             using (SolidBrush kb = new SolidBrush(dark))
             using (SolidBrush pu = new SolidBrush(Color.FromArgb(70, 30, 110)))
