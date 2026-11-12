@@ -397,11 +397,11 @@ const OUTSETS = [
   { name: 'mar', hat: '#1ea0aa', tunic: '#1c7d96', pants: '#14506e', shoes: '#f0e6c8' },
   { name: 'cogumelo', hat: '#d63034', tunic: '#d63034', pants: '#d6c49c', shoes: '#ac8c62' },
   { name: 'maça', hat: '#c8222c', tunic: '#c8222c', pants: '#f4e4a8', shoes: '#46963c' },
-  { name: 'doce', hat: '#ffaacd', tunic: '#ffbed7', pants: '#fff6fa', shoes: '#bea0eb' },      // SURPRESA: rosa de algodao-doce com bolinhas brancas, calca clarinha e sapatinhos lilas
+  { name: 'doce', hat: '#ffaacd', tunic: '#ffbed7', pants: '#ffa0c4', shoes: '#e23642' },      // SURPRESA: rosa de algodao-doce com bolinhas brancas, calca clarinha e sapatinhos lilas
   { name: 'sombra', hat: '#222232', tunic: '#262638', pants: '#161620', shoes: '#4e161e' }];      // imita o Link Sombrio: gorro e blusa quase pretos, calca escura, sapatos vinho, cinto prateado e rosto palido      // maca: gorro e blusa vermelho-maca, calca cor de polpa, sapatos verde-folha, mais o escudo de maca cortada
 //      // cogumelo: gorro e blusa vermelhos com bolinhas brancas, calca cor do talo, mais o Cogumelo-maca
 const SET_THR = [4950, 6600, 8800, 11550, 15400, 17600, 20900, 36000, 52000];      // os 2 ultimos (doce e sombra) sao DIFICEIS: 36000 e 52000      // total de monstros derrotados (evoKills) para liberar cada conjunto
-const setBelt = (si) => si === 3 ? '#f0c828' : (si === 8 ? '#c4c6d6' : shadeHex(OUTSETS[si].tunic, -0.45));
+const setBelt = (si) => si === 7 ? '#b0d8ff' : si === 3 ? '#f0c828' : (si === 8 ? '#c4c6d6' : shadeHex(OUTSETS[si].tunic, -0.45));
 const shadeHex = (hex, t) => { const n = parseInt(hex.slice(1), 16), c = [n >> 16 & 255, n >> 8 & 255, n & 255].map((v) => Math.round(t >= 0 ? v + (255 - v) * t : v * (1 + t))); return '#' + c.map((v) => v.toString(16).padStart(2, '0')).join(''); };
 /* ---------- FASE 2 ----------
    Depois de vencer o Dragao comeca a FASE 2 (atalho ?fase2): os mesmos 7 niveis (agora a cada 40 rupias), monstros sombrios com o dobro de vida e, no fim, o vilao:
@@ -424,6 +424,7 @@ function buildSprites() {
   const hov = {}; if (eqHat === 1) hov.H = '#9650cd'; if (eqTunic === 1) hov.Q = '#467deb';      // equipado: gorro roxo / blusa azul
   if (eqTunic === 2) { hov.Q = '#be233c'; hov.J = '#966437'; hov.Z = '#823cbe'; }      // bau: manto vermelho, calca marrom, sapatos roxos
   if (eqHat >= 3) hov.H = OUTSETS[eqHat - 3].hat;      // conjuntos novos: gorro, blusa, calca e sapatos
+  if (eqTunic === 10) hov.z = '#ceb0f4';      // conjunto doce: meio da blusa lilas
   if (eqHat === 11) { hov.S = '#cec6d6'; hov.V = '#363648'; }      // conjunto sombra: rosto palido e cabelo escuro como o Link Sombrio
   if (eqTunic >= 3) { const o = OUTSETS[eqTunic - 3]; hov.Q = o.tunic; hov.J = o.pants; hov.Z = o.shoes; }
   { const hb = hov.H || '#3aa53e'; hov.i = shadeHex(hb, 0.4); hov.n = shadeHex(hb, -0.4); }
@@ -439,7 +440,8 @@ function buildSprites() {
     capItem: makeSprite(ROWS.capItem, S, { H: '#9650cd', h: '#cd96f0', g: '#60328c' }), shirtItem: makeSprite(ROWS.shirtItem, S, { Q: '#467deb', h: '#87b4ff', g: '#2d55be' }),
     crown: makeSprite(ROWS.crownItem, S, { C: '#ffcd28', c: '#d79614', R: '#d7283c', U: '#467deb' }), capGreen: makeSprite(ROWS.capItem, S, { H: '#3aa53e', h: '#82d278', g: '#1e6e2d' }), shirtGreen: makeSprite(ROWS.shirtItem, S, { Q: '#3aa53e', h: '#82d278', g: '#1e6e2d' }), robeItem: makeSprite(ROWS.robeIcon, S, { Q: '#be233c', g: '#821428', C: '#ffcd28' }),
     setCap, setShirt,
-    mushIcon: makeSprite(ROWS.mushItem, S, { R: '#d63034', W: '#fafafa', T: '#eee0bc', t: '#c8af82' }), hammerIcon: makeSprite(ROWS.hammerItem, S, { G: '#969bac', g: '#5f6476', h: '#d2d7e6', c: '#5ae1eb', C: '#ebffff' }), flameIcon: makeSprite(ROWS.flameItem, S, { O: '#ff8c28', Y: '#ffe15a', F: '#e84e1e', R: '#aa2828', B: '#6e2828', b: '#4b191e' }),    heroPow: [tintBlue(makeSprite(ROWS.heroA, S)), tintBlue(makeSprite(ROWS.heroB, S))],
+    mushIcon: makeSprite(ROWS.mushItem, S, { R: '#d63034', W: '#fafafa', T: '#eee0bc', t: '#c8af82' }), hammerIcon: makeSprite(ROWS.hammerItem, S, { G: '#969bac', g: '#5f6476', h: '#d2d7e6', c: '#5ae1eb', C: '#ebffff' }), darkIcon: makeSprite(ROWS.flameItem, S, { O: '#545078', F: '#545078', Y: '#acaacc', R: '#b02236', B: '#382c5a', b: '#221a38' }),
+    flameIcon: makeSprite(ROWS.flameItem, S, { O: '#ff8c28', Y: '#ffe15a', F: '#e84e1e', R: '#aa2828', B: '#6e2828', b: '#4b191e' }),    heroPow: [tintBlue(makeSprite(ROWS.heroA, S)), tintBlue(makeSprite(ROWS.heroB, S))],
     heart: makeSprite(ROWS.heart, S), heartE: makeSprite(ROWS.heart, S, { R: '#46465a', W: '#69697a' }), heartH: (() => { const e = makeSprite(ROWS.heart, S, { R: '#46465a', W: '#69697a' }), f = makeSprite(ROWS.heart, S), mk = (a, b) => { const c = document.createElement('canvas'); c.width = a.width; c.height = a.height; const g = c.getContext('2d'); g.drawImage(a, 0, 0); g.drawImage(b, 0, 0, b.width / 2, b.height, 0, 0, b.width / 2, b.height); return c; }; return { r: mk(e.r, f.r), l: mk(e.l, f.l), w: e.w, h: e.h }; })(),
     rupee: [makeSprite(ROWS.rupee, S), makeSprite(ROWS.rupee, S, { G: '#467deb' }), makeSprite(ROWS.rupee, S, { G: '#e63c3c' }), makeSprite(ROWS.rupee, S, { G: '#f0c83c' }), makeSprite(ROWS.rupee, S, { G: '#9650cd' }), makeSprite(ROWS.rupee, S * 2, { G: '#ffcd28' })],      // [5] = 300 (recompensa do dragao): dourada e grande
     rock: makeSprite(ROWS.rock, S), apple: makeSprite(ROWS.apple, S), appleHud: makeSprite(ROWS.appleBig, S),
@@ -609,9 +611,16 @@ const hatDetail = (s, i) => {      // i = brilho, n = sombra (como no icone do i
   else if (i === 2) { if (a[4] === 'H') a[4] = 'i'; }
   return a.join('');
 };
+const cuteTunic = (s, i) => {      // blusa do conjunto doce: 1 quadradinho maior para tras e, nas linhas da blusa, o meio fica lilas ('z')
+  const a = s.split(''); let f = 0; while (f < a.length && a[f] === '.') f++;
+  if (f > 0 && f + 1 < a.length) { a[f - 1] = 'K'; a[f] = a[f + 1] === 'K' ? 'Q' : a[f + 1]; if (i === 13) a[f] = 'B'; }
+  if (i <= 12) { let q0 = -1, q1 = -1; for (let c = 0; c < a.length; c++) if (a[c] === 'Q') { if (q0 < 0) q0 = c; q1 = c; } if (q0 >= 0) { const m = (q0 + q1) >> 1; if (a[m] === 'Q') a[m] = 'z'; if (m + 1 < a.length && a[m + 1] === 'Q') a[m + 1] = 'z'; } }
+  return a.join('');
+};
 const heroRows = (rows) => {
-  const out = rows.map((r, i) => { let s = r.replace(/Y/g, 'V').replace(/G/g, i < 9 ? (eqHat === 2 ? 'V' : 'H') : 'Q'); if ((eqHat === 8 || eqHat === 10) && i >= 1 && i <= 3) s = spotRow(s, i === 1 ? [6] : i === 2 ? [4, 8] : [3, 6, 10], 'H'); if (eqHat !== 2 && i >= 1 && i <= 3) s = hatDetail(s, i); if (eqTunic >= 3 && i === 13) s = s.replace(/B/g, 'b'); if ((eqTunic === 8 || eqTunic === 10) && i >= 10 && i <= 12) s = spotRow(s, i === 10 ? [5, 9] : i === 11 ? [4, 7, 10] : [5, 9], 'Q'); if (eqHat === 2 && (i === 4 || i === 5) && s.startsWith('KV')) s = '.K' + s.slice(2); if (eqTunic === 2) { if (i === 9) s = s.replace(/Q/g, 'F'); else if (i === 13) s = s.replace(/B/g, 'C'); else if (i === 14) s = s.replace(/W/g, 'J'); else if (i === 15) s = s.replace(/B/g, 'Z'); } else if (eqTunic >= 3) { if (i === 14) s = s.replace(/W/g, 'J'); else if (i === 15) s = s.replace(/B/g, 'Z'); } return s; });
+  const out = rows.map((r, i) => { let s = r.replace(/Y/g, 'V').replace(/G/g, i < 9 ? ((eqHat === 2 || eqHat === 10) ? 'V' : 'H') : 'Q'); if (eqHat === 8 && i >= 1 && i <= 3) s = spotRow(s, i === 1 ? [6] : i === 2 ? [4, 8] : [3, 6, 10], 'H'); if (eqHat !== 2 && eqHat !== 10 && i >= 1 && i <= 3) s = hatDetail(s, i); if (eqTunic === 10 && i >= 10 && i <= 13) s = cuteTunic(s, i); if (eqTunic >= 3 && i === 13) s = s.replace(/B/g, 'b'); if (eqTunic === 8 && i >= 10 && i <= 12) s = spotRow(s, i === 10 ? [5, 9] : i === 11 ? [4, 7, 10] : [5, 9], 'Q'); if ((eqHat === 2 || eqHat === 10) && (i === 4 || i === 5) && s.startsWith('KV')) s = '.K' + s.slice(2); if (eqTunic === 2) { if (i === 9) s = s.replace(/Q/g, 'F'); else if (i === 13) s = s.replace(/B/g, 'C'); else if (i === 14) s = s.replace(/W/g, 'J'); else if (i === 15) s = s.replace(/B/g, 'Z'); } else if (eqTunic >= 3) { if (i === 14) s = s.replace(/W/g, 'J'); else if (i === 15) s = s.replace(/B/g, 'Z'); } return s; });
   const ctr = (t) => { const w = rows[0].length, pad = Math.max(0, Math.floor((w - 14) / 2)); return ('.'.repeat(pad) + t).padEnd(w, '.').slice(0, w); };      // centra o desenho de 14 na largura da linha 0
+  if (eqHat === 10) return [ctr('....C..PP..C..'), ctr('....CCCCCCCC..'), ...out];      // conjunto doce: tiara dourada com joia lilas (sem gorro: o cabelo aparece)
   if (eqHat === 9) return [ctr('........KNNK..'), ctr('.....KBBKNNK..'), ctr('.....KBBK.....'), ...out];      // gorro maca: cabinho (talo marrom e folha verde) em cima
   return eqHat === 2 ? ['....C.CC.C....', '....CCCCCC....', '....CRCCRC....', ...out] : out;      // coroa sobre o gorro
 };
@@ -717,7 +726,7 @@ while (wpnKnown < 3 && wpnKills >= WPN_THR[wpnKnown]) wpnKnown++;
 if (/[?&]armas\b/.test(location.search)) wpnTest = true;      // teste rapido: as 3 armas liberadas
 const weaponsOwned = () => { if (wpnTest) return 3; let n = 0; while (n < 3 && wpnKills >= WPN_THR[n]) n++; return n; };
 const swHit = () => (eqSword === 2 ? 0.30 : eqSword === 3 ? 0.07 : eqSword === 4 ? 0.14 : 0.11), swEnd = () => (eqSword === 2 ? 0.55 : eqSword === 3 ? 0.20 : eqSword === 4 ? 0.36 : 0.32), swCool = () => (eqSword === 2 ? 0.40 : eqSword === 3 ? 0.08 : eqSword === 4 ? 0.24 : 0.22);      // marreta lenta e pesada; espada de chamas rapida
-const swordDamage = () => (eqSword === 1 ? 300 : eqSword === 2 ? 600 : eqSword === 3 ? 450 : eqSword === 4 ? 700 : 150);
+const swordDamage = () => (eqSword === 1 ? 300 : eqSword === 2 ? 600 : eqSword === 3 ? 450 : eqSword === 4 ? 700 : eqSword === 5 ? 800 : 150);
 function unlockWeapon(i) {      // arma nova: ja vem equipada, com aviso
   if (i === 0) eqSword = 2; else if (i === 1) eqSword = 3; else eqBow = 2;
   validateEquip(); saveEquip(); showNewItem(); say('Arma nova: ' + WPN_NAME[i] + '!');
@@ -729,14 +738,14 @@ function fireArrows(sx, sy) {
   else arrows.push({ x: sx, y: sy, vx: hero.aimX * 210 * S, vy: hero.aimY * 210 * S });
 }
 function updateCrystalQueue(dt) { if (crystalQ < 0) return; crystalQ -= dt; if (crystalQ > 0) return; crystalQ = -1; if (hero.dead || eqBow !== 2) return; arrows.push({ x: hero.x + hero.face * 7 * S, y: hero.y - 8 * S, vx: hero.aimX * 210 * S, vy: hero.aimY * 210 * S, crystal: true }); }
-function ownBow(i) { return i === 0 || (i === 1 && evoStage >= 1) || (i === 2 && weaponsOwned() >= 3); }
-function ownSword(i) { return i === 0 || (i === 1 && evoStage >= 4) || (i === 2 && weaponsOwned() >= 1) || (i === 3 && weaponsOwned() >= 2) || (i === 4 && setsOwned() >= 6); }
-function ownShield(i) { return i === 0 || (i === 1 && evoStage >= 4) || (i === 2 && kingGear) || (i === 3 && setsOwned() >= 7); }      // 3 = escudo maca cortada (conjunto maca)
+function ownBow(i) { return i === 0 || (i === 1 && evoStage >= 1) || (i === 2 && weaponsOwned() >= 3) || (i === 3 && setsOwned() >= 9); }      // 3 = arco sombrio (conjunto sombra)
+function ownSword(i) { return i === 0 || (i === 1 && evoStage >= 4) || (i === 2 && weaponsOwned() >= 1) || (i === 3 && weaponsOwned() >= 2) || (i === 4 && setsOwned() >= 6) || (i === 5 && setsOwned() >= 9); }
+function ownShield(i) { return i === 0 || (i === 1 && evoStage >= 4) || (i === 2 && kingGear) || (i === 3 && setsOwned() >= 7) || (i === 4 && setsOwned() >= 9); }      // 3 = escudo maca cortada (conjunto maca)
 const setsOwned = () => { if (setsTest) return OUTSETS.length; let n = 0; while (n < OUTSETS.length && setKills >= SET_THR[n]) n++; return n; };
 function ownHat(i) { return i === 0 || (i === 1 && evoStage >= 2) || (i === 2 && kingGear) || (i >= 3 && i - 3 < setsOwned()); }
 function ownTunic(i) { return i === 0 || (i === 1 && evoStage >= 3) || (i === 2 && kingGear) || (i >= 3 && i - 3 < setsOwned()); }
 function unlockSet(i) {      // conjunto novo: ja vem vestido, com aviso
-  eqHat = 3 + i; eqTunic = 3 + i; if (i === 5) eqSword = 4; if (i === 6) eqShield = 3; validateEquip(); saveEquip(); buildSprites(); buildProps(); showNewItem(); say('Conjunto novo: ' + OUTSETS[i].name + '!');
+  eqHat = 3 + i; eqTunic = 3 + i; if (i === 5) eqSword = 4; if (i === 6) eqShield = 3; if (i === 8) { eqSword = 5; eqShield = 4; eqBow = 3; } validateEquip(); saveEquip(); buildSprites(); buildProps(); showNewItem(); say('Conjunto novo: ' + OUTSETS[i].name + '!');
   for (let k = 0; k < 10; k++) puffs.push({ kind: k % 2, x: hero.x + (rnd() - 0.5) * 20 * S, y: hero.y - rnd() * 18 * S, t: 0 });
 }
 const ownFairy = (i) => (i === 0 && fairyState === 1) || (i >= 1 && fairySkin >= i);
@@ -1579,6 +1588,40 @@ function updateDrops(dt) {      // espirra gotas quando o heroi anda dentro de u
   wasInPuddle = inP;
 }
 function drawDrops() { for (const d of drops) { rect('#bee1fa', d.x - S, d.y - S, 2 * S, 2 * S); rect('#ffffff', d.x - S, d.y - S, S, S); } }
+// CONJUNTO DOCE: o Link age como uma FADA: flutua (pairando e balancando no ar), tem asinhas que batem e deixa um rastro de brilhinhos
+const fairyOn = () => eqTunic === 10 && eqHat === 10 && !hero.dead && powerT <= 0;
+const fairyLift = () => 4.5 * S + Math.sin(time * 3.4) * 0.9 * S;
+let fairyFxT = 0; const linkFairySparks = [];
+function updateFairyFx(dt) {      // rastro de brilhinhos pequenos atras do Link-fada
+  for (let i = linkFairySparks.length - 1; i >= 0; i--) { const p = linkFairySparks[i]; p.t += dt; p.y += 6 * S * dt; if (p.t > 0.8) linkFairySparks.splice(i, 1); }
+  if (!fairyOn() || scene !== 0) return;
+  fairyFxT -= dt; if (fairyFxT > 0) return;
+  fairyFxT = hero.walking ? 0.07 : 0.16;
+  linkFairySparks.push({ x: hero.x + (rnd() - 0.5) * 12 * S - hero.face * 3 * S, y: hero.y - fairyLift() - rnd() * 15 * S, t: 0 });
+}
+function drawFairySparks() {
+  for (const p of linkFairySparks) {
+    const k = Math.max(0, 1 - p.t / 0.8), n = k > 0.55 ? 2 : 1;      // estrelinha em cruz que encolhe
+    rect('#ffcde8', p.x - n * S / 2, p.y - S / 2, n * S, S); rect('#ffcde8', p.x - S / 2, p.y - n * S / 2, S, n * S); if (n === 2) rect('#ffffff', p.x - S / 2, p.y - S / 2, S, S);
+  }
+}
+function drawFairyWings(x, y, face, front) {      // asinhas de fada: brancas e azul bebe, batendo; de lado uma grande atras e uma pequena embaixo; de frente uma de cada lado
+  const w1 = ['..KK..', '.KWWK.', 'KWBWWK', 'KWWBWK', 'KWWWWK', '.KWWK.', '..KK..'], w2 = ['.KK.', 'KWWK', 'KWBK', '.KK.'];
+  const flap = Math.floor(time * 9) % 2 === 0, rowsN = flap ? 7 : 6, col = { K: '#96bcec', W: '#fcfcff', B: '#bce0ff' };
+  for (let side = 0; side < (front ? 2 : 1); side++) {
+    const dir = front ? (side === 0 ? -1 : 1) : -face, ox = x + dir * (front ? 6 : 4) * S, oy = y - 5 * S;
+    for (let r = 0; r < rowsN; r++) for (let c = 0; c < 6; c++) { const ch = w1[r][c]; if (ch === '.') continue; const cx = dir > 0 ? c : 5 - c; rect(col[ch], ox + (dir > 0 ? 0 : -6 * S) + cx * S, oy + r * S, S, S); }
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) { const ch = w2[r][c]; if (ch === '.') continue; const cx = dir > 0 ? c : 3 - c; rect(col[ch], ox + (dir > 0 ? S : -5 * S) + cx * S, oy + rowsN * S + r * S - S, S, S); }
+  }
+}
+function drawHeroFx() {
+  if (!fairyOn()) { drawHeroMaybeWading(); return; }
+  shadow(hero.x, hero.y, 12);      // a sombra fica no chao
+  noShadow = true; ctx.save(); ctx.translate(0, -fairyLift());
+  drawFairyWings(hero.x, hero.y - 12 * S, hero.face, false);
+  drawHeroMaybeWading();
+  ctx.restore(); noShadow = false;
+}
 function drawHeroMaybeWading() {      // dentro da poca o pe fica um pouquinho submerso
   if (!interlude || hero.dead || !inPuddle(hero.x, hero.y)) { drawHero(); return; }
   ctx.save(); ctx.beginPath(); ctx.rect(-20000, -20000, 40000, 20000 + hero.y - 2 * S); ctx.rect(-20000, hero.y, 40000, 20000); ctx.clip(); drawHero(); ctx.restore();      // corta os pes (2 quadradinhos)
@@ -1771,7 +1814,7 @@ function step(dt) {
   if (p2MsgT > 0) { p2MsgT += dt; if (p2MsgT >= 5) p2MsgT = 0; }      // aviso da Fase 2 conta tempo ate durante a cena
   if (scene !== 0) { updateScene(dt); return; }      // cena do Feiticeiro: o jogo fica parado
   if (staffPending) { staffPending = false; if (interlude && !staffPh) startStaffEvent(); }
-  updateStaff(dt); updateAlly(dt); updateDrops(dt);
+  updateStaff(dt); updateAlly(dt); updateDrops(dt); updateFairyFx(dt);
   updateCalmState(dt);
   spawnTimer -= dt;
   if (spawnTimer <= 0) { spawnTimer = (3 + rnd() * 4) / spawnRateMul(); if (enemies.length < enemyCap() && !hero.dead && calmState === 0 && cookState === 0 && bossPhase === 0 && !errandPh && !staffPh) spawn(spawnType()); }      // sem monstros enquanto colhe a pedido
@@ -1812,7 +1855,8 @@ function updateHero(dt) {
 
 /* ============================ DESENHO ============================ */
 function spr(sp, cx, feetY, right) { ctx.drawImage(right ? sp.r : sp.l, Math.round(cx - sp.w / 2), Math.round(feetY - sp.h)); }
-function shadow(x, y, wTiles) { ctx.fillStyle = 'rgba(30,28,45,.38)'; ctx.beginPath(); ctx.ellipse(x, y + S * 0.5, wTiles * S / 2, S * 1.5, 0, 0, TAU); ctx.fill(); }
+let noShadow = false;      // true enquanto o Link-fada e desenhado no ar (a sombra fica no chao)
+function shadow(x, y, wTiles) { if (noShadow) return; ctx.fillStyle = 'rgba(30,28,45,.38)'; ctx.beginPath(); ctx.ellipse(x, y + S * 0.5, wTiles * S / 2, S * 1.5, 0, 0, TAU); ctx.fill(); }
 function rect(c, x, y, w, h) { ctx.fillStyle = c; ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
 function text(s, x, y, color, size, align) {
   ctx.font = 'bold ' + (size || 4 * S) + 'px "Press Start 2P", Consolas, monospace'; ctx.textAlign = align || 'left'; ctx.textBaseline = 'top';
@@ -1884,7 +1928,7 @@ function drawPixelatedSword(handX, handY, dx0, dy0, px0, py0, sc, lenCells) {
   const ang = Math.round(Math.atan2(dy0, dx0) / (Math.PI / 4)) * (Math.PI / 4), dx = Math.cos(ang), dy = Math.sin(ang), px = -dy, py = dx;
   const cell = Math.max(1, Math.floor(sc / 2 + 0.5)); handX = Math.round(handX); handY = Math.round(handY);      // quadradinho pequeno, em pixels inteiros
   const mix = (a, b, t) => { const p = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)], A = p(a), B = p(b); return 'rgb(' + A.map((v, k) => Math.round(v + (B[k] - v) * t)).join(',') + ')'; };
-  const outl = '#1c1624', blade = eqSword === 1 ? '#cde8ff' : '#e1ebf5', guard = eqSword === 1 ? '#3c5fcd' : '#d7a028', grip = eqSword === 1 ? '#503796' : '#87552d', lite = mix(blade, '#ffffff', 0.6);
+  const outl = '#1c1624', blade = eqSword === 5 ? '#545078' : (eqSword === 1 ? '#cde8ff' : '#e1ebf5'), guard = eqSword === 5 ? '#b02236' : (eqSword === 1 ? '#3c5fcd' : '#d7a028'), grip = eqSword === 5 ? '#342854' : (eqSword === 1 ? '#503796' : '#87552d'), lite = mix(blade, '#ffffff', 0.6);
   const tipU = Math.round(lenCells * sc / cell), R = Math.ceil(tipU + 4);
   for (let ci = -R; ci <= R; ci++) for (let cj = -R; cj <= R; cj++) {
     const u = ci * dx + cj * dy, w = ci * px + cj * py, aw = Math.abs(w); let c = null;
@@ -1905,7 +1949,7 @@ function drawPixelatedSword(handX, handY, dx0, dy0, px0, py0, sc, lenCells) {
 }
 function drawSword(handX, handY, aDeg, f) {
   const a = aDeg * Math.PI / 180, dx = f * Math.cos(a), dy = Math.sin(a), px = -dy, py = dx, len = 11 * S, w = 1.0 * S;      // espada menor em proporcao ao Link (antes 14 e 1,2)
-  if (eqSword >= 2) { drawSpecialSword(handX, handY, dx, dy, px, py); return; }      // marreta / espada de chamas
+  if (eqSword >= 2 && eqSword !== 5) { drawSpecialSword(handX, handY, dx, dy, px, py); return; }      // marreta / espada de chamas
   drawPixelatedSword(handX, handY, dx, dy, px, py, S, 11);      // espada comum / Mestre pixelada (mesmo desenho de antes, em quadradinhos)
 }
 // ESCUDO DE MACA CORTADA: grade de 11 x 14 quadradinhos (8% maiores que na versao de 12 x 15, e mais simples): casca vermelha com um brilho, polpa creme, 2 sementes, talo e folha. A forma (dois lobos com covinha em cima) e gerada por codigo (igual ao desktop).
@@ -1952,16 +1996,16 @@ function drawShieldBody(sx, sy) {
     const cx = sx + 3 * S, cy = sy + 4 * S, circ = (r, c) => { ctx.beginPath(); ctx.arc(cx, cy, r, 0, TAU); ctx.fillStyle = c; ctx.fill(); };
     circ(3.6 * S, '#1c1624'); circ(2.8 * S, '#461e6e'); rect('#1c1624', cx - 1.7 * S, cy - 1.7 * S, 3.4 * S, 3.4 * S); rect('#467deb', cx - 1.3 * S, cy - 1.3 * S, 2.6 * S, 2.6 * S); return;
   }
-  rect('#1c1624', sx, sy, 6 * S, 8 * S); rect(eqShield === 1 ? '#cd3232' : '#375fcd', sx + S, sy + S, 4 * S, 6 * S); rect('#f5cd46', sx + 2 * S, sy + 2 * S, 2 * S, 2 * S); }      // escudo menor em proporcao ao Link (6 x 8; antes 8 x 10)
+  rect('#1c1624', sx, sy, 6 * S, 8 * S); rect(eqShield === 4 ? '#342e54' : (eqShield === 1 ? '#cd3232' : '#375fcd'), sx + S, sy + S, 4 * S, 6 * S); rect(eqShield === 4 ? '#cccee0' : '#f5cd46', sx + 2 * S, sy + 2 * S, 2 * S, 2 * S); }      // escudo menor em proporcao ao Link (6 x 8; antes 8 x 10)
 // ARCO em pixel art (os tres arcos), igual no jogo, no menu, no inventario e no item grande: curva de quadradinhos (miolo de 1 unidade, contorno escuro de 1 unidade).
 // dx,dy = para onde aponta (a barriga vai para la); half = meia altura; bend = quanto a barriga avanca; eq: 0 madeira | 1 metal | 2 cristal
 function pixelBow(cx, cy, dx, dy, half, bend, unit, eq) {
-  const main = eq === 2 ? '#3cc8d2' : (eq === 1 ? '#b9c0cd' : '#87552d'), hi = eq === 2 ? '#d7ffff' : (eq === 1 ? '#f0f5ff' : '#b97d46'), px = -dy, py = dx, n = Math.max(10, Math.floor(half * 2 / unit * 1.6)), pts = [];
+  const main = eq === 3 ? '#4e4a6c' : eq === 2 ? '#3cc8d2' : (eq === 1 ? '#b9c0cd' : '#87552d'), hi = eq === 3 ? '#a09cc8' : eq === 2 ? '#d7ffff' : (eq === 1 ? '#f0f5ff' : '#b97d46'), px = -dy, py = dx, n = Math.max(10, Math.floor(half * 2 / unit * 1.6)), pts = [];
   for (let i = 0; i <= n; i++) { const u = i / n * 2 - 1, b = bend * (1 - u * u); pts.push([Math.floor((cx + px * u * half + dx * b) / unit) * unit, Math.floor((cy + py * u * half + dy * b) / unit) * unit]); }
   const sq = (p, c, o, w) => { ctx.fillStyle = c; ctx.fillRect(p[0] - o, p[1] - o, w, w); };
-  const shd = eq === 2 ? '#2296aa' : (eq === 1 ? '#808aa6' : '#965624');
+  const shd = eq === 3 ? '#2e2a4a' : eq === 2 ? '#2296aa' : (eq === 1 ? '#808aa6' : '#965624');
   pts.forEach((p) => sq(p, '#1c1624', unit, 4 * unit)); pts.forEach((p) => sq(p, main, 0, 2 * unit)); pts.forEach((p) => sq([p[0] + unit, p[1] + unit], shd, 0, unit)); for (let i = 1; i < n; i += 3) sq(pts[i], hi, 0, unit);      // membros GROSSOS (2 quadradinhos) com contorno forte e lado de baixo mais escuro
-  { const gcol = eq === 2 ? '#ffaa28' : (eq === 1 ? '#deb040' : '#684024'); for (let k = -2; k <= 2; k++) sq(pts[Math.max(0, Math.min(n, (n >> 1) + k * 2))], gcol, 0, unit); }      // empunhadura: 5 quadradinhos no meio numa cor diferente
+  { const gcol = eq === 3 ? '#c42838' : eq === 2 ? '#ffaa28' : (eq === 1 ? '#deb040' : '#684024'); for (let k = -2; k <= 2; k++) sq(pts[Math.max(0, Math.min(n, (n >> 1) + k * 2))], gcol, 0, unit); }      // empunhadura: 5 quadradinhos no meio numa cor diferente
   if (eq === 2) { const m = pts[n >> 1]; sq([m[0] - unit / 2, m[1] - unit / 2], '#ffaa28', 0, 2 * unit); sq(pts[0], '#78ebf5', 0, unit); sq(pts[n], '#78ebf5', 0, unit); }
 }
 function bowIcon(eq, cx, cy, u) {      // arco para icones e item grande (barriga para a direita, como no jogo)
@@ -2099,7 +2143,7 @@ function render() {
   drawPuddles();
   for (const it of items) { if (it.t > 12 && Math.floor(it.t * 8) % 2 === 0) continue; const bob = Math.abs(Math.sin(it.t * 4)) * 2 * S; shadow(it.x, it.y, 6); spr(it.kind === 0 ? SP.heart : SP.rupee[it.kind - 1], it.x, it.y - 2 * S - bob, true); }
   drawDragonGhost(); drawShocks(); drawChest();
-  const ents = [...propEnts(), ...enemies.map((e) => ({ y: e.y, f: () => drawEnemy(e) })), ...trees.map((t) => ({ y: t.y, f: () => drawTree(t) })), { y: hero.y, f: drawHeroMaybeWading }];
+  const ents = [...propEnts(), ...enemies.map((e) => ({ y: e.y, f: () => drawEnemy(e) })), ...trees.map((t) => ({ y: t.y, f: () => drawTree(t) })), { y: hero.y, f: drawHeroFx }];
   if (allyOn) ents.push({ y: ay, f: drawAlly });
   if (cookState !== 0 || bossPhase === 1) ents.push({ y: fireY, f: drawFire });
   ents.sort((a, b) => a.y - b.y).forEach((o) => o.f());
@@ -2109,7 +2153,7 @@ function render() {
   for (const fa of flyApples) { const u = Math.min(1, fa.t / 0.6), tx = hero.x + hero.face * 6 * S, ty = hero.y - 20 * S; spr(SP.apple, fa.x0 + (tx - fa.x0) * u, fa.y0 + (ty - fa.y0) * u - Math.sin(u * Math.PI) * 6 * S + SP.apple.h / 2, true); }
   for (const a of cookApples) { const u = Math.min(1, a.t / a.dur); drawBakeApple(a.dir === 1 ? 0 : 3, a.x0 + (a.x1 - a.x0) * u, a.y0 + (a.y1 - a.y0) * u - Math.sin(u * Math.PI) * 10 * S, 1.5); }
   for (const s of smokes) { if (s.t < 0) continue; const k = s.t / (s.life || 3.2), sz = S * (s.sz + k * (s.grow || 5)), sh = Math.floor(210 - 90 * k); ctx.fillStyle = 'rgb(' + sh + ',' + sh + ',' + (sh + 10) + ')'; ctx.fillRect(Math.round(s.x - sz / 2), Math.round(s.y - s.t * 11 * S - sz / 2), Math.round(sz), Math.round(sz)); }
-  puffs.forEach(drawPuff); drawDrops(); drawStaff(); ctx.restore();      // HUD e mensagens nao ampliam
+  puffs.forEach(drawPuff); drawDrops(); drawFairySparks(); drawStaff(); ctx.restore();      // HUD e mensagens nao ampliam
   drawChestPrompt(); drawHud(); drawBossMsg(); drawEvo(); drawDialog(); drawTint();
   if (paused) {
     ctx.fillStyle = 'rgba(8,6,16,.35)'; ctx.fillRect(0, 0, W, H);
@@ -2156,8 +2200,8 @@ $('goPlay').addEventListener('click', () => { $('intro').hidden = true; goFullsc
 $('goAuto').addEventListener('click', () => { $('intro').hidden = true; goFullscreen(); });
 /* ---------- MENU DE PAUSA (heroi de frente com franja no olho; sem atalhos de teste nem "dar 5 macas"; Espaco; clicar na maca = comer; Roupas: heroi sem armas): abas Armas / Roupas / Comida e o heroi ampliado ---------- */
 let invOn = false, invTab = -1, invBow = false, invEatT = 0, previewBare = false, invMsg = '', eatRaw = false, autoEatPh = 0, autoEatTree = null;      // invBow: o heroi do exemplo segura o arco (clicou num arco) ou espada e escudo (clicou neles)
-const INV_NAMES = [['Arco de madeira', 'Arco de metal', 'Arco de cristal'], ['Espada comum', 'Espada Mestre', 'Marreta trovão', 'Espada de chamas', 'Espada cogumelo'], ['Escudo azul', 'Escudo vermelho', 'Escudo do rei', 'Escudo maçã'], ['Gorro verde', 'Gorro roxo', 'Coroa de ouro', 'Gorro areia', 'Gorro gelo', 'Gorro fogo', 'Gorro noite', 'Gorro mar', 'Gorro cogumelo', 'Gorro maçã', 'Gorro doce', 'Gorro sombra'], ['Túnica verde', 'Blusa azul', 'Roupa de rei', 'Blusa areia', 'Blusa gelo', 'Blusa fogo', 'Blusa noite', 'Blusa mar', 'Blusa cogumelo', 'Blusa maçã', 'Blusa doce', 'Blusa sombra'], ['Fadinha', 'Fadinha rosa', 'Fadinha folha', 'Fadinha estrela']];
-const INV_DESC = [['O arco de sempre.', 'Flechas com o dobro de dano.', 'Atira 2 flechas de cristal, uma logo depois da outra.'], ['A espada de sempre: 150 de dano.', 'Espada Mestre: o dobro de dano, 300 de dano.', 'Usa as DUAS mãos (sem escudo): golpe lento, área grande, 600 de dano.', 'Lâmina de fogo: golpes muito rápidos, 450 de dano.', 'Um cogumelo gigante de maça: acerta em área e solta esporos, 700 de dano (vem com o conjunto cogumelo).'], ['Escudo comum.', 'Escudo vermelho do herói.', 'Escudo circular do tesouro do rei.', 'Escudo de maçã cortada (vem com o conjunto maçã).'], ['O gorro de sempre.', 'Gorro roxo da evolução.', 'Coroa de ouro do tesouro do rei.', 'Conjunto areia: gorro, blusa, calça e sapatos.', 'Conjunto gelo: gorro, blusa, calça e sapatos.', 'Conjunto fogo: gorro, blusa, calça e sapatos.', 'Conjunto noite: gorro, blusa, calça e sapatos.', 'Conjunto mar: gorro, blusa, calça e sapatos.', 'Conjunto cogumelo: gorro com bolinhas, blusa de cogumelo e calça cor do talo.', 'Conjunto maçã: gorro, blusa, calça e sapatos, mais o escudo de maçã cortada.', 'Conjunto doce: gorro, blusa, calça e sapatos fofos, rosinha com bolinhas.', 'Conjunto sombra: gorro, blusa, calça e sapatos escuros, no estilo do Link Sombrio.'], ['A túnica de sempre.', 'Blusa azul da evolução.', 'Manto vermelho, calça marrom e sapatos roxos.', 'Blusa, calça e sapatos do conjunto areia.', 'Blusa, calça e sapatos do conjunto gelo.', 'Blusa, calça e sapatos do conjunto fogo.', 'Blusa, calça e sapatos do conjunto noite.', 'Blusa, calça e sapatos do conjunto mar.', 'Blusa de cogumelo com bolinhas e calça cor do talo (conjunto cogumelo).', 'Blusa, calça e sapatos do conjunto maçã.', 'Blusa, calça e sapatos do conjunto doce.', 'Blusa, calça e sapatos do conjunto sombra.'], ['A fadinha ajudante.', 'Corpo rosa e asas azul escuro.']];
+const INV_NAMES = [['Arco de madeira', 'Arco de metal', 'Arco de cristal', 'Arco sombrio'], ['Espada comum', 'Espada Mestre', 'Marreta trovão', 'Espada de chamas', 'Espada cogumelo', 'Espada sombria'], ['Escudo azul', 'Escudo vermelho', 'Escudo do rei', 'Escudo maçã', 'Escudo sombrio'], ['Gorro verde', 'Gorro roxo', 'Coroa de ouro', 'Gorro areia', 'Gorro gelo', 'Gorro fogo', 'Gorro noite', 'Gorro mar', 'Gorro cogumelo', 'Gorro maçã', 'Gorro doce', 'Gorro sombra'], ['Túnica verde', 'Blusa azul', 'Roupa de rei', 'Blusa areia', 'Blusa gelo', 'Blusa fogo', 'Blusa noite', 'Blusa mar', 'Blusa cogumelo', 'Blusa maçã', 'Blusa doce', 'Blusa sombra'], ['Fadinha', 'Fadinha rosa', 'Fadinha folha', 'Fadinha estrela']];
+const INV_DESC = [['O arco de sempre.', 'Flechas com o dobro de dano.', 'Atira 2 flechas de cristal, uma logo depois da outra.', 'Arco escuro do Link Sombrio (vem com o conjunto sombra).'], ['A espada de sempre: 150 de dano.', 'Espada Mestre: o dobro de dano, 300 de dano.', 'Usa as DUAS mãos (sem escudo): golpe lento, área grande, 600 de dano.', 'Lâmina de fogo: golpes muito rápidos, 450 de dano.', 'Um cogumelo gigante de maça: acerta em área e solta esporos, 700 de dano (vem com o conjunto cogumelo).', 'Lâmina escura do Link Sombrio: 800 de dano (vem com o conjunto sombra).'], ['Escudo comum.', 'Escudo vermelho do herói.', 'Escudo circular do tesouro do rei.', 'Escudo de maçã cortada (vem com o conjunto maçã).', 'Escudo escuro com emblema prateado, do Link Sombrio (vem com o conjunto sombra).'], ['O gorro de sempre.', 'Gorro roxo da evolução.', 'Coroa de ouro do tesouro do rei.', 'Conjunto areia: gorro, blusa, calça e sapatos.', 'Conjunto gelo: gorro, blusa, calça e sapatos.', 'Conjunto fogo: gorro, blusa, calça e sapatos.', 'Conjunto noite: gorro, blusa, calça e sapatos.', 'Conjunto mar: gorro, blusa, calça e sapatos.', 'Conjunto cogumelo: gorro com bolinhas, blusa de cogumelo e calça cor do talo.', 'Conjunto maçã: gorro, blusa, calça e sapatos, mais o escudo de maçã cortada.', 'Conjunto doce: gorro, blusa, calça e sapatos fofos, rosinha com bolinhas.', 'Conjunto sombra: gorro, blusa, calça e sapatos escuros, no estilo do Link Sombrio.'], ['A túnica de sempre.', 'Blusa azul da evolução.', 'Manto vermelho, calça marrom e sapatos roxos.', 'Blusa, calça e sapatos do conjunto areia.', 'Blusa, calça e sapatos do conjunto gelo.', 'Blusa, calça e sapatos do conjunto fogo.', 'Blusa, calça e sapatos do conjunto noite.', 'Blusa, calça e sapatos do conjunto mar.', 'Blusa de cogumelo com bolinhas e calça cor do talo (conjunto cogumelo).', 'Blusa, calça e sapatos do conjunto maçã.', 'Blusa, calça e sapatos do conjunto doce.', 'Blusa, calça e sapatos do conjunto sombra.'], ['A fadinha ajudante.', 'Corpo rosa e asas azul escuro.']];
 const withCtx = (c, fn) => { const old = ctx; ctx = c; try { fn(); } finally { ctx = old; } };
 function iconShape(g, pts, fill, u) { g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.closePath(); g.fillStyle = fill; g.fill(); g.lineWidth = Math.max(1, u * 0.7); g.strokeStyle = '#1c1624'; g.lineJoin = 'round'; g.stroke(); }
 function drawIcon(cat, id, cx, cy, u) {      // desenha o icone no 'ctx' atual
@@ -2165,7 +2209,7 @@ function drawIcon(cat, id, cx, cy, u) {      // desenha o icone no 'ctx' atual
   if (cat === 0) {
     bowIcon(id, cx, cy, u * 0.85);
   } else if (cat === 1) {
-    if (id >= 2) { itemSpr(id === 2 ? SP.hammerIcon : id === 4 ? SP.mushIcon : SP.flameIcon, cx, cy, u * 0.85); return; }
+    if (id >= 2) { itemSpr(id === 2 ? SP.hammerIcon : id === 4 ? SP.mushIcon : id === 5 ? SP.darkIcon : SP.flameIcon, cx, cy, u * 0.85); return; }
     const m = id === 1; ctx.save(); ctx.translate(cx, cy); ctx.rotate(Math.PI / 4);
     iconShape(ctx, [[-2 * u, 3 * u], [-2 * u, -11 * u], [0, -15 * u], [2 * u, -11 * u], [2 * u, 3 * u]], m ? '#cde8ff' : '#e1ebf5', u); rect('#fff', -0.4 * u, -12 * u, 0.8 * u, 14 * u);
     iconShape(ctx, [[-6 * u, 3 * u], [6 * u, 3 * u], [7 * u, 6 * u], [-7 * u, 6 * u]], m ? '#3c5fcd' : '#d7a028', u);
@@ -2174,7 +2218,7 @@ function drawIcon(cat, id, cx, cy, u) {      // desenha o icone no 'ctx' atual
     if (id === 2) { drawShieldItem(cx, cy, u * 0.9); return; }
     if (id === 3) { const k3 = u * 2.2; drawApplePix(cx - 4 * k3, cy - 5 * k3, k3); return; }
     const k = u * 2.2, x = cx - 3 * k, y = cy - 4 * k;      // mesmo formato do escudo do jogo: retangulo 6x8, borda escura, quadradinho amarelo 2x3
-    rect('#1c1624', x - k, y - k, 8 * k, 10 * k); rect(id === 1 ? '#cd3232' : '#375fcd', x, y, 6 * k, 8 * k); rect('#f5cd46', x + 2 * k, y + 2 * k, 2 * k, 3 * k);
+    rect('#1c1624', x - k, y - k, 8 * k, 10 * k); rect(id === 4 ? '#342e54' : (id === 1 ? '#cd3232' : '#375fcd'), x, y, 6 * k, 8 * k); rect(id === 4 ? '#cccee0' : '#f5cd46', x + 2 * k, y + 2 * k, 2 * k, 3 * k);
   } else if (cat === 3) {
     if (id === 2) { drawCrownItem(cx, cy, u * 0.9); return; }
     if (id >= 3) { itemSpr(SP.setCap[id - 3], cx, cy, u * 0.85); return; }
@@ -2193,6 +2237,7 @@ function iconCanvas(cat, id) { const c = document.createElement('canvas'); c.wid
 function appleIcon() { const c = document.createElement('canvas'); c.width = c.height = 72; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(SP.appleHud.r, 4, 4, 64, 64); return c; }      // a mesma maca em pixel art do indicador do topo
 // heroi de frente no inventario (corpo estreito, escudo no braco, espada inteira): o sprite frontal atual, escudo baixado ao lado, espada ou arco na mao direita (sem armas na aba Roupas)
 function drawHeroFrontPreview() {
+  if (eqTunic === 10 && eqHat === 10) drawFairyWings(hero.x, hero.y - 12 * S, 1, true);      // conjunto doce: asinhas atras
   spr(SP.frontInv, hero.x, hero.y, true);      // mesma aparencia atual de frente (cabeca e franja da pausa), com o corpo mais estreito
   if (!previewBare) {
     drawShieldBody(hero.x - 9 * S, hero.y - 9 * S);      // escudo no braco esquerdo, encostado no corpo
