@@ -1,5 +1,8 @@
 # Changelog (resumo)
 
+## 12/11/2026 — Asas do Link-fada nas costas
+- As asas ficavam na altura da cabeça; agora ficam nas costas (altura do tronco).
+
 ## 12/11/2026 — Ajustes do Link-fada
 - **Tiara prateada** mais bonita (3 fileiras, pontas laterais e joia lilás no meio); o item do inventário agora se chama **"Tiara"**.
 - **Faixa azul fina e horizontal** (some a listra vertical lilás da blusa).
