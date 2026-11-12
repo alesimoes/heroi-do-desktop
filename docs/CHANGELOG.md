@@ -1,5 +1,8 @@
 ﻿# Changelog (resumo)
 
+## 12/11/2026 — Desequipar a fadinha
+- Na aba Roupas → Fadinha, clicar de novo na fadinha equipada **a guarda**: ela some do jogo e do inventário do Link, **não ataca** nem marca monstros. Clicar outra vez a traz de volta. Fica salvo.
+
 ## 12/11/2026 — Rupias: automático salvo, jogável como antes (substitui as 3 entradas abaixo)
 - O saldo do **automático** nunca se perde: fica guardado ao jogar no modo jogável e **salvo ao fechar** o jogo (e a cada ~20 s). O saldo do **jogável** funciona como antes (começa do zero e some ao sair).
 - Morrer **não zera**: perde 10 rupias (como já era).

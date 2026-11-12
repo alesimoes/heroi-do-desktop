@@ -755,7 +755,7 @@ function owns(cat, id) { return [ownBow, ownSword, ownShield, ownHat, ownTunic, 
 const fairyRate = () => (eqFairy === 3 ? 2 : 1);      // a fadinha de ESTRELA (3) ataca o DOBRO de vezes: 40% dos monstros marcados e pronta a cada 15 s (as outras: 20% e 30 s)
 let offBow = false, offSword = false, offShield = false;      // arma desequipada (clicar de novo no menu): o Link nao a segura
 const fairySet = () => eqHat === 10 && eqTunic === 10;      // tiara + blusa de fada: nao da para equipar armas
-function getEq(cat) { return [fairySet() || offBow ? -1 : eqBow, fairySet() || offSword ? -1 : eqSword, fairySet() || offShield ? -1 : eqShield, eqHat, eqTunic, eqFairy][cat]; }
+function getEq(cat) { return [fairySet() || offBow ? -1 : eqBow, fairySet() || offSword ? -1 : eqSword, fairySet() || offShield ? -1 : eqShield, eqHat, eqTunic, offFairy ? -1 : eqFairy][cat]; }
 function bestEquip() { eqBow = evoStage >= 1 ? 1 : 0; eqSword = evoStage >= 4 ? 1 : 0; eqShield = kingGear ? 2 : (evoStage >= 4 ? 1 : 0); eqHat = kingGear ? 2 : (evoStage >= 2 ? 1 : 0); eqTunic = kingGear ? 2 : (evoStage >= 3 ? 1 : 0); }
 function validateEquip() { if (!ownBow(eqBow)) eqBow = 0; if (!ownSword(eqSword)) eqSword = 0; if (!ownShield(eqShield)) eqShield = 0; if (!ownHat(eqHat)) eqHat = 0; if (!ownTunic(eqTunic)) eqTunic = 0; }
 function saveEquip() { try { localStorage.setItem('heroi_equip', [eqBow, eqSword, eqShield, eqHat, eqTunic].join(',')); localStorage.setItem('heroi_equip_off', String((offBow ? 1 : 0) | (offSword ? 2 : 0) | (offShield ? 4 : 0))); } catch (_) {} }
@@ -782,6 +782,7 @@ function chestTap() { if (fairyState === 1 && fairy.cool <= 0 && Math.hypot(mx -
    que aparecem: voa ate o monstro, gira rapido em volta da cabeca dele (um pouco acima) e ele cai. Vale nos dois modos. */
 const FAIRY_NEEDED = 55;
 const FAIRY_SKIN_NEEDED = 550;     // 500 monstros depois da fadinha: asas azul escuro com rosa
+let offFairy = false; try { offFairy = localStorage.getItem('heroi_fada_off') === '1'; } catch (_) {}      // fadinha desequipada: some e nao ataca
 let eqFairy = 0, fairyKills2 = 0, fairySkin = 0, fairyKills = 0, fairyState = 0; const fairy = { x: 0, y: 0, t: 0, orbit: 0, trail: 0, ph: 0, target: null, cool: 30, said: false, prev4: false };      // fairyState: 0 contando | 1 tem a fadinha;  ph: 0 segue | 1 voa ate o alvo | 2 gira em volta
 try { fairyKills = Math.max(0, parseInt(localStorage.getItem('heroi_monstros_fada') || '0', 10) || 0); fairyState = Math.max(0, Math.min(1, parseInt(localStorage.getItem('heroi_fada') || '0', 10) || 0)); fairyKills2 = Math.max(0, parseInt(localStorage.getItem('heroi_monstros_fada2') || '0', 10) || 0); fairySkin = Math.max(0, Math.min(3, parseInt(localStorage.getItem('heroi_fada_skin') || '0', 10) || 0)); } catch (_) {}
 if (fairyState === 0 && evoStage < 4) fairyKills = 0;
@@ -791,7 +792,7 @@ if (/[?&]fada2\b/.test(location.search)) { kingGear = true; fairyState = 1; fair
 if (/[?&]fada4\b/.test(location.search)) { kingGear = true; fairyState = 1; fairySkin = 3; }
 eqFairy = fairySkin; try { const lk = localStorage.getItem('heroi_fada_look'); if (lk !== null && !/[?&]fada2\b/.test(location.search)) eqFairy = Math.max(0, Math.min(4, parseInt(lk, 10) || 0)); } catch (_) {}
 if (eqFairy > fairySkin && eqFairy !== 4) eqFairy = 0;      // aparencia escolhida no inventario (aba Roupas): 0 normal | 1 rosa      // teste rapido: ja com a fadinha
-function saveFairy() { try { localStorage.setItem('heroi_monstros_fada', String(fairyKills)); localStorage.setItem('heroi_fada', String(fairyState)); localStorage.setItem('heroi_monstros_fada2', String(fairyKills2)); localStorage.setItem('heroi_fada_skin', String(fairySkin)); localStorage.setItem('heroi_fada_look', String(eqFairy)); } catch (_) {} }
+function saveFairy() { try { localStorage.setItem('heroi_fada_off', offFairy ? '1' : '0'); } catch (_) {} try { localStorage.setItem('heroi_monstros_fada', String(fairyKills)); localStorage.setItem('heroi_fada', String(fairyState)); localStorage.setItem('heroi_monstros_fada2', String(fairyKills2)); localStorage.setItem('heroi_fada_skin', String(fairySkin)); localStorage.setItem('heroi_fada_look', String(eqFairy)); } catch (_) {} }
 function countFairyKill() {
   if (fairyState === 1 && kingGear && fairySkin < 3) {      // depois da fadinha: 500 / 1000 / 1500 monstros dao as aparencias 1 (rosa), 2 (folha) e 3 (estrela)
     fairyKills2++; if (fairyKills2 % 25 === 0) saveFairy();
@@ -804,12 +805,12 @@ function countFairyKill() {
   if (fairyKills >= FAIRY_NEEDED) { fairyState = 1; fairy.cool = 30 / fairyRate(); saveFairy(); showNewItem(); fairy.x = hero.x; fairy.y = hero.y - 26 * S; say('Uma fadinha!'); for (let k = 0; k < 10; k++) puffs.push({ kind: 1, x: fairy.x + (rnd() - 0.5) * 24 * S, y: fairy.y + (rnd() - 0.5) * 16 * S, t: 0 }); }
 }
 function fairyCommand(silent) {      // silent = chamada automatica (modo automatico); comanda a fadinha a derrotar o monstro mais perto do heroi (so quando ela esta pronta; nao ataca o dragao)
-  const F = fairy; if (fairyState !== 1 || F.cool > 0 || F.target || bossPhase !== 0 || hero.dead) return;
+  const F = fairy; if (fairyState !== 1 || offFairy || F.cool > 0 || F.target || bossPhase !== 0 || hero.dead) return;
   let best = null, bd = 1e18; for (const e of enemies) { if (e.type === 3 || e.type === 7) continue; const d = (e.x - hero.x) ** 2 + (e.y - hero.y) ** 2; if (d < bd) { bd = d; best = e; } }
   if (best) { F.target = best; F.ph = 1; F.orbit = 0; F.cool = 30 / fairyRate(); } else if (!silent) say('Sem alvo');
 }
 function updateFairy(dt) {
-  if (fairyState !== 1) return;
+  if (fairyState !== 1 || offFairy) return;
   const F = fairy; F.t += dt;
   if (F.cool > 0) { F.cool -= dt; if (F.cool <= 0) { F.cool = 0; F.said = false; } }      // a cada 30 s fica pronta: pisca amarela e ataca por comando (tecla 4 ou toque nela); so entao a tecla 4 funciona
   if (F.cool <= 0 && !F.said && !hero.dead) { F.said = true; say('Fadinha pronta: 4'); }
@@ -845,7 +846,7 @@ function drawFairyShape(x, y, u, look, hot, flap) {      // 4 aparencias: look 0
   rect(P[2], x - 6 * u, y + wy - u, 3 * u, 2 * u); rect(P[3], x - 5 * u, y + wy, 2 * u, u); rect(P[2], x + 3 * u, y + wy - u, 3 * u, 2 * u); rect(P[3], x + 3 * u, y + wy, 2 * u, u);
 }
 function drawFairy() {
-  if (fairyState !== 1) return;
+  if (fairyState !== 1 || offFairy) return;
   for (const sp of fairySparks) { const q = 1 - sp.a / 0.55; ctx.globalAlpha = 0.6 * q; rect('#5aafff', sp.x, sp.y + sp.a * 6 * S, S, S); } ctx.globalAlpha = 1;
   drawFairyShape(fairy.x, fairy.y, S, eqFairy, fairy.cool <= 0 && Math.floor(time * 7) % 2 === 0, Math.floor(time * 16) % 2 === 0);}function updateChest(dt) {
   if (hero.dead || bossPhase !== 0) chestGo = false;      // o bau vale nos dois modos; fica parado durante a luta com o dragao
@@ -987,7 +988,7 @@ function spawn(type) {
   if (edge === 0) { x = m; y = m * 3 + rnd() * (H - m * 6); } else if (edge === 1) { x = W - m; y = m * 3 + rnd() * (H - m * 6); }
   else if (edge === 2) { x = m * 3 + rnd() * (W - m * 6); y = 16 * S; } else { x = m * 3 + rnd() * (W - m * 6); y = H - m; }
   const e = { type, x, y, vx: 0, vy: 0, kx: 0, ky: 0, t: 0, timer: 0.8 + rnd(), flash: 0, hp: type === 1 ? 50 : (type === 2 ? 50 : (type === 0 ? 200 : (type === 5 ? 250 : 100))), maxHp: 0, face: 1, mode: 0, tx: 0, ty: 0, rt: 0, moving: false };
-  e.maxHp = e.hp; puffs.push({ kind: 2, x, y, t: 0 }); if (fairyState === 1 && type !== 3 && rnd() < 0.20 * fairyRate()) e.fairy = true;      // a fadinha derrota 20% dos monstros que aparecem (40% com a fadinha de estrela)
+  e.maxHp = e.hp; puffs.push({ kind: 2, x, y, t: 0 }); if (fairyState === 1 && !offFairy && type !== 3 && rnd() < 0.20 * fairyRate()) e.fairy = true;      // a fadinha derrota 20% dos monstros que aparecem (40% com a fadinha de estrela)
   enemies.push(e); return e;
 }
 function nearestMelee() { let b = null, bd = 1e18; for (const e of enemies) { if (e.type === 1) continue; const d = (e.x - hero.x) ** 2 + (e.y - hero.y) ** 2; if (d < bd) { bd = d; b = e; } } return b; }
@@ -2351,7 +2352,7 @@ function drawHeroPreview() {      // heroi equipado, ampliado (muda na hora ao t
   const sv = { pt: pickT, ax: hero.aimX, ay: hero.aimY, bt: hero.bowT, x: hero.x, y: hero.y, f: hero.face, w: hero.walking, a: hero.attacking, b: hero.bowing, d: hero.dead, i: hero.inv, p: powerT, c: calmState, k: cookState, pp: playPickT, pe: playEatT, er: eatRaw };
   try {
     hero.x = 0; hero.y = 0; hero.face = 1; hero.walking = false; hero.attacking = false; hero.bowing = invBow; hero.aimX = 1; hero.aimY = 0; hero.bowT = 0.4; hero.dead = false; hero.inv = 0; powerT = 0; calmState = 0; cookState = 0; playPickT = invPickT; pickT = invPickT; playEatT = invEatT; eatRaw = invEatT > 0; previewBare = invTab === 1;
-    const k = Math.max(1, (pc.height * 0.8) / (30 * S)); g.setTransform(k, 0, 0, k, pc.width / 2, pc.height / 2 + 13.5 * S * k); /* sem legenda: heroi centralizado; escudo 1 unidade mais a direita */ withCtx(g, () => { drawHeroFrontPreview(); if (fairyState === 1) drawFairyShape(9 * S, -25 * S, S, eqFairy, false, Math.floor(time * 16) % 2 === 0); });
+    const k = Math.max(1, (pc.height * 0.8) / (30 * S)); g.setTransform(k, 0, 0, k, pc.width / 2, pc.height / 2 + 13.5 * S * k); /* sem legenda: heroi centralizado; escudo 1 unidade mais a direita */ withCtx(g, () => { drawHeroFrontPreview(); if (fairyState === 1 && !offFairy) drawFairyShape(9 * S, -25 * S, S, eqFairy, false, Math.floor(time * 16) % 2 === 0); });
   } finally { pickT = sv.pt; hero.aimX = sv.ax; hero.aimY = sv.ay; hero.bowT = sv.bt; hero.x = sv.x; hero.y = sv.y; hero.face = sv.f; hero.walking = sv.w; hero.attacking = sv.a; hero.bowing = sv.b; hero.dead = sv.d; hero.inv = sv.i; powerT = sv.p; calmState = sv.c; cookState = sv.k; playPickT = sv.pp; playEatT = sv.pe; eatRaw = sv.er; previewBare = false; g.setTransform(1, 0, 0, 1, 0, 0); }
 }
 function renderInv() {
@@ -2405,7 +2406,7 @@ function errandControl(dt) {
   const iv = setInterval(() => { const now = performance.now(), dt = Math.min(0.1, (now - last) / 1000); last = now; invEatT += dt; if (invEatT >= 0.9 || !invOn) { clearInterval(iv); invEatT = 0; if (invOn && hero.apples > 0) { hero.apples--; hero.hp = Math.min(hero.maxHp, hero.hp + 0.5); } renderInv(); return; } drawHeroPreview(); }, 33);
 }
 function equipItem(cat, id) {
-  if (!owns(cat, id)) return; if (cat === 5) { eqFairy = id; saveFairy(); renderInv(); return; }      // fadinha: so troca a aparencia
+  if (!owns(cat, id)) return; if (cat === 5) { if (eqFairy === id) offFairy = !offFairy; else { eqFairy = id; offFairy = false; } saveFairy(); renderInv(); return; }      // fadinha: so troca a aparencia
   if (cat <= 2 && fairySet()) return;      // conjunto de fada: sem armas
   if (cat === 0) { if (eqBow === id) offBow = !offBow; else { eqBow = id; offBow = false; } } else if (cat === 1) { if (eqSword === id) offSword = !offSword; else { eqSword = id; offSword = false; } } else if (cat === 2) { if (eqShield === id) offShield = !offShield; else { eqShield = id; offShield = false; } } else if (cat === 3) eqHat = id; else eqTunic = id;
   saveEquip(); buildSprites(); buildProps(); syncTouchIcons(); renderInv();

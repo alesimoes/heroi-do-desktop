@@ -1789,7 +1789,7 @@ namespace HeroiPet
         }
         public void EquipItem(int cat, int id)      // cat: 0 arco, 1 espada, 2 escudo, 3 gorro, 4 roupa
         {
-            if (cat == 5) { if (Owns(5, id)) { eqFairy = id; SaveFairy(); } return; }      // fadinha: so troca a aparencia
+            if (cat == 5) { if (Owns(5, id)) { if (eqFairy == id) offFairy = !offFairy; else { eqFairy = id; offFairy = false; } SaveFairy(); } return; }      // fadinha: so troca a aparencia
             if (cat <= 2 && FairySet) return;      // conjunto de fada: sem armas
             if (cat == 0 && OwnBow(id)) { if (eqBow == id) offBow = !offBow; else { eqBow = id; offBow = false; } } else if (cat == 1 && OwnSword(id)) { if (eqSword == id) offSword = !offSword; else { eqSword = id; offSword = false; } } else if (cat == 2 && OwnShield(id)) { if (eqShield == id) offShield = !offShield; else { eqShield = id; offShield = false; } }
             else if (cat == 3 && OwnHat(id)) eqHat = id; else if (cat == 4 && OwnTunic(id)) eqTunic = id; else return;
@@ -1813,7 +1813,7 @@ namespace HeroiPet
         }
         public int Equipped(int cat)
         {
-            switch (cat) { case 0: return FairySet || offBow ? -1 : eqBow; case 1: return FairySet || offSword ? -1 : eqSword; case 2: return FairySet || offShield ? -1 : eqShield; case 3: return eqHat; case 4: return eqTunic; default: return eqFairy; }
+            switch (cat) { case 0: return FairySet || offBow ? -1 : eqBow; case 1: return FairySet || offSword ? -1 : eqSword; case 2: return FairySet || offShield ? -1 : eqShield; case 3: return eqHat; case 4: return eqTunic; default: return offFairy ? -1 : eqFairy; }
         }
         public int AppleCount { get { return apples; } }
         public float HeartsNow { get { return hp; } }
@@ -1897,7 +1897,7 @@ namespace HeroiPet
                 g.TranslateTransform(cx, groundY); g.ScaleTransform(k, k);
                 g.InterpolationMode = InterpolationMode.NearestNeighbor; g.PixelOffsetMode = PixelOffsetMode.Half; g.SmoothingMode = SmoothingMode.None;
                 DrawHeroFrontPreview(g, bow, bare);      // no inventario o heroi fica DE FRENTE
-                if (fairyState == 1) DrawFairyShape(g, 9 * S, -25 * S, S, eqFairy, false, ((int)(time * 16)) % 2 == 0);      // a fadinha aparece ao lado da cabeca, com a aparencia escolhida
+                if (fairyState == 1 && !offFairy) DrawFairyShape(g, 9 * S, -25 * S, S, eqFairy, false, ((int)(time * 16)) % 2 == 0);      // a fadinha aparece ao lado da cabeca, com a aparencia escolhida
                 g.Restore(st);
             }
             finally { pickT = spt; aimX = sax; aimY = say; bowT = sbt; hx = shx; hy = shy; hface = shf; walking = sw; attacking = sa; bowing = sb; dead = sd; powerT = sp; inv = si; playPickT = spk; playEatT = sed; eatRaw = ser; calmState = sc; cookState = sck; previewMode = false; previewBare = false; }
@@ -2922,11 +2922,12 @@ namespace HeroiPet
         const int FairyKillsNeeded = 55;      // (era 50; +10%)
         const int FairyPinkKillsNeeded = 110;      // 110 monstros depois do bau: fadinha rosa (era 100)
         const int FairySkinKillsNeeded = 550;      // 550 monstros por nivel depois da fadinha: folha 1100, estrela 1650 (era 500)
+        bool offFairy;      // fadinha desequipada (clicar de novo no menu): some e nao ataca
         int fairyKills2, fairySkin, eqFairy;      // eqFairy: aparencia escolhida no inventario (0 normal | 1 rosa)
         int fairyKills, fairyState, fairyPh;      // fairyState: 0 contando | 1 tem a fadinha;  fairyPh: 0 segue o heroi | 1 voa ate o alvo | 2 gira em volta
         float fx, fy, fairyT, fairyOrbit, fairyTrail, fairyCool = 30f; Enemy fairyTarget; bool prevF4, fairyReadySaid;      // fairyCool: a cada 30 s a fadinha fica pronta (pisca amarela) e ataca por comando (tecla 4)
         float FairyRate { get { return eqFairy == 3 ? 2f : 1f; } }      // a fadinha de ESTRELA ataca o DOBRO de vezes: 40% dos monstros marcados e pronta a cada 15 s (as outras: 20% e 30 s)
-        bool FairyReady { get { return fairyState == 1 && fairyCool <= 0; } }
+        bool FairyReady { get { return fairyState == 1 && !offFairy && fairyCool <= 0; } }
         void FairyInit()
         {
             fairyKills = 0; fairyState = 0; fairyKills2 = 0; fairySkin = 0;
@@ -2937,14 +2938,14 @@ namespace HeroiPet
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--fada2") >= 0) { kingGear = true; fairyState = 1; fairySkin = 1; }
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--fada4") >= 0) { kingGear = true; fairyState = 1; fairySkin = 3; }      // teste: as 4 aparencias      // teste rapido: fadinha com as asas azul escuro e rosa      // teste rapido: ja com a fadinha
             eqFairy = fairySkin;
-            if (Environment.GetEnvironmentVariable("HEROI_TESTE") == null) try { using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"Software\HeroiDoDesktop")) { object v = k == null ? null : k.GetValue("FadaLook"); if (v != null) eqFairy = Math.Max(0, Math.Min(4, Convert.ToInt32(v))); } } catch { }
+            if (Environment.GetEnvironmentVariable("HEROI_TESTE") == null) try { using (RegistryKey k = Registry.CurrentUser.OpenSubKey(@"Software\HeroiDoDesktop")) { object v = k == null ? null : k.GetValue("FadaLook"); object vo = k == null ? null : k.GetValue("FadaOff"); offFairy = vo != null && Convert.ToInt32(vo) != 0; if (v != null) eqFairy = Math.Max(0, Math.Min(4, Convert.ToInt32(v))); } } catch { }
             if (eqFairy > fairySkin && eqFairy != 4) eqFairy = 0;
             fx = W / 2f; fy = H / 2f;
         }
         void SaveFairy()
         {
             if (Environment.GetEnvironmentVariable("HEROI_TESTE") != null) return;
-            try { using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"Software\HeroiDoDesktop")) { k.SetValue("MonstrosFada", fairyKills); k.SetValue("Fada", fairyState); k.SetValue("MonstrosFada2", fairyKills2); k.SetValue("FadaSkin", fairySkin); k.SetValue("FadaLook", eqFairy); } } catch { }
+            try { using (RegistryKey k = Registry.CurrentUser.CreateSubKey(@"Software\HeroiDoDesktop")) { k.SetValue("MonstrosFada", fairyKills); k.SetValue("Fada", fairyState); k.SetValue("MonstrosFada2", fairyKills2); k.SetValue("FadaSkin", fairySkin); k.SetValue("FadaLook", eqFairy); k.SetValue("FadaOff", offFairy ? 1 : 0); } } catch { }
         }
         void CountFairyKill()
         {
@@ -2966,7 +2967,7 @@ namespace HeroiPet
         }
         void UpdateFairy(float dt)
         {
-            if (fairyState != 1) return;
+            if (fairyState != 1 || offFairy) return;
             fairyT += dt;
             if (fairyCool > 0) { fairyCool -= dt; if (fairyCool <= 0) { fairyCool = 0; fairyReadySaid = false; } }
             if (FairyReady && !fairyReadySaid && !dead) { fairyReadySaid = true; Say("Fadinha pronta: 4"); }
@@ -3026,7 +3027,7 @@ namespace HeroiPet
         List<float[]> fairySparks = new List<float[]>();      // brilhinhos da fadinha: x, y, idade
         void DrawFairy(Graphics g)
         {
-            if (fairyState != 1) return;
+            if (fairyState != 1 || offFairy) return;
             foreach (float[] sp in fairySparks) { float q = 1f - sp[2] / 0.55f; shadowList.Add(new float[] { sp[0], sp[1] + sp[2] * 6 * S, S * 1f, 150f * q, eqFairy == 1 ? 1f : 0f, 0f }); }      // camada com transparencia real, abaixo do heroi
             bool hot = FairyReady && ((int)(time * 7)) % 2 == 0;      // pronta: pisca e fica mais amarela
             DrawFairyShape(g, fx, fy, S, eqFairy, hot, ((int)(time * 16)) % 2 == 0);
@@ -5123,7 +5124,7 @@ namespace HeroiPet
             // (fase 2: mesma vida; so a quantidade e a frequencia sobem, como na fase 1)      // morcego 50, gelatina 50, octorok (vermelho) 200, bokoblin a cavalo 250, bokoblin comum 100
             e.Timer = 0.8f + (float)rnd.NextDouble();
             puffs.Add(new Puff { Kind = 2, X = e.X, Y = e.Y });
-            if (fairyState == 1 && type != 3 && rnd.NextDouble() < 0.20 * FairyRate) e.Fairy = true;      // a fadinha derrota 20% dos monstros que aparecem (40% com a fadinha de estrela)
+            if (fairyState == 1 && !offFairy && type != 3 && rnd.NextDouble() < 0.20 * FairyRate) e.Fairy = true;      // a fadinha derrota 20% dos monstros que aparecem (40% com a fadinha de estrela)
             enemies.Add(e);
             return e;
         }
