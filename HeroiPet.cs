@@ -163,7 +163,8 @@ namespace HeroiPet
         };
 
         // separa o verde do gorro (linhas 0-8) do verde da roupa (linhas 9+) para poder recolorir cada um na evolucao
-        public static bool Crown, Robe, Legs, MushHat, MushShirt;      // MushHat/MushShirt: bolinhas brancas do conjunto cogumelo      // Legs: conjunto com calca e sapatos coloridos (J/Z)     // equipado: coroa de ouro / roupa de rei (com calca marrom e sapatos roxos)
+        public static bool Crown, Robe, Legs, MushHat, MushShirt, AppleHat;      // AppleHat: gorro do conjunto maca (cabinho de maca em cima)
+        static string Ctr(string t, int w) { int pad = Math.Max(0, (w - 14) / 2); return (new string('.', pad) + t).PadRight(w, '.').Substring(0, w); }      // centraliza um desenho de 14 de largura      // MushHat/MushShirt: bolinhas brancas do conjunto cogumelo      // Legs: conjunto com calca e sapatos coloridos (J/Z)     // equipado: coroa de ouro / roupa de rei (com calca marrom e sapatos roxos)
         static string HatDetail(string s, int i)      // i = brilho (claro); so troca pixels do gorro (H). Sem sombra escura.
         {
             char[] a = s.ToCharArray();
@@ -181,6 +182,7 @@ namespace HeroiPet
         {
             List<string> r = new List<string>();
             if (Crown) { r.Add("....C.CC.C...."); r.Add("....CCCCCC...."); r.Add("....CRCCRC...."); }      // coroa sobre o gorro
+            if (AppleHat) { int aw = rows[0].Length; r.Add(Ctr("........KNNK..", aw)); r.Add(Ctr(".....KBBKNNK..", aw)); r.Add(Ctr(".....KBBK.....", aw)); }      // cabinho de maca: talo marrom e folha verde
             for (int i = 0; i < rows.Length; i++)
             {
                 string s = rows[i].Replace('Y', 'V').Replace('G', i < 9 ? (Crown ? 'V' : 'H') : 'Q');      // cabelo castanho ('V') para contrastar com o rosto; com a coroa: sem gorro (cabelo aparece) e a coroa fica sobre a cabeca
@@ -2266,7 +2268,7 @@ namespace HeroiPet
         void BuildSprites()
         {
             ValidateEquip();
-            Art.Crown = eqHat == 2; Art.Robe = eqTunic == 2; Art.Legs = eqTunic >= 3; Art.MushHat = eqHat == 8; Art.MushShirt = eqTunic == 8;
+            Art.Crown = eqHat == 2; Art.Robe = eqTunic == 2; Art.Legs = eqTunic >= 3; Art.MushHat = eqHat == 8; Art.AppleHat = eqHat == 9; Art.MushShirt = eqTunic == 8;
             Dictionary<char, Color> hov = new Dictionary<char, Color>();
             if (eqHat == 1) hov['H'] = Color.FromArgb(150, 80, 205);       // gorro roxo
             if (eqTunic == 1) hov['Q'] = Color.FromArgb(70, 125, 235);       // blusa azul
@@ -3084,18 +3086,64 @@ namespace HeroiPet
 
         // itens do tesouro (usados no anuncio grande)
         // escudo do heroi: normal (retangular) ou, com o tesouro do bau, circular roxo escuro com um quadrado azul (um pouco menor, cobre menos o personagem)
-        static readonly string[] AppleShield = {
-            "...KT.L.", ".KKKTKLK", "KRRRRRRK", "KRFFFFRK", "KRFBBFRK", "KRFBBFRK", "KRFFFFRK", ".KRFFRK.", "..KRRK..", "...KK..." };
-        void DrawApplePix(Graphics g, float x0, float y0, float k)      // escudo de maca cortada em pixels (8 x 10 quadradinhos)
+        // ESCUDO DE MACA CORTADA: grade de 12 x 15 quadradinhos (menores: 2/3 do tamanho de antes, que era 8 x 10) para caber mais detalhe: casca vermelha com brilho e sombra,
+        // polpa creme com borda mais escura, miolo com 2 sementes, talo e folha. A forma (dois lobos com covinha em cima) e gerada por codigo.
+        static string[] appleRows;
+        static string[] AppleShieldRows()
+        {
+            if (appleRows != null) return appleRows;
+            const int W = 12, H = 15; bool[,] ins = new bool[H, W]; int[,] dep = new int[H, W];
+            for (int y = 0; y < H; y++) for (int x = 0; x < W; x++)
+            {
+                float px = x + 0.5f, py = y + 0.5f, ax = (px - 4.0f) / 3.9f, ay = (py - 9.3f) / 5.4f, bx = (px - 8.0f) / 3.9f, by = (py - 9.3f) / 5.4f;
+                bool body = (ax * ax + ay * ay <= 1f) || (bx * bx + by * by <= 1f), dimple = (px - 6f) * (px - 6f) + (py - 4.2f) * (py - 4.2f) < 1.5f * 1.5f;
+                ins[y, x] = body && !dimple && y >= 3;
+            }
+            for (int y = 0; y < H; y++) for (int x = 0; x < W; x++) dep[y, x] = ins[y, x] ? 99 : -1;
+            for (int pass = 0; pass < 4; pass++)
+                for (int y = 0; y < H; y++) for (int x = 0; x < W; x++)
+                {
+                    if (!ins[y, x] || dep[y, x] != 99) continue;
+                    bool edge = y == 0 || x == 0 || y == H - 1 || x == W - 1; int best = 99;
+                    int[] dx4 = { 1, -1, 0, 0 }, dy4 = { 0, 0, 1, -1 };
+                    for (int d = 0; d < 4; d++) { int nx = x + dx4[d], ny = y + dy4[d]; if (nx < 0 || ny < 0 || nx >= W || ny >= H || !ins[ny, nx]) edge = true; else if (dep[ny, nx] < 99) best = Math.Min(best, dep[ny, nx] + 1); }
+                    if (edge) dep[y, x] = 0; else if (best < 99) dep[y, x] = best;
+                }
+            char[][] g = new char[H][]; for (int y = 0; y < H; y++) { g[y] = new char[W]; for (int x = 0; x < W; x++) g[y][x] = '.'; }
+            for (int y = 0; y < H; y++) for (int x = 0; x < W; x++)
+            {
+                if (!ins[y, x]) continue; int d = dep[y, x]; char c;
+                if (d == 0) c = 'K';
+                else if (d == 1) c = (x <= 4 && y <= 8 && (x + y) % 2 == 0 && y >= 5) ? 'h' : ((x >= 7 && y >= 10) ? 'r' : 'R');      // casca: brilho em cima a esquerda, sombra embaixo a direita
+                else if (d == 2) c = 'f'; else c = 'F';      // borda da polpa mais escura
+                g[y][x] = c;
+            }
+            // miolo (elipse) com 2 sementes
+            for (int y = 0; y < H; y++) for (int x = 0; x < W; x++)
+            {
+                if (!ins[y, x] || dep[y, x] < 3) continue; float cx = (x + 0.5f - 6f) / 1.9f, cy = (y + 0.5f - 9.4f) / 2.9f;
+                if (cx * cx + cy * cy <= 1f) g[y][x] = 'c';
+            }
+            g[8][5] = 'B'; g[9][5] = 'B'; g[8][6] = 'b'; g[9][6] = 'B'; g[10][6] = 'b'; g[10][5] = 'B';
+            // talo (marrom) e folha (verde) em cima
+            string[] top = { "....KK..KKK.", "....TTK.LLLK", "....TT.KlLK.", "....TK..KK.." };
+            for (int y = 0; y < top.Length && y < 4; y++) for (int x = 0; x < W; x++) if (top[y][x] != '.') g[y][x] = top[y][x];
+            string[] rows = new string[H]; for (int y = 0; y < H; y++) rows[y] = new string(g[y]);
+            appleRows = rows; return rows;
+        }
+        void DrawApplePix(Graphics g, float x0, float y0, float k)      // escudo de maca cortada: mesmo tamanho de antes (8k x 10k), agora com quadradinhos menores (2/3)
         {
             SmoothingMode sm = g.SmoothingMode; g.SmoothingMode = SmoothingMode.None;
-            Color[] cs = { Color.FromArgb(28, 22, 36), Color.FromArgb(200, 34, 44), Color.FromArgb(250, 236, 190), Color.FromArgb(110, 60, 30), Color.FromArgb(120, 80, 40), Color.FromArgb(70, 160, 60) };
-            const string keys = "KRFBTL";
-            for (int r = 0; r < AppleShield.Length; r++) for (int c = 0; c < AppleShield[r].Length; c++)
-            {
-                int ci = keys.IndexOf(AppleShield[r][c]); if (ci < 0) continue;
-                using (SolidBrush b = new SolidBrush(cs[ci])) g.FillRectangle(b, x0 + c * k - 0.3f, y0 + r * k - 0.3f, k + 0.6f, k + 0.6f);
-            }
+            string[] rows = AppleShieldRows(); float cell = k * 8f / 12f;
+            Color[] cs = { Color.FromArgb(28, 22, 36), Color.FromArgb(200, 34, 44), Color.FromArgb(150, 22, 34), Color.FromArgb(242, 120, 120), Color.FromArgb(250, 236, 190), Color.FromArgb(226, 206, 148), Color.FromArgb(214, 190, 128), Color.FromArgb(110, 60, 30), Color.FromArgb(70, 38, 20), Color.FromArgb(120, 80, 40), Color.FromArgb(70, 160, 60), Color.FromArgb(136, 214, 100) };
+            const string keys = "KRrhFfcBbTLl";
+            using (SolidBrush b = new SolidBrush(Color.Black))
+                for (int r = 0; r < rows.Length; r++) for (int c = 0; c < rows[r].Length; c++)
+                {
+                    int ci = keys.IndexOf(rows[r][c]); if (ci < 0) continue;
+                    float xa = (float)Math.Round(x0 + c * cell), xb = (float)Math.Round(x0 + (c + 1) * cell), ya = (float)Math.Round(y0 + r * cell), yb = (float)Math.Round(y0 + (r + 1) * cell);
+                    b.Color = cs[ci]; g.FillRectangle(b, xa, ya, Math.Max(1f, xb - xa), Math.Max(1f, yb - ya));
+                }
             g.SmoothingMode = sm;
         }
         void DrawShieldBody(Graphics g, float sx, float sy)

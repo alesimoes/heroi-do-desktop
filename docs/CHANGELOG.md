@@ -1,5 +1,9 @@
 # Changelog (resumo)
 
+## 12/11/2026 — Gorro maçã com cabinho e escudo maçã mais detalhado
+- **Gorro maçã:** ganhou um **cabinho de maçã em cima** (talo marrom e folha verde), no herói e na prévia do inventário.
+- **Escudo maçã:** desenhado com **quadradinhos menores** (grade de 12 x 15 em vez de 8 x 10, no mesmo tamanho total) para caber mais detalhe: casca vermelha com brilho e sombra, polpa creme com borda mais escura, miolo com duas sementes, talo e folha.
+
 ## 11/11/2026 — Atalhos para as conversas do Feiticeiro
 - **Versão entregue sem os atalhos:** os atalhos (Ctrl+Shift+F1/F2, itens da bandeja, `--cena` e `--cena2`) agora só existem se o jogo for compilado com `/define:ATALHOS`. O `build.bat` e o instalador **normais não os incluem**; o instalador salvo no pendrive foi compilado assim.
 - **Ctrl+Shift+F1** toca a **1ª conversa** do Feiticeiro e **Ctrl+Shift+F2** a **2ª conversa**, em qualquer momento do jogo (liga o modo jogo se estiver no automático). Também há dois itens no menu da bandeja (**Atalho: 1a / 2a conversa do Feiticeiro**) e os parâmetros `--cena` e `--cena2` ao abrir o jogo.
