@@ -1,5 +1,11 @@
 ﻿# Changelog (resumo)
 
+## 13/11/2026 — Aparência do instalador
+- O **ícone** do jogo e do instalador (e a imagem do topo do instalador) agora mostram o Link de lado **como ele é hoje** (tamanhos 16, 32, 48 e 256). O instalador `installersaidaInstalador-HeroiDoDesktop.exe` foi refeito com essa aparência.
+
+## 13/11/2026 — Link de lado: blusa mais estreita (desktop)
+- Com os pixels menores, a blusa do Link de lado perdeu 1 pixel fino na barriga e 1 nas costas. Web não atualizada.
+
 ## 13/11/2026 — Link com pixels menores (desktop)
 - Cada pixel do Link (de lado, de frente, dormindo, acenando) agora é feito de 4 pixels (2×2): mesma aparência e tamanho de antes, só que os próximos ajustes podem ser de meio quadradinho. Web não atualizada.
 
