@@ -1,13 +1,27 @@
 ﻿# Changelog (resumo)
 
-## 13/11/2026 — Aparência do instalador
-- O **ícone** do jogo e do instalador (e a imagem do topo do instalador) agora mostram o Link de lado **como ele é hoje** (tamanhos 16, 32, 48 e 256). O instalador `installersaidaInstalador-HeroiDoDesktop.exe` foi refeito com essa aparência.
+## 13/11/2026 — Atalho do fim da fase 3 e inventário de tamanho fixo (desktop)
+- Novo atalho de teste: **Ctrl+Shift+F3** leva direto ao fim da fase 3, com a Gelatina de Fogo morta, as 1000 rupias recolhidas e a mensagem "ESPERE POR MAIS ATUALIZAÇÕES".
+- O **inventário** agora tem sempre o tamanho do jogo médio, também com o jogo pequeno ou grande. Web não atualizada.
 
-## 13/11/2026 — Link de lado: blusa mais estreita (desktop)
-- Com os pixels menores, a blusa do Link de lado perdeu 1 pixel fino na barriga e 1 nas costas. Web não atualizada.
+## 13/11/2026 — Menu do inventário azul (desktop)
+- O menu do inventário agora é **azul escuro** (fundo, cartões e painel do herói) com detalhes em **azul claro** e **verde-água** (borda, títulos, aba e item selecionados). Web não atualizada.
+
+## 13/11/2026 — Arco mais fino e nome Gladiador (desktop)
+- O **arco** (jogo, inventário e ícones) ficou mais fino: 1 quadradinho de largura com contorno de 1. Nos nomes do inventário, o elmo e a roupa do conjunto agora se chamam só **Gladiador**. Web não atualizada.
+
+## 13/11/2026 — Braços do Link de frente mais largos (desktop)
+- O braço do Link **de lado** (jogo e automático) ficou 1 pixel pequeno mais largo que antes e alinhado com a barriga (o corpo atrás dele perdeu 1 pixel pequeno). De frente e no inventário nada mudou. Web não atualizada.
+
+## 13/11/2026 — Link de frente igual ao do inventário (desktop)
+- No jogo, o Link **de frente** (parado, acenando, agachando) agora tem o mesmo corpo do inventário (mais estreito, com os braços junto ao corpo). Web não atualizada.
 
 ## 13/11/2026 — Link com pixels menores (desktop)
 - Cada pixel do Link (de lado, de frente, dormindo, acenando) agora é feito de 4 pixels (2×2): mesma aparência e tamanho de antes, só que os próximos ajustes podem ser de meio quadradinho. Web não atualizada.
+- No Link de lado: a **barriga** ficou 1 pixel pequeno (meio quadradinho) mais fina e a **cabeça** voltou ao formato original (estava achatada atrás).
+
+## 13/11/2026 — Cogumelos, flores e arbusto no cenário (desktop)
+- O cenário padrão (modo jogo e automático) ganhou **enfeites**: 1 arbusto com frutinhas vermelhas, 4 cogumelos (vermelhos e laranja) e 7 flores de várias cores, espalhados longe do centro e das macieiras. Ficam atrás/na frente do Link conforme a posição e não dão maçã. Na fase escura (pedras) eles somem e voltam depois. Web não atualizada.
 
 ## 12/11/2026 — Web: botão Deixar rodando ao morrer e revisão
 - **Web:** a tela "VOCÊ MORREU" ganhou o botão **Deixar rodando** (o do menu ficava atrás da tela e não dava para clicar): volta com a perda das rupias e deixa o automático rodando.

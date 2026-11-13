@@ -349,12 +349,51 @@ namespace HeroiPet
             "....KGK....",
             ".....K....."
         };
-        public static Sprite Make(string[] rows, int s, Dictionary<char, Color> over)
+        public static string[] Up2(string[] rows)      // cada pixel vira 4 (2x2): mesmo desenho, resolucao dobrada
+        {
+            List<string> o = new List<string>();
+            foreach (string r in rows) { System.Text.StringBuilder sb = new System.Text.StringBuilder(); foreach (char c in r) { sb.Append(c); sb.Append(c); } string d = sb.ToString(); o.Add(d); o.Add(d); }
+            return o.ToArray();
+        }
+        public static Sprite MakeHi(string[] rows, int s, Dictionary<char, Color> over) { return Make(Up2(rows), s, over, 2); }      // Link: pixels com metade do lado, mesmo tamanho total
+        public static Sprite MakeFront(string[] rows, int s, Dictionary<char, Color> over)      // Link de frente: bracos (linhas 11 e 12) 1 pixel pequeno mais largos para fora
+        {
+            string[] u = Up2(rows);
+            for (int i = 22; i <= 25 && i < u.Length; i++)
+            {
+                char[] a = u[i].ToCharArray(); int f = 0; while (f < a.Length && a[f] == '.') f++;
+                int e = a.Length - 1; while (e >= 0 && a[e] == '.') e--;
+                bool L = f >= 1 && f + 2 < a.Length && a[f] == 'K' && a[f + 2] == 'S', R = e <= a.Length - 2 && e >= 2 && a[e] == 'K' && a[e - 2] == 'S';
+                System.Text.StringBuilder sb = new System.Text.StringBuilder(u[i]);
+                if (R) { sb.Remove(a.Length - 1, 1); sb.Insert(e - 1, 'S'); sb.Remove(e + 1, 0); }
+                if (L) { sb.Insert(f + 2, 'S'); sb.Remove(0, 1); }
+                u[i] = sb.ToString();
+            }
+            return Make(u, s, over, 2);
+        }
+        public static Sprite MakeSide(string[] rows, int s, Dictionary<char, Color> over)      // Link de lado: barriga (frente do tronco, linhas 10 a 13) 1 pixel pequeno mais fina
+        {
+            string[] u = Up2(rows);
+            for (int i = 20; i <= 27 && i < u.Length; i++)      // linhas 24 e 25 = braco (S): fica inteiro, 1 pixel pequeno mais largo que a barriga
+            {
+                int e = u[i].LastIndexOf('K');
+                if (i == 24 || i == 25)      // braco: continua com 2 pixels pequenos de pele e fica alinhado com a barriga (tira um pixel do corpo atras dele)
+                {
+                    int j = e - 2; while (j > 0 && u[i][j] == 'S') j--;
+                    if (e >= 2 && u[i][e - 1] == 'K' && u[i][j] != 'K' && u[i][j] != '.') u[i] = u[i].Remove(j, 1) + ".";
+                    continue;
+                }
+                if (e >= 2 && u[i][e - 1] == 'K' && u[i][e - 2] != 'K' && u[i][e - 2] != '.') u[i] = u[i].Remove(e - 2, 1) + ".";
+            }
+            return Make(u, s, over, 2);
+        }
+        public static Sprite Make(string[] rows, int s, Dictionary<char, Color> over) { return Make(rows, s, over, 1); }
+        public static Sprite Make(string[] rows, int s, Dictionary<char, Color> over, int div)
         {
             int w = 0;
             foreach (string r in rows) if (r.Length > w) w = r.Length;
             int h = rows.Length;
-            Bitmap b = new Bitmap(w * s, h * s, PixelFormat.Format32bppArgb);
+            Bitmap b = new Bitmap(w * s / div, h * s / div, PixelFormat.Format32bppArgb);
             using (Graphics g = Graphics.FromImage(b))
             {
                 g.SmoothingMode = SmoothingMode.None;
@@ -369,7 +408,7 @@ namespace HeroiPet
                             if (!Pal.TryGetValue(c, out col)) continue;
                         if (Tint != null) col = Tint(col);
                         using (SolidBrush br = new SolidBrush(col))
-                            g.FillRectangle(br, x * s, y * s, s, s);
+                            g.FillRectangle(br, x * s / div, y * s / div, (x + 1) * s / div - x * s / div, (y + 1) * s / div - y * s / div);
                     }
             }
             Bitmap l = (Bitmap)b.Clone();
@@ -384,10 +423,10 @@ namespace HeroiPet
             "....KKKKKK....",
             "...KGGGGGGK...",
             "..KGGGGGGGGK..",
-            "..KGGGGGGGGGK.",
-            "..KGYYYYYYYSK.",
-            "..KGYYYYYYYSSK",
-            "..KYYYYYYYKSSK",
+            ".KGGGGGGGGGGK.",
+            ".KGGYYYYYYYSK.",
+            ".KGYYYYYYYYSSK",
+            ".KYYYYYYYYKSSK",
             "..KYYYYYYSSSK.",
             "..KYYYYYSSSK..",
             "..KYYKGGGGKK..",
@@ -402,10 +441,10 @@ namespace HeroiPet
             "....KKKKKK....",
             "...KGGGGGGK...",
             "..KGGGGGGGGK..",
-            "..KGGGGGGGGGK.",
-            "..KGYYYYYYYSK.",
-            "..KGYYYYYYYSSK",
-            "..KYYYYYYYKSSK",
+            ".KGGGGGGGGGGK.",
+            ".KGGYYYYYYYSK.",
+            ".KGYYYYYYYYSSK",
+            ".KYYYYYYYYKSSK",
             "..KYYYYYYSSSK.",
             "..KYYYYYSSSK..",
             "..KYYKGGGGKK..",
@@ -444,6 +483,30 @@ namespace HeroiPet
         { return (x - cx) * (x - cx) + (y - cy) * (y - cy) <= r * r; }
         static bool Canopy(int x, int y)
         { return Disc(x, y, 10, 8, 7.3) || Disc(x, y, 5, 11, 5.3) || Disc(x, y, 15, 11, 5.3); }
+        // ENFEITES DO CENARIO: cogumelos, flores e arbusto (pixel art simples)
+        public static string[] MushRows = { "...KKK...", "..KRRWK..", ".KRWRRRK.", ".KRRRWRK.", "..KKKKK..", "...KSK...", "...KSK...", "....K...." };
+        public static string[] FlowerRows = { "...K...", "..KPK..", ".KPYPK.", "..KPK..", "...G...", ".G.G...", ".GGG...", "...G..." };
+        public static string[] BushRows()
+        {
+            const int w = 18, h = 11;
+            double[][] el = { new double[] { 5, 6, 5.6, 4.6 }, new double[] { 9.5, 4.6, 6.2, 4.6 }, new double[] { 13, 6.6, 5.2, 4.2 } };
+            Func<int, int, bool> inside = (x, y) => { if (y > 10 || y < 0 || x < 0 || x >= w) return false; foreach (double[] e in el) { double dx = (x - e[0]) / e[2], dy = (y - e[1]) / e[3]; if (dx * dx + dy * dy <= 1) return true; } return false; };
+            string[] rows = new string[h];
+            for (int y = 0; y < h; y++)
+            {
+                char[] r = new char[w];
+                for (int x = 0; x < w; x++)
+                {
+                    if (!inside(x, y)) { r[x] = '.'; continue; }
+                    bool edge = !inside(x - 1, y) || !inside(x + 1, y) || !inside(x, y - 1) || !inside(x, y + 1);
+                    r[x] = edge ? 'K' : (x + y < 11 ? 'N' : (y >= 7 && x >= 8 ? 'g' : 'G'));
+                }
+                rows[y] = new string(r);
+            }
+            int[][] berries = { new int[] { 4, 5 }, new int[] { 9, 3 }, new int[] { 12, 6 }, new int[] { 7, 8 }, new int[] { 14, 7 } };
+            foreach (int[] bp in berries) { char[] r = rows[bp[1]].ToCharArray(); if (r[bp[0]] != 'K' && r[bp[0]] != '.') { r[bp[0]] = 'R'; rows[bp[1]] = new string(r); } }
+            return rows;
+        }
         public static string[] TreeRows()
         {
             int w = 20, h = 24;
@@ -623,12 +686,12 @@ namespace HeroiPet
             "..KYSSSSSSYK..",
             "...KSSSSSSK...",
             "...KKGGGGKK...",
-            "..KGGGGGGGGK..",
-            ".KSGGGGGGGGSK.",
-            ".KSGGGGGGGGSK.",
-            "..KBBBBBBBBK..",
-            "..KWWWKKWWWK..",
-            "..KBBBKKBBBK.."
+            "...KGGGGGGK...",
+            "..KSGGGGGGSK..",
+            "..KSGGGGGGSK..",
+            "...KBBBBBBK...",
+            "...KWWKKWWK...",
+            "...KBBKKBBK..."
         };
         // igual, mas sem a mao esquerda (o braco levantado e desenhado a parte)
         public static string[] HeroFrontWave = {
@@ -642,12 +705,12 @@ namespace HeroiPet
             "..KYSSSSSSYK..",
             "...KSSSSSSK...",
             "...KKGGGGKK...",
-            "..KGGGGGGGGK..",
-            ".KSGGGGGGGGGK.",
-            ".KSGGGGGGGGGK.",
-            "..KBBBBBBBBK..",
-            "..KWWWKKWWWK..",
-            "..KBBBKKBBBK.."
+            "...KGGGGGGK...",
+            "..KSGGGGGGGK..",
+            "..KSGGGGGGGK..",
+            "...KBBBBBBK...",
+            "...KWWKKWWK...",
+            "...KBBKKBBK..."
         };
 
         // ---------- Inimigos ----------
@@ -1002,7 +1065,7 @@ namespace HeroiPet
     }
     class Rock { public float X, Y, VX, VY, Life; public bool Fire, Homing, Arrow, Orb, Ember; }      // Ember: bolinha de fogo da gelatina de fogo (fase 3): igual a pedra de octorok (explode em 3 s)      // Orb: esfera sombria do Feiticeiro      // Arrow: flecha dos bokoblins a cavalo
     class Arrow { public float X, Y, VX, VY; public bool Power, Crystal, Glow; }
-    class Tree { public float X, Y; public bool Stone; public int Variant; public bool[] Has = new bool[5]; public float[] Regrow = new float[5]; }      // Stone: pedra da Fase 2 (no lugar da macieira)
+    class Tree { public float X, Y; public int Deco, Var; public bool Stone; public int Variant; public bool[] Has = new bool[5]; public float[] Regrow = new float[5]; }      // Stone: pedra da Fase 2 (no lugar da macieira)
     class AllyMark { }
     class Spark { public float X, Y, VX, VY, T, Life; public int Col; }      // estrelinha roxa da explosao do Feiticeiro
     class Acid { public float SX, SY, TX, TY, T, Dur; }      // bola de acido do Octorok Gigante: sai da boca e cai onde o heroi estava
@@ -1475,6 +1538,7 @@ namespace HeroiPet
         float calmT, nextCalm = 120f + 180f * (float)new Random().NextDouble();
         Sprite heroFrontInv, heroFront, heroFrontWave, heroSleepSpr, treeSpr, appleSpr, appleHud;
         List<Tree> trees = new List<Tree>();
+        Sprite[] mushSpr = new Sprite[2], flowerSpr = new Sprite[4]; Sprite bushSpr;
         List<Arrow> arrows = new List<Arrow>();
         List<FlyApple> flyApples = new List<FlyApple>();
         int apples;
@@ -1517,6 +1581,22 @@ namespace HeroiPet
             trees.Add(NewTree(Wd * (0.90f + 0.04f * (float)rnd.NextDouble()), Hd * (0.45f + 0.08f * (float)rnd.NextDouble())));
             trees.Add(NewTree(Wd * (0.86f + 0.05f * (float)rnd.NextDouble()), Hd * (0.82f + 0.05f * (float)rnd.NextDouble())));
             trees.Add(NewTree(Wd * (0.10f + 0.12f * (float)rnd.NextDouble()), Hd * 0.90f));
+            // enfeites: 1 arbusto, 4 cogumelos e 7 flores espalhados (longe do centro e das macieiras); somem so na fase escura (as pedras trocam as arvores)
+            int[] decoKinds = { 3, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2 };
+            for (int dn = 0; dn < decoKinds.Length; dn++)
+            {
+                float dx0 = Wd / 2, dy0 = Hd / 2;
+                for (int tr = 0; tr < 80; tr++)
+                {
+                    dx0 = Wd * (0.04f + 0.92f * (float)rnd.NextDouble()); dy0 = Hd * (0.22f + 0.74f * (float)rnd.NextDouble());
+                    bool ok = Math.Abs(dx0 - Wd / 2f) + Math.Abs(dy0 - Hd / 2f) > 90 * S;
+                    foreach (Tree o in trees) if ((o.X - dx0) * (o.X - dx0) + (o.Y - dy0) * (o.Y - dy0) < (36 * S) * (36 * S)) ok = false;
+                    if (ok) break;
+                }
+                Tree dt0 = new Tree(); dt0.X = dx0; dt0.Y = dy0; dt0.Deco = decoKinds[dn]; dt0.Var = rnd.Next(4);
+                for (int i = 0; i < 5; i++) dt0.Regrow[i] = 1e9f;      // enfeite nao da maca
+                trees.Add(dt0);
+            }
 
             BuildTray();
             record = LoadRecord(); nextPower = Math.Max(25, record + 1);
@@ -1527,13 +1607,7 @@ namespace HeroiPet
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--lanche") >= 0) apples = 5;
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--jogar") >= 0) SetPlayMode(true);
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--fase2") >= 0) StartPhase2Test();      // atalho: direto na fase 2
-#if ATALHOS
-            if (Array.IndexOf(Environment.GetCommandLineArgs(), "--cena2") >= 0) StartScene2Test();      // atalho: 2a conversa do Feiticeiro
-#endif
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--fase3") >= 0) StartPhase3Test();      // atalho: direto na fase 3
-#if ATALHOS
-            if (Array.IndexOf(Environment.GetCommandLineArgs(), "--cena") >= 0) StartSceneTest();      // atalho: cena do Feiticeiro e depois a fase 2
-#endif
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--chefao") >= 0) StartBossTest();   // teste rapido do lanche
             timer = new System.Windows.Forms.Timer();
             timer.Interval = 30;
@@ -1821,7 +1895,7 @@ namespace HeroiPet
         void OpenMenu()
         {
             if (MenuOpen || EvoWaiting || deathWait) return;
-            try { menuForm = new MenuForm(this, S / 3f); menuForm.Show(); }
+            try { menuForm = new MenuForm(this, baseS / 3f); menuForm.Show(); }
             catch { menuForm = null; }
         }
         void CloseMenu() { if (MenuOpen) { try { menuForm.Close(); } catch { } } menuForm = null; }
@@ -2021,9 +2095,8 @@ namespace HeroiPet
                 Color shd = eq == 3 ? Color.FromArgb(46, 42, 74) : eq == 2 ? Color.FromArgb(34, 150, 170) : (eq == 1 ? Color.FromArgb(128, 138, 166) : Color.FromArgb(150, 86, 36));
                 using (SolidBrush bs2 = new SolidBrush(shd))
                 {
-                    foreach (PointF p in pts) g.FillRectangle(bd, p.X - unit, p.Y - unit, 4 * unit, 4 * unit);      // membros GROSSOS (2 quadradinhos) com contorno forte
-                    foreach (PointF p in pts) g.FillRectangle(bm, p.X, p.Y, 2 * unit, 2 * unit);
-                    foreach (PointF p in pts) g.FillRectangle(bs2, p.X + unit, p.Y + unit, unit, unit);      // lado de baixo mais escuro
+                    foreach (PointF p in pts) g.FillRectangle(bd, p.X - unit, p.Y - unit, 3 * unit, 3 * unit);      // membros FINOS (1 quadradinho) com contorno de 1 quadradinho
+                    foreach (PointF p in pts) g.FillRectangle(bm, p.X, p.Y, unit, unit);
                     for (int i = 1; i < n; i += 3) g.FillRectangle(bh, pts[i].X, pts[i].Y, unit, unit);      // brilho
                 }
                 Color gc = eq == 3 ? Color.FromArgb(196, 40, 56) : eq == 2 ? Color.FromArgb(255, 170, 40) : (eq == 1 ? Color.FromArgb(222, 176, 64) : Color.FromArgb(104, 64, 36));      // empunhadura (5 quadradinhos no meio) numa cor diferente
@@ -2161,9 +2234,10 @@ namespace HeroiPet
         class MenuForm : Form
         {
             struct Hit { public Rectangle R; public int Kind, A, B; }      // Kind 0 aba | 1 item | 2 fechar
+            static readonly Brush AquaB = new SolidBrush(Color.FromArgb(90, 225, 205));      // verde-agua do menu
             static readonly string[][] Names = {
                 new string[] { "Arco de madeira", "Arco de metal", "Arco de cristal", "Arco sombrio" }, new string[] { "Espada comum", "Espada Mestre", "Marreta trovão", "Espada de chamas", "Espada cogumelo", "Espada sombria" }, new string[] { "Escudo azul", "Escudo vermelho", "Escudo do rei", "Escudo maçã", "Escudo sombrio" },
-                new string[] { "Gorro verde", "Gorro roxo", "Coroa de ouro", "Gorro areia", "Gorro gelo", "Gorro fogo", "Gorro noite", "Gorro mar", "Gorro cogumelo", "Gorro maçã", "Tiara", "Gorro sombra", "Elmo de gladiador" }, new string[] { "Túnica verde", "Blusa azul", "Roupa de rei", "Blusa areia", "Blusa gelo", "Blusa fogo", "Blusa noite", "Blusa mar", "Blusa cogumelo", "Blusa maçã", "Blusa de fada", "Blusa sombra", "Roupa de gladiador" }, new string[] { "Fadinha", "Fadinha rosa", "Fadinha folha", "Fadinha estrela", "Fadinha sombria" } };
+                new string[] { "Gorro verde", "Gorro roxo", "Coroa de ouro", "Gorro areia", "Gorro gelo", "Gorro fogo", "Gorro noite", "Gorro mar", "Gorro cogumelo", "Gorro maçã", "Tiara", "Gorro sombra", "Gladiador" }, new string[] { "Túnica verde", "Blusa azul", "Roupa de rei", "Blusa areia", "Blusa gelo", "Blusa fogo", "Blusa noite", "Blusa mar", "Blusa cogumelo", "Blusa maçã", "Blusa de fada", "Blusa sombra", "Gladiador" }, new string[] { "Fadinha", "Fadinha rosa", "Fadinha folha", "Fadinha estrela", "Fadinha sombria" } };
             static readonly string[][] Descs = {
                 new string[] { "O arco de sempre.", "Flechas com o dobro de dano.", "Atira 2 flechas de cristal, uma logo depois da outra.", "Arco escuro do Link Sombrio (vem com o conjunto sombra)." }, new string[] { "A espada de sempre: 150 de dano.", "Espada Mestre: o dobro de dano, 300 de dano.", "Usa as DUAS mãos (sem escudo): golpe lento, área grande, 600 de dano.", "Lâmina de fogo: golpes muito rápidos, 450 de dano.", "Um cogumelo gigante de maça: acerta em área e solta esporos, 700 de dano (vem com o conjunto cogumelo).", "Lâmina escura do Link Sombrio: 800 de dano (vem com o conjunto sombra)." }, new string[] { "Escudo comum.", "Escudo vermelho do herói.", "Escudo circular do tesouro do rei.", "Escudo de maçã cortada (vem com o conjunto maçã).", "Escudo escuro com emblema prateado, do Link Sombrio (vem com o conjunto sombra)." },
                 new string[] { "O gorro de sempre.", "Gorro roxo da evolução.", "Coroa de ouro do tesouro do rei.", "Conjunto areia: gorro, blusa, calça e sapatos.", "Conjunto gelo: gorro, blusa, calça e sapatos.", "Conjunto fogo: gorro, blusa, calça e sapatos.", "Conjunto noite: gorro, blusa, calça e sapatos.", "Conjunto mar: gorro, blusa, calça e sapatos.", "Conjunto cogumelo: gorro com bolinhas, blusa de cogumelo e calça cor do talo.", "Conjunto maçã: gorro, blusa, calça e sapatos, mais o escudo de maçã cortada.", "Tiara prateada do conjunto de fada: com a blusa de fada o Link voa e não usa armas.", "Conjunto sombra: gorro, blusa, calça e sapatos escuros, no estilo do Link Sombrio.", "Conjunto gladiador: elmo de bronze com crista vermelha, peitoral, saiote e sandálias (libera com 700 monstros)." }, new string[] { "A túnica de sempre.", "Blusa azul da evolução.", "Manto vermelho, calça marrom e sapatos roxos.", "Blusa, calça e sapatos do conjunto areia.", "Blusa, calça e sapatos do conjunto gelo.", "Blusa, calça e sapatos do conjunto fogo.", "Blusa, calça e sapatos do conjunto noite.", "Blusa, calça e sapatos do conjunto mar.", "Blusa de cogumelo com bolinhas e calça cor do talo (conjunto cogumelo).", "Blusa, calça e sapatos do conjunto maçã.", "Blusa de fada, calça e sapatos do conjunto de fada (com a tiara o Link voa e não usa armas).", "Blusa, calça e sapatos do conjunto sombra.", "Peitoral de bronze, saiote vermelho e sandálias do conjunto gladiador." }, new string[] { "A fadinha ajudante.", "Corpo rosa e asas azul escuro.", "Corpo verde e asas douradas.", "Corpo violeta e asas turquesa.", "Corpo roxo escuro e asas sombrias (vem com o conjunto sombra)." } };
@@ -2183,7 +2257,7 @@ namespace HeroiPet
                 Rectangle wa = Screen.PrimaryScreen.WorkingArea;
                 int w = Math.Min((int)(1040 * sc), wa.Width - 20), h = Math.Min((int)(620 * sc), wa.Height - 20);
                 Bounds = new Rectangle(wa.X + (wa.Width - w) / 2, wa.Y + (wa.Height - h) / 2, w, h);
-                BackColor = Color.FromArgb(18, 22, 30);
+                BackColor = Color.FromArgb(10, 22, 50);
                 Shown += delegate { Activate(); p.PushLayers(); };
                 Activated += delegate { p.PushLayers(); };      // clicar nele o traria para a frente dos aplicativos: volta para o fundo na hora
                 eatTimer = new System.Windows.Forms.Timer(); eatTimer.Interval = 33;
@@ -2231,7 +2305,7 @@ namespace HeroiPet
 
             void Section(Graphics g, string title, int cat, ref int y, Rectangle area, Font hf, Font nf)
             {
-                g.DrawString(title, hf, Brushes.Gold, area.X, y); y += (int)(26 * sc);
+                g.DrawString(title, hf, AquaB, area.X, y); y += (int)(26 * sc);
                 int cs = (int)(112 * sc), gap = (int)(12 * sc), x = area.X;
                 int n = Names[cat].Length;
                 for (int id = 0; id < n; id++)
@@ -2241,12 +2315,12 @@ namespace HeroiPet
                     Rectangle r = new Rectangle(x, y, cs, cs);
                     bool eq = p.Equipped(cat) == id; int idx = hits.Count; bool vis = r.IntersectsWith(clipArea); bool hv = vis && hover == idx;
                     if (vis) hits.Add(new Hit { R = r, Kind = 1, A = cat, B = id });
-                    using (SolidBrush bg = new SolidBrush(hv ? Color.FromArgb(58, 66, 86) : Color.FromArgb(34, 40, 54)))
-                    using (Pen pen = new Pen(eq ? Color.FromArgb(247, 190, 70) : Color.FromArgb(80, 90, 112), eq ? 3 * sc : 1.5f * sc))
+                    using (SolidBrush bg = new SolidBrush(hv ? Color.FromArgb(32, 70, 134) : Color.FromArgb(18, 42, 88)))
+                    using (Pen pen = new Pen(eq ? Color.FromArgb(90, 225, 205) : Color.FromArgb(70, 150, 200), eq ? 3 * sc : 1.5f * sc))
                         Round(g, r, (int)(10 * sc), bg, pen);
                     p.DrawIcon(g, cat, id, r.X + cs / 2f, r.Y + cs * 0.42f, cs / 34f);
                     StringFormat c = new StringFormat(); c.Alignment = StringAlignment.Center;
-                    g.DrawString(eq ? "EQUIPADO" : Names[cat][id], nf, eq ? Brushes.Gold : Brushes.White, new RectangleF(r.X, r.Bottom - 22 * sc, cs, 22 * sc), c);
+                    g.DrawString(eq ? "EQUIPADO" : Names[cat][id], nf, eq ? AquaB : Brushes.White, new RectangleF(r.X, r.Bottom - 22 * sc, cs, 22 * sc), c);
                     x += cs + gap;
                 }
                 y += cs + (int)(14 * sc);
@@ -2257,17 +2331,17 @@ namespace HeroiPet
                 Graphics g = e.Graphics; hits.Clear();
                 g.SmoothingMode = SmoothingMode.AntiAlias; g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
                 float W = Width, H = Height; int pad = (int)(20 * sc);
-                using (Pen border = new Pen(Color.FromArgb(247, 190, 70), 3 * sc)) g.DrawRectangle(border, 1, 1, W - 3, H - 3);
+                using (Pen border = new Pen(Color.FromArgb(90, 225, 205), 3 * sc)) g.DrawRectangle(border, 1, 1, W - 3, H - 3);
                 using (Font tf = new Font("Segoe UI", 24 * sc, FontStyle.Bold, GraphicsUnit.Pixel))
                 using (Font hf = new Font("Segoe UI", 17 * sc, FontStyle.Bold, GraphicsUnit.Pixel))
                 using (Font nf = new Font("Segoe UI", 13 * sc, FontStyle.Bold, GraphicsUnit.Pixel))
                 using (Font sf = new Font("Segoe UI", 15 * sc, FontStyle.Regular, GraphicsUnit.Pixel))
                 {
-                    g.DrawString("HERÓI", tf, Brushes.Gold, pad, 22 * sc);
+                    g.DrawString("HERÓI", tf, AquaB, pad, 22 * sc);
                     // heroi ampliado (mostra o que esta equipado)
                     Rectangle pv = new Rectangle(pad, (int)(80 * sc), (int)(360 * sc), (int)(H - 80 * sc - pad));
-                    using (LinearGradientBrush lg = new LinearGradientBrush(pv, Color.FromArgb(46, 56, 78), Color.FromArgb(22, 28, 40), 90f))
-                    using (Pen pp = new Pen(Color.FromArgb(80, 90, 112), 1.5f * sc)) Round(g, pv, (int)(12 * sc), lg, pp);
+                    using (LinearGradientBrush lg = new LinearGradientBrush(pv, Color.FromArgb(28, 62, 120), Color.FromArgb(10, 24, 56), 90f))
+                    using (Pen pp = new Pen(Color.FromArgb(70, 150, 200), 1.5f * sc)) Round(g, pv, (int)(12 * sc), lg, pp);
                     float k = Math.Max(2f, (float)Math.Floor(pv.Height * 0.8f / (30f * p.S)));      // sem legenda: o heroi (com a fadinha) fica grande e centralizado no quadro
                     p.DrawHeroPreview(g, pv.X + pv.Width / 2f, pv.Y + pv.Height / 2f + 13.5f * p.S * k, k, showBow, tab == 1);      // pes abaixo do centro: o conjunto (fadinha ate os pes, ~27 S) fica no meio
                     g.SmoothingMode = SmoothingMode.AntiAlias; g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
@@ -2277,8 +2351,8 @@ namespace HeroiPet
                     {
                         Rectangle r = new Rectangle(x0 + i * (tw + gapT), pad, tw, th); int idx = hits.Count; bool hv = hover == idx; bool sel = tab == i;
                         hits.Add(new Hit { R = r, Kind = 0, A = i });
-                        using (SolidBrush bg = new SolidBrush(sel ? Color.FromArgb(247, 190, 70) : (hv ? Color.FromArgb(58, 66, 86) : Color.FromArgb(34, 40, 54))))
-                        using (Pen pen = new Pen(Color.FromArgb(247, 190, 70), 2 * sc)) Round(g, r, (int)(10 * sc), bg, pen);
+                        using (SolidBrush bg = new SolidBrush(sel ? Color.FromArgb(90, 225, 205) : (hv ? Color.FromArgb(32, 70, 134) : Color.FromArgb(18, 42, 88))))
+                        using (Pen pen = new Pen(Color.FromArgb(90, 225, 205), 2 * sc)) Round(g, r, (int)(10 * sc), bg, pen);
                         StringFormat c = new StringFormat(); c.Alignment = StringAlignment.Center; c.LineAlignment = StringAlignment.Center;
                         g.DrawString(TabNames[i], hf, sel ? Brushes.Black : Brushes.White, r, c);
                     }
@@ -2295,26 +2369,26 @@ namespace HeroiPet
                         int y = area.Y - scrollY; clipArea = area; if (tab != 2) g.SetClip(area);
                         if (tab == 0) { Section(g, "ARCOS", 0, ref y, area, hf, nf); Section(g, "ESPADAS", 1, ref y, area, hf, nf); Section(g, "ESCUDOS", 2, ref y, area, hf, nf); }
                         else if (tab == 1) { Section(g, "GORROS", 3, ref y, area, hf, nf); Section(g, "ROUPAS", 4, ref y, area, hf, nf); if (p.Owns(5, 0)) Section(g, "FADINHA", 5, ref y, area, hf, nf); }
-                        if (tab != 2) { contentH = y - (area.Y - scrollY); g.ResetClip(); if (tab == 0 && p.FairySet) g.DrawString("Com a tiara e a blusa de fada o Link voa e não usa armas.", sf, Brushes.Gold, area.X, H - pad - 26 * sc); }
+                        if (tab != 2) { contentH = y - (area.Y - scrollY); g.ResetClip(); if (tab == 0 && p.FairySet) g.DrawString("Com a tiara e a blusa de fada o Link voa e não usa armas.", sf, AquaB, area.X, H - pad - 26 * sc); }
                         else
                         {
-                            g.DrawString("COMIDA", hf, Brushes.Gold, area.X, y); y += (int)(26 * sc);
+                            g.DrawString("COMIDA", hf, AquaB, area.X, y); y += (int)(26 * sc);
                             int cs = (int)(112 * sc); Rectangle r = new Rectangle(area.X, y, cs, cs);
                             int ai = hits.Count; hits.Add(new Hit { R = r, Kind = 3 });
-                            using (SolidBrush bg = new SolidBrush(hover == ai ? Color.FromArgb(58, 66, 86) : Color.FromArgb(34, 40, 54))) using (Pen pen = new Pen(Color.FromArgb(80, 90, 112), 1.5f * sc)) Round(g, r, (int)(10 * sc), bg, pen);
+                            using (SolidBrush bg = new SolidBrush(hover == ai ? Color.FromArgb(32, 70, 134) : Color.FromArgb(18, 42, 88))) using (Pen pen = new Pen(Color.FromArgb(70, 150, 200), 1.5f * sc)) Round(g, r, (int)(10 * sc), bg, pen);
                             p.IconApple(g, r.X + cs / 2f, r.Y + cs * 0.42f, cs / 34f);
                             StringFormat c = new StringFormat(); c.Alignment = StringAlignment.Center;
                             g.DrawString("Maçãs x " + p.AppleCount, nf, Brushes.White, new RectangleF(r.X, r.Bottom - 22 * sc, cs, 22 * sc), c);
                             Rectangle eb = new Rectangle(area.X, r.Bottom + 8 * sc > 0 ? (int)(r.Bottom + 8 * sc) : r.Bottom, cs, (int)(32 * sc));      // opcao "Comer maçã" logo abaixo do icone
                             int ei = hits.Count; hits.Add(new Hit { R = eb, Kind = 3 });
-                            using (SolidBrush bg2 = new SolidBrush(hover == ei ? Color.FromArgb(255, 210, 100) : Color.FromArgb(247, 190, 70))) using (Pen pen2 = new Pen(Color.FromArgb(28, 22, 36), 1.5f * sc)) Round(g, eb, (int)(8 * sc), bg2, pen2);
+                            using (SolidBrush bg2 = new SolidBrush(hover == ei ? Color.FromArgb(150, 242, 228) : Color.FromArgb(90, 225, 205))) using (Pen pen2 = new Pen(Color.FromArgb(28, 22, 36), 1.5f * sc)) Round(g, eb, (int)(8 * sc), bg2, pen2);
                             using (SolidBrush dk2 = new SolidBrush(Color.FromArgb(28, 22, 36))) g.DrawString("Comer maçã", nf, dk2, new RectangleF(eb.X, eb.Y + 5 * sc, eb.Width, eb.Height), c);
                             Rectangle pb = new Rectangle(eb.Right + (int)(10 * sc), eb.Y, cs, eb.Height);      // opcao "Colher maçã" ao lado
                             int pi = hits.Count; hits.Add(new Hit { R = pb, Kind = 4 });
                             using (SolidBrush bg3 = new SolidBrush(hover == pi ? Color.FromArgb(150, 225, 130) : Color.FromArgb(105, 200, 95))) using (Pen pen3 = new Pen(Color.FromArgb(28, 22, 36), 1.5f * sc)) Round(g, pb, (int)(8 * sc), bg3, pen3);
                             using (SolidBrush dk3 = new SolidBrush(Color.FromArgb(28, 22, 36))) g.DrawString("Colher maçã", nf, dk3, new RectangleF(pb.X, pb.Y + 5 * sc, pb.Width, pb.Height), c);
                             g.DrawString("Maçã crua recupera meio coração.\nCom 5 ou mais ele faz lanche na fogueira (assadas recuperam mais).", sf, Brushes.LightGray, area.X, eb.Bottom + 12 * sc);
-                            g.DrawString("Corações: " + p.HeartsNow.ToString("0.#") + " / " + p.HeartsMax, sf, Brushes.Gold, area.X, eb.Bottom + 64 * sc);
+                            g.DrawString("Corações: " + p.HeartsNow.ToString("0.#") + " / " + p.HeartsMax, sf, AquaB, area.X, eb.Bottom + 64 * sc);
                             if (!string.IsNullOrEmpty(msg)) g.DrawString(msg, sf, Brushes.OrangeRed, area.X, eb.Bottom + 90 * sc);
                         }
                     }
@@ -2324,7 +2398,7 @@ namespace HeroiPet
                         Hit h = hits[hover];
                         if (h.A == 3 || h.A == 4 || h.A == 5) { }      // roupas (gorros e blusas) e fadinha: nenhum texto embaixo
                         else if (h.A <= 2) g.DrawString(Descs[h.A][h.B], sf, Brushes.White, new RectangleF(area.X, H - pad - 26 * sc, area.Width, 30 * sc));      // armas, arcos e escudos: so a descricao, sem o nome
-                        else { g.DrawString(Names[h.A][h.B], sf, Brushes.Gold, area.X, H - pad - 50 * sc); g.DrawString(Descs[h.A][h.B], sf, Brushes.White, new RectangleF(area.X, H - pad - 26 * sc, area.Width, 30 * sc)); }
+                        else { g.DrawString(Names[h.A][h.B], sf, AquaB, area.X, H - pad - 50 * sc); g.DrawString(Descs[h.A][h.B], sf, Brushes.White, new RectangleF(area.X, H - pad - 26 * sc, area.Width, 30 * sc)); }
                     }
                 }
             }
@@ -2349,13 +2423,13 @@ namespace HeroiPet
             }
             if (eqTunic == 2) { hov['Q'] = Color.FromArgb(190, 35, 60); hov['J'] = Color.FromArgb(150, 100, 55); hov['Z'] = Color.FromArgb(130, 60, 190); }      // bau: manto vermelho, calca marrom, sapatos roxos
             { Color hb = hov.ContainsKey('H') ? hov['H'] : Color.FromArgb(58, 165, 62); hov['i'] = Shade(hb, 0.4f); }
-            heroWalk[0] = Art.Make(Art.HeroRecolor(Art.HeroA), S, hov);
-            heroWalk[1] = Art.Make(Art.HeroRecolor(Art.HeroB), S, hov);
+            heroWalk[0] = Art.MakeSide(Art.HeroRecolor(Art.HeroA), S, hov);
+            heroWalk[1] = Art.MakeSide(Art.HeroRecolor(Art.HeroB), S, hov);
             UpdateTrayIcon();      // o icone da bandeja acompanha a roupa
             Bitmap d = (Bitmap)heroWalk[0].R.Clone();
             d.RotateFlip(RotateFlipType.Rotate90FlipNone);
             heroDead = new Sprite(); heroDead.R = d; heroDead.L = d; heroDead.W = d.Width; heroDead.H = d.Height;
-            Sprite fs = Art.Make(Art.HeroRecolor(Art.HeroFrontSleep), S, hov);
+            Sprite fs = Art.MakeHi(Art.HeroRecolor(Art.HeroFrontSleep), S, hov);
             Bitmap lie = (Bitmap)fs.R.Clone();
             lie.RotateFlip(RotateFlipType.Rotate270FlipNone);          // cabeca para a esquerda, rosto para cima
             heroSleepSpr = new Sprite(); heroSleepSpr.R = lie; heroSleepSpr.L = lie; heroSleepSpr.W = lie.Width; heroSleepSpr.H = lie.Height;
@@ -2363,6 +2437,21 @@ namespace HeroiPet
             side.RotateFlip(RotateFlipType.Rotate270FlipNone);         // de costas, de perfil: cabeca a esquerda, nariz para cima
             heroSideSleep = new Sprite(); heroSideSleep.R = side; heroSideSleep.L = side; heroSideSleep.W = side.Width; heroSideSleep.H = side.Height;
             treeSpr = Art.Make(Art.TreeRows(), S, null);
+            {
+                Color dk = Color.FromArgb(28, 22, 36);
+                Dictionary<char, Color> mo = new Dictionary<char, Color>(); mo['K'] = dk; mo['R'] = Color.FromArgb(214, 48, 52); mo['W'] = Color.White; mo['S'] = Color.FromArgb(238, 224, 188);
+                mushSpr[0] = Art.Make(Art.MushRows, S, mo);
+                Dictionary<char, Color> m2 = new Dictionary<char, Color>(mo); m2['R'] = Color.FromArgb(226, 150, 60);
+                mushSpr[1] = Art.Make(Art.MushRows, S, m2);
+                Color[] petals = { Color.FromArgb(255, 150, 190), Color.FromArgb(255, 255, 255), Color.FromArgb(150, 170, 255), Color.FromArgb(255, 120, 90) };
+                for (int fv = 0; fv < 4; fv++)
+                {
+                    Dictionary<char, Color> fo = new Dictionary<char, Color>(); fo['K'] = dk; fo['P'] = petals[fv]; fo['Y'] = Color.FromArgb(255, 220, 60); fo['G'] = Color.FromArgb(70, 150, 60);
+                    flowerSpr[fv] = Art.Make(Art.FlowerRows, S, fo);
+                }
+                Dictionary<char, Color> bo = new Dictionary<char, Color>(); bo['K'] = dk; bo['N'] = Color.FromArgb(120, 200, 80); bo['G'] = Color.FromArgb(70, 150, 60); bo['g'] = Color.FromArgb(40, 105, 55); bo['R'] = Color.FromArgb(214, 48, 52);
+                bushSpr = Art.Make(Art.BushRows(), S, bo);
+            }
             appleSpr = Art.Make(Art.AppleSm, S, null);
             appleHud = Art.Make(Art.AppleBig, S, null);
             int ds = (int)Math.Round(S * 1.7); DK = ds / (float)S;          // dragao ~1,7x maior
@@ -2374,8 +2463,8 @@ namespace HeroiPet
             fireSpr[0] = Art.Make(Art.FireballRows(0), S + 1, null); fireSpr[1] = Art.Make(Art.FireballRows(1), S + 1, null);
             Color[] bk = { Color.FromArgb(215, 55, 55), Color.FromArgb(205, 92, 48), Color.FromArgb(176, 86, 42), Color.FromArgb(142, 74, 36) };
             for (int i = 0; i < 4; i++) { Dictionary<char, Color> ob = Art.Ov('R', bk[i]); ob['G'] = i == 0 ? Color.FromArgb(58, 165, 62) : Color.FromArgb(104, 110, 40); appleBake[i] = Art.Make(Art.AppleSm, S, ob); }
-            heroFront = Art.Make(Art.HeroRecolor(Art.HeroFront), S, hov);
-            heroFrontInv = Art.Make(Art.HeroRecolor(Art.HeroFrontInv), S, hov);
+            heroFront = Art.MakeHi(Art.HeroRecolor(Art.HeroFront), S, hov);
+            heroFrontInv = Art.MakeHi(Art.HeroRecolor(Art.HeroFrontInv), S, hov);
             Dictionary<char, Color> capOv = Art.Ov('H', Color.FromArgb(150, 80, 205)); capOv['h'] = Color.FromArgb(205, 150, 240); capOv['g'] = Color.FromArgb(96, 50, 140);
             Dictionary<char, Color> shOv = Art.Ov('Q', Color.FromArgb(70, 125, 235)); shOv['h'] = Color.FromArgb(135, 180, 255); shOv['g'] = Color.FromArgb(45, 85, 190);
             evoItemSpr[0] = Art.Make(Art.CapItem, S, capOv); evoItemSpr[1] = Art.Make(Art.ShirtItem, S, shOv);
@@ -2394,7 +2483,7 @@ namespace HeroiPet
             wpnSpr[2] = Art.Make(Art.MushItem, S, mhOv);
             Dictionary<char, Color> dkOv = Art.Ov('O', Color.FromArgb(84, 80, 120)); dkOv['F'] = Color.FromArgb(84, 80, 120); dkOv['Y'] = Color.FromArgb(172, 170, 204); dkOv['R'] = Color.FromArgb(176, 34, 54); dkOv['B'] = Color.FromArgb(56, 44, 90); dkOv['b'] = Color.FromArgb(34, 26, 56);
             wpnSpr[3] = Art.Make(Art.FlameItem, S, dkOv);      // icone da espada sombria (mesma forma, cores escuras)
-            heroFrontWave = Art.Make(Art.HeroRecolor(Art.HeroFrontWave), S, hov);
+            heroFrontWave = Art.MakeHi(Art.HeroRecolor(Art.HeroFrontWave), S, hov);
             if (phase2)      // fase 2: os mesmos monstros, mais detalhados (octorok verde, bokoblin mais escuro com armadura)
             {
                 Dictionary<char, Color> o2 = Art.Ov('h', Color.FromArgb(150, 225, 120)); Dictionary<char, Color> b2 = Art.Ov('p', Color.FromArgb(88, 45, 130)); b2['P'] = Color.FromArgb(124, 62, 176);
@@ -2483,9 +2572,8 @@ namespace HeroiPet
             mAutoItem.Click += delegate { SetPlayMode(false); };
             mPlayItem.Click += delegate { SetPlayMode(true); };
             menu.Items.Add(mAutoItem); menu.Items.Add(mPlayItem); menu.Items.Add(new ToolStripSeparator());
-#if ATALHOS      // atalhos de teste das conversas do Feiticeiro: so existem se compilar com /define:ATALHOS (a versao entregue nao tem)
-            menu.Items.Add("Atalho: 1a conversa do Feiticeiro (Ctrl+Shift+F1)", null, delegate { StartSceneTest(); });
-            menu.Items.Add("Atalho: 2a conversa do Feiticeiro (Ctrl+Shift+F2)", null, delegate { StartScene2Test(); });
+#if ATALHOS      // atalho de teste do fim da fase 3: so existe se compilar com /define:ATALHOS (a versao entregue nao tem)
+            menu.Items.Add("Atalho: fim da fase 3 (Ctrl+Shift+F3)", null, delegate { StartEnd3Test(); });
 #endif
             menu.Items.Add("Invocar inimigo", null, delegate { Spawn(rnd.Next(3)); });
             menu.Items.Add("Curar heroi", null, delegate { hp = MaxHP; });
@@ -3999,7 +4087,7 @@ namespace HeroiPet
             new string[] { "*", "" },
             new string[] { "Feiticeiro", "Meu amigo, não se preocupe, eu...| nunca o machucaria, he he" } };
         static readonly float[] DlgTime2 = { 6.2f, 2.4f, 3.4f, 2.4f, 12f, 6f };      // a ameaca com o cajado (acao) dura 12 s
-        bool sceneTest, prevHk1, prevHk2; int sceneKind = 1; float wizPoint, wizGlow;      // sceneTest: atalho de teste: toca so a conversa e volta ao jogo normal      // wizGlow 0..1: a ponta do cajado brilha como se fosse atirar      // sceneKind: 1 primeira conversa (vai para a fase intermediaria) | 2 segunda (vai para a Fase 3); wizPoint 0..1: o Feiticeiro aponta o cajado
+        bool sceneTest, prevHk3; int sceneKind = 1; float wizPoint, wizGlow;      // sceneTest: atalho de teste: toca so a conversa e volta ao jogo normal      // wizGlow 0..1: a ponta do cajado brilha como se fosse atirar      // sceneKind: 1 primeira conversa (vai para a fase intermediaria) | 2 segunda (vai para a Fase 3); wizPoint 0..1: o Feiticeiro aponta o cajado
         string[][] CurDlg { get { return sceneKind == 2 ? Dlg2 : Dlg; } }
         float[] CurDlgTime { get { return sceneKind == 2 ? DlgTime2 : DlgTime; } }
         static readonly float[] DlgTime = { 6.6f, 4.6f, 2.8f, 5.8f };      // cada fala fica 2 s a mais na tela; "Seu poder..." fica a metade do tempo das outras
@@ -4018,12 +4106,12 @@ namespace HeroiPet
             zfx = hx; zfy = hy - 8 * S; hface = 1; walking = false; attacking = false; bowing = false; speechT = 0; inv = 0; kvx = kvy = 0;
         }
         void StartSceneTest() { if (!playMode) SetPlayMode(true); sceneTest = true; StartScene(); }      // atalho: so a 1a conversa do Feiticeiro
-        // ATALHOS DE TECLADO (escondidos): Ctrl+Shift+F1 = 1a conversa do Feiticeiro | Ctrl+Shift+F2 = 2a conversa. Tambem: --cena e --cena2 ao abrir o jogo.
+        // ATALHO DE TECLADO (escondido): Ctrl+Shift+F3 = fim da fase 3.
         void CheckSceneHotkeys()
         {
-            bool cs = IsDown(0x11) && IsDown(0x10), k1 = cs && IsDown(0x70), k2 = cs && IsDown(0x71);
-            if (scene == 0 && !paused && !deathWait) { if (k1 && !prevHk1) StartSceneTest(); else if (k2 && !prevHk2) StartScene2Test(); }
-            prevHk1 = k1; prevHk2 = k2;
+            bool cs = IsDown(0x11) && IsDown(0x10), k3 = cs && IsDown(0x72);
+            if (scene == 0 && !paused && !deathWait) { if (k3 && !prevHk3) StartEnd3Test(); }
+            prevHk3 = k3;
         }
         void StartScene2Test() { if (!playMode) SetPlayMode(true); phase2 = true; BuildSprites(); sceneTest = true; StartScene(2); }      // atalho: so a segunda conversa (Feiticeiro pede a espada) e depois a Fase 3
 
@@ -4452,6 +4540,16 @@ namespace HeroiPet
             rupees = 0; lastStep = 0; SetMaxHp(Math.Max(MaxHP, 8)); hp = MaxHP; dead = false; deathWait = false; inv = 2f;
             apples = 0; hx = W / 2; hy = H / 2; spawnTimer = 2f; killsAtMax = 0; p3EndT = 0; msgT = 0;
             Say("Fase 3!");
+        }
+        // ATALHO: fim da fase 3 (Ctrl+Shift+F3 ou --fim3 ao abrir): a Gelatina de Fogo ja morreu, as 1000 rupias ja foram recolhidas e aparece "ESPERE POR MAIS ATUALIZACOES"
+        void StartEnd3Test()
+        {
+            if (!playMode) SetPlayMode(true);
+            StartPhase3();
+            enemies.Clear(); items.Clear(); rocks.Clear(); acids.Clear(); pools.Clear(); sparks.Clear(); puffs.Clear();
+            rupees = 1000; lastStep = RupeeStep();
+            bossPhase = 5; bossT = 3.7f; endStarted = false; rewardSpawned = true; msgT = 0; rewardWaitT = 0; bossDeadMage = false;
+            hp = MaxHP; inv = 2f; Say("Fim da fase 3!");
         }
         void StartPhase3Test() { if (!playMode) SetPlayMode(true); StartPhase3(); }      // atalho: direto na FASE 3 (nivel 1)
         void StartPhase2Test()      // atalho: liga o modo jogo direto na FASE 2 (nivel 1, vida cheia)
@@ -6059,6 +6157,13 @@ namespace HeroiPet
 
         void DrawTree(Graphics g, Tree t)
         {
+            if (t.Deco > 0)
+            {
+                if (t.Deco == 3) { Shadow(g, t.X, t.Y, 15); Spr(g, bushSpr, t.X, t.Y, true); }
+                else if (t.Deco == 1) Spr(g, mushSpr[t.Var % 2], t.X, t.Y, true);
+                else Spr(g, flowerSpr[t.Var % 4], t.X, t.Y, true);
+                return;
+            }
             if (t.Stone) { Shadow(g, t.X, t.Y, 16); Spr(g, stoneSpr[t.Variant % 3], t.X, t.Y, true); return; }      // Fase 2: pedra no lugar da macieira
             Shadow(g, t.X, t.Y, 16);
             Spr(g, treeSpr, t.X, t.Y, true);
