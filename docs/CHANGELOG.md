@@ -1,11 +1,11 @@
 ﻿# Changelog (resumo)
 
+## 13/11/2026 — Link com pixels menores (desktop)
+- Cada pixel do Link (de lado, de frente, dormindo, acenando) agora é feito de 4 pixels (2×2): mesma aparência e tamanho de antes, só que os próximos ajustes podem ser de meio quadradinho. Web não atualizada.
+
 ## 12/11/2026 — Web: botão Deixar rodando ao morrer e revisão
 - **Web:** a tela "VOCÊ MORREU" ganhou o botão **Deixar rodando** (o do menu ficava atrás da tela e não dava para clicar): volta com a perda das rupias e deixa o automático rodando.
 - Revisão da web contra o desktop: tiara encostada na cabeça, asas de frente do Link-fada mais perto das costas, blusa de fada simétrica de frente, código morto removido, gladiador com 52700 (700 a mais que o último conjunto).
-
-## 12/11/2026 — Link de lado mais estreito
-- A cabeça do Link de lado perdeu 1 quadradinho atrás (nuca/gorro), ficando mais estreito.
 
 ## 12/11/2026 — Link de lado volta ao original
 - Escudo, espada, mão e inclinação da espada voltaram ao que eram no início; o bracinho foi removido (uma outra sessão o tinha reposto sem querer).
